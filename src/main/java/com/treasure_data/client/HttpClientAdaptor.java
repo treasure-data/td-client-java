@@ -51,6 +51,10 @@ import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
 import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.DeleteTableResult;
+import com.treasure_data.model.ExportRequest;
+import com.treasure_data.model.ExportResult;
+import com.treasure_data.model.ImportRequest;
+import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.JobResult;
 import com.treasure_data.model.KillJobRequest;
@@ -483,6 +487,66 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     }
 
     @Override
+    public ImportResult importData(ImportRequest request) throws ClientException {
+        request.setCredentials(getConfig().getCredentials());
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_JOB_SUBMIT,
+                    request.getTable().getDatabase().getName(),
+                    request.getTable().getName(),
+                    ImportRequest.toFormatName(request.getFormat()));
+            conn.doPutRequest(request, path, request.getBytes());
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Import data failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
+        String dbName = (String) map.get("database");
+        String tblName = (String) map.get("table");
+        double time = (Double) map.get("time");
+        if (!dbName.equals(request.getTable().getDatabase().getName())) {
+            String msg = String.format("invalid database name: expected=%s, actual=%s",
+                    request.getTable().getDatabase().getName(), dbName);
+            throw new ClientException(msg);
+        }
+        if (!tblName.equals(request.getTable().getName())) {
+            String msg = String.format("invalid table name: expected=%s, actual=%s",
+                    request.getTable().getDatabase().getName(), tblName);
+            throw new ClientException(msg);
+        }
+
+        return new ImportResult(request.getTable());
+    }
+
+    @Override
+    public ExportResult exportData(ExportRequest request) throws ClientException {
+        // TODO #MN
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public SubmitJobResult submitJob(SubmitJobRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
@@ -716,10 +780,10 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_RESULT,
-                    request.getJob().getJobID());
+                    request.getJobResult().getJob().getJobID());
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
-            params.put("format", "msgpack");
+            params.put("format", JobResult.toFormatName(request.getJobResult().getFormat()));
             conn.doGetRequest(request, path, header, params);
 
             // receive response code
@@ -742,7 +806,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             }
         }
 
-        return new GetJobResultResult(new JobResult(request.getJob(), value));
+        request.getJobResult().setResult(value);
+        return new GetJobResultResult(request.getJobResult());
     }
 
     private void validateJSONData(String jsonData) throws ClientException {
@@ -773,6 +838,10 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         String V3_TABLE_CREATE = "/v3/table/create/%s/%s/%s";
 
         String V3_TABLE_DELETE = "/v3/table/delete/%s/%s";
+
+        String V3_IMPORT = "/v3/table/import/%s/%s/%s";
+
+        String V3_EXPORT = "/v3/table/import/%s/%s/%s";
 
         String V3_JOB_SUBMIT = "/v3/job/issue/hive/%s";
 
