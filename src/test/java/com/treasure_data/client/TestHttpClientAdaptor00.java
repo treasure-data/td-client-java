@@ -180,7 +180,7 @@ public class TestHttpClientAdaptor00 {
 
         Database database = new Database("mugadb");
         String q = "select * from mugatbl";
-        SubmitJobRequest request = new SubmitJobRequest(database, q, null);
+        SubmitJobRequest request = new SubmitJobRequest(new Job(null, null, database, q, null));
         SubmitJobResult result = clientAdaptor.submitJob(request);
         Job job = result.getJob();
         System.out.println(job.getJobID());
