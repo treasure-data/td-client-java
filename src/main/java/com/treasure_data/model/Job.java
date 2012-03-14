@@ -68,7 +68,36 @@ public class Job extends AbstractModel {
         }
     }
 
-    private String type;
+    public static enum Type {
+        HIVE, UNKNOWN,
+    }
+
+    public static Type toType(String typeName) {
+        if (typeName == null) {
+            throw new NullPointerException();
+        }
+
+        if (typeName.equals("hive")) {
+            return Type.HIVE;
+        } else {
+            return Type.UNKNOWN;
+        }
+    }
+
+    public static String toTypeName(Type type) {
+        if (type == null) {
+            throw new NullPointerException();
+        }
+
+        switch (type) {
+        case HIVE:
+            return "hive";
+        default:
+            return "unknown";
+        }
+    }
+
+    private Type type;
 
     private Database database;
 
@@ -90,19 +119,19 @@ public class Job extends AbstractModel {
         super(jobID);
     }
 
-    public Job(String jobID, String type) {
+    public Job(String jobID, Job.Type type) {
         super(jobID);
         this.type = type;
     }
 
-    public Job(String jobID, String type, Database database, String url) {
+    public Job(String jobID, Job.Type type, Database database, String url) {
         super(jobID);
         this.type = type;
         this.database = database;
         this.url = url;
     }
 
-    public Job(String jobID, String type, Database database, String query, String url) {
+    public Job(String jobID, Job.Type type, Database database, String query, String url) {
         super(jobID);
         this.type = type;
         this.database = database;
@@ -110,7 +139,7 @@ public class Job extends AbstractModel {
         this.url = url;
     }
 
-    public Job(String jobID, String type, Status status, String startAt,
+    public Job(String jobID, Job.Type type, Status status, String startAt,
             String endAt, String query, String resultTable) {
         super(jobID);
         this.type = type;
@@ -125,7 +154,7 @@ public class Job extends AbstractModel {
         return getName();
     }
 
-    public String getType() {
+    public Job.Type getType() {
         return type;
     }
     public Database getDatabase() {

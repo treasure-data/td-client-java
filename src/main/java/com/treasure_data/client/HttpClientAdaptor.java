@@ -588,7 +588,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
         String jobID = jobMap.get("job_id");
-        String typeName = jobMap.get("type");
+        Job.Type type = Job.toType(jobMap.get("type"));
         String dbName = jobMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
@@ -597,7 +597,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         }
         String url = (String) jobMap.get("url");
 
-        Job job = new Job(jobID, typeName, request.getDatabase(), url);
+        Job job = new Job(jobID, type, request.getDatabase(), url);
         return new SubmitJobResult(job);
     }
 
@@ -658,7 +658,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         List<Job> jobs = new ArrayList<Job>();
         while (jobMapIter.hasNext()) {
             Map<String, String> jobMap = jobMapIter.next();
-            String type = jobMap.get("type");
+            Job.Type type = Job.toType(jobMap.get("type"));
             String jobID = jobMap.get("job_id");
             Job.Status status = Job.toStatus(jobMap.get("status"));
             String startAt = jobMap.get("start_at");
@@ -759,7 +759,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap =
             (Map<String, String>) JSONValue.parse(jsonData);
-        String type = jobMap.get("type");
+        Job.Type type = Job.toType(jobMap.get("type"));
         String jobID = jobMap.get("job_id");
         Job.Status status = Job.toStatus(jobMap.get("status"));
         String query = jobMap.get("query");
