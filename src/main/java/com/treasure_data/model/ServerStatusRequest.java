@@ -17,14 +17,5 @@
 //
 package com.treasure_data.model;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.Map;
-
-import org.json.simple.JSONValue;
-
-import com.treasure_data.client.ClientAdaptor;
-import com.treasure_data.client.ClientException;
-
 public class ServerStatusRequest extends AbstractRequest<AbstractModel> {
 }

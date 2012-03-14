@@ -18,8 +18,6 @@
 package com.treasure_data.model;
 
 import com.treasure_data.auth.TreasureDataCredentials;
-import com.treasure_data.client.ClientAdaptor;
-import com.treasure_data.client.ClientException;
 
 public interface Request<T> {
 
