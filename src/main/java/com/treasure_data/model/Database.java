@@ -46,7 +46,7 @@ public class Database extends AbstractModel {
                 // ignore
             }
         }
-        return tables.getList();
+        return tables.get();
     }
 
     public boolean deleteTable(String tableName) {

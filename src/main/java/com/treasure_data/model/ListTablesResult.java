@@ -29,7 +29,7 @@ public class ListTablesResult extends AbstractResult<ListTables> {
     }
 
     public List<Table> getTables() {
-        return get().getList();
+        return get().get();
     }
 
     public Table get(String name) {

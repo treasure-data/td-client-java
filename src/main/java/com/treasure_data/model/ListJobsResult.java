@@ -9,6 +9,6 @@ public class ListJobsResult extends AbstractResult<ListJobs> {
     }
 
     public List<Job> getJobs() {
-        return get().getList();
+        return get().get();
     }
 }

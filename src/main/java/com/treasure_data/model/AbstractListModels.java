@@ -13,14 +13,14 @@ abstract class AbstractListModels<T extends AbstractModel>
     }
 
     /**
-     * @see AbstractModel
+     * @see com.treasure_data.data.model.AbstractModel#getName()
      */
     @Override
     public String getName() {
         throw new UnsupportedOperationException();
     }
 
-    public List<T> getList() {
+    public List<T> get() {
         return list;
     }
 

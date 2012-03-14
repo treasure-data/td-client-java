@@ -4,9 +4,11 @@ import java.util.List;
 
 interface ListModels<T extends Model> extends Model {
 
-    List<T> getList();
+    List<T> get();
 
     T get(String name);
 
     int size();
+
+    boolean delete(String name);
 }
