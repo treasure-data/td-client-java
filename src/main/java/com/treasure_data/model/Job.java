@@ -20,8 +20,7 @@ package com.treasure_data.model;
 public class Job extends AbstractModel {
 
     public static enum Status {
-        RUNNING, SUCCESS, ERROR, UNKNOWN,
-        // TODO #MN
+        QUEUED, BOOTING, RUNNING, SUCCESS, ERROR, KILLED, UNKNOWN,
     }
 
     public static Status toStatus(String statusName) {
@@ -29,30 +28,44 @@ public class Job extends AbstractModel {
             throw new NullPointerException();
         }
 
-        if (statusName.equals("running")) {
+        if (statusName.equals("queued")) {
+            return Status.QUEUED;
+        } else if (statusName.equals("booting")) {
+            return Status.BOOTING;
+        } else if (statusName.equals("running")) {
             return Status.RUNNING;
         } else if (statusName.equals("success")) {
             return Status.SUCCESS;
         } else if (statusName.equals("error")) {
             return Status.ERROR;
+        } else if (statusName.equals("killed")) {
+            return Status.KILLED;
         } else {
             return Status.UNKNOWN;
         }
-        // TODO #MN
     }
 
     public static String toStatusName(Status status) {
+        if (status == null) {
+            throw new NullPointerException();
+        }
+
         switch (status) {
+        case QUEUED:
+            return "queued";
+        case BOOTING:
+            return "booting";
         case RUNNING:
             return "running";
         case SUCCESS:
             return "success";
         case ERROR:
             return "error";
+        case KILLED:
+            return "killed";
         default:
             return "unknown";
         }
-        // TODO #MN
     }
 
     private String type;
