@@ -33,4 +33,16 @@ public class ListJobs extends AbstractListModels<Job> {
         this.from = from;
         this.to = to;
     }
+
+    public long getCount() {
+        return count;
+    }
+
+    public long getFrom() {
+        return from;
+    }
+
+    public long getTo() {
+        return to;
+    }
 }

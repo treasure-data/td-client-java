@@ -17,8 +17,6 @@
 //
 package com.treasure_data.model;
 
-import com.treasure_data.client.ClientAdaptor;
-
 public class ListDatabasesRequest extends AbstractRequest<ListDatabases> {
 
     public ListDatabasesRequest() {

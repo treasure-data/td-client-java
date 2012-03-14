@@ -46,9 +46,9 @@ public class JobResult extends AbstractModel {
 
     private Job job;
 
-    private org.msgpack.type.Value result;
-
     private Format format;
+
+    private org.msgpack.type.Value result;
 
     public JobResult(String jobID) {
         this(new Job(jobID), Format.MSGPACK);
