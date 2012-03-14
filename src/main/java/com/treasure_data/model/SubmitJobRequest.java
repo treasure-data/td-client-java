@@ -25,14 +25,11 @@ public class SubmitJobRequest extends AbstractRequest<Job> {
 
     private String resultTableName;
 
-    private boolean wait;
-
-    public SubmitJobRequest(Database database, String query, String resultTableName, boolean wait) {
+    public SubmitJobRequest(Database database, String query, String resultTableName) {
         super(null);
         this.database = database;
         this.query = query;
         this.resultTableName = resultTableName;
-        this.wait = wait;
     }
 
     public Database getDatabase() {
@@ -47,7 +44,4 @@ public class SubmitJobRequest extends AbstractRequest<Job> {
         return resultTableName;
     }
 
-    public boolean isWait() {
-        return wait;
-    }
 }
