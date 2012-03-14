@@ -29,6 +29,10 @@ import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
 import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.DeleteTableResult;
+import com.treasure_data.model.ExportRequest;
+import com.treasure_data.model.ExportResult;
+import com.treasure_data.model.ImportRequest;
+import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.KillJobRequest;
 import com.treasure_data.model.KillJobResult;
 import com.treasure_data.model.ListDatabasesRequest;
@@ -120,6 +124,16 @@ public class TreasureDataClient {
     public DeleteTableResult deleteTable(DeleteTableRequest request)
             throws ClientException {
 	return clientAdaptor.deleteTable(request);
+    }
+
+    // Import and Export API
+
+    public ImportResult importData(ImportRequest request) throws ClientException {
+        return clientAdaptor.importData(request);
+    }
+
+    public ExportResult exportData(ExportRequest request) throws ClientException {
+        return clientAdaptor.exportData(request);
     }
 
     // Job API
