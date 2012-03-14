@@ -8,7 +8,7 @@ public class GetJobResultRequest extends AbstractRequest<JobResult> {
         this.result = result;
     }
 
-    public Job getJob() {
-        return result.getJob();
+    public JobResult getJobResult() {
+        return getJobResult();
     }
 }

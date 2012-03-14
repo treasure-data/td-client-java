@@ -1,6 +1,5 @@
 package com.treasure_data.client;
 
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Properties;
 
@@ -9,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
@@ -46,14 +46,17 @@ public class TestHttpClientAdaptor {
         props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Test @Ignore
+    static class HttpConnectionImplforGetServerStatus01 extends HttpConnectionImpl {
+        
+    }
+
+    @Test
     public void testGetServerStatus01() throws Exception {
         Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
-
+        clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus01());
         ServerStatusRequest request = new ServerStatusRequest();
         ServerStatusResult result = clientAdaptor.getServerStatus(request);
         System.out.println(result.getMessage());
@@ -215,7 +218,7 @@ public class TestHttpClientAdaptor {
         System.out.println(result.getJobID());
     }
 
-    @Test
+    @Test @Ignore
     public void testShowJob01() throws Exception {
         Properties props = System.getProperties();
         Config conf = new Config();
@@ -237,7 +240,8 @@ public class TestHttpClientAdaptor {
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
-        GetJobResultRequest request = new GetJobResultRequest(new JobResult(new Job("26317")));
+        GetJobResultRequest request = new GetJobResultRequest(
+                new JobResult(new Job("26317"), JobResult.Format.MSGPACK));
         GetJobResultResult result = clientAdaptor.getJobResult(request);
         System.out.println(result.getJob().getJobID());
     }

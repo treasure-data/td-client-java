@@ -26,7 +26,7 @@ public class ListDatabasesResult extends AbstractResult<ListDatabases> {
     }
 
     public List<Database> getDatabases() {
-        return get().getList();
+        return get().get();
     }
 
     public Database getDatabase(String name) {
