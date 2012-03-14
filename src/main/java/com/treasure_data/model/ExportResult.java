@@ -17,10 +17,10 @@
 //
 package com.treasure_data.model;
 
-public class ExportResult extends AbstractResult<Model> {
+public class ExportResult extends AbstractResult<AbstractModel> {
 
-    protected ExportResult(Model model) {
-        super(model);
+    protected ExportResult() {
+        super(null);
     }
 
 }

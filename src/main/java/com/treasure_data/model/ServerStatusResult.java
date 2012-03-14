@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class ServerStatusResult extends AbstractResult<Model> {
+public class ServerStatusResult extends AbstractResult<AbstractModel> {
 
     private String message;
 

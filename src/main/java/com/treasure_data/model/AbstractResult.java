@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-class AbstractResult<T extends Model> implements Result<T> {
+class AbstractResult<T extends AbstractModel> implements Result<T> {
 
     private T model;
 
