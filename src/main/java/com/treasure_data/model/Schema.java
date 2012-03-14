@@ -17,6 +17,6 @@
 //
 package com.treasure_data.model;
 
-public class Schema {
+public class Schema extends AbstractModel {
 
 }
