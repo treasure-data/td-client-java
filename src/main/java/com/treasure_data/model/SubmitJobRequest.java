@@ -19,29 +19,20 @@ package com.treasure_data.model;
 
 public class SubmitJobRequest extends AbstractRequest<Job> {
 
-    private Database database;
-
-    private String query;
-
-    private String resultTableName;
-
-    public SubmitJobRequest(Database database, String query, String resultTableName) {
-        super(null);
-        this.database = database;
-        this.query = query;
-        this.resultTableName = resultTableName;
+    public SubmitJobRequest(Job job) {
+        super(job);
     }
 
     public Database getDatabase() {
-        return database;
+        return get().getDatabase();
     }
 
     public String getQuery() {
-        return query;
+        return get().getQuery();
     }
 
     public String getResultTableName() {
-        return resultTableName;
+        return get().getResultTable();
     }
 
 }

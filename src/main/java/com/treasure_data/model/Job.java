@@ -55,8 +55,6 @@ public class Job extends AbstractModel {
         // TODO #MN
     }
 
-    private String jobID;
-
     private String type;
 
     private Database database;
@@ -65,13 +63,15 @@ public class Job extends AbstractModel {
 
     private Status status;
 
+    private String createdAt;
+
     private String startAt;
 
     private String endAt;
 
     private String query;
 
-    private String result;
+    private String resultTable;
 
     public Job(String jobID) {
         super(jobID);
@@ -89,15 +89,23 @@ public class Job extends AbstractModel {
         this.url = url;
     }
 
+    public Job(String jobID, String type, Database database, String query, String url) {
+        super(jobID);
+        this.type = type;
+        this.database = database;
+        this.query = query;
+        this.url = url;
+    }
+
     public Job(String jobID, String type, Status status, String startAt,
-            String endAt, String query, String result) {
+            String endAt, String query, String resultTable) {
         super(jobID);
         this.type = type;
         this.status = status;
         this.startAt = startAt;
         this.endAt = endAt;
         this.query = query;
-        this.result = result;
+        this.resultTable = resultTable;
     }
 
     public String getJobID() {
@@ -117,5 +125,25 @@ public class Job extends AbstractModel {
 
     public Status getStatus() {
         return status;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getStartAt() {
+        return startAt;
+    }
+
+    public String getEndAt() {
+        return endAt;
+    }
+
+    public String getQuery() {
+        return query;
+    }
+
+    public String getResultTable() {
+        return resultTable;
     }
 }
