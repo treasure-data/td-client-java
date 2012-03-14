@@ -1,9 +1,12 @@
 package com.treasure_data.model;
 
-public class ImportResult extends AbstractResult {
+public class ImportResult extends AbstractResult<Table> {
 
-    protected ImportResult(Model model) {
-        super(model);
+    public ImportResult(Table table) {
+        super(table);
     }
 
+    public Table getTable() {
+        return this.get();
+    }
 }

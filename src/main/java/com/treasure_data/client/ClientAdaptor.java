@@ -25,6 +25,10 @@ import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
 import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.DeleteTableResult;
+import com.treasure_data.model.ExportRequest;
+import com.treasure_data.model.ExportResult;
+import com.treasure_data.model.ImportRequest;
+import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.KillJobRequest;
 import com.treasure_data.model.KillJobResult;
 import com.treasure_data.model.ListDatabasesRequest;
@@ -62,6 +66,12 @@ public interface ClientAdaptor {
     CreateTableResult createTable(CreateTableRequest request) throws ClientException;
 
     DeleteTableResult deleteTable(DeleteTableRequest request) throws ClientException;
+
+    // Import and Export API
+
+    ImportResult importData(ImportRequest request) throws ClientException;
+
+    ExportResult exportData(ExportRequest request) throws ClientException;
 
     // Job API
 
