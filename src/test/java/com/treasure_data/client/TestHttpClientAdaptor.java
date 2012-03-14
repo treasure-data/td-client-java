@@ -213,7 +213,7 @@ public class TestHttpClientAdaptor {
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
-        KillJobRequest request = new KillJobRequest(new Job("25773", "hive"));
+        KillJobRequest request = new KillJobRequest(new Job("25773", Job.Type.HIVE));
         KillJobResult result = clientAdaptor.killJob(request);
         System.out.println(result.getJobID());
     }
