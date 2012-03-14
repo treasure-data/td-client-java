@@ -23,11 +23,11 @@ public class GetJobResultResult extends AbstractResult<JobResult> {
         super(result);
     }
 
-    public Job getJob() {
-        return get().getJob();
+    public JobResult getJobResult() {
+        return get();
     }
 
-    public org.msgpack.type.Value getResult() {
-        return get().getResult();
+    public Job getJob() {
+        return get().getJob();
     }
 }

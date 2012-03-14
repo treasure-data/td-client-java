@@ -709,7 +709,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
-        String status = map.get("former_status");
+        Job.Status status = Job.toStatus(map.get("former_status"));
         String jobID = map.get("job_id");
         if (jobID.equals(request.getJob().getJobID())) {
             String msg = String.format("invalid job ID: expected=%d, actual=%d",

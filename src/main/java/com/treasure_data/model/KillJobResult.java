@@ -21,9 +21,9 @@ public class KillJobResult extends AbstractResult<Job> {
 
     private String jobID;
 
-    private String status;
+    private Job.Status status;
 
-    public KillJobResult(String jobID, String status) {
+    public KillJobResult(String jobID, Job.Status status) {
         super(null);
         this.jobID = jobID;
         this.status = status;
@@ -33,7 +33,7 @@ public class KillJobResult extends AbstractResult<Job> {
         return jobID;
     }
 
-    public String getStatus() {
+    public Job.Status getStatus() {
         return status;
     }
 }
