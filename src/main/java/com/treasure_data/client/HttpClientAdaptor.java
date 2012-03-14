@@ -22,9 +22,8 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -82,6 +81,14 @@ import com.treasure_data.model.Table;
 public class HttpClientAdaptor extends AbstractClientAdaptor {
 
     private static Logger LOG = Logger.getLogger(HttpClientAdaptor.class.getName());
+
+    private static String e(String s) throws ClientException {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new ClientException(e);
+        }
+    }
 
     private HttpConnectionImpl conn = null;
 
@@ -200,7 +207,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             conn = createConnection();
 
             // send request
-            String path = String.format(HttpURL.V3_DATABASE_CREATE, request.getDatabaseName());
+            String path = String.format(HttpURL.V3_DATABASE_CREATE,
+                    e(request.getDatabaseName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -247,7 +255,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             conn = createConnection();
 
             // send request
-            String path = String.format(HttpURL.V3_DATABASE_DELETE, request.getDatabase().getName());
+            String path = String.format(HttpURL.V3_DATABASE_DELETE,
+                    e(request.getDatabase().getName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -315,7 +324,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             conn = createConnection();
 
             // send request
-            String path = String.format(HttpURL.V3_TABLE_LIST, request.getDatabase().getName());
+            String path = String.format(HttpURL.V3_TABLE_LIST,
+                    e(request.getDatabase().getName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
@@ -369,9 +379,9 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_TABLE_CREATE,
-                    request.getDatabase().getName(),
-                    request.getTableName(),
-                    Table.toTypeName(request.getTableType()));
+                    e(request.getDatabase().getName()),
+                    e(request.getTableName()),
+                    e(Table.toTypeName(request.getTableType())));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -432,8 +442,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_TABLE_DELETE,
-                    request.getDatabase().getName(),
-                    request.getTable().getName());
+                    e(request.getDatabase().getName()),
+                    e(request.getTable().getName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -495,9 +505,9 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_SUBMIT,
-                    request.getTable().getDatabase().getName(),
-                    request.getTable().getName(),
-                    ImportRequest.toFormatName(request.getFormat()));
+                    e(request.getTable().getDatabase().getName()),
+                    e(request.getTable().getName()),
+                    e(ImportRequest.toFormatName(request.getFormat())));
             conn.doPutRequest(request, path, request.getBytes());
 
             // receive response code
@@ -556,12 +566,20 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_SUBMIT,
-                    request.getDatabase().getName());
+                    e(request.getDatabase().getName()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
-            params.put("query", URLEncoder.encode(request.getQuery(), "UTF-8"));
+            if (request.getQuery() != null) {
+                // query is required
+                params.put("query", e(request.getQuery()));
+            } else {
+                throw new NullPointerException("query is null");
+            }
             params.put("version", "0.7");
-            // TODO #MN more params
+            if (request.getResultTableName() != null) {
+                // result table is not required
+                params.put("result", e(request.getResultTableName()));
+            }
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
@@ -681,7 +699,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_KILL,
-                    "" + request.getJob().getJobID());
+                    e(request.getJob().getJobID()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -731,9 +749,9 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_SHOW,
-                    "" + request.getJob().getJobID());
+                    e(request.getJob().getJobID()));
             Map<String, String> header = null;
-            Map<String, String> params = new HashMap<String, String>();
+            Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
 
             // receive response code
@@ -780,10 +798,15 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_RESULT,
-                    request.getJobResult().getJob().getJobID());
+                    e(request.getJobResult().getJob().getJobID()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
-            params.put("format", JobResult.toFormatName(request.getJobResult().getFormat()));
+            if (request.getJobResult().getFormat() != null) {
+                params.put("format",
+                        e(JobResult.toFormatName(request.getJobResult().getFormat())));
+            } else {
+                params.put("format", JobResult.toFormatName(JobResult.Format.MSGPACK));
+            }
             conn.doGetRequest(request, path, header, params);
 
             // receive response code
