@@ -26,6 +26,7 @@ public class CreateTableRequest extends AbstractRequest<Table> {
     private Table.Type tableType;
 
     public CreateTableRequest(Database database, String tableName, Table.Type tableType) {
+        super(null);
         this.database = database;
         this.tableName = tableName;
         this.tableType = tableType;

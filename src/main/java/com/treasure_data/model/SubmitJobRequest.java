@@ -28,6 +28,7 @@ public class SubmitJobRequest extends AbstractRequest<Job> {
     private boolean wait;
 
     public SubmitJobRequest(Database database, String query, String resultTableName, boolean wait) {
+        super(null);
         this.database = database;
         this.query = query;
         this.resultTableName = resultTableName;

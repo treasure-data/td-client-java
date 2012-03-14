@@ -18,4 +18,8 @@
 package com.treasure_data.model;
 
 public class GetJobStatusRequest extends AbstractRequest<Job> {
+
+    public GetJobStatusRequest() {
+        super(null);
+    }
 }

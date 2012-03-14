@@ -19,10 +19,10 @@ package com.treasure_data.model;
 
 import com.treasure_data.client.ClientAdaptor;
 
-public class ListDatabasesRequest extends AbstractRequest<Database> {
+public class ListDatabasesRequest extends AbstractRequest<ListDatabases> {
 
-    public ListDatabasesResult doIt(ClientAdaptor adaptor) {
-	return null; // TODO
+    public ListDatabasesRequest() {
+        super(null);
     }
 
 }

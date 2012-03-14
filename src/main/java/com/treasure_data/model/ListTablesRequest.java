@@ -26,6 +26,7 @@ public class ListTablesRequest extends AbstractRequest<ListTables> {
     }
 
     public ListTablesRequest(Database database) {
+        super(null);
         this.database = database;
     }
 

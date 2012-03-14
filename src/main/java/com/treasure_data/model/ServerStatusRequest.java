@@ -18,4 +18,8 @@
 package com.treasure_data.model;
 
 public class ServerStatusRequest extends AbstractRequest<AbstractModel> {
+
+    public ServerStatusRequest() {
+        super(null);
+    }
 }

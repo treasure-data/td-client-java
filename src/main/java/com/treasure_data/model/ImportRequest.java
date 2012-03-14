@@ -40,20 +40,18 @@ public class ImportRequest extends AbstractRequest<Table> {
         }
     }
 
-    private Table table;
-
     private Format format;
 
     private byte[] bytes;
 
     public ImportRequest(Table table, Format format, byte[] bytes) {
-        this.table = table;
+        super(table);
         this.format = format;
         this.bytes = bytes;
     }
 
     public Table getTable() {
-        return table;
+        return get();
     }
 
     public Format getFormat() {

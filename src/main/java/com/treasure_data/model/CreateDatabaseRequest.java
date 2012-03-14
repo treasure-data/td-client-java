@@ -22,6 +22,7 @@ public class CreateDatabaseRequest extends AbstractRequest<Database> {
     private String databaseName;
 
     public CreateDatabaseRequest(String databaseName) {
+        super(null);
         this.databaseName = databaseName;
     }
 

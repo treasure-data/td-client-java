@@ -18,4 +18,8 @@
 package com.treasure_data.model;
 
 public class ExportRequest extends AbstractRequest<AbstractModel> {
+
+    public ExportRequest() {
+        super(null);
+    }
 }
