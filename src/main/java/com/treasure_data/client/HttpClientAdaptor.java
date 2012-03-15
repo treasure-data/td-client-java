@@ -133,6 +133,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                 LOG.severe(msg);
             } else {
                 String jsonData = conn.getResponseBody();
+                validateJSONData(jsonData);
                 @SuppressWarnings("rawtypes")
                 Map map = (Map) JSONValue.parse(jsonData);
                 if (map == null) {
