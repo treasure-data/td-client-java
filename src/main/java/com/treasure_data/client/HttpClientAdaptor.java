@@ -190,6 +190,11 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
+        if (map == null) {
+            throw new ClientException(String.format(
+                    "Server error (invalid JSON Data): %s", jsonData));
+        }
+
         @SuppressWarnings("unchecked")
         Iterator<Map<String, String>> dbNameMapIter =
             ((List<Map<String, String>>) map.get("databases")).iterator();
