@@ -22,8 +22,6 @@ import com.treasure_data.model.Database;
 import com.treasure_data.model.ListDatabasesRequest;
 import com.treasure_data.model.ListDatabasesResult;
 import com.treasure_data.model.Request;
-import com.treasure_data.model.ServerStatusRequest;
-import com.treasure_data.model.ServerStatusResult;
 
 public class TestListDatabases {
     @Before
@@ -42,6 +40,11 @@ public class TestListDatabases {
         @Override
         int getResponseCode() throws IOException {
             return HttpURLConnection.HTTP_OK;
+        }
+
+        @Override
+        String getResponseMessage() throws IOException {
+            return "";
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -70,7 +73,7 @@ public class TestListDatabases {
      * check normal behavior of client
      */
     @Test
-    public void testGetServerStatus01() throws Exception {
+    public void testListDatabases01() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -97,6 +100,11 @@ public class TestListDatabases {
         }
 
         @Override
+        String getResponseMessage() throws IOException {
+            return "";
+        }
+
+        @Override
         String getResponseBody() throws IOException {
             return "foobar"; // invalid JSON data
         }
@@ -111,14 +119,14 @@ public class TestListDatabases {
      * check behavior when receiving *invalid JSON data* as response body
      */
     @Test
-    public void testGetServerStatus02() throws Exception {
+    public void testListDatabases02() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases02());
-        ServerStatusRequest request = new ServerStatusRequest();
+        ListDatabasesRequest request = new ListDatabasesRequest();
         try {
-            clientAdaptor.getServerStatus(request);
+            clientAdaptor.listDatabases(request);
             fail();
         } catch (Throwable t) {
             assertTrue(t instanceof ClientException);
@@ -157,13 +165,17 @@ public class TestListDatabases {
      * check behavior when receiving non-OK response code
      */
     @Test
-    public void testGetServerStatus03() throws Exception {
+    public void testListDatabases03() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases03());
-        ServerStatusRequest request = new ServerStatusRequest();
-        ServerStatusResult result = clientAdaptor.getServerStatus(request);
-        assertTrue(result.getMessage() != "ok");
+        ListDatabasesRequest request = new ListDatabasesRequest();
+        try {
+            clientAdaptor.listDatabases(request);
+            fail();
+        } catch (Throwable t) {
+            assertTrue(t instanceof ClientException);
+        }
     }
 }
