@@ -1,6 +1,5 @@
 package com.treasure_data.client;
 
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Properties;
 
@@ -48,11 +47,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testGetServerStatus01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         ServerStatusRequest request = new ServerStatusRequest();
         ServerStatusResult result = clientAdaptor.getServerStatus(request);
@@ -61,11 +58,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testListDatabases01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         ListDatabasesRequest request = new ListDatabasesRequest();
         ListDatabasesResult result = clientAdaptor.listDatabases(request);
@@ -77,11 +72,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testCreateDatabase01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         CreateDatabaseRequest request = new CreateDatabaseRequest("test_http_client_adaptor");
         CreateDatabaseResult result = clientAdaptor.createDatabase(request);
@@ -90,11 +83,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testDeleteDatabase01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         DeleteDatabaseRequest request = new DeleteDatabaseRequest(new Database("test_http_client_adaptor"));
         DeleteDatabaseResult result = clientAdaptor.deleteDatabase(request);
@@ -103,11 +94,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testListTables01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         //ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
         ListTablesRequest request = new ListTablesRequest();
@@ -123,11 +112,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testCreateTable01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         try {
             // create database
@@ -146,11 +133,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testDeleteTable01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         try {
             // create database
@@ -172,11 +157,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testSubmitJob01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         Database database = new Database("mugadb");
         String q = "select * from mugatbl";
@@ -188,11 +171,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testListJobs01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         ListJobsRequest request = new ListJobsRequest();
         ListJobsResult result = clientAdaptor.listJobs(request);
@@ -204,11 +185,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testKillJob01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         KillJobRequest request = new KillJobRequest(new Job("25773", Job.Type.HIVE));
         KillJobResult result = clientAdaptor.killJob(request);
@@ -217,11 +196,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testShowJob01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         ShowJobRequest request = new ShowJobRequest(new Job("26597"));
         ShowJobResult result = clientAdaptor.showJob(request);
@@ -231,11 +208,9 @@ public class TestHttpClientAdaptor00 {
 
     @Test @Ignore
     public void testGetJobResult01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         GetJobResultRequest request = new GetJobResultRequest(
                 new JobResult(new Job("26317"), JobResult.Format.MSGPACK));

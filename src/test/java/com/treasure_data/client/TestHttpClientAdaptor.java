@@ -144,7 +144,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         ListDatabasesRequest request = new ListDatabasesRequest();
         ListDatabasesResult result = clientAdaptor.listDatabases(request);
@@ -159,7 +159,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         CreateDatabaseRequest request = new CreateDatabaseRequest("test_http_client_adaptor");
         CreateDatabaseResult result = clientAdaptor.createDatabase(request);
@@ -171,7 +171,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         DeleteDatabaseRequest request = new DeleteDatabaseRequest(new Database("test_http_client_adaptor"));
         DeleteDatabaseResult result = clientAdaptor.deleteDatabase(request);
@@ -183,7 +183,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         //ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
         ListTablesRequest request = new ListTablesRequest();
@@ -202,7 +202,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         try {
             // create database
@@ -224,7 +224,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         try {
             // create database
@@ -249,7 +249,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         Database database = new Database("mugadb");
         String q = "select * from mugatbl";
@@ -264,7 +264,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         ListJobsRequest request = new ListJobsRequest();
         ListJobsResult result = clientAdaptor.listJobs(request);
@@ -279,7 +279,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         KillJobRequest request = new KillJobRequest(new Job("25773", Job.Type.HIVE));
         KillJobResult result = clientAdaptor.killJob(request);
@@ -291,7 +291,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         ShowJobRequest request = new ShowJobRequest(new Job("26597"));
         ShowJobResult result = clientAdaptor.showJob(request);
@@ -304,7 +304,7 @@ public class TestHttpClientAdaptor {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new MockHttpConnectionImpl0());
+        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         GetJobResultRequest request = new GetJobResultRequest(
                 new JobResult(new Job("26317"), JobResult.Format.MSGPACK));
