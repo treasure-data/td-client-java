@@ -33,13 +33,13 @@ public class TreasureDataCredentials {
 
         // check properties
         apiKey = props.getProperty(Config.TD_API_KEY);
-        /**
         if (apiKey != null) {
             return apiKey;
         }
-         */
 
-        return apiKey;
+        // another setting...
+
+        return apiKey; // null
     }
 
     private String apiKey;
