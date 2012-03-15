@@ -135,6 +135,10 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                 String jsonData = conn.getResponseBody();
                 @SuppressWarnings("rawtypes")
                 Map map = (Map) JSONValue.parse(jsonData);
+                if (map == null) {
+                    throw new ClientException(String.format(
+                            "Server error (invalid JSON Data): %s", jsonData));
+                }
                 msg = (String) map.get("status");
             }
 
@@ -885,10 +889,10 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         private HttpURLConnection conn = null;
 
-        public HttpConnectionImpl() {
+        HttpConnectionImpl() {
         }
 
-        void doGetRequest(Request request, String path, Map<String, String> header,
+        void doGetRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             Properties props = System.getProperties();
             String host = props.getProperty(
@@ -1051,12 +1055,9 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             conn.disconnect();
         }
 
+        // TODO #MN should consider the design of the method 
         org.msgpack.type.Value getResponseBodyBinary() throws IOException {
             BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
-            /**
-            BufferedReader reader = new BufferedReader( 
-                    new InputStreamReader(conn.getInputStream()));
-             */
             MessagePack msgpack = new MessagePack();
             BufferUnpacker unpacker = msgpack.createBufferUnpacker();
             byte[] buf = new byte[1024];
