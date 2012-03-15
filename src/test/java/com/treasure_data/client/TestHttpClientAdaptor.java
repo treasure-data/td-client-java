@@ -52,7 +52,6 @@ public class TestHttpClientAdaptor {
 
     @Test
     public void testGetServerStatus01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -64,7 +63,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testListDatabases01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -80,7 +78,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testCreateDatabase01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -93,7 +90,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testDeleteDatabase01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -106,7 +102,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testListTables01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -126,7 +121,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testCreateTable01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -149,7 +143,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testDeleteTable01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -175,7 +168,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testSubmitJob01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -191,7 +183,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testListJobs01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -207,7 +198,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testKillJob01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -220,7 +210,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testShowJob01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
@@ -234,7 +223,6 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testGetJobResult01() throws Exception {
-        Properties props = System.getProperties();
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
