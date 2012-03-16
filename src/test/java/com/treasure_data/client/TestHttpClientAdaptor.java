@@ -51,107 +51,10 @@ import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.Table;
 
 public class TestHttpClientAdaptor {
-
     @Before
     public void setUp() throws Exception {
         Properties props = System.getProperties();
-        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
-
-    static class HttpConnectionImplforGetServerStatus01 extends HttpConnectionImpl {
-        @Override
-        void doGetRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            // do nothing
-        }
-
-        @Override
-        int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_OK;
-        }
-
-        @Override
-        String getResponseBody() throws IOException {
-            Map<String, String> map = new HashMap<String, String>();
-            map.put("status", "ok");
-            String jsonData = JSONValue.toJSONString(map);
-            return jsonData;
-        }
-
-        @Override
-        void disconnect() {
-            // do nothing
-        }
-    }
-
-    /**
-     * check normal behavior of client
-     */
-    @Test
-    public void testGetServerStatus01() throws Exception {
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus01());
-        ServerStatusRequest request = new ServerStatusRequest();
-        ServerStatusResult result = clientAdaptor.getServerStatus(request);
-        assertEquals("ok", result.getMessage());
-    }
-
-    static class HttpConnectionImplforGetServerStatus02 extends HttpConnectionImpl {
-        @Override
-        void doGetRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            // do nothing
-        }
-
-        @Override
-        int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_OK;
-        }
-
-        @Override
-        String getResponseBody() throws IOException {
-            return "foobar"; // invalid JSON data
-        }
-
-        @Override
-        void disconnect() {
-            // do nothing
-        }
-    }
-
-    /**
-     * check behavior when receiving *invalid JSON data* as response body
-     */
-    @Test
-    public void testGetServerStatus02() throws Exception {
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus02());
-        ServerStatusRequest request = new ServerStatusRequest();
-        try {
-            clientAdaptor.getServerStatus(request);
-            fail();
-        } catch (Throwable t) {
-            assertTrue(t instanceof ClientException);
-        }
-    }
-
-    @Test @Ignore
-    public void testListDatabases01() throws Exception {
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
-
-        ListDatabasesRequest request = new ListDatabasesRequest();
-        ListDatabasesResult result = clientAdaptor.listDatabases(request);
-        List<Database> databases = result.getDatabases();
-        for (Database database : databases) {
-            System.out.println(database.getName());
-        }
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
     @Test @Ignore
