@@ -34,6 +34,10 @@ public abstract class AbstractClientAdaptor implements ClientAdaptor {
 	return conf;
     }
 
+    public TreasureDataCredentials getTreasureDataCredentials() {
+        return conf.getCredentials();
+    }
+
     public void setTreasureDataCredentials(TreasureDataCredentials credentials) {
         conf.setCredentials(credentials);
     }

@@ -51,16 +51,32 @@ import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.Table;
 
 public class TestHttpClientAdaptor {
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+    @Test
+    public void testSetTreasureDataCredentials() throws Exception {
+        Config conf = new Config();
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        {
+            TreasureDataCredentials credentails = clientAdaptor.getTreasureDataCredentials();
+            assertTrue(credentails == null);
+        }
+
+        {
+            Properties props = new Properties();
+            props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+            clientAdaptor.setTreasureDataCredentials(new TreasureDataCredentials(props));
+            TreasureDataCredentials credentails = clientAdaptor.getTreasureDataCredentials();
+            assertTrue(credentails != null);
+            assertTrue(credentails.getAPIKey() != null);
+        }
     }
 
     @Test @Ignore
     public void testCreateDatabase01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
@@ -71,8 +87,10 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testDeleteDatabase01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
@@ -83,8 +101,10 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testListTables01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
@@ -102,8 +122,10 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testCreateTable01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
@@ -124,8 +146,10 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testDeleteTable01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
@@ -149,8 +173,10 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testSubmitJob01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
@@ -164,8 +190,10 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testListJobs01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
@@ -179,8 +207,10 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testKillJob01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
@@ -191,8 +221,10 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testShowJob01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
@@ -204,8 +236,10 @@ public class TestHttpClientAdaptor {
 
     @Test @Ignore
     public void testGetJobResult01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
