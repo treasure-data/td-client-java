@@ -73,50 +73,8 @@ public class TestHttpClientAdaptor {
 
     // TODO
 
-    @Test @Ignore
-    public void testListTables01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
-        //ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
-        ListTablesRequest request = new ListTablesRequest();
-        ListTablesResult result = clientAdaptor.listTables(request);
-        List<Table> tables = result.getTables();
-        for (Table table : tables) {
-            System.out.println(table.getDatabase().getName());
-            System.out.println(table.getName());
-            System.out.println(table.getType());
-            System.out.println(table.getCount());
-        }
-    }
 
-    @Test @Ignore
-    public void testCreateTable01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
-
-        try {
-            // create database
-            CreateDatabaseResult ret =
-                clientAdaptor.createDatabase(new CreateDatabaseRequest("test_http_client_adaptor"));
-            Database database = ret.getDatabase();
-
-            CreateTableRequest request = new CreateTableRequest(database, "test01", Table.Type.LOG);
-            CreateTableResult result = clientAdaptor.createTable(request);
-            System.out.println(result.getTable().getName());
-        } finally {
-            // delete database
-            clientAdaptor.deleteDatabase(new DeleteDatabaseRequest(new Database("test_http_client_adaptor")));
-        }
-    }
 
     @Test @Ignore
     public void testDeleteTable01() throws Exception {

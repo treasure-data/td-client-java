@@ -6,9 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -18,22 +16,20 @@ import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
+import com.treasure_data.model.CreateTableRequest;
+import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
-import com.treasure_data.model.ListTablesRequest;
-import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.Request;
 import com.treasure_data.model.Table;
 
-public class TestListTables {
+public class TestCreateTable {
     @Before
     public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    static class HttpConnectionImplforListTables01 extends HttpConnectionImpl {
+    static class HttpConnectionImplforCreateTable01 extends HttpConnectionImpl {
         @Override
-        void doGetRequest(Request<?> request, String path, Map<String, String> header,
+        void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             // do nothing
         }
@@ -48,23 +44,12 @@ public class TestListTables {
             return "";
         }
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
         @Override
         String getResponseBody() throws IOException {
-            Map map = new HashMap();
+            Map<String, String> map = new HashMap<String, String>();
             map.put("database", "testdb");
-            List tbls = new ArrayList();
-            Map m0 = new HashMap();
-            m0.put("type", "item");
-            m0.put("name", "foo");
-            m0.put("count", 13123233);
-            tbls.add(m0);
-            Map m1 = new HashMap();
-            m1.put("type", "item");
-            m1.put("name", "bar");
-            m1.put("count", 331232);
-            tbls.add(m1);
-            map.put("tables", tbls);
+            map.put("table", "testtbl");
+            map.put("type", "log");
             String jsonData = JSONValue.toJSONString(map);
             return jsonData;
         }
@@ -79,24 +64,24 @@ public class TestListTables {
      * check normal behavior of client
      */
     @Test
-    public void testListTables01() throws Exception {
+    public void testCreateDatabase01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforListTables01());
+        clientAdaptor.setConnection(new HttpConnectionImplforCreateTable01());
 
         String databaseName = "testdb";
-        ListTablesRequest request = new ListTablesRequest(new Database(databaseName));
-        ListTablesResult result = clientAdaptor.listTables(request);
-        List<Table> tables = result.getTables();
-        assertEquals(2, tables.size());
-        assertEquals("foo", tables.get(0).getName());
-        assertEquals("bar", tables.get(1).getName());
+        String tableName = "testtbl";
+        CreateTableRequest request = new CreateTableRequest(new Database(databaseName), tableName, Table.Type.LOG);
+        CreateTableResult result = clientAdaptor.createTable(request);
+        assertEquals(databaseName, result.getDatabase().getName());
     }
 
-    static class HttpConnectionImplforListTables02 extends HttpConnectionImpl {
+    static class HttpConnectionImplforCreateTable02 extends HttpConnectionImpl {
         @Override
-        void doGetRequest(Request<?> request, String path, Map<String, String> header,
+        void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             // do nothing
         }
@@ -126,25 +111,28 @@ public class TestListTables {
      * check behavior when receiving *invalid JSON data* as response body
      */
     @Test
-    public void testListTables02() throws Exception {
+    public void testCreateDatabase02() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforListTables02());
+        clientAdaptor.setConnection(new HttpConnectionImplforCreateTable02());
 
         String databaseName = "testdb";
-        ListTablesRequest request = new ListTablesRequest(new Database(databaseName));
+        String tableName = "testtbl";
+        CreateTableRequest request = new CreateTableRequest(new Database(databaseName), tableName, Table.Type.LOG);
         try {
-            clientAdaptor.listTables(request);
+            clientAdaptor.createTable(request);
             fail();
         } catch (Throwable t) {
             assertTrue(t instanceof ClientException);
         }
     }
 
-    static class HttpConnectionImplforListTables03 extends HttpConnectionImpl {
+    static class HttpConnectionImplforCreateTable03 extends HttpConnectionImpl {
         @Override
-        void doGetRequest(Request<?> request, String path, Map<String, String> header,
+        void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             // do nothing
         }
@@ -174,16 +162,19 @@ public class TestListTables {
      * check behavior when receiving non-OK response code
      */
     @Test
-    public void testListTables03() throws Exception {
+    public void testCreateDatabase03() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforListTables03());
+        clientAdaptor.setConnection(new HttpConnectionImplforCreateTable03());
 
         String databaseName = "testdb";
-        ListTablesRequest request = new ListTablesRequest(new Database(databaseName));
+        String tableName = "testtbl";
+        CreateTableRequest request = new CreateTableRequest(new Database(databaseName), tableName, Table.Type.LOG);
         try {
-            clientAdaptor.listTables(request);
+            clientAdaptor.createTable(request);
             fail();
         } catch (Throwable t) {
             assertTrue(t instanceof ClientException);

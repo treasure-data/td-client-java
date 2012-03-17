@@ -446,6 +446,11 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
+        if (tableMap == null) {
+            throw new ClientException(String.format(
+                    "Server error (invalid JSON Data): %s", jsonData));
+        }
+
         String dbName = tableMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
