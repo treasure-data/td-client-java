@@ -53,7 +53,7 @@ public class TestHttpClientAdaptor00 {
 
         ServerStatusRequest request = new ServerStatusRequest();
         ServerStatusResult result = clientAdaptor.getServerStatus(request);
-        System.out.println(result.getMessage());
+        System.out.println(result.getServerStatus().getMessage());
     }
 
     @Test @Ignore

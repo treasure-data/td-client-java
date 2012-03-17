@@ -17,16 +17,13 @@
 //
 package com.treasure_data.model;
 
-public class ServerStatusResult extends AbstractResult<AbstractModel> {
+public class ServerStatusResult extends AbstractResult<ServerStatus> {
 
-    private String message;
-
-    public ServerStatusResult(String message) {
-        super(null);
-        this.message = message;
+    public ServerStatusResult(ServerStatus serverStatus) {
+        super(serverStatus);
     }
 
-    public String getMessage() {
-        return message;
+    public ServerStatus getServerStatus() {
+        return get();
     }
 }

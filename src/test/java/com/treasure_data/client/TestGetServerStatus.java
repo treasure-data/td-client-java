@@ -65,7 +65,7 @@ public class TestGetServerStatus {
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus01());
         ServerStatusRequest request = new ServerStatusRequest();
         ServerStatusResult result = clientAdaptor.getServerStatus(request);
-        assertEquals("ok", result.getMessage());
+        assertEquals("ok", result.getServerStatus().getMessage());
     }
 
     static class HttpConnectionImplforGetServerStatus02 extends HttpConnectionImpl {
@@ -148,6 +148,6 @@ public class TestGetServerStatus {
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus03());
         ServerStatusRequest request = new ServerStatusRequest();
         ServerStatusResult result = clientAdaptor.getServerStatus(request);
-        assertTrue(result.getMessage() != "ok");
+        assertTrue(result.getServerStatus().getMessage() != "ok");
     }
 }

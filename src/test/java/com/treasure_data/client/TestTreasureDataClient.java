@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.treasure_data.model.ServerStatus;
 import com.treasure_data.model.ServerStatusResult;
 
 public class TestTreasureDataClient {
@@ -21,8 +22,8 @@ public class TestTreasureDataClient {
         Properties props = System.getProperties();
         
         TreasureDataClient client = new TreasureDataClient(props);
-        ServerStatusResult result = client.getServerStatus();
-        System.out.println(result.getMessage());
+        ServerStatus serverStatus = client.getServerStatus();
+        System.out.println(serverStatus.getMessage());
     }
     
 }
