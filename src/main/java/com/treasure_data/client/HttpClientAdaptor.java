@@ -252,6 +252,10 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> dbMap = (Map<String, String>) JSONValue.parse(jsonData);
+        if (dbMap == null) {
+            throw new ClientException(String.format(
+                    "Server error (invalid JSON Data): %s", jsonData));
+        }
         String dbName = dbMap.get("database");
         if (!dbName.equals(request.getDatabaseName())) {
             String msg = String.format("invalid name: expected=%s, actual=%s",
@@ -974,7 +978,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             conn.connect();
         }
 
-        void doPostRequest(Request request, String path, Map<String, String> header,
+        void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             Properties props = System.getProperties();
             String host = props.getProperty(
@@ -1028,7 +1032,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             conn.connect();
         }
 
-        HttpURLConnection doPutRequest(Request request, String path, byte[] bytes)
+        HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
                 throws IOException {
             Properties props = System.getProperties();
             String host = props.getProperty(
