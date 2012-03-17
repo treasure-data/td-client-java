@@ -74,8 +74,6 @@ public class TestHttpClientAdaptor {
     // TODO
 
 
-
-
     @Test @Ignore
     public void testDeleteTable01() throws Exception {
         Properties props = new Properties();
