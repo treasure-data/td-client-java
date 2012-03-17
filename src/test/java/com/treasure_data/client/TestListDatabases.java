@@ -124,6 +124,7 @@ public class TestListDatabases {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases02());
+
         ListDatabasesRequest request = new ListDatabasesRequest();
         try {
             clientAdaptor.listDatabases(request);
@@ -170,6 +171,7 @@ public class TestListDatabases {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases03());
+
         ListDatabasesRequest request = new ListDatabasesRequest();
         try {
             clientAdaptor.listDatabases(request);

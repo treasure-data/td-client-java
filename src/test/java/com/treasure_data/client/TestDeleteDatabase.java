@@ -18,14 +18,17 @@ import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
+import com.treasure_data.model.Database;
+import com.treasure_data.model.DeleteDatabaseRequest;
+import com.treasure_data.model.DeleteDatabaseResult;
 import com.treasure_data.model.Request;
 
-public class TestCreateDatabase {
+public class TestDeleteDatabase {
     @Before
     public void setUp() throws Exception {
     }
 
-    static class HttpConnectionImplforCreateDatabase01 extends HttpConnectionImpl {
+    static class HttpConnectionImplforDeleteDatabase01 extends HttpConnectionImpl {
         @Override
         void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
@@ -60,21 +63,32 @@ public class TestCreateDatabase {
      * check normal behavior of client
      */
     @Test
-    public void testCreateDatabase01() throws Exception {
+    public void testDeleteDatabase01() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforCreateDatabase01());
+        clientAdaptor.setConnection(new HttpConnectionImplforDeleteDatabase01());
 
         String databaseName = "testdb";
-        CreateDatabaseRequest request = new CreateDatabaseRequest(databaseName);
-        CreateDatabaseResult result = clientAdaptor.createDatabase(request);
-        assertEquals(databaseName, result.getDatabase().getName());
+        Database database = null;
+        { // create
+            CreateDatabaseRequest request = new CreateDatabaseRequest(databaseName);
+            CreateDatabaseResult result = clientAdaptor.createDatabase(request);
+            database = result.getDatabase();
+            assertEquals(databaseName, database.getName());
+        }
+
+        { // delete
+            DeleteDatabaseRequest request = new DeleteDatabaseRequest(database);
+            DeleteDatabaseResult result = clientAdaptor.deleteDatabase(request);
+            String dstName = result.getDatabaseName();
+            assertEquals(databaseName, dstName);
+        }
     }
 
-    static class HttpConnectionImplforCreateDatabase02 extends HttpConnectionImpl {
+    static class HttpConnectionImplforDeleteDatabase02 extends HttpConnectionImpl {
         @Override
         void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
@@ -106,25 +120,25 @@ public class TestCreateDatabase {
      * check behavior when receiving *invalid JSON data* as response body
      */
     @Test
-    public void testCreateDatabase02() throws Exception {
+    public void testDeleteDatabase02() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforCreateDatabase02());
+        clientAdaptor.setConnection(new HttpConnectionImplforDeleteDatabase02());
 
         String databaseName = "testdb";
-        CreateDatabaseRequest request = new CreateDatabaseRequest(databaseName);
+        DeleteDatabaseRequest request = new DeleteDatabaseRequest(new Database(databaseName));
         try {
-            clientAdaptor.createDatabase(request);
+            clientAdaptor.deleteDatabase(request);
             fail();
         } catch (Throwable t) {
             assertTrue(t instanceof ClientException);
         }
     }
 
-    static class HttpConnectionImplforCreateDatabase03 extends HttpConnectionImpl {
+    static class HttpConnectionImplforDeleteDatabase03 extends HttpConnectionImpl {
         @Override
         void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
@@ -156,18 +170,18 @@ public class TestCreateDatabase {
      * check behavior when receiving non-OK response code
      */
     @Test
-    public void testCreateDatabase03() throws Exception {
+    public void testDeleteDatabase03() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforCreateDatabase03());
+        clientAdaptor.setConnection(new HttpConnectionImplforDeleteDatabase03());
 
         String databaseName = "testdb";
-        CreateDatabaseRequest request = new CreateDatabaseRequest(databaseName);
+        DeleteDatabaseRequest request = new DeleteDatabaseRequest(new Database(databaseName));
         try {
-            clientAdaptor.createDatabase(request);
+            clientAdaptor.deleteDatabase(request);
             fail();
         } catch (Throwable t) {
             assertTrue(t instanceof ClientException);
