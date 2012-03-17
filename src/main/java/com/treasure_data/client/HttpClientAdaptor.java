@@ -382,6 +382,11 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
+        if (map == null) {
+            throw new ClientException(String.format(
+                    "Server error (invalid JSON Data): %s", jsonData));
+        }
+
         @SuppressWarnings("unchecked")
         Iterator<Map<String, Object>> tableMapIter =
             ((List<Map<String, Object>>) map.get("tables")).iterator();
