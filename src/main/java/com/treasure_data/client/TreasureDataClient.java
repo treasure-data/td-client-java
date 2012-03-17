@@ -129,8 +129,6 @@ public class TreasureDataClient {
 
     // Table API
 
-    // TODO change type of return variable:
-    // List<Table> -> List<TableSummary>
     public List<Table> listTables(String databaseName)
             throws ClientException {
         return listTables(new ListTablesRequest(
