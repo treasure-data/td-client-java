@@ -53,9 +53,10 @@ public class TreasureDataCredentials {
     }
 
     public TreasureDataCredentials(String apiKey) {
-        if (apiKey == null) {
-            throw new NullPointerException("apiKey is not set.");
-        }
+        this.apiKey = apiKey;
+    }
+
+    public void setAPIKey(String apiKey) {
         this.apiKey = apiKey;
     }
 
@@ -66,6 +67,7 @@ public class TreasureDataCredentials {
     @Override
     public String toString() {
 	return String.format("%s{apiKey=%s}",
-		TreasureDataCredentials.class.getName(), apiKey);
+		TreasureDataCredentials.class.getName(),
+		apiKey != null ? apiKey : "null");
     }
 }

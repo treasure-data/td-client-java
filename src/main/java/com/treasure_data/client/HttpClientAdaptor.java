@@ -116,6 +116,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public ServerStatusResult getServerStatus(ServerStatusRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+
         try {
             conn = createConnection();
 
@@ -158,6 +159,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public ListDatabasesResult listDatabases(ListDatabasesRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
         String jsonData = null;
         try {
             conn = createConnection();
@@ -213,6 +216,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public CreateDatabaseResult createDatabase(CreateDatabaseRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
         String jsonData = null;
         try {
             conn = createConnection();
@@ -261,6 +266,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public DeleteDatabaseResult deleteDatabase(DeleteDatabaseRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
         String jsonData = null;
         try {
             conn = createConnection();
@@ -330,6 +337,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         }
 
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
         String jsonData = null;
         try {
             conn = createConnection();
@@ -384,6 +393,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public CreateTableResult createTable(CreateTableRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
         String jsonData = null;
         try {
             conn = createConnection();
@@ -447,6 +458,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public DeleteTableResult deleteTable(DeleteTableRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
         String jsonData = null;
         try {
             conn = createConnection();
@@ -510,6 +523,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     @Override
     public ImportResult importData(ImportRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
         String jsonData = null;
         try {
             conn = createConnection();
@@ -571,6 +586,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public SubmitJobResult submitJob(SubmitJobRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
         String jsonData = null;
         try {
             conn = createConnection();
@@ -633,6 +650,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     @Override
     public ListJobsResult listJobs(ListJobsRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
 
         String jsonData = null;
         try {
@@ -704,6 +722,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     @Override
     public KillJobResult killJob(KillJobRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
         String jsonData = null;
         try {
             conn = createConnection();
@@ -753,6 +773,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public ShowJobResult showJob(ShowJobRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
 
         String jsonData = null;
         try {
@@ -802,6 +823,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public GetJobResultResult getJobResult(GetJobResultRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
 
         org.msgpack.type.Value value = null;
         try {
@@ -842,6 +864,13 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         request.getJobResult().setResult(value);
         return new GetJobResultResult(request.getJobResult());
+    }
+
+    private void validateCredentials(Request<?> request) throws ClientException {
+        String apiKey = request.getCredentials().getAPIKey();
+        if (apiKey == null) {
+            throw new ClientException("api key is not set.");
+        }
     }
 
     private void validateJSONData(String jsonData) throws ClientException {

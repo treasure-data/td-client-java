@@ -81,7 +81,11 @@ public class TreasureDataClient {
     }
 
     public TreasureDataClient(TreasureDataCredentials credentials, Properties props) {
-	this.clientAdaptor = createClientAdaptor(credentials, props);
+	clientAdaptor = createClientAdaptor(credentials, props);
+    }
+
+    public void setTreasureDataCredentials(TreasureDataCredentials credentials) {
+        clientAdaptor.setTreasureDataCredentials(credentials);
     }
 
     // Server Status API
