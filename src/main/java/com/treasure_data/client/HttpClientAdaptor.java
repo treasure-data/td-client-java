@@ -70,6 +70,7 @@ import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.Request;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
+import com.treasure_data.model.ServerStatus;
 import com.treasure_data.model.ServerStatusRequest;
 import com.treasure_data.model.ServerStatusResult;
 import com.treasure_data.model.ShowJobRequest;
@@ -143,7 +144,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                 msg = (String) map.get("status");
             }
 
-            return new ServerStatusResult(msg);
+            return new ServerStatusResult(new ServerStatus(msg));
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
