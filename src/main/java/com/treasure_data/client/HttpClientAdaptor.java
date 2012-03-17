@@ -138,10 +138,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                 validateJSONData(jsonData);
                 @SuppressWarnings("rawtypes")
                 Map map = (Map) JSONValue.parse(jsonData);
-                if (map == null) {
-                    throw new ClientException(String.format(
-                            "Server error (invalid JSON Data): %s", jsonData));
-                }
+                validateJavaObject(jsonData, map);
                 msg = (String) map.get("status");
             }
 
@@ -194,10 +191,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
-        if (map == null) {
-            throw new ClientException(String.format(
-                    "Server error (invalid JSON Data): %s", jsonData));
-        }
+        validateJavaObject(jsonData, map);
 
         @SuppressWarnings("unchecked")
         Iterator<Map<String, String>> dbNameMapIter =
@@ -252,10 +246,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> dbMap = (Map<String, String>) JSONValue.parse(jsonData);
-        if (dbMap == null) {
-            throw new ClientException(String.format(
-                    "Server error (invalid JSON Data): %s", jsonData));
-        }
+        validateJavaObject(jsonData, dbMap);
 
         String dbName = dbMap.get("database");
         if (!dbName.equals(request.getDatabaseName())) {
@@ -307,10 +298,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> dbMap = (Map<String, String>) JSONValue.parse(jsonData);
-        if (dbMap == null) {
-            throw new ClientException(String.format(
-                    "Server error (invalid JSON Data): %s", jsonData));
-        }
+        validateJavaObject(jsonData, dbMap);
 
         String dbName = dbMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
@@ -382,10 +370,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
-        if (map == null) {
-            throw new ClientException(String.format(
-                    "Server error (invalid JSON Data): %s", jsonData));
-        }
+        validateJavaObject(jsonData, map);
 
         @SuppressWarnings("unchecked")
         Iterator<Map<String, Object>> tableMapIter =
@@ -446,10 +431,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
-        if (tableMap == null) {
-            throw new ClientException(String.format(
-                    "Server error (invalid JSON Data): %s", jsonData));
-        }
+        validateJavaObject(jsonData, tableMap);
 
         String dbName = tableMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
@@ -515,10 +497,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
-        if (tableMap == null) {
-            throw new ClientException(String.format(
-                    "Server error (invalid JSON Data): %s", jsonData));
-        }
+        validateJavaObject(jsonData, tableMap);
 
         String dbName = tableMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
@@ -584,6 +563,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
+        validateJavaObject(jsonData, map);
+
         String dbName = (String) map.get("database");
         String tblName = (String) map.get("table");
         double time = (Double) map.get("time");
@@ -658,6 +639,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
+        validateJavaObject(jsonData, jobMap);
+
         String jobID = jobMap.get("job_id");
         Job.Type type = Job.toType(jobMap.get("type"));
         String dbName = jobMap.get("database");
@@ -721,6 +704,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
+        validateJavaObject(jsonData, map);
+
         long count = (Long) map.get("count");
         long from = (Long) map.get("from");
         long to = (Long) map.get("to");
@@ -783,6 +768,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
+        validateJavaObject(jsonData, map);
+
         Job.Status status = Job.toStatus(map.get("former_status"));
         String jobID = map.get("job_id");
         if (jobID.equals(request.getJob().getJobID())) {
@@ -902,6 +889,13 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         if (jsonData == null) {
             throw new ClientException(
                     "JSON data that was returned by server is null");
+        }
+    }
+
+    private void validateJavaObject(String jsonData, Object obj) throws ClientException {
+        if (obj == null) {
+            throw new ClientException(String.format(
+                    "Server error (invalid JSON Data): %s", jsonData));
         }
     }
 

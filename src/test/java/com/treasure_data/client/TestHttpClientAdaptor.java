@@ -75,33 +75,6 @@ public class TestHttpClientAdaptor {
 
 
     @Test @Ignore
-    public void testDeleteTable01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
-
-        try {
-            // create database
-            CreateDatabaseResult ret =
-                clientAdaptor.createDatabase(new CreateDatabaseRequest("test_http_client_adaptor"));
-            Database database = ret.getDatabase();
-            CreateTableRequest req = new CreateTableRequest(database, "test01", Table.Type.LOG);
-            CreateTableResult res = clientAdaptor.createTable(req);
-            Table table = res.getTable();
-
-            DeleteTableRequest request = new DeleteTableRequest(table);
-            DeleteTableResult result = clientAdaptor.deleteTable(request);
-            System.out.println(result.getTableName());
-        } finally {
-            // delete database
-            clientAdaptor.deleteDatabase(new DeleteDatabaseRequest(new Database("test_http_client_adaptor")));
-        }
-    }
-
-    @Test @Ignore
     public void testSubmitJob01() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
