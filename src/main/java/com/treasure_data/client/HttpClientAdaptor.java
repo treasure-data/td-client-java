@@ -821,6 +821,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap =
             (Map<String, String>) JSONValue.parse(jsonData);
+        validateJavaObject(jsonData, jobMap);
+
         Job.Type type = Job.toType(jobMap.get("type"));
         String jobID = jobMap.get("job_id");
         Job.Status status = Job.toStatus(jobMap.get("status"));

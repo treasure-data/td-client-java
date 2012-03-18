@@ -123,21 +123,6 @@ public class TestHttpClientAdaptor {
     }
 
     @Test @Ignore
-    public void testShowJob01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
-
-        ShowJobRequest request = new ShowJobRequest(new Job("26597"));
-        ShowJobResult result = clientAdaptor.showJob(request);
-        System.out.println(result.getJob().getJobID());
-        System.out.println(result.getJob().getStatus());
-    }
-
-    @Test @Ignore
     public void testGetJobResult01() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
