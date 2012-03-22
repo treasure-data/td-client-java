@@ -92,37 +92,6 @@ public class TestHttpClientAdaptor {
     }
 
     @Test @Ignore
-    public void testListJobs01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
-
-        ListJobsRequest request = new ListJobsRequest();
-        ListJobsResult result = clientAdaptor.listJobs(request);
-        List<Job> jobs = result.getJobs();
-        for (Job job : jobs) {
-            System.out.println(job.getJobID());    
-        }
-    }
-
-    @Test @Ignore
-    public void testKillJob01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
-
-        KillJobRequest request = new KillJobRequest(new Job("25773", Job.Type.HIVE));
-        KillJobResult result = clientAdaptor.killJob(request);
-        System.out.println(result.getJobID());
-    }
-
-    @Test @Ignore
     public void testGetJobResult01() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
