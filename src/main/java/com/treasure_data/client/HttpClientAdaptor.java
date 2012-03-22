@@ -772,8 +772,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         Job.Status status = Job.toStatus(map.get("former_status"));
         String jobID = map.get("job_id");
-        if (jobID.equals(request.getJob().getJobID())) {
-            String msg = String.format("invalid job ID: expected=%d, actual=%d",
+        if (!jobID.equals(request.getJob().getJobID())) {
+            String msg = String.format("invalid job ID: expected=%s, actual=%s",
                     request.getJob().getJobID(), jobID);
             throw new ClientException(msg);
         }
