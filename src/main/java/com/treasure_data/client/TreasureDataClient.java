@@ -238,10 +238,9 @@ public class TreasureDataClient {
     // TODO #MN add it in next version
     //JobDescription describeJob(DescribeJobRequest request) throws ClientException;
 
-    public JobResult getJobResult(Job job, JobResult.Format format)
-            throws ClientException {
+    public JobResult getJobResult(Job job) throws ClientException {
         return getJobResult(new GetJobResultRequest(
-                new JobResult(job, format))).getJobResult();
+                new JobResult(job))).getJobResult();
     }
 
     public GetJobResultResult getJobResult(GetJobResultRequest request) throws ClientException {

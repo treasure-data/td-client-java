@@ -1,54 +1,17 @@
 package com.treasure_data.client;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
-import org.json.simple.JSONValue;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
-import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
-import com.treasure_data.model.CreateDatabaseRequest;
-import com.treasure_data.model.CreateDatabaseResult;
-import com.treasure_data.model.CreateTableRequest;
-import com.treasure_data.model.CreateTableResult;
-import com.treasure_data.model.Database;
-import com.treasure_data.model.DeleteDatabaseRequest;
-import com.treasure_data.model.DeleteDatabaseResult;
-import com.treasure_data.model.DeleteTableRequest;
-import com.treasure_data.model.DeleteTableResult;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.JobResult;
-import com.treasure_data.model.KillJobRequest;
-import com.treasure_data.model.KillJobResult;
-import com.treasure_data.model.ListDatabasesRequest;
-import com.treasure_data.model.ListDatabasesResult;
-import com.treasure_data.model.ListJobsRequest;
-import com.treasure_data.model.ListJobsResult;
-import com.treasure_data.model.ListTablesRequest;
-import com.treasure_data.model.ListTablesResult;
-import com.treasure_data.model.Request;
-import com.treasure_data.model.ServerStatusRequest;
-import com.treasure_data.model.ServerStatusResult;
-import com.treasure_data.model.ShowJobRequest;
-import com.treasure_data.model.ShowJobResult;
-import com.treasure_data.model.SubmitJobRequest;
-import com.treasure_data.model.SubmitJobResult;
-import com.treasure_data.model.Table;
 
 public class TestHttpClientAdaptor {
     @Test
@@ -83,7 +46,7 @@ public class TestHttpClientAdaptor {
         //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
 
         GetJobResultRequest request = new GetJobResultRequest(
-                new JobResult(new Job("26317"), JobResult.Format.MSGPACK));
+                new JobResult(new Job("26317")));
         GetJobResultResult result = clientAdaptor.getJobResult(request);
         System.out.println(result.getJob().getJobID());
     }

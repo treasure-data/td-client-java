@@ -213,7 +213,7 @@ public class TestHttpClientAdaptor00 {
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
         GetJobResultRequest request = new GetJobResultRequest(
-                new JobResult(new Job("26317"), JobResult.Format.MSGPACK));
+                new JobResult(new Job("26317")));
         GetJobResultResult result = clientAdaptor.getJobResult(request);
         System.out.println(result.getJob().getJobID());
     }

@@ -50,10 +50,10 @@ public class JobResult extends AbstractModel {
 
     private org.msgpack.type.Value result;
 
-    public JobResult(Job job, Format format) {
+    public JobResult(Job job) {
         super(job.getJobID());
         this.job = job;
-        this.format = format;
+        this.format = Format.MSGPACK;
     }
 
     public Job getJob() {
