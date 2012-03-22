@@ -73,24 +73,6 @@ public class TestHttpClientAdaptor {
 
     // TODO
 
-
-    @Test @Ignore
-    public void testSubmitJob01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
-        //clientAdaptor.setConnection(new MockHttpConnectionImpl0());
-
-        Database database = new Database("mugadb");
-        String q = "select * from mugatbl";
-        SubmitJobRequest request = new SubmitJobRequest(new Job(null, null, database, q, null));
-        SubmitJobResult result = clientAdaptor.submitJob(request);
-        Job job = result.getJob();
-        System.out.println(job.getJobID());
-    }
-
     @Test @Ignore
     public void testGetJobResult01() throws Exception {
         Properties props = new Properties();
