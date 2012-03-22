@@ -78,7 +78,7 @@ public class TestShowJob {
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforShowJob01());
 
-        String jobID = "26597";
+        String jobID = "12345";
         ShowJobRequest request = new ShowJobRequest(new Job(jobID));
         ShowJobResult result = clientAdaptor.showJob(request);
         assertEquals(jobID, result.getJob().getJobID());
