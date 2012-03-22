@@ -1,6 +1,5 @@
 package com.treasure_data.client;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -18,10 +17,7 @@ import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
-import com.treasure_data.model.Database;
 import com.treasure_data.model.Job;
-import com.treasure_data.model.ListDatabasesRequest;
-import com.treasure_data.model.ListDatabasesResult;
 import com.treasure_data.model.ListJobsRequest;
 import com.treasure_data.model.ListJobsResult;
 import com.treasure_data.model.Request;
@@ -53,15 +49,42 @@ public class TestListJobs {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         @Override
         String getResponseBody() throws IOException {
-            List ary = new ArrayList();
-            Map m0 = new HashMap();
-            m0.put("name", "foo");
-            ary.add(m0);
-            Map m1 = new HashMap();
-            m1.put("name", "bar");
-            ary.add(m1);
             Map map = new HashMap();
-            map.put("databases", ary);
+            map.put("count", 3);
+            map.put("from", 30);
+            map.put("to", 32);
+            List jobs = new ArrayList();
+            Map j0 = new HashMap();
+            j0.put("type", "hive");
+            j0.put("job_id", "12345");
+            j0.put("status", "running");
+            j0.put("created_at", "2011-09-09 05:31:00 UTC");
+            j0.put("start_at", "2011-09-09 05:31:10 UTC");
+            j0.put("end_at", "2011-09-09 05:59:19 UTC");
+            j0.put("query", "SELECT * FROM access");
+            j0.put("result", "output1");
+            jobs.add(j0);
+            Map j1 = new HashMap();
+            j1.put("type", "mapred");
+            j1.put("job_id", "12346");
+            j1.put("status", "success");
+            j1.put("created_at", "2011-09-09 05:31:00 UTC");
+            j1.put("start_at", "2011-09-09 05:31:10 UTC");
+            j1.put("end_at", "2011-09-09 05:59:19 UTC");
+            j1.put("query", "SELECT * FROM access");
+            j1.put("result", "output1");
+            jobs.add(j1);
+            Map j2 = new HashMap();
+            j2.put("type", "pig");
+            j2.put("job_id", "12347");
+            j2.put("status", "failed");
+            j2.put("created_at", "2011-09-09 05:31:00 UTC");
+            j2.put("start_at", "2011-09-09 05:31:10 UTC");
+            j2.put("end_at", "2011-09-09 05:59:19 UTC");
+            j2.put("query", "SELECT * FROM access");
+            j2.put("result", "output1");
+            jobs.add(j2);
+            map.put("jobs", jobs);
             String jsonData = JSONValue.toJSONString(map);
             return jsonData;
         }
@@ -85,8 +108,14 @@ public class TestListJobs {
         ListJobsRequest request = new ListJobsRequest();
         ListJobsResult result = clientAdaptor.listJobs(request);
         List<Job> jobs = result.getJobs();
+
+        // confirm
+        List<String> srcJobIDs = new ArrayList<String>();
+        srcJobIDs.add("12345");
+        srcJobIDs.add("12346");
+        srcJobIDs.add("12347");
         for (Job job : jobs) {
-            System.out.println(job.getJobID());    
+            assertTrue(srcJobIDs.contains(job.getJobID()));
         }
     }
 
