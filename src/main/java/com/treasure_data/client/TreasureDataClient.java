@@ -135,8 +135,12 @@ public class TreasureDataClient {
 
     public List<Table> listTables(String databaseName)
             throws ClientException {
-        return listTables(new ListTablesRequest(
-                new Database(databaseName))).getTables();
+        return listTables(new Database(databaseName));
+    }
+
+    public List<Table> listTables(Database database)
+            throws ClientException {
+        return listTables(new ListTablesRequest(database)).getTables();
     }
 
     public ListTablesResult listTables(ListTablesRequest request)
@@ -146,8 +150,13 @@ public class TreasureDataClient {
 
     public Table createTable(String databaseName, String tableName)
             throws ClientException {
+        return createTable(new Database(databaseName), tableName);
+    }
+
+    public Table createTable(Database database, String tableName)
+            throws ClientException {
         CreateTableResult result = createTable(new CreateTableRequest(
-                new Database(databaseName), tableName, Table.Type.LOG));
+                database, tableName, Table.Type.LOG));
         return result.getTable();
     }
 

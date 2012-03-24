@@ -17,43 +17,19 @@
 //
 package com.treasure_data.model;
 
-import java.util.List;
-
-import com.treasure_data.client.ClientAdaptor;
-import com.treasure_data.client.ClientException;
-
 public class Database extends AbstractModel {
-
-    private ListTables tables = null;
 
     public Database(String name) {
         super(name);
     }
 
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+    }
+
+    @Override
     public String getName() {
         return super.getName();
-    }
-
-    public void setListTables(ListTables tables) {
-        this.tables = tables;
-    }
-
-    public List<Table> getTables(ClientAdaptor clientAdaptor) {
-        if (tables == null) {
-            try {
-                clientAdaptor.listTables(new ListTablesRequest(this));
-            } catch (ClientException e) {
-                // ignore
-            }
-        }
-        return tables.get();
-    }
-
-    public boolean deleteTable(String tableName) {
-        if (tables == null) {
-            return true;
-        } else {
-            return tables.delete(tableName);
-        }
     }
 }

@@ -385,7 +385,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         }
 
         ListTables tables = new ListTables(tableList);
-        request.getDatabase().setListTables(tables);
         return new ListTablesResult(tables);
     }
 
@@ -520,7 +519,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         }
          */
 
-        request.getDatabase().deleteTable(tableName);
         return new DeleteTableResult(request.getDatabase(), tableName);
     }
 
