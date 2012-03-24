@@ -119,11 +119,11 @@ public class Job extends AbstractModel {
         super(jobID);
     }
 
-    public Job(String jobID, Job.Type type, Database database, String url) {
-        super(jobID);
-        this.type = type;
+    public Job(Database database, String sql) {
+        super(null);
+        this.type = Type.HIVE;
         this.database = database;
-        this.url = url;
+        this.query = sql;
     }
 
     public Job(String jobID, Job.Type type, Database database, String query, String url) {
@@ -145,22 +145,39 @@ public class Job extends AbstractModel {
         this.resultTable = resultTable;
     }
 
+    public void setJobID(String jobID) {
+        this.setName(jobID);
+    }
+
     public String getJobID() {
         return getName();
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Job.Type getType() {
         return type;
     }
+
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
+
     public Database getDatabase() {
         return database;
+    }
+
+    public void setURL(String url) {
+        this.url = url;
     }
 
     public String getURL() {
         return url;
     }
 
-    void setStatus(Job.Status status) {
+    public void setStatus(Job.Status status) {
         this.status = status;
     }
 
@@ -168,7 +185,7 @@ public class Job extends AbstractModel {
         return status;
     }
 
-    void setCreatedAt(String time) {
+    public void setCreatedAt(String time) {
         this.createdAt = time;
     }
 
@@ -176,7 +193,7 @@ public class Job extends AbstractModel {
         return createdAt;
     }
 
-    void setStartAt(String time) {
+    public void setStartAt(String time) {
         this.startAt = time;
     }
 
@@ -184,7 +201,7 @@ public class Job extends AbstractModel {
         return startAt;
     }
 
-    void setEndAt(String time) {
+    public void setEndAt(String time) {
         this.endAt = time;
     }
 
@@ -192,7 +209,7 @@ public class Job extends AbstractModel {
         return endAt;
     }
 
-    void setQuery(String q) {
+    public void setQuery(String q) {
         query = q;
     }
 

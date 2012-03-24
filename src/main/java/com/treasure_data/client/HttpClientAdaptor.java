@@ -633,7 +633,9 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         }
         String url = (String) jobMap.get("url");
 
-        Job job = new Job(jobID, type, request.getDatabase(), url);
+        Job job = request.getJob();
+        job.setJobID(jobID);
+        job.setURL(url);
         return new SubmitJobResult(job);
     }
 
