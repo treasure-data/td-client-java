@@ -49,6 +49,10 @@ public class Table extends AbstractModel {
 
     private long count;
 
+    public Table(Database database, String name) {
+        this(database, name, Table.Type.LOG);
+    }
+
     public Table(Database database, String name, Type type) {
         this(database, name, type, 0);
     }

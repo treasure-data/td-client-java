@@ -98,8 +98,7 @@ public class TestHttpClientAdaptor00 {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        //ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
-        ListTablesRequest request = new ListTablesRequest();
+        ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
         ListTablesResult result = clientAdaptor.listTables(request);
         List<Table> tables = result.getTables();
         for (Table table : tables) {
@@ -122,7 +121,7 @@ public class TestHttpClientAdaptor00 {
                 clientAdaptor.createDatabase(new CreateDatabaseRequest("test_http_client_adaptor"));
             Database database = ret.getDatabase();
 
-            CreateTableRequest request = new CreateTableRequest(database, "test01", Table.Type.LOG);
+            CreateTableRequest request = new CreateTableRequest(database, "test01");
             CreateTableResult result = clientAdaptor.createTable(request);
             System.out.println(result.getTable().getName());
         } finally {
@@ -142,7 +141,7 @@ public class TestHttpClientAdaptor00 {
             CreateDatabaseResult ret =
                 clientAdaptor.createDatabase(new CreateDatabaseRequest("test_http_client_adaptor"));
             Database database = ret.getDatabase();
-            CreateTableRequest req = new CreateTableRequest(database, "test01", Table.Type.LOG);
+            CreateTableRequest req = new CreateTableRequest(database, "test01");
             CreateTableResult res = clientAdaptor.createTable(req);
             Table table = res.getTable();
 
@@ -189,7 +188,7 @@ public class TestHttpClientAdaptor00 {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        KillJobRequest request = new KillJobRequest(new Job("25773", Job.Type.HIVE));
+        KillJobRequest request = new KillJobRequest(new Job("25773"));
         KillJobResult result = clientAdaptor.killJob(request);
         System.out.println(result.getJobID());
     }

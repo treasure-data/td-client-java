@@ -23,4 +23,6 @@ public class ListDatabasesRequest extends AbstractRequest<ListDatabases> {
         super(null);
     }
 
+    //public void setOffset(int offset);
+    //public void setLimit(int limit);
 }

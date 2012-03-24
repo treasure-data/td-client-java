@@ -270,7 +270,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_DATABASE_DELETE,
-                    e(request.getDatabase().getName()));
+                    e(request.getDatabaseName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -301,33 +301,17 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         validateJavaObject(jsonData, dbMap);
 
         String dbName = dbMap.get("database");
-        if (!dbName.equals(request.getDatabase().getName())) {
+        if (!dbName.equals(request.getDatabaseName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
-                    request.getDatabase().getName(), dbName);
+                    request.getDatabaseName(), dbName);
             throw new ClientException(msg);
         }
 
-        return new DeleteDatabaseResult(dbName);
+        return new DeleteDatabaseResult(request.getDatabase());
     }
 
     @Override
     public ListTablesResult listTables(ListTablesRequest request)
-            throws ClientException {
-        request.setCredentials(getConfig().getCredentials());
-        if (request.getDatabase() != null) {
-            return listTables0(request);
-        } else {
-            List<Database> databases = listDatabases(new ListDatabasesRequest()).getDatabases();
-            List<Table> tables = new ArrayList<Table>();
-            for (Database database : databases) {
-                ListTablesResult result = listTables0(new ListTablesRequest(database));
-                tables.addAll(result.getTables());
-            }
-            return new ListTablesResult(new ListTables(tables));
-        }
-    }
-
-    private ListTablesResult listTables0(ListTablesRequest request)
             throws ClientException {
         // validate request
         if (request.getDatabase() == null) {
@@ -385,7 +369,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         }
 
         ListTables tables = new ListTables(tableList);
-        return new ListTablesResult(tables);
+        return new ListTablesResult(request.getDatabase(), tables);
     }
 
     @Override
@@ -402,7 +386,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             String path = String.format(HttpURL.V3_TABLE_CREATE,
                     e(request.getDatabase().getName()),
                     e(request.getTableName()),
-                    e(Table.toTypeName(request.getTableType())));
+                    e(Table.toTypeName(request.getTable().getType())));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -445,9 +429,9 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             throw new ClientException(msg);
         }
         Table.Type tableType = Table.toType(tableMap.get("type"));
-        if (tableType != request.getTableType()) {
+        if (tableType != request.getTable().getType()) {
             String msg = String.format("invalid table type: expected=%s, actual=%s",
-                    request.getTableType(), tableType);
+                    request.getTable().getType(), tableType);
             throw new ClientException(msg);
         }
 

@@ -17,19 +17,29 @@
 //
 package com.treasure_data.model;
 
-import java.util.List;
+public class DatabaseSpecifyRequest<T extends Database, S extends DatabaseSpecifyRequest<?, ?>>
+        extends AbstractRequest<T> {
 
-public class ListTablesResult extends DatabaseSpecifyResult<Database> {
-
-    private ListTables tables;
-
-    public ListTablesResult(Database database, ListTables tables) {
+    protected DatabaseSpecifyRequest(T database) {
         super(database);
-        this.tables = tables;
     }
 
-    public List<Table> getTables() {
-        return tables.get();
+    public T getDatabase() {
+        return get();
+    }
+
+    protected S setDatabaseName(String name) {
+        try {
+            S c = (S) clone();
+            c.getDatabase().setName(name);
+            return c;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getDatabaseName() {
+        return get().getName();
     }
 
 }

@@ -17,19 +17,26 @@
 //
 package com.treasure_data.model;
 
-import java.util.List;
+public class JobSpecifyRequest<T extends Job, S extends JobSpecifyRequest>
+        extends AbstractRequest<T> {
 
-public class ListTablesResult extends DatabaseSpecifyResult<Database> {
-
-    private ListTables tables;
-
-    public ListTablesResult(Database database, ListTables tables) {
-        super(database);
-        this.tables = tables;
+    protected JobSpecifyRequest(T job) {
+        super(job);
     }
 
-    public List<Table> getTables() {
-        return tables.get();
+    public Database getDatabase() {
+        return get().getDatabase();
     }
 
+    public Job getJob() {
+        return get();
+    }
+
+    public String getQuery() {
+        return get().getQuery();
+    }
+
+    public String getResultTableName() {
+        return get().getResultTable();
+    }
 }

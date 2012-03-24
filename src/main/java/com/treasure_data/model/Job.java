@@ -119,11 +119,6 @@ public class Job extends AbstractModel {
         super(jobID);
     }
 
-    public Job(String jobID, Job.Type type) {
-        super(jobID);
-        this.type = type;
-    }
-
     public Job(String jobID, Job.Type type, Database database, String url) {
         super(jobID);
         this.type = type;
@@ -165,20 +160,40 @@ public class Job extends AbstractModel {
         return url;
     }
 
+    void setStatus(Job.Status status) {
+        this.status = status;
+    }
+
     public Status getStatus() {
         return status;
+    }
+
+    void setCreatedAt(String time) {
+        this.createdAt = time;
     }
 
     public String getCreatedAt() {
         return createdAt;
     }
 
+    void setStartAt(String time) {
+        this.startAt = time;
+    }
+
     public String getStartAt() {
         return startAt;
     }
 
+    void setEndAt(String time) {
+        this.endAt = time;
+    }
+
     public String getEndAt() {
         return endAt;
+    }
+
+    void setQuery(String q) {
+        query = q;
     }
 
     public String getQuery() {

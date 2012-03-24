@@ -17,23 +17,14 @@
 //
 package com.treasure_data.model;
 
-public class KillJobResult extends AbstractResult<Job> {
-
-    private String jobID;
-
-    private Job.Status status;
+public class KillJobResult extends JobSpecifyResult<Job> {
 
     public KillJobResult(String jobID, Job.Status status) {
-        super(null);
-        this.jobID = jobID;
-        this.status = status;
+        this(new Job(jobID));
+        get().setStatus(status);
     }
 
-    public String getJobID() {
-        return jobID;
-    }
-
-    public Job.Status getStatus() {
-        return status;
+    public KillJobResult(Job job) {
+        super(job);
     }
 }

@@ -17,19 +17,25 @@
 //
 package com.treasure_data.model;
 
-import java.util.List;
+public class TableSpecifyResult<T extends Table> extends AbstractResult<T> {
 
-public class ListTablesResult extends DatabaseSpecifyResult<Database> {
-
-    private ListTables tables;
-
-    public ListTablesResult(Database database, ListTables tables) {
-        super(database);
-        this.tables = tables;
+    protected TableSpecifyResult(T table) {
+        super(table);
     }
 
-    public List<Table> getTables() {
-        return tables.get();
+    public Database getDatabase() {
+        return get().getDatabase();
     }
 
+    public String getDatabaseName() {
+        return getDatabase().getName();
+    }
+
+    public Table getTable() {
+        return get();
+    }
+
+    public String getTableName() {
+        return getTable().getName();
+    }
 }

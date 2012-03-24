@@ -74,7 +74,7 @@ public class TestCreateTable {
 
         String databaseName = "testdb";
         String tableName = "testtbl";
-        CreateTableRequest request = new CreateTableRequest(new Database(databaseName), tableName, Table.Type.LOG);
+        CreateTableRequest request = new CreateTableRequest(new Database(databaseName), tableName);
         CreateTableResult result = clientAdaptor.createTable(request);
         assertEquals(databaseName, result.getDatabase().getName());
     }
@@ -121,7 +121,7 @@ public class TestCreateTable {
 
         String databaseName = "testdb";
         String tableName = "testtbl";
-        CreateTableRequest request = new CreateTableRequest(new Database(databaseName), tableName, Table.Type.LOG);
+        CreateTableRequest request = new CreateTableRequest(new Database(databaseName), tableName);
         try {
             clientAdaptor.createTable(request);
             fail();
@@ -172,7 +172,7 @@ public class TestCreateTable {
 
         String databaseName = "testdb";
         String tableName = "testtbl";
-        CreateTableRequest request = new CreateTableRequest(new Database(databaseName), tableName, Table.Type.LOG);
+        CreateTableRequest request = new CreateTableRequest(new Database(databaseName), tableName);
         try {
             clientAdaptor.createTable(request);
             fail();

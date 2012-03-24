@@ -71,7 +71,7 @@ public class TestKillJob {
         clientAdaptor.setConnection(new HttpConnectionImplforKillJob01());
 
         String jobID = "12345";
-        KillJobRequest request = new KillJobRequest(new Job(jobID, Job.Type.HIVE));
+        KillJobRequest request = new KillJobRequest(new Job(jobID));
         KillJobResult result = clientAdaptor.killJob(request);
         assertEquals(jobID, result.getJobID());
         assertEquals(Job.Status.RUNNING, result.getStatus());
@@ -119,7 +119,7 @@ public class TestKillJob {
 
         try {
             String jobID = "12345";
-            KillJobRequest request = new KillJobRequest(new Job(jobID, Job.Type.HIVE));
+            KillJobRequest request = new KillJobRequest(new Job(jobID));
             clientAdaptor.killJob(request);
             fail();
         } catch (Throwable t) {
@@ -169,7 +169,7 @@ public class TestKillJob {
 
         try {
             String jobID = "12345";
-            KillJobRequest request = new KillJobRequest(new Job(jobID, Job.Type.HIVE));
+            KillJobRequest request = new KillJobRequest(new Job(jobID));
             clientAdaptor.killJob(request);
             fail();
         } catch (Throwable t) {

@@ -17,21 +17,10 @@
 //
 package com.treasure_data.model;
 
-public class ListTablesRequest extends AbstractRequest<ListTables> {
-
-    private Database database;
-
-    public ListTablesRequest() {
-        this(null);
-    }
+public class ListTablesRequest extends DatabaseSpecifyRequest<Database, ListTablesRequest> {
 
     public ListTablesRequest(Database database) {
-        super(null);
-        this.database = database;
-    }
-
-    public Database getDatabase() {
-        return database;
+        super(database);
     }
 
 }

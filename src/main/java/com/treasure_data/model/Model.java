@@ -19,5 +19,7 @@ package com.treasure_data.model;
 
 interface Model {
 
+    void setName(String name);
+
     String getName();
 }

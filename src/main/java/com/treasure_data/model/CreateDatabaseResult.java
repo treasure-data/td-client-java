@@ -17,13 +17,10 @@
 //
 package com.treasure_data.model;
 
-public class CreateDatabaseResult extends AbstractResult<Database> {
+public class CreateDatabaseResult extends DatabaseSpecifyResult<Database> {
 
     public CreateDatabaseResult(Database database) {
         super(database);
     }
 
-    public Database getDatabase() {
-        return get();
-    }
 }

@@ -17,23 +17,9 @@
 //
 package com.treasure_data.model;
 
-public class DeleteTableResult extends AbstractResult<Table> {
-
-    private Database database;
-
-    private String tableName;
+public class DeleteTableResult extends TableSpecifyResult<Table> {
 
     public DeleteTableResult(Database database, String tableName) {
-        super(null);
-        this.database = database;
-        this.tableName = tableName;
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public String getTableName() {
-        return tableName;
+        super(new Table(database, tableName));
     }
 }

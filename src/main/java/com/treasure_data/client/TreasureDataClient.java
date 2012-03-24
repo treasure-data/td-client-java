@@ -156,7 +156,7 @@ public class TreasureDataClient {
     public Table createTable(Database database, String tableName)
             throws ClientException {
         CreateTableResult result = createTable(new CreateTableRequest(
-                database, tableName, Table.Type.LOG));
+                database, tableName));
         return result.getTable();
     }
 
