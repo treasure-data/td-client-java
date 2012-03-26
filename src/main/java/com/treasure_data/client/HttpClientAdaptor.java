@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 import org.json.simple.JSONValue;
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.BufferUnpacker;
+import org.msgpack.unpacker.Unpacker;
 
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
@@ -823,7 +824,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         request.setCredentials(getConfig().getCredentials());
         validateCredentials(request);
 
-        org.msgpack.type.Value value = null;
+        Unpacker unpacker = null;
         try {
             conn = createConnection();
 
@@ -832,9 +833,10 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                     e(request.getJobResult().getJob().getJobID()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
-            if (request.getJobResult().getFormat() != null) {
-                params.put("format",
-                        e(JobResult.toFormatName(request.getJobResult().getFormat())));
+            if (request.getJobResult().getFormat() != JobResult.Format.MSGPACK) {
+                String msg = String.format("Doesn't support format",
+                        request.getJobResult().getFormat());
+                throw new UnsupportedOperationException(msg);
             } else {
                 params.put("format", JobResult.toFormatName(JobResult.Format.MSGPACK));
             }
@@ -850,8 +852,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             }
 
             // receive response body
-            value = conn.getResponseBodyBinary();
-            validateResponseData(value);
+            unpacker = conn.getResponseBodyBinary();
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -860,7 +861,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             }
         }
 
-        request.getJobResult().setResult(value);
+        request.getJobResult().setResult(unpacker);
         return new GetJobResultResult(request.getJobResult());
     }
 
@@ -882,13 +883,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         if (obj == null) {
             throw new ClientException(String.format(
                     "Server error (invalid JSON Data): %s", jsonData));
-        }
-    }
-
-    private void validateResponseData(org.msgpack.type.Value value) throws ClientException {
-        if (value == null) {
-            throw new ClientException(
-                    "Response data that was returned by server is null");
         }
     }
 
@@ -1096,8 +1090,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             conn.disconnect();
         }
 
-        // TODO #MN should consider the design of the method 
-        org.msgpack.type.Value getResponseBodyBinary() throws IOException {
+        Unpacker getResponseBodyBinary() throws IOException {
             BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
             MessagePack msgpack = new MessagePack();
             BufferUnpacker unpacker = msgpack.createBufferUnpacker();
@@ -1109,11 +1102,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                 unpacker.feed(buf, 0, len);
             }
 
-            org.msgpack.type.Value value = unpacker.readValue();
-            System.out.println(value.getClass().getName());
-            System.out.println(value);
-            // TODO #MN should consider
-            return value;
+            return unpacker;
         }
 
         private static String toRFC2822Format(Date from) {

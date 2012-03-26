@@ -17,6 +17,8 @@
 //
 package com.treasure_data.model;
 
+import org.msgpack.unpacker.Unpacker;
+
 public class JobResult extends AbstractModel {
 
     public static enum Format {
@@ -48,7 +50,7 @@ public class JobResult extends AbstractModel {
 
     private Format format;
 
-    private org.msgpack.type.Value result;
+    private Unpacker result;
 
     public JobResult(Job job) {
         super(job.getJobID());
@@ -60,11 +62,11 @@ public class JobResult extends AbstractModel {
         return job;
     }
 
-    public void setResult(org.msgpack.type.Value result) {
+    public void setResult(Unpacker result) {
         this.result = result;
     }
 
-    public org.msgpack.type.Value getResult() {
+    public Unpacker getResult() {
         return result;
     }
 
