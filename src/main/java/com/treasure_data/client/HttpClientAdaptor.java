@@ -590,7 +590,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                 // query is required
                 params.put("query", e(request.getQuery()));
             } else {
-                throw new NullPointerException("query is null");
+                throw new IllegalArgumentException("query is null");
             }
             params.put("version", "0.7");
             if (request.getResultTableName() != null) {
@@ -625,18 +625,18 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         validateJavaObject(jsonData, jobMap);
 
         String jobID = jobMap.get("job_id");
-        Job.Type type = Job.toType(jobMap.get("type"));
+        //Job.Type type = Job.toType(jobMap.get("type"));
         String dbName = jobMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
                     request.getDatabase().getName(), dbName);
             throw new ClientException(msg);
         }
-        String url = (String) jobMap.get("url");
+        //String url = (String) jobMap.get("url");
 
         Job job = request.getJob();
         job.setJobID(jobID);
-        job.setURL(url);
+        //job.setURL(url);
         return new SubmitJobResult(job);
     }
 
