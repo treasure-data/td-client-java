@@ -8,6 +8,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.model.AuthenticateRequest;
+import com.treasure_data.model.AuthenticateResult;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
@@ -43,6 +45,19 @@ public class TestHttpClientAdaptor00 {
     public void setUp() throws Exception {
         Properties props = System.getProperties();
         props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test
+    public void testAuthenticate01() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        String email = System.getProperties().getProperty("td.api.user");
+        String password = System.getProperties().getProperty("td.api.password");
+        AuthenticateRequest request = new AuthenticateRequest(email, password);
+        AuthenticateResult result = clientAdaptor.authenticate(request);
+        System.out.println(result.getTreasureDataCredentials().getAPIKey());
     }
 
     @Test @Ignore
@@ -199,7 +214,7 @@ public class TestHttpClientAdaptor00 {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        ShowJobRequest request = new ShowJobRequest(new Job("26597"));
+        ShowJobRequest request = new ShowJobRequest(new Job("40944"));
         ShowJobResult result = clientAdaptor.showJob(request);
         System.out.println(result.getJob().getJobID());
         System.out.println(result.getJob().getStatus());
