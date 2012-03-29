@@ -157,6 +157,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
+        validateJavaObject(jsonData, map);
         //String user = map.get("user");
         String apiKey = map.get("apikey");
         TreasureDataCredentials credentails = new TreasureDataCredentials(apiKey);
