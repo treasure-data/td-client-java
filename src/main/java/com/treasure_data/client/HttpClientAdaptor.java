@@ -42,6 +42,9 @@ import org.msgpack.MessagePack;
 import org.msgpack.unpacker.BufferUnpacker;
 import org.msgpack.unpacker.Unpacker;
 
+import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.model.AuthenticateRequest;
+import com.treasure_data.model.AuthenticateResult;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
@@ -111,6 +114,53 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
     void setConnection(HttpConnectionImpl conn) {
         this.conn = conn;
+    }
+
+    @Override
+    public AuthenticateResult authenticate(AuthenticateRequest request)
+            throws ClientException {
+        request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = HttpURL.V3_USER_AUTHENTICATE;
+            Map<String, String> header = null;
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("user", request.getEmail());
+            params.put("password", request.getPassword());
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Authentication failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
+        //String user = map.get("user");
+        String apiKey = map.get("apikey");
+        TreasureDataCredentials credentails = new TreasureDataCredentials(apiKey);
+        return new AuthenticateResult(credentails);
     }
 
     @Override
@@ -808,6 +858,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             (Map<String, String>) JSONValue.parse(jsonData);
         validateJavaObject(jsonData, jobMap);
 
+        System.out.println("jobMap: " + jobMap);
         Job.Type type = Job.toType(jobMap.get("type"));
         String jobID = jobMap.get("job_id");
         Job.Status status = Job.toStatus(jobMap.get("status"));
@@ -887,6 +938,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     }
 
     static interface HttpURL {
+        String V3_USER_AUTHENTICATE = "/v3/user/authenticate";
+
         String V3_SYSTEM_SERVER_STATUS = "/v3/system/server_status";
 
         String V3_DATABASE_LIST = "/v3/database/list";

@@ -18,6 +18,8 @@
 package com.treasure_data.client;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.model.AuthenticateRequest;
+import com.treasure_data.model.AuthenticateResult;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
@@ -51,6 +53,8 @@ public interface ClientAdaptor {
     TreasureDataCredentials getTreasureDataCredentials();
 
     void setTreasureDataCredentials(TreasureDataCredentials credentials);
+
+    AuthenticateResult authenticate(AuthenticateRequest request) throws ClientException;
 
     // Server Status API
 

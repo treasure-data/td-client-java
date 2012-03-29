@@ -22,6 +22,8 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.model.AuthenticateRequest;
+import com.treasure_data.model.AuthenticateResult;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
@@ -86,6 +88,18 @@ public class TreasureDataClient {
 
     public void setTreasureDataCredentials(TreasureDataCredentials credentials) {
         clientAdaptor.setTreasureDataCredentials(credentials);
+    }
+
+    public void authenticate(String email, String password)
+            throws ClientException {
+        AuthenticateResult result = clientAdaptor.authenticate(
+                new AuthenticateRequest(email, password));
+        TreasureDataCredentials credentials =  result.getTreasureDataCredentials();
+        setTreasureDataCredentials(credentials);
+    }
+    public AuthenticateResult authenticate(AuthenticateRequest request)
+            throws ClientException {
+        return clientAdaptor.authenticate(request);
     }
 
     // Server Status API
