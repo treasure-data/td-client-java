@@ -214,10 +214,11 @@ public class TestHttpClientAdaptor00 {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        ShowJobRequest request = new ShowJobRequest(new Job("40944"));
+        ShowJobRequest request = new ShowJobRequest(new Job("41863"));
         ShowJobResult result = clientAdaptor.showJob(request);
         System.out.println(result.getJob().getJobID());
         System.out.println(result.getJob().getStatus());
+        System.out.println(result.getJob().getResultSchema());
     }
 
     @Test @Ignore

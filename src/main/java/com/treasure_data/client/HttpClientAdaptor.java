@@ -758,7 +758,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             String endAt = jobMap.get("end_at");
             String query = jobMap.get("query");
             String result = jobMap.get("result");
-            Job job = new Job(jobID, type, status, startAt, endAt, query, result);
+            Job job = new Job(jobID, type, status, startAt, endAt, query, result, "");
             jobs.add(job);
         }
 
@@ -859,13 +859,14 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             (Map<String, String>) JSONValue.parse(jsonData);
         validateJavaObject(jsonData, jobMap);
 
-        System.out.println("jobMap: " + jobMap);
         Job.Type type = Job.toType(jobMap.get("type"));
         String jobID = jobMap.get("job_id");
         Job.Status status = Job.toStatus(jobMap.get("status"));
         String query = jobMap.get("query");
         String result = jobMap.get("result");
-        Job job = new Job(jobID, type, status, "", "", query, result);
+        String resultSchema = jobMap.get("hive_result_schema");
+        // TODO different object from request's one
+        Job job = new Job(jobID, type, status, "", "", query, result, resultSchema);
 
         return new ShowJobResult(job);
     }
@@ -990,7 +991,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                     Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULT));
 
             StringBuilder sbuf = new StringBuilder();
-            sbuf.append("http://").append(host).append(":").append(port).append(path);
+            sbuf.append("http://").append(getApiServerPath()).append(path);
 
             // parameters
             if (params != null && !params.isEmpty()) {
@@ -1036,7 +1037,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                     Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULT));
 
             StringBuilder sbuf = new StringBuilder();
-            sbuf.append("http://").append(host).append(":").append(port).append(path);
+            sbuf.append("http://").append(getApiServerPath()).append(path);
 
             // parameters
             if (params != null && !params.isEmpty()) {
@@ -1090,7 +1091,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                     Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULT));
 
             StringBuilder sbuf = new StringBuilder();
-            sbuf.append("http://").append(host).append(":").append(port).append(path);
+            sbuf.append("http://").append(getApiServerPath()).append(path);
 
             URL url = new URL(sbuf.toString()); // TODO #MN should use URL class for encoding 
             conn = (HttpURLConnection) url.openConnection();
@@ -1152,11 +1153,30 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             int len = 0;
             while ((len = in.read(buf)) != -1) {
-                System.out.println("# len: " + len);
                 unpacker.feed(buf, 0, len);
             }
 
             return unpacker;
+        }
+
+        private String getApiServerPath() {
+            String hostAndPort = "";
+
+            // environment variables
+            hostAndPort = System.getenv(Config.TD_ENV_API_SERVER);
+            if (hostAndPort != null) {
+                return hostAndPort;
+            }
+
+            // system properties
+            Properties props = System.getProperties();
+            String host = props.getProperty(
+                    Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULT);
+            int port = Integer.parseInt(props.getProperty(
+                    Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULT));
+            hostAndPort = host + ":" + port;
+
+            return hostAndPort;
         }
 
         private static String toRFC2822Format(Date from) {

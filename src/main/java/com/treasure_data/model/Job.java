@@ -115,6 +115,8 @@ public class Job extends AbstractModel {
 
     private String resultTable;
 
+    private String resultSchema; // hive-specific schema
+
     public Job(String jobID) {
         super(jobID);
     }
@@ -135,7 +137,7 @@ public class Job extends AbstractModel {
     }
 
     public Job(String jobID, Job.Type type, Status status, String startAt,
-            String endAt, String query, String resultTable) {
+            String endAt, String query, String resultTable, String resultSchema) {
         super(jobID);
         this.type = type;
         this.status = status;
@@ -143,6 +145,7 @@ public class Job extends AbstractModel {
         this.endAt = endAt;
         this.query = query;
         this.resultTable = resultTable;
+        this.resultSchema = resultSchema;
     }
 
     public void setJobID(String jobID) {
@@ -219,5 +222,9 @@ public class Job extends AbstractModel {
 
     public String getResultTable() {
         return resultTable;
+    }
+
+    public String getResultSchema() {
+        return resultSchema;
     }
 }
