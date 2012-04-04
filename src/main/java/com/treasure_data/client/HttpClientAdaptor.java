@@ -408,6 +408,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         Map map = (Map) JSONValue.parse(jsonData);
         validateJavaObject(jsonData, map);
 
+        String databaseName = (String) map.get("database");
         @SuppressWarnings("unchecked")
         Iterator<Map<String, Object>> tableMapIter =
             ((List<Map<String, Object>>) map.get("tables")).iterator();
@@ -417,7 +418,12 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             String name = (String) tableMap.get("name");
             String typeName = (String) tableMap.get("type");
             Long count = (Long) tableMap.get("count");
-            tableList.add(new Table(request.getDatabase(), name, Table.toType(typeName), count));
+            String schema = (String) tableMap.get("schema");
+            String createdAt = (String) tableMap.get("created_at");
+            String updatedAt = (String) tableMap.get("updated_at");
+            Table tbl = new Table(request.getDatabase(), name, Table.toType(typeName),
+                    count, schema, createdAt, updatedAt);
+            tableList.add(tbl);
         }
 
         ListTables tables = new ListTables(tableList);
@@ -533,6 +539,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
         validateJavaObject(jsonData, tableMap);
+        System.out.println(jsonData);
 
         String dbName = tableMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
@@ -546,14 +553,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                     request.getTable().getName(), dbName);
             throw new ClientException(msg);
         }
-        /**
-        Table.Type tableType = Table.toType(tableMap.get("type"));
-        if (tableType != request.getTable().getType()) {
-            String msg = String.format("invalid table type: expected=%s, actual=%s",
-                    request.getTable().getType(), tableType);
-            throw new ClientException(msg);
-        }
-         */
 
         return new DeleteTableResult(request.getDatabase(), tableName);
     }

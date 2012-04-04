@@ -12,6 +12,7 @@ import java.util.Properties;
 
 import org.json.simple.JSONValue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
@@ -26,6 +27,17 @@ public class TestGetServerStatus {
     public void setUp() throws Exception {
         Properties props = System.getProperties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test @Ignore
+    public void testGetServerStatus00() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        ServerStatusRequest request = new ServerStatusRequest();
+        ServerStatusResult result = clientAdaptor.getServerStatus(request);
+        System.out.println(result.getServerStatus().getMessage());
     }
 
     static class HttpConnectionImplforGetServerStatus01 extends HttpConnectionImpl {

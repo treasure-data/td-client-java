@@ -12,11 +12,18 @@ import java.util.Properties;
 
 import org.json.simple.JSONValue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
+import com.treasure_data.model.CreateDatabaseRequest;
+import com.treasure_data.model.CreateDatabaseResult;
+import com.treasure_data.model.CreateTableRequest;
+import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
+import com.treasure_data.model.DeleteDatabaseRequest;
+import com.treasure_data.model.DeleteDatabaseResult;
 import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.DeleteTableResult;
 import com.treasure_data.model.Request;
@@ -25,6 +32,33 @@ import com.treasure_data.model.Table;
 public class TestDeleteTable {
     @Before
     public void setUp() throws Exception {
+        Properties props = System.getProperties();
+        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test @Ignore
+    public void testDeleteTable00() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        String databaseName = "db1";
+        try {
+            // create database
+            CreateDatabaseResult ret =
+                clientAdaptor.createDatabase(new CreateDatabaseRequest(databaseName));
+            Database database = ret.getDatabase();
+            CreateTableRequest req = new CreateTableRequest(database, "test01");
+            CreateTableResult res = clientAdaptor.createTable(req);
+            Table table = res.getTable();
+
+            DeleteTableRequest request = new DeleteTableRequest(table);
+            DeleteTableResult result = clientAdaptor.deleteTable(request);
+            System.out.println(result.getTableName());
+        } finally {
+            // delete database
+            clientAdaptor.deleteDatabase(new DeleteDatabaseRequest(databaseName));
+        }
     }
 
     static class HttpConnectionImplforDeleteTable01 extends HttpConnectionImpl {

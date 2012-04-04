@@ -12,17 +12,38 @@ import java.util.Properties;
 
 import org.json.simple.JSONValue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
+import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.Request;
 
 public class TestCreateDatabase {
     @Before
     public void setUp() throws Exception {
+        Properties props = System.getProperties();
+        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test @Ignore
+    public void testCreateDatabase00() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        String databaseName = "db1";
+        try {
+            CreateDatabaseRequest request = new CreateDatabaseRequest(databaseName);
+            CreateDatabaseResult result = clientAdaptor.createDatabase(request);
+            System.out.println(result.getDatabase().getName());
+        } finally {
+            DeleteDatabaseRequest request = new DeleteDatabaseRequest(databaseName);
+            clientAdaptor.deleteDatabase(request);
+        }
     }
 
     static class HttpConnectionImplforCreateDatabase01 extends HttpConnectionImpl {

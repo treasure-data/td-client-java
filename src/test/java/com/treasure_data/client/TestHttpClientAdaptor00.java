@@ -208,13 +208,13 @@ public class TestHttpClientAdaptor00 {
         System.out.println(result.getJobID());
     }
 
-    @Test @Ignore
+    @Test
     public void testShowJob01() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        ShowJobRequest request = new ShowJobRequest(new Job("41863"));
+        ShowJobRequest request = new ShowJobRequest(new Job("200338"));
         ShowJobResult result = clientAdaptor.showJob(request);
         System.out.println(result.getJob().getJobID());
         System.out.println(result.getJob().getStatus());

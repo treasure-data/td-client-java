@@ -12,19 +12,47 @@ import java.util.Properties;
 
 import org.json.simple.JSONValue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
+import com.treasure_data.model.CreateDatabaseRequest;
+import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
+import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.Request;
 import com.treasure_data.model.Table;
 
 public class TestCreateTable {
     @Before
     public void setUp() throws Exception {
+        Properties props = System.getProperties();
+        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test
+    public void testCreateTable00() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        String databaseName = "db1";
+        try {
+            // create database
+            CreateDatabaseResult ret =
+                clientAdaptor.createDatabase(new CreateDatabaseRequest(databaseName));
+            Database database = ret.getDatabase();
+
+            CreateTableRequest request = new CreateTableRequest(database, "test01");
+            CreateTableResult result = clientAdaptor.createTable(request);
+            System.out.println(result.getTable().getName());
+        } finally {
+            // delete database
+            clientAdaptor.deleteDatabase(new DeleteDatabaseRequest(databaseName));
+        }
     }
 
     static class HttpConnectionImplforCreateTable01 extends HttpConnectionImpl {
@@ -64,7 +92,7 @@ public class TestCreateTable {
      * check normal behavior of client
      */
     @Test
-    public void testCreateDatabase01() throws Exception {
+    public void testCreateTable01() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
@@ -111,7 +139,7 @@ public class TestCreateTable {
      * check behavior when receiving *invalid JSON data* as response body
      */
     @Test
-    public void testCreateDatabase02() throws Exception {
+    public void testCreateTable02() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
@@ -162,7 +190,7 @@ public class TestCreateTable {
      * check behavior when receiving non-OK response code
      */
     @Test
-    public void testCreateDatabase03() throws Exception {
+    public void testCreateTable03() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();

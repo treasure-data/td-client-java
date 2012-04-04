@@ -12,10 +12,13 @@ import java.util.Properties;
 
 import org.json.simple.JSONValue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
+import com.treasure_data.model.CreateDatabaseRequest;
+import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.Database;
 import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
@@ -24,6 +27,27 @@ import com.treasure_data.model.Request;
 public class TestDeleteDatabase {
     @Before
     public void setUp() throws Exception {
+        Properties props = System.getProperties();
+        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test @Ignore
+    public void testDeleteDatabase00() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        String databaseName = "db1";
+        {
+            CreateDatabaseRequest request = new CreateDatabaseRequest(databaseName);
+            CreateDatabaseResult result = clientAdaptor.createDatabase(request);
+            System.out.println(result.getDatabase().getName());
+        }
+        {
+            DeleteDatabaseRequest request = new DeleteDatabaseRequest(databaseName);
+            DeleteDatabaseResult result = clientAdaptor.deleteDatabase(request);
+            System.out.println(result.getDatabase().getName());
+        }
     }
 
     static class HttpConnectionImplforDeleteDatabase01 extends HttpConnectionImpl {

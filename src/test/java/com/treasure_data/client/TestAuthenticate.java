@@ -11,7 +11,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
@@ -23,6 +25,26 @@ import com.treasure_data.model.Request;
 public class TestAuthenticate {
     @Before
     public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
+
+    @Test @Ignore
+    public void testAuthenticate00() throws Exception {
+        Properties props = new Properties();
+        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        String email = props.getProperty("td.api.user");
+        String password = props.getProperty("td.api.password");
+        AuthenticateRequest request = new AuthenticateRequest(email, password);
+        AuthenticateResult result = clientAdaptor.authenticate(request);
+        System.out.println(result.getTreasureDataCredentials().getAPIKey());
     }
 
     static class HttpConnectionImplforAuthenticate01 extends HttpConnectionImpl {

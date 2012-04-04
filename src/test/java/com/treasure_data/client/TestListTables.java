@@ -14,6 +14,7 @@ import java.util.Properties;
 
 import org.json.simple.JSONValue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
@@ -29,6 +30,23 @@ public class TestListTables {
     public void setUp() throws Exception {
         Properties props = System.getProperties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test @Ignore
+    public void testListTables00() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
+        ListTablesResult result = clientAdaptor.listTables(request);
+        List<Table> tables = result.getTables();
+        for (Table table : tables) {
+            System.out.println(table.getDatabase().getName());
+            System.out.println(table.getName());
+            System.out.println(table.getType());
+            System.out.println(table.getCount());
+        }
     }
 
     static class HttpConnectionImplforListTables01 extends HttpConnectionImpl {

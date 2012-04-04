@@ -25,8 +25,16 @@ public class AuthenticateRequest extends AbstractRequest<AbstractModel> {
 
     public AuthenticateRequest(String email, String password) {
         super(null);
-        this.email = email;
-        this.password = password;
+        if (email == null) {
+            throw new IllegalArgumentException("email is null");
+        } else {
+            this.email = email;
+        }
+        if (password == null) {
+            throw new IllegalArgumentException("password is null");
+        } else {
+            this.password = password;
+        }
     }
 
     public String getEmail() {
