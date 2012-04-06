@@ -34,7 +34,7 @@ public class TestAuthenticate {
     @Test @Ignore
     public void testAuthenticate00() throws Exception {
         Properties props = new Properties();
-        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
 
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());

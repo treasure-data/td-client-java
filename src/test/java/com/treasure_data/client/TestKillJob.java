@@ -12,6 +12,7 @@ import java.util.Properties;
 
 import org.json.simple.JSONValue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
@@ -24,6 +25,19 @@ import com.treasure_data.model.Request;
 public class TestKillJob {
     @Before
     public void setUp() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test @Ignore
+    public void testKillJob00() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        KillJobRequest request = new KillJobRequest(new Job("25773"));
+        KillJobResult result = clientAdaptor.killJob(request);
+        System.out.println(result.getJobID());
     }
 
     static class HttpConnectionImplforKillJob01 extends HttpConnectionImpl {

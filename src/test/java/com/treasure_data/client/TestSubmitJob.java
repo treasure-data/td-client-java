@@ -12,6 +12,7 @@ import java.util.Properties;
 
 import org.json.simple.JSONValue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
@@ -25,6 +26,22 @@ import com.treasure_data.model.SubmitJobResult;
 public class TestSubmitJob {
     @Before
     public void setUp() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test @Ignore
+    public void testSubmitJob00() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        Database database = new Database("mugadb");
+        String q = "select * from mugatbl";
+        SubmitJobRequest request = new SubmitJobRequest(new Job(database, q));
+        SubmitJobResult result = clientAdaptor.submitJob(request);
+        Job job = result.getJob();
+        System.out.println(job.getJobID());
     }
 
     static class HttpConnectionImplforSubmitJob01 extends HttpConnectionImpl {

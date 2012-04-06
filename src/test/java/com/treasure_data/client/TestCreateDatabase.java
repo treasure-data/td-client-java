@@ -26,7 +26,7 @@ public class TestCreateDatabase {
     @Before
     public void setUp() throws Exception {
         Properties props = System.getProperties();
-        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
     @Test @Ignore

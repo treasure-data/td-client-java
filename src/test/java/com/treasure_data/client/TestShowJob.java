@@ -12,6 +12,7 @@ import java.util.Properties;
 
 import org.json.simple.JSONValue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
@@ -26,6 +27,19 @@ public class TestShowJob {
     public void setUp() throws Exception {
         Properties props = System.getProperties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+    }
+
+    @Test @Ignore
+    public void testShowJob00() throws Exception {
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+
+        ShowJobRequest request = new ShowJobRequest(new Job("200338"));
+        ShowJobResult result = clientAdaptor.showJob(request);
+        System.out.println(result.getJob().getJobID());
+        System.out.println(result.getJob().getStatus());
+        System.out.println(result.getJob().getResultSchema());
     }
 
     static class HttpConnectionImplforShowJob01 extends HttpConnectionImpl {
