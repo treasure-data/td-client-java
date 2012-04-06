@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class ListJobsRequest extends AbstractRequest<ListJobs> {
+public class ListJobsRequest extends AbstractRequest<ListJobs<JobSummary>> {
     private long from;
 
     private long to;

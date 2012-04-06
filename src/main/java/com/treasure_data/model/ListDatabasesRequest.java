@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class ListDatabasesRequest extends AbstractRequest<ListDatabases> {
+public class ListDatabasesRequest extends AbstractRequest<ListDatabases<DatabaseSummary>> {
 
     public ListDatabasesRequest() {
         super(null);
