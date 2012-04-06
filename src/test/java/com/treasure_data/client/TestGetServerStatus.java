@@ -18,8 +18,8 @@ import org.junit.Test;
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
 import com.treasure_data.model.Request;
-import com.treasure_data.model.ServerStatusRequest;
-import com.treasure_data.model.ServerStatusResult;
+import com.treasure_data.model.GetServerStatusRequest;
+import com.treasure_data.model.GetServerStatusResult;
 
 public class TestGetServerStatus {
 
@@ -35,8 +35,8 @@ public class TestGetServerStatus {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        ServerStatusRequest request = new ServerStatusRequest();
-        ServerStatusResult result = clientAdaptor.getServerStatus(request);
+        GetServerStatusRequest request = new GetServerStatusRequest();
+        GetServerStatusResult result = clientAdaptor.getServerStatus(request);
         System.out.println(result.getServerStatus().getMessage());
     }
 
@@ -75,8 +75,8 @@ public class TestGetServerStatus {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus01());
-        ServerStatusRequest request = new ServerStatusRequest();
-        ServerStatusResult result = clientAdaptor.getServerStatus(request);
+        GetServerStatusRequest request = new GetServerStatusRequest();
+        GetServerStatusResult result = clientAdaptor.getServerStatus(request);
         assertEquals("ok", result.getServerStatus().getMessage());
     }
 
@@ -112,7 +112,7 @@ public class TestGetServerStatus {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus02());
-        ServerStatusRequest request = new ServerStatusRequest();
+        GetServerStatusRequest request = new GetServerStatusRequest();
         try {
             clientAdaptor.getServerStatus(request);
             fail();
@@ -158,8 +158,8 @@ public class TestGetServerStatus {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus03());
-        ServerStatusRequest request = new ServerStatusRequest();
-        ServerStatusResult result = clientAdaptor.getServerStatus(request);
+        GetServerStatusRequest request = new GetServerStatusRequest();
+        GetServerStatusResult result = clientAdaptor.getServerStatus(request);
         assertTrue(result.getServerStatus().getMessage() != "ok");
     }
 }

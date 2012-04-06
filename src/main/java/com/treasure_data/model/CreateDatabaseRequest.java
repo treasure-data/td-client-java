@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class CreateDatabaseRequest extends DatabaseSpecifyRequest<Database, CreateDatabaseRequest> {
+public class CreateDatabaseRequest extends DatabaseSpecifyRequest<Database> {
 
     public CreateDatabaseRequest(String databaseName) {
         super(new Database(databaseName));

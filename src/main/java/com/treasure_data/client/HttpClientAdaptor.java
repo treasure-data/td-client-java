@@ -75,8 +75,8 @@ import com.treasure_data.model.Request;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
 import com.treasure_data.model.ServerStatus;
-import com.treasure_data.model.ServerStatusRequest;
-import com.treasure_data.model.ServerStatusResult;
+import com.treasure_data.model.GetServerStatusRequest;
+import com.treasure_data.model.GetServerStatusResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
@@ -165,7 +165,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     }
 
     @Override
-    public ServerStatusResult getServerStatus(ServerStatusRequest request)
+    public GetServerStatusResult getServerStatus(GetServerStatusRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
 
@@ -194,7 +194,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                 msg = (String) map.get("status");
             }
 
-            return new ServerStatusResult(new ServerStatus(msg));
+            return new GetServerStatusResult(new ServerStatus(msg));
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {

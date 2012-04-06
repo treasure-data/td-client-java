@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class CreateTableRequest extends TableSpecifyRequest<Table, CreateTableRequest> {
+public class CreateTableRequest extends TableSpecifyRequest<Table> {
 
     public CreateTableRequest(Database database, String tableName) {
         super(new Table(database, tableName, Table.Type.LOG));

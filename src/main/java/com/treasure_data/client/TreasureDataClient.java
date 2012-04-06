@@ -50,8 +50,8 @@ import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
 import com.treasure_data.model.ServerStatus;
-import com.treasure_data.model.ServerStatusRequest;
-import com.treasure_data.model.ServerStatusResult;
+import com.treasure_data.model.GetServerStatusRequest;
+import com.treasure_data.model.GetServerStatusResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
@@ -106,12 +106,12 @@ public class TreasureDataClient {
 
     public ServerStatus getServerStatus() throws ClientException {
         return clientAdaptor.getServerStatus(
-                new ServerStatusRequest()).getServerStatus();
+                new GetServerStatusRequest()).getServerStatus();
     }
 
-    public ServerStatusResult getServerStatus(ServerStatusRequest request)
+    public GetServerStatusResult getServerStatus(GetServerStatusRequest request)
             throws ClientException {
-        return clientAdaptor.getServerStatus(new ServerStatusRequest());
+        return clientAdaptor.getServerStatus(new GetServerStatusRequest());
     }
 
     // Database API

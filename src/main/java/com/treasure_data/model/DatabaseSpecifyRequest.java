@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class DatabaseSpecifyRequest<T extends Database, S extends DatabaseSpecifyRequest<?, ?>>
+public class DatabaseSpecifyRequest<T extends Database>
         extends AbstractRequest<T> {
 
     protected DatabaseSpecifyRequest(T database) {
@@ -28,14 +28,8 @@ public class DatabaseSpecifyRequest<T extends Database, S extends DatabaseSpecif
         return get();
     }
 
-    protected S setDatabaseName(String name) {
-        try {
-            S c = (S) clone();
-            c.getDatabase().setName(name);
-            return c;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    protected void setDatabaseName(String name) {
+        get().setName(name);
     }
 
     public String getDatabaseName() {

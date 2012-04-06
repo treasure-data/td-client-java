@@ -7,7 +7,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.model.ServerStatus;
-import com.treasure_data.model.ServerStatusResult;
+import com.treasure_data.model.GetServerStatusResult;
 
 public class TestTreasureDataClient {
 

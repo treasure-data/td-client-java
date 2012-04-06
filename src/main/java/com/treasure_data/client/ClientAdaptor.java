@@ -42,8 +42,8 @@ import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
-import com.treasure_data.model.ServerStatusRequest;
-import com.treasure_data.model.ServerStatusResult;
+import com.treasure_data.model.GetServerStatusRequest;
+import com.treasure_data.model.GetServerStatusResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
@@ -58,7 +58,7 @@ public interface ClientAdaptor {
 
     // Server Status API
 
-    ServerStatusResult getServerStatus(ServerStatusRequest request) throws ClientException;
+    GetServerStatusResult getServerStatus(GetServerStatusRequest request) throws ClientException;
 
     // Database API
 

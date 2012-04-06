@@ -17,9 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class TableSpecifyRequest<T extends Table, S extends TableSpecifyRequest>
-        extends AbstractRequest<T> {
-
+public class TableSpecifyRequest<T extends Table> extends AbstractRequest<T> {
     protected TableSpecifyRequest(T table) {
         super(table);
     }
@@ -32,28 +30,16 @@ public class TableSpecifyRequest<T extends Table, S extends TableSpecifyRequest>
         return get();
     }
 
-    protected S setDatabaseName(String name) {
-        try {
-            S c = (S) clone();
-            c.getTable().getDatabase().setName(name);
-            return c;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    protected void setDatabaseName(String name) {
+        get().getDatabase().setName(name);
     }
 
     public String getDatabaseName() {
         return get().getDatabase().getName();
     }
 
-    protected S setTableName(String name) {
-        try {
-            S c = (S) clone();
-            c.getTable().setName(name);
-            return c;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    protected void setTableName(String name) {
+        get().setName(name);
     }
 
     public String getTableName() {

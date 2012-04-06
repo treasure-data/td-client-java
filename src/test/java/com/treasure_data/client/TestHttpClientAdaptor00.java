@@ -31,8 +31,8 @@ import com.treasure_data.model.ListJobsRequest;
 import com.treasure_data.model.ListJobsResult;
 import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
-import com.treasure_data.model.ServerStatusRequest;
-import com.treasure_data.model.ServerStatusResult;
+import com.treasure_data.model.GetServerStatusRequest;
+import com.treasure_data.model.GetServerStatusResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
@@ -66,8 +66,8 @@ public class TestHttpClientAdaptor00 {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        ServerStatusRequest request = new ServerStatusRequest();
-        ServerStatusResult result = clientAdaptor.getServerStatus(request);
+        GetServerStatusRequest request = new GetServerStatusRequest();
+        GetServerStatusResult result = clientAdaptor.getServerStatus(request);
         System.out.println(result.getServerStatus().getMessage());
     }
 

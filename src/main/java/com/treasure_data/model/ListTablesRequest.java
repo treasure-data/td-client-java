@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class ListTablesRequest extends DatabaseSpecifyRequest<Database, ListTablesRequest> {
+public class ListTablesRequest extends DatabaseSpecifyRequest<Database> {
 
     public ListTablesRequest(Database database) {
         super(database);

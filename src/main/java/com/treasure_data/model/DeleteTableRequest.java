@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class DeleteTableRequest extends TableSpecifyRequest<Table, DeleteTableRequest> {
+public class DeleteTableRequest extends TableSpecifyRequest<Table> {
 
     public DeleteTableRequest(Table table) {
         super(table);

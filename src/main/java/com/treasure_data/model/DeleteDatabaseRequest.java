@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class DeleteDatabaseRequest extends DatabaseSpecifyRequest<Database, DeleteDatabaseRequest> {
+public class DeleteDatabaseRequest extends DatabaseSpecifyRequest<Database> {
 
     public DeleteDatabaseRequest(String databaseName) {
         super(new Database(databaseName));
