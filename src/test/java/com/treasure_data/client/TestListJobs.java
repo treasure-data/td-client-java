@@ -19,6 +19,7 @@ import org.junit.Test;
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
 import com.treasure_data.model.Job;
+import com.treasure_data.model.JobSummary;
 import com.treasure_data.model.ListJobsRequest;
 import com.treasure_data.model.ListJobsResult;
 import com.treasure_data.model.Request;
@@ -38,8 +39,8 @@ public class TestListJobs {
 
         ListJobsRequest request = new ListJobsRequest();
         ListJobsResult result = clientAdaptor.listJobs(request);
-        List<Job> jobs = result.getJobs();
-        for (Job job : jobs) {
+        List<JobSummary> jobs = result.getJobs();
+        for (JobSummary job : jobs) {
             System.out.println(job.getJobID());
         }
     }
@@ -122,7 +123,7 @@ public class TestListJobs {
 
         ListJobsRequest request = new ListJobsRequest();
         ListJobsResult result = clientAdaptor.listJobs(request);
-        List<Job> jobs = result.getJobs();
+        List<JobSummary> jobs = result.getJobs();
 
         // confirm
         List<String> srcJobIDs = new ArrayList<String>();

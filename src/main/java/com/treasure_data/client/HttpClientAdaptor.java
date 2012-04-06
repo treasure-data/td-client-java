@@ -61,6 +61,7 @@ import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.JobResult;
+import com.treasure_data.model.JobSummary;
 import com.treasure_data.model.KillJobRequest;
 import com.treasure_data.model.KillJobResult;
 import com.treasure_data.model.ListDatabases;
@@ -84,6 +85,7 @@ import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.Table;
 import com.treasure_data.model.TableSummary;
+import com.treasure_data.model.JobSummary.Status;
 
 public class HttpClientAdaptor extends AbstractClientAdaptor {
 
@@ -413,7 +415,13 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         Map map = (Map) JSONValue.parse(jsonData);
         validateJavaObject(jsonData, map);
 
-        String databaseName = (String) map.get("database");
+        String dbName = (String) map.get("database");
+        if (!dbName.equals(request.getDatabase().getName())) {
+            String msg = String.format("invalid database name: expected=%s, actual=%s",
+                    request.getDatabase().getName(), dbName);
+            throw new ClientException(msg);
+        }
+
         @SuppressWarnings("unchecked")
         Iterator<Map<String, Object>> tableMapIter =
             ((List<Map<String, Object>>) map.get("tables")).iterator();
@@ -641,16 +649,16 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                     e(request.getDatabase().getName()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
-            if (request.getQuery() != null) {
+            if (request.getJob().getQuery() != null) {
                 // query is required
-                params.put("query", e(request.getQuery()));
+                params.put("query", e(request.getJob().getQuery()));
             } else {
                 throw new IllegalArgumentException("query is null");
             }
             params.put("version", "0.7");
-            if (request.getResultTableName() != null) {
+            if (request.getJob().getResultTable() != null) {
                 // result table is not required
-                params.put("result", e(request.getResultTableName()));
+                params.put("result", e(request.getJob().getResultTable()));
             }
             conn.doPostRequest(request, path, header, params);
 
@@ -752,21 +760,22 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Iterator<Map<String, String>> jobMapIter =
             ((List<Map<String, String>>) map.get("jobs")).iterator();
-        List<Job> jobs = new ArrayList<Job>();
+        List<JobSummary> jobs = new ArrayList<JobSummary>();
         while (jobMapIter.hasNext()) {
             Map<String, String> jobMap = jobMapIter.next();
             Job.Type type = Job.toType(jobMap.get("type"));
             String jobID = jobMap.get("job_id");
-            Job.Status status = Job.toStatus(jobMap.get("status"));
+            JobSummary.Status status = JobSummary.toStatus(jobMap.get("status"));
             String startAt = jobMap.get("start_at");
             String endAt = jobMap.get("end_at");
             String query = jobMap.get("query");
             String result = jobMap.get("result");
-            Job job = new Job(jobID, type, status, startAt, endAt, query, result, "");
+            JobSummary job = new JobSummary(jobID, type, null, null, result,
+                    status, startAt, endAt, query, null);
             jobs.add(job);
         }
 
-        return new ListJobsResult(new ListJobs(count, from, to, jobs));
+        return new ListJobsResult(new ListJobs<JobSummary>(count, from, to, jobs));
     }
 
     @Override
@@ -797,6 +806,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             // receive response body
             jsonData = conn.getResponseBody();
             validateJSONData(jsonData);
+            System.out.println("jsonData: " + jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -810,7 +820,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
         validateJavaObject(jsonData, map);
 
-        Job.Status status = Job.toStatus(map.get("former_status"));
+        JobSummary.Status status = JobSummary.toStatus(map.get("former_status"));
         String jobID = map.get("job_id");
         if (!jobID.equals(request.getJob().getJobID())) {
             String msg = String.format("invalid job ID: expected=%s, actual=%s",
@@ -865,13 +875,13 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         Job.Type type = Job.toType(jobMap.get("type"));
         String jobID = jobMap.get("job_id");
-        Job.Status status = Job.toStatus(jobMap.get("status"));
+        JobSummary.Status status = JobSummary.toStatus(jobMap.get("status"));
         String query = jobMap.get("query");
         String result = jobMap.get("result");
         String resultSchema = jobMap.get("hive_result_schema");
         // TODO different object from request's one
-        Job job = new Job(jobID, type, status, "", "", query, result, resultSchema);
-
+        JobSummary job = new JobSummary(jobID, type, null, null, result,
+                status, null, null, query, resultSchema);
         return new ShowJobResult(job);
     }
 

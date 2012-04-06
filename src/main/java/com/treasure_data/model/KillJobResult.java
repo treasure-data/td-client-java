@@ -19,12 +19,18 @@ package com.treasure_data.model;
 
 public class KillJobResult extends JobSpecifyResult<Job> {
 
-    public KillJobResult(String jobID, Job.Status status) {
-        this(new Job(jobID));
-        get().setStatus(status);
+    private JobSummary.Status status;
+
+    public KillJobResult(String jobID, JobSummary.Status status) {
+        super(new Job(jobID));
+        this.status = status;
     }
 
-    public KillJobResult(Job job) {
-        super(job);
+    public String getJobID() {
+        return super.getJobID();
+    }
+
+    public JobSummary.Status getFormerStatus() {
+        return status;
     }
 }

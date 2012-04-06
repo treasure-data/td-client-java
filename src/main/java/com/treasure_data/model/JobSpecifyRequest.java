@@ -32,11 +32,4 @@ public class JobSpecifyRequest<T extends Job>
         return get();
     }
 
-    public String getQuery() {
-        return get().getQuery();
-    }
-
-    public String getResultTableName() {
-        return get().getResultTable();
-    }
 }

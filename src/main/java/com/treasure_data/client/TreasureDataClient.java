@@ -40,6 +40,7 @@ import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.JobResult;
+import com.treasure_data.model.JobSummary;
 import com.treasure_data.model.KillJobRequest;
 import com.treasure_data.model.KillJobResult;
 import com.treasure_data.model.ListDatabasesRequest;
@@ -228,7 +229,7 @@ public class TreasureDataClient {
         return clientAdaptor.submitJob(request);
     }
 
-    public List<Job> listJobs(long from, long to) throws ClientException {
+    public List<JobSummary> listJobs(long from, long to) throws ClientException {
         return listJobs(new ListJobsRequest(from, to)).getJobs();
     }
 

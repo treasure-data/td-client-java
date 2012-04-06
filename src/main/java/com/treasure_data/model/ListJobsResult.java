@@ -19,13 +19,13 @@ package com.treasure_data.model;
 
 import java.util.List;
 
-public class ListJobsResult extends AbstractResult<ListJobs> {
+public class ListJobsResult extends AbstractResult<ListJobs<JobSummary>> {
 
-    public ListJobsResult(ListJobs jobs) {
+    public ListJobsResult(ListJobs<JobSummary> jobs) {
         super(jobs);
     }
 
-    public List<Job> getJobs() {
+    public List<JobSummary> getJobs() {
         return get().get();
     }
 }

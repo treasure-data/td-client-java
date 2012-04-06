@@ -18,6 +18,7 @@ import org.junit.Test;
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
 import com.treasure_data.model.Job;
+import com.treasure_data.model.JobSummary;
 import com.treasure_data.model.KillJobRequest;
 import com.treasure_data.model.KillJobResult;
 import com.treasure_data.model.Request;
@@ -35,7 +36,7 @@ public class TestKillJob {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        KillJobRequest request = new KillJobRequest(new Job("25773"));
+        KillJobRequest request = new KillJobRequest(new Job("47555"));
         KillJobResult result = clientAdaptor.killJob(request);
         System.out.println(result.getJobID());
     }
@@ -88,7 +89,7 @@ public class TestKillJob {
         KillJobRequest request = new KillJobRequest(new Job(jobID));
         KillJobResult result = clientAdaptor.killJob(request);
         assertEquals(jobID, result.getJobID());
-        assertEquals(Job.Status.RUNNING, result.getStatus());
+        assertEquals(JobSummary.Status.RUNNING, result.getFormerStatus());
     }
 
     static class HttpConnectionImplforKillJob02 extends HttpConnectionImpl {

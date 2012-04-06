@@ -18,6 +18,7 @@ import org.junit.Test;
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
 import com.treasure_data.model.Job;
+import com.treasure_data.model.JobSummary;
 import com.treasure_data.model.Request;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
@@ -35,9 +36,9 @@ public class TestShowJob {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        ShowJobRequest request = new ShowJobRequest(new Job("200338"));
+        ShowJobRequest request = new ShowJobRequest(new Job("47555"));
         ShowJobResult result = clientAdaptor.showJob(request);
-        System.out.println(result.getJob().getJobID());
+        System.out.println(result.getJobID());
         System.out.println(result.getJob().getStatus());
         System.out.println(result.getJob().getResultSchema());
     }
@@ -97,7 +98,7 @@ public class TestShowJob {
         ShowJobResult result = clientAdaptor.showJob(request);
         assertEquals(jobID, result.getJob().getJobID());
         assertEquals(Job.Type.HIVE, result.getJob().getType());
-        assertEquals(Job.Status.SUCCESS, result.getJob().getStatus());
+        assertEquals(JobSummary.Status.SUCCESS, result.getJob().getStatus());
     }
 
     static class HttpConnectionImplforShowJob02 extends HttpConnectionImpl {

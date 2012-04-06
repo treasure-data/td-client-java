@@ -23,15 +23,11 @@ public class JobSpecifyResult<T extends Job> extends AbstractResult<T> {
         super(job);
     }
 
-    public Job getJob() {
+    public T getJob() {
         return get();
     }
 
     public String getJobID() {
         return get().getJobID();
-    }
-
-    public Job.Status getStatus() {
-        return get().getStatus();
     }
 }

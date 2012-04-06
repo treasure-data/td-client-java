@@ -17,9 +17,9 @@
 //
 package com.treasure_data.model;
 
-public class ShowJobResult extends JobSpecifyResult<Job> {
+public class ShowJobResult extends JobSpecifyResult<JobSummary> {
 
-    public ShowJobResult(Job job) {
+    public ShowJobResult(JobSummary job) {
         super(job);
     }
 }

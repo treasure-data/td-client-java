@@ -23,7 +23,6 @@ import com.treasure_data.model.Database;
 import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.Request;
-import com.treasure_data.model.Table;
 import com.treasure_data.model.TableSummary;
 
 public class TestListTables {

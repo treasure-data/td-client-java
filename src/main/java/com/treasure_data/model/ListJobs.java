@@ -19,7 +19,7 @@ package com.treasure_data.model;
 
 import java.util.List;
 
-public class ListJobs extends AbstractListModels<Job> {
+public class ListJobs<T extends Job> extends AbstractListModels<T> {
 
     private long count;
 
@@ -27,7 +27,7 @@ public class ListJobs extends AbstractListModels<Job> {
 
     private long to;
 
-    public ListJobs(long count, long from, long to, List<Job> jobs) {
+    public ListJobs(long count, long from, long to, List<T> jobs) {
         super(jobs);
         this.count = count;
         this.from = from;

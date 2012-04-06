@@ -19,55 +19,6 @@ package com.treasure_data.model;
 
 public class Job extends AbstractModel {
 
-    public static enum Status {
-        QUEUED, BOOTING, RUNNING, SUCCESS, ERROR, KILLED, UNKNOWN,
-    }
-
-    public static Status toStatus(String statusName) {
-        if (statusName == null) {
-            throw new NullPointerException();
-        }
-
-        if (statusName.equals("queued")) {
-            return Status.QUEUED;
-        } else if (statusName.equals("booting")) {
-            return Status.BOOTING;
-        } else if (statusName.equals("running")) {
-            return Status.RUNNING;
-        } else if (statusName.equals("success")) {
-            return Status.SUCCESS;
-        } else if (statusName.equals("error")) {
-            return Status.ERROR;
-        } else if (statusName.equals("killed")) {
-            return Status.KILLED;
-        } else {
-            return Status.UNKNOWN;
-        }
-    }
-
-    public static String toStatusName(Status status) {
-        if (status == null) {
-            throw new NullPointerException();
-        }
-
-        switch (status) {
-        case QUEUED:
-            return "queued";
-        case BOOTING:
-            return "booting";
-        case RUNNING:
-            return "running";
-        case SUCCESS:
-            return "success";
-        case ERROR:
-            return "error";
-        case KILLED:
-            return "killed";
-        default:
-            return "unknown";
-        }
-    }
-
     public static enum Type {
         HIVE, UNKNOWN,
     }
@@ -103,57 +54,37 @@ public class Job extends AbstractModel {
 
     private String url;
 
-    private Status status;
-
-    private String createdAt;
-
-    private String startAt;
-
-    private String endAt;
-
     private String query;
 
     private String resultTable;
 
-    private String resultSchema; // hive-specific schema
-
     public Job(String jobID) {
-        super(jobID);
+        this(jobID, Job.Type.HIVE, null, null, null);
     }
 
-    public Job(Database database, String sql) {
-        super(null);
-        this.type = Type.HIVE;
-        this.database = database;
-        this.query = sql;
+    public Job(Database database, String query) {
+        this(null, Job.Type.HIVE, database, query, null);
     }
 
-    public Job(String jobID, Job.Type type, Database database, String query, String url) {
-        super(jobID);
-        this.type = type;
-        this.database = database;
-        this.query = query;
-        this.url = url;
+    public Job(Database database, String query, String resultTable) {
+        this(null, Job.Type.HIVE, database, null, null);
+        setQuery(query);
     }
 
-    public Job(String jobID, Job.Type type, Status status, String startAt,
-            String endAt, String query, String resultTable, String resultSchema) {
+    public Job(String jobID, Job.Type type, Database database, String url, String resultTable) {
         super(jobID);
-        this.type = type;
-        this.status = status;
-        this.startAt = startAt;
-        this.endAt = endAt;
-        this.query = query;
-        this.resultTable = resultTable;
-        this.resultSchema = resultSchema;
+        setType(type);
+        setDatabase(database);
+        setURL(url);
+        setResultTable(resultTable);
     }
 
     public void setJobID(String jobID) {
-        this.setName(jobID);
+        super.setName(jobID);
     }
 
     public String getJobID() {
-        return getName();
+        return super.getName();
     }
 
     public void setType(Type type) {
@@ -180,51 +111,19 @@ public class Job extends AbstractModel {
         return url;
     }
 
-    public void setStatus(Job.Status status) {
-        this.status = status;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setCreatedAt(String time) {
-        this.createdAt = time;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setStartAt(String time) {
-        this.startAt = time;
-    }
-
-    public String getStartAt() {
-        return startAt;
-    }
-
-    public void setEndAt(String time) {
-        this.endAt = time;
-    }
-
-    public String getEndAt() {
-        return endAt;
-    }
-
-    public void setQuery(String q) {
-        query = q;
+    public void setQuery(String query) {
+        this.query = query;
     }
 
     public String getQuery() {
         return query;
     }
 
-    public String getResultTable() {
-        return resultTable;
+    public void setResultTable(String resultTable) {
+        this.resultTable = resultTable;
     }
 
-    public String getResultSchema() {
-        return resultSchema;
+    public String getResultTable() {
+        return resultTable;
     }
 }

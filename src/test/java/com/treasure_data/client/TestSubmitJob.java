@@ -38,7 +38,7 @@ public class TestSubmitJob {
 
         Database database = new Database("mugadb");
         String q = "select * from mugatbl";
-        SubmitJobRequest request = new SubmitJobRequest(new Job(database, q));
+        SubmitJobRequest request = new SubmitJobRequest(new Job(database, q, null));
         SubmitJobResult result = clientAdaptor.submitJob(request);
         Job job = result.getJob();
         System.out.println(job.getJobID());
@@ -92,7 +92,7 @@ public class TestSubmitJob {
 
         Database database = new Database("mugadb");
         String q = "select * from mugatbl";
-        SubmitJobRequest request = new SubmitJobRequest(new Job(null, null, database, q, null));
+        SubmitJobRequest request = new SubmitJobRequest(new Job(database, q, null));
         SubmitJobResult result = clientAdaptor.submitJob(request);
         Job job = result.getJob();
         assertEquals(database.getName(), job.getDatabase().getName());
@@ -141,7 +141,7 @@ public class TestSubmitJob {
         try {
             Database database = new Database("mugadb");
             String q = "select * from mugatbl";
-            SubmitJobRequest request = new SubmitJobRequest(new Job(null, null, database, q, null));
+            SubmitJobRequest request = new SubmitJobRequest(new Job(database, q, null));
             clientAdaptor.submitJob(request);
             fail();
         } catch (Throwable t) {
@@ -192,7 +192,7 @@ public class TestSubmitJob {
         try {
             Database database = new Database("mugadb");
             String q = "select * from mugatbl";
-            SubmitJobRequest request = new SubmitJobRequest(new Job(null, null, database, q, null));
+            SubmitJobRequest request = new SubmitJobRequest(new Job(database, q, null));
             clientAdaptor.submitJob(request);
             fail();
         } catch (Throwable t) {
