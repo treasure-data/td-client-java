@@ -182,16 +182,6 @@ public class TreasureDataClient {
 	return clientAdaptor.createTable(request);
     }
 
-    // TODO #MN add it in next version
-    //public TableDescription describeTable(DescribeTableRequest request) throws ClientException;
-
-    // TODO #MN add it in next version
-    /**
-    TableDescription describeTable(String databaseName, String tableName) throws ClientException {
-        return describeTable(new DescribeTableRequest(databaseName, tableName));
-    }
-    */
-
     public void deleteTable(String databaseName, String tableName)
             throws ClientException {
         deleteTable(new DeleteTableRequest(new Table(
@@ -249,20 +239,17 @@ public class TreasureDataClient {
         return clientAdaptor.killJob(request);
     }
 
-    public void showJob(String jobID) throws ClientException {
-        showJob(new Job(jobID));
+    public JobSummary showJob(String jobID) throws ClientException {
+        return showJob(new Job(jobID));
     }
 
-    public void showJob(Job job) throws ClientException {
-        showJob(new ShowJobRequest(job));
+    public JobSummary showJob(Job job) throws ClientException {
+        return showJob(new ShowJobRequest(job)).getJob();
     }
 
     public ShowJobResult showJob(ShowJobRequest request) throws ClientException {
         return clientAdaptor.showJob(request);
     }
-
-    // TODO #MN add it in next version
-    //JobDescription describeJob(DescribeJobRequest request) throws ClientException;
 
     public JobResult getJobResult(Job job) throws ClientException {
         return getJobResult(new GetJobResultRequest(
