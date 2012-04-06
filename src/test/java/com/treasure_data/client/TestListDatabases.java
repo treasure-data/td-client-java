@@ -19,7 +19,7 @@ import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
-import com.treasure_data.model.Database;
+import com.treasure_data.model.DatabaseSummary;
 import com.treasure_data.model.ListDatabasesRequest;
 import com.treasure_data.model.ListDatabasesResult;
 import com.treasure_data.model.Request;
@@ -39,8 +39,8 @@ public class TestListDatabases {
 
         ListDatabasesRequest request = new ListDatabasesRequest();
         ListDatabasesResult result = clientAdaptor.listDatabases(request);
-        List<Database> databases = result.getDatabases();
-        for (Database database : databases) {
+        List<DatabaseSummary> databases = result.getDatabases();
+        for (DatabaseSummary database : databases) {
             System.out.println(database.getName());
         }
     }
@@ -68,9 +68,15 @@ public class TestListDatabases {
             List ary = new ArrayList();
             Map m0 = new HashMap();
             m0.put("name", "foo");
+            m0.put("count", 10);
+            m0.put("created_at", "created_time");
+            m0.put("updated_at", "updated_time");
             ary.add(m0);
             Map m1 = new HashMap();
             m1.put("name", "bar");
+            m1.put("count", 10);
+            m1.put("created_at", "created_time");
+            m1.put("updated_at", "updated_time");
             ary.add(m1);
             Map map = new HashMap();
             map.put("databases", ary);
@@ -96,7 +102,7 @@ public class TestListDatabases {
 
         ListDatabasesRequest request = new ListDatabasesRequest();
         ListDatabasesResult result = clientAdaptor.listDatabases(request);
-        List<Database> databases = result.getDatabases();
+        List<DatabaseSummary> databases = result.getDatabases();
         assertEquals(2, databases.size());
         assertEquals("foo", databases.get(0).getName());
         assertEquals("bar", databases.get(1).getName());

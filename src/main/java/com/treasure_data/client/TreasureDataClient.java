@@ -29,6 +29,7 @@ import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
+import com.treasure_data.model.DatabaseSummary;
 import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
 import com.treasure_data.model.DeleteTableRequest;
@@ -117,7 +118,7 @@ public class TreasureDataClient {
 
     // Database API
 
-    public List<Database> listDatabases() throws ClientException {
+    public List<DatabaseSummary> listDatabases() throws ClientException {
         return listDatabases(new ListDatabasesRequest()).getDatabases();
     }
 

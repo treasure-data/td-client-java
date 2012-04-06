@@ -50,6 +50,7 @@ import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
+import com.treasure_data.model.DatabaseSummary;
 import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
 import com.treasure_data.model.DeleteTableRequest;
@@ -247,16 +248,19 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         validateJavaObject(jsonData, map);
 
         @SuppressWarnings("unchecked")
-        Iterator<Map<String, String>> dbNameMapIter =
-            ((List<Map<String, String>>) map.get("databases")).iterator();
-        List<Database> databases = new ArrayList<Database>();
-        while (dbNameMapIter.hasNext()) {
-            Map<String, String> dbNameMap = dbNameMapIter.next();
-            String name = dbNameMap.get("name");
-            databases.add(new Database(name));
+        Iterator<Map<String, Object>> dbMaps =
+            ((List<Map<String, Object>>) map.get("databases")).iterator();
+        List<DatabaseSummary> databases = new ArrayList<DatabaseSummary>();
+        while (dbMaps.hasNext()) {
+            Map<String, Object> dbMap = dbMaps.next();
+            String name = (String) dbMap.get("name");
+            long count = (Long) dbMap.get("count");
+            String createdAt = (String) dbMap.get("created_at");
+            String updatedAt = (String) dbMap.get("updated_at");
+            databases.add(new DatabaseSummary(name, count, createdAt, updatedAt));
         }
 
-        return new ListDatabasesResult(new ListDatabases(databases));
+        return new ListDatabasesResult(new ListDatabases<DatabaseSummary>(databases));
     }
 
     @Override
@@ -413,7 +417,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Iterator<Map<String, Object>> tableMapIter =
             ((List<Map<String, Object>>) map.get("tables")).iterator();
-        List<Table> tableList = new ArrayList<Table>();
+        List<TableSummary> tableList = new ArrayList<TableSummary>();
         while (tableMapIter.hasNext()) {
             Map<String, Object> tableMap = tableMapIter.next();
             String name = (String) tableMap.get("name");
@@ -427,7 +431,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             tableList.add(tbl);
         }
 
-        ListTables tables = new ListTables(tableList);
+        ListTables<TableSummary> tables = new ListTables<TableSummary>(tableList);
         return new ListTablesResult(request.getDatabase(), tables);
     }
 

@@ -19,9 +19,9 @@ package com.treasure_data.model;
 
 import java.util.List;
 
-public class ListDatabases extends AbstractListModels<Database> {
+public class ListDatabases<T extends Database> extends AbstractListModels<T> {
 
-    public ListDatabases(List<Database> list) {
+    public ListDatabases(List<T> list) {
         super(list);
     }
 }
