@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class ShowJobRequest extends JobSpecifyRequest<Job, ShowJobRequest> {
+public class ShowJobRequest extends JobSpecifyRequest<Job> {
 
     public ShowJobRequest(Job job) {
         super(job);

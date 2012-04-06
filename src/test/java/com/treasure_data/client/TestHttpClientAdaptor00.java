@@ -208,7 +208,7 @@ public class TestHttpClientAdaptor00 {
         System.out.println(result.getJobID());
     }
 
-    @Test
+    @Test @Ignore
     public void testShowJob01() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());

@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class JobSpecifyRequest<T extends Job, S extends JobSpecifyRequest>
+public class JobSpecifyRequest<T extends Job>
         extends AbstractRequest<T> {
 
     protected JobSpecifyRequest(T job) {

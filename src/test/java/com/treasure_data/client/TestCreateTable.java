@@ -33,7 +33,7 @@ public class TestCreateTable {
         props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Test
+    @Test @Ignore
     public void testCreateTable00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());

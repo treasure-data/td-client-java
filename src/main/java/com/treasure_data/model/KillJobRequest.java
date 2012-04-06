@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class KillJobRequest extends JobSpecifyRequest<Job, KillJobRequest> {
+public class KillJobRequest extends JobSpecifyRequest<Job> {
 
     public KillJobRequest(Job job) {
         super(job);

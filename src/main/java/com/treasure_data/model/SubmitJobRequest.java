@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-public class SubmitJobRequest extends JobSpecifyRequest<Job, SubmitJobRequest> {
+public class SubmitJobRequest extends JobSpecifyRequest<Job> {
 
     public SubmitJobRequest(Job job) {
         super(job);
