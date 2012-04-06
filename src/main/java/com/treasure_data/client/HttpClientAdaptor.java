@@ -85,7 +85,6 @@ import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.Table;
 import com.treasure_data.model.TableSummary;
-import com.treasure_data.model.JobSummary.Status;
 
 public class HttpClientAdaptor extends AbstractClientAdaptor {
 
@@ -187,17 +186,18 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             int code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
                 msg = String.format("Server is down (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                        conn.getResponseMessage(), code, conn.getResponseBody());
                 LOG.severe(msg);
             } else {
                 String jsonData = conn.getResponseBody();
                 validateJSONData(jsonData);
+
                 @SuppressWarnings("rawtypes")
                 Map map = (Map) JSONValue.parse(jsonData);
                 validateJavaObject(jsonData, map);
+
                 msg = (String) map.get("status");
             }
-
             return new GetServerStatusResult(new ServerStatus(msg));
         } catch (IOException e) {
             throw new ClientException(e);
@@ -998,12 +998,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         void doGetRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
-            Properties props = System.getProperties();
-            String host = props.getProperty(
-                    Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULT);
-            int port = Integer.parseInt(props.getProperty(
-                    Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULT));
-
             StringBuilder sbuf = new StringBuilder();
             sbuf.append("http://").append(getApiServerPath()).append(path);
 
@@ -1044,12 +1038,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
-            Properties props = System.getProperties();
-            String host = props.getProperty(
-                    Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULT);
-            int port = Integer.parseInt(props.getProperty(
-                    Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULT));
-
             StringBuilder sbuf = new StringBuilder();
             sbuf.append("http://").append(getApiServerPath()).append(path);
 
@@ -1090,12 +1078,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
                 throws IOException {
-            Properties props = System.getProperties();
-            String host = props.getProperty(
-                    Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULT);
-            int port = Integer.parseInt(props.getProperty(
-                    Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULT));
-
             StringBuilder sbuf = new StringBuilder();
             sbuf.append("http://").append(getApiServerPath()).append(path);
 
