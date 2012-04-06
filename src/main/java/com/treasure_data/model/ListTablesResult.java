@@ -21,14 +21,14 @@ import java.util.List;
 
 public class ListTablesResult extends DatabaseSpecifyResult<Database> {
 
-    private ListTables tables;
+    private ListTables<TableSummary> tables;
 
-    public ListTablesResult(Database database, ListTables tables) {
+    public ListTablesResult(Database database, ListTables<TableSummary> tables) {
         super(database);
         this.tables = tables;
     }
 
-    public List<Table> getTables() {
+    public List<TableSummary> getTables() {
         return tables.get();
     }
 

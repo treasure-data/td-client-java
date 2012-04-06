@@ -47,42 +47,26 @@ public class Table extends AbstractModel {
 
     private Type type;
 
-    private long count;
-
-    private String schema;
-
-    private String createdAt;
-
-    private String updatedAt;
-
     public Table(Database database, String name) {
         this(database, name, Table.Type.LOG);
     }
 
     public Table(Database database, String name, Type type) {
-        this(database, name, type, 0, "", "", "");
-    }
-
-    public Table(Database database, String name, Type type, long count,
-            String schema, String createdAt, String updatedAt) {
         super(name);
         this.database = database;
         this.type = type;
-        this.count = count;
-        this.schema = schema;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     public Database getDatabase() {
         return database;
     }
 
+    public String getName() {
+        return super.getName();
+    }
+
     public Type getType() {
         return type;
     }
 
-    public long getCount() {
-        return count;
-    }
 }

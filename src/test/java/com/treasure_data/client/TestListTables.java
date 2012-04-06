@@ -24,6 +24,7 @@ import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.Request;
 import com.treasure_data.model.Table;
+import com.treasure_data.model.TableSummary;
 
 public class TestListTables {
     @Before
@@ -40,8 +41,8 @@ public class TestListTables {
 
         ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
         ListTablesResult result = clientAdaptor.listTables(request);
-        List<Table> tables = result.getTables();
-        for (Table table : tables) {
+        List<TableSummary> tables = result.getTables();
+        for (TableSummary table : tables) {
             System.out.println(table.getDatabase().getName());
             System.out.println(table.getName());
             System.out.println(table.getType());
@@ -106,7 +107,7 @@ public class TestListTables {
         String databaseName = "testdb";
         ListTablesRequest request = new ListTablesRequest(new Database(databaseName));
         ListTablesResult result = clientAdaptor.listTables(request);
-        List<Table> tables = result.getTables();
+        List<TableSummary> tables = result.getTables();
         assertEquals(2, tables.size());
         assertEquals("foo", tables.get(0).getName());
         assertEquals("bar", tables.get(1).getName());

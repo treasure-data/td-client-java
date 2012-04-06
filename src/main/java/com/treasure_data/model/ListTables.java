@@ -19,9 +19,9 @@ package com.treasure_data.model;
 
 import java.util.List;
 
-public class ListTables extends AbstractListModels<Table> {
+public class ListTables<T extends Table> extends AbstractListModels<T> {
 
-    public ListTables(List<Table> tables) {
+    public ListTables(List<T> tables) {
         super(tables);
     }
 }

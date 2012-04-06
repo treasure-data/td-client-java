@@ -57,6 +57,7 @@ import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.Table;
+import com.treasure_data.model.TableSummary;
 
 public class TreasureDataClient {
     private static Logger LOG = Logger.getLogger(TreasureDataClient.class.getName());
@@ -147,12 +148,12 @@ public class TreasureDataClient {
 
     // Table API
 
-    public List<Table> listTables(String databaseName)
+    public List<TableSummary> listTables(String databaseName)
             throws ClientException {
         return listTables(new Database(databaseName));
     }
 
-    public List<Table> listTables(Database database)
+    public List<TableSummary> listTables(Database database)
             throws ClientException {
         return listTables(new ListTablesRequest(database)).getTables();
     }

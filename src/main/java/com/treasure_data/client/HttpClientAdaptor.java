@@ -82,6 +82,7 @@ import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.Table;
+import com.treasure_data.model.TableSummary;
 
 public class HttpClientAdaptor extends AbstractClientAdaptor {
 
@@ -421,7 +422,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             String schema = (String) tableMap.get("schema");
             String createdAt = (String) tableMap.get("created_at");
             String updatedAt = (String) tableMap.get("updated_at");
-            Table tbl = new Table(request.getDatabase(), name, Table.toType(typeName),
+            TableSummary tbl = new TableSummary(request.getDatabase(), name, Table.toType(typeName),
                     count, schema, createdAt, updatedAt);
             tableList.add(tbl);
         }
