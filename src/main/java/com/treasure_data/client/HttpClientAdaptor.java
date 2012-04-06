@@ -1012,7 +1012,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             }
 
             // create connection object with url
-            URL url = new URL(sbuf.toString()); // TODO #MN should use URL class for encoding 
+            URL url = new URL(sbuf.toString());
             conn = (HttpURLConnection) url.openConnection();
 
             // header
@@ -1055,18 +1055,10 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                         sbuf.append("&");
                     }
                 }
-                try {
-                    URL url = new URL(sbuf.toString()); // TODO #MN should use URL class for encoding
-                    //URI uri = new URI(sbuf.toString());
-                    conn = (HttpURLConnection) url.openConnection();
-                    //conn = (HttpURLConnection) uri.toURL().openConnection();
-                //} catch (URISyntaxException e) {
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                URL url = new URL(sbuf.toString());
+                conn = (HttpURLConnection) url.openConnection();
             } else {
-                URL url = new URL(sbuf.toString()); // TODO #MN should use URL class for encoding 
+                URL url = new URL(sbuf.toString());
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestProperty("Content-Length", "0");
             }
@@ -1097,7 +1089,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             StringBuilder sbuf = new StringBuilder();
             sbuf.append("http://").append(getApiServerPath()).append(path);
 
-            URL url = new URL(sbuf.toString()); // TODO #MN should use URL class for encoding 
+            URL url = new URL(sbuf.toString());
             conn = (HttpURLConnection) url.openConnection();
             conn.setReadTimeout(600 * 1000);
             conn.setRequestMethod("PUT");
