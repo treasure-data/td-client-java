@@ -19,7 +19,7 @@ package com.treasure_data.client;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 
-public class Config {
+public class Config implements Constants {
     public static final String TD_ENV_API_KEY = "TREASURE_DATA_API_KEY";
 
     public static final String TD_ENV_API_SERVER = "TD_API_SERVER";
