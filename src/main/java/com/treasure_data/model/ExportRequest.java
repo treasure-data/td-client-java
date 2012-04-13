@@ -17,9 +17,49 @@
 //
 package com.treasure_data.model;
 
-public class ExportRequest extends AbstractRequest<AbstractModel> {
+public class ExportRequest extends TableSpecifyRequest<Table> {
 
-    public ExportRequest() {
-        super(null);
+    private String storageType;
+
+    private String bucketName;
+
+    private String fileFormat;
+
+    private String from;
+
+    private String to;
+
+    public ExportRequest(Table table, String storageType, String bucketName, String fileFormat) {
+        this(table, storageType, bucketName, fileFormat, null, null);
+    }
+
+    public ExportRequest(Table table, String storageType, String bucketName, String fileFormat,
+            String from, String to) {
+        super(table);
+        this.storageType = storageType;
+        this.bucketName = bucketName;
+        this.fileFormat = fileFormat;
+        this.from = from;
+        this.to = to;
+    }
+
+    public String getStorageType() {
+        return storageType;
+    }
+
+    public String getBucketName() {
+        return bucketName;
+    }
+
+    public String getFileFormat() {
+        return fileFormat;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public String getTo() {
+        return to;
     }
 }

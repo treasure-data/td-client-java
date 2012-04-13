@@ -65,9 +65,7 @@ public class TestSubmitJob {
         String getResponseBody() throws IOException {
             Map<String, String> map = new HashMap<String, String>();
             map.put("job_id", "12345");
-            map.put("type", "hive");
             map.put("database", "mugadb");
-            map.put("url", "http://console.treasure-data.com/will-be-readly");
             String jsonData = JSONValue.toJSONString(map);
             return jsonData;
         }

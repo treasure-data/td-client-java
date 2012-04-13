@@ -630,8 +630,76 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
     @Override
     public ExportResult exportData(ExportRequest request) throws ClientException {
-        // TODO #MN
-        throw new UnsupportedOperationException();
+        request.setCredentials(getConfig().getCredentials());
+        validateCredentials(request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_EXPORTJOB_SUBMIT,
+                    e(request.getDatabase().getName()), e(request.getTable().getName()));
+            Map<String, String> header = null;
+            Map<String, String> params = new HashMap<String, String>();
+            if (request.getStorageType() != null) {
+                params.put("storage_type", request.getStorageType());
+            } else {
+                throw new IllegalArgumentException("storage_type is null");
+            }
+            if (request.getBucketName() != null) {
+                params.put("bucket", request.getBucketName());
+            } else {
+                throw new IllegalArgumentException("bucket is null");
+            }
+            if (request.getFileFormat() != null) {
+                params.put("file_format", request.getFileFormat());
+            } else {
+                throw new IllegalArgumentException("file_format is null");
+            }
+            if (request.getFrom() != null) {
+                params.put("from", request.getFrom());
+            }
+            if (request.getTo() != null) {
+                params.put("to", request.getTo());
+            }
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Submit job failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data
+        @SuppressWarnings("unchecked")
+        Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
+        validateJavaObject(jsonData, jobMap);
+
+        String jobID = jobMap.get("job_id");
+        String dbName = jobMap.get("database");
+        if (!dbName.equals(request.getDatabase().getName())) {
+            String msg = String.format("invalid database name: expected=%s, actual=%s",
+                    request.getDatabase().getName(), dbName);
+            throw new ClientException(msg);
+        }
+
+        Job job = new Job(jobID, Job.Type.MAPRED, request.getDatabase(), null, null);
+        return new ExportResult(job);
     }
 
     @Override
@@ -688,18 +756,15 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         validateJavaObject(jsonData, jobMap);
 
         String jobID = jobMap.get("job_id");
-        //Job.Type type = Job.toType(jobMap.get("type"));
         String dbName = jobMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
                     request.getDatabase().getName(), dbName);
             throw new ClientException(msg);
         }
-        //String url = (String) jobMap.get("url");
 
         Job job = request.getJob();
         job.setJobID(jobID);
-        //job.setURL(url);
         return new SubmitJobResult(job);
     }
 
@@ -973,6 +1038,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         String V3_IMPORT = "/v3/table/import/%s/%s/%s";
 
         String V3_EXPORT = "/v3/table/import/%s/%s/%s";
+
+        String V3_EXPORTJOB_SUBMIT = "/v3/export/run/%s/%s";
 
         String V3_JOB_SUBMIT = "/v3/job/issue/hive/%s";
 

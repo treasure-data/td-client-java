@@ -20,7 +20,7 @@ package com.treasure_data.model;
 public class Job extends AbstractModel {
 
     public static enum Type {
-        HIVE, UNKNOWN,
+        HIVE, MAPRED, UNKNOWN,
     }
 
     public static Type toType(String typeName) {
@@ -30,6 +30,8 @@ public class Job extends AbstractModel {
 
         if (typeName.equals("hive")) {
             return Type.HIVE;
+        } else if (typeName.equals("mapred")) {
+            return Type.MAPRED;
         } else {
             return Type.UNKNOWN;
         }
@@ -43,6 +45,8 @@ public class Job extends AbstractModel {
         switch (type) {
         case HIVE:
             return "hive";
+        case MAPRED:
+            return "mapred";
         default:
             return "unknown";
         }
