@@ -642,6 +642,16 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                     e(request.getDatabase().getName()), e(request.getTable().getName()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
+            if (request.getAccessKeyID() != null) {
+                params.put("access_key_id", request.getAccessKeyID());
+            } else {
+                throw new IllegalArgumentException("access_key_id is null");
+            }
+            if (request.getSecretAccessKey() != null) {
+                params.put("secret_access_key", request.getSecretAccessKey());
+            } else {
+                throw new IllegalArgumentException("secret_access_key is null");
+            }
             if (request.getStorageType() != null) {
                 params.put("storage_type", request.getStorageType());
             } else {

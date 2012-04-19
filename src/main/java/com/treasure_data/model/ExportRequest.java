@@ -25,20 +25,27 @@ public class ExportRequest extends TableSpecifyRequest<Table> {
 
     private String fileFormat;
 
+    private String accessKeyID;
+
+    private String secretAccessKey;
+
     private String from;
 
     private String to;
 
-    public ExportRequest(Table table, String storageType, String bucketName, String fileFormat) {
-        this(table, storageType, bucketName, fileFormat, null, null);
+    public ExportRequest(Table table, String storageType, String bucketName, String fileFormat,
+            String accessKeyID, String secretAccessKey) {
+        this(table, storageType, bucketName, fileFormat, accessKeyID, secretAccessKey, null, null);
     }
 
     public ExportRequest(Table table, String storageType, String bucketName, String fileFormat,
-            String from, String to) {
+            String accessKeyID, String secretAccessKey, String from, String to) {
         super(table);
         this.storageType = storageType;
         this.bucketName = bucketName;
         this.fileFormat = fileFormat;
+        this.accessKeyID = accessKeyID;
+        this.secretAccessKey = secretAccessKey;
         this.from = from;
         this.to = to;
     }
@@ -53,6 +60,14 @@ public class ExportRequest extends TableSpecifyRequest<Table> {
 
     public String getFileFormat() {
         return fileFormat;
+    }
+
+    public String getAccessKeyID() {
+        return accessKeyID;
+    }
+
+    public String getSecretAccessKey() {
+        return secretAccessKey;
     }
 
     public String getFrom() {
