@@ -37,9 +37,14 @@ public class TestExportData {
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
+        Properties props = System.getProperties();
+        String bucketName = props.getProperty("td.client.export.bucket");
+        String accessKeyID = props.getProperty("td.client.accesskey.id");
+        String secretAccessKey = props.getProperty("td.client.secret.accesskey");
         Database database = new Database("mugadb");
         Table table = new Table(database, "mugatbl");
-        ExportRequest request = new ExportRequest(table, "ex", "bucket1", "json.gz");
+        ExportRequest request = new ExportRequest(
+                table, "s3", bucketName, "json.gz", accessKeyID, secretAccessKey);
         ExportResult result = clientAdaptor.exportData(request);
         Job job = result.getJob();
         System.out.println(job.getJobID());
@@ -91,7 +96,8 @@ public class TestExportData {
 
         Database database = new Database("mugadb");
         Table table = new Table(database, "mugatbl");
-        ExportRequest request = new ExportRequest(table, "ex", "bucket1", "json.gz");
+        ExportRequest request = new ExportRequest(
+                table, "s3", "bucket1", "json.gz", "xxx", "yyy");
         ExportResult result = clientAdaptor.exportData(request);
         Job job = result.getJob();
         assertEquals(database.getName(), job.getDatabase().getName());
@@ -140,7 +146,8 @@ public class TestExportData {
         try {
             Database database = new Database("mugadb");
             Table table = new Table(database, "mugatbl");
-            ExportRequest request = new ExportRequest(table, "ex", "bucket1", "json.gz");
+            ExportRequest request = new ExportRequest(
+                    table, "s3", "bucket1", "json.gz", "xxx", "yyy");
             clientAdaptor.exportData(request);
             fail();
         } catch (Throwable t) {
@@ -191,7 +198,8 @@ public class TestExportData {
         try {
             Database database = new Database("mugadb");
             Table table = new Table(database, "mugatbl");
-            ExportRequest request = new ExportRequest(table, "ex", "bucket1", "json.gz");
+            ExportRequest request = new ExportRequest(
+                    table, "ex", "bucket1", "json.gz", "xxx", "yyy");
             clientAdaptor.exportData(request);
             fail();
         } catch (Throwable t) {
