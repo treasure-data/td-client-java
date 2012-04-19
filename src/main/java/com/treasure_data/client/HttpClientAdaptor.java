@@ -90,7 +90,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
     private static Logger LOG = Logger.getLogger(HttpClientAdaptor.class.getName());
 
-    private static String e(String s) throws ClientException {
+    public static String e(String s) throws ClientException {
         try {
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -643,12 +643,12 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
             if (request.getAccessKeyID() != null) {
-                params.put("access_key_id", request.getAccessKeyID());
+                params.put("access_key_id", e(request.getAccessKeyID()));
             } else {
                 throw new IllegalArgumentException("access_key_id is null");
             }
             if (request.getSecretAccessKey() != null) {
-                params.put("secret_access_key", request.getSecretAccessKey());
+                params.put("secret_access_key", e(request.getSecretAccessKey()));
             } else {
                 throw new IllegalArgumentException("secret_access_key is null");
             }
