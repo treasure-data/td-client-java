@@ -39,7 +39,7 @@ public class TreasureDataCredentials {
 
         // another setting...
 
-        return apiKey; // null
+        return apiKey;
     }
 
     private String apiKey;
@@ -66,8 +66,7 @@ public class TreasureDataCredentials {
 
     @Override
     public String toString() {
-	return String.format("%s{apiKey=%s}",
-		TreasureDataCredentials.class.getName(),
+	return String.format("%s{apiKey=%s}", this.getClass().getName(),
 		apiKey != null ? apiKey : "null");
     }
 }

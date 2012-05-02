@@ -86,6 +86,10 @@ public class TreasureDataClient {
 	clientAdaptor = createClientAdaptor(credentials, props);
     }
 
+    public TreasureDataCredentials getTreasureDataCredentials() {
+        return clientAdaptor.getTreasureDataCredentials();
+    }
+
     public void setTreasureDataCredentials(TreasureDataCredentials credentials) {
         clientAdaptor.setTreasureDataCredentials(credentials);
     }
@@ -97,6 +101,7 @@ public class TreasureDataClient {
         TreasureDataCredentials credentials =  result.getTreasureDataCredentials();
         setTreasureDataCredentials(credentials);
     }
+
     public AuthenticateResult authenticate(AuthenticateRequest request)
             throws ClientException {
         return clientAdaptor.authenticate(request);
