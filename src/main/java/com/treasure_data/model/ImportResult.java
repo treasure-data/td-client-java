@@ -19,11 +19,18 @@ package com.treasure_data.model;
 
 public class ImportResult extends AbstractResult<Table> {
 
-    public ImportResult(Table table) {
+    private double time;
+
+    public ImportResult(Table table, double time) {
         super(table);
+        this.time = time;
     }
 
     public Table getTable() {
-        return this.get();
+        return get();
+    }
+
+    public double getElapsedTime() {
+        return time;
     }
 }

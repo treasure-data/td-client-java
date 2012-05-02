@@ -44,9 +44,9 @@ public class ImportRequest extends AbstractRequest<Table> {
 
     private byte[] bytes;
 
-    public ImportRequest(Table table, Format format, byte[] bytes) {
+    public ImportRequest(Table table, byte[] bytes) {
         super(table);
-        this.format = format;
+        this.format = Format.MSGPACKGZ;
         this.bytes = bytes;
     }
 
