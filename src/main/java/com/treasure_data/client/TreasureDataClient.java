@@ -62,8 +62,6 @@ import com.treasure_data.model.Table;
 import com.treasure_data.model.TableSummary;
 
 public class TreasureDataClient {
-    private static Logger LOG = Logger.getLogger(TreasureDataClient.class.getName());
-
     /**
      * adaptor factory method
      */
@@ -197,6 +195,15 @@ public class TreasureDataClient {
     //TableSchema updateTableSchema(UpdateTableSchemaRequest request) throws ClientException;
 
     // Import API
+    public ImportResult importData(String databaseName, String tableName, byte[] data)
+            throws ClientException {
+        return importData(new Table(new Database(databaseName), tableName), data);
+    }
+
+    public ImportResult importData(Table table, byte[] data)
+            throws ClientException {
+        return importData(new ImportRequest(table, data));
+    }
 
     public ImportResult importData(ImportRequest request) throws ClientException {
         return clientAdaptor.importData(request);
