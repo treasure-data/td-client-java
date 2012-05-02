@@ -580,10 +580,9 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             conn = createConnection();
 
             // send request
-            String path = String.format(HttpURL.V3_JOB_SUBMIT,
+            String path = String.format(HttpURL.V3_TABLE_IMPORT,
                     e(request.getTable().getDatabase().getName()),
-                    e(request.getTable().getName()),
-                    e(ImportRequest.toFormatName(request.getFormat())));
+                    e(request.getTable().getName()));
             conn.doPutRequest(request, path, request.getBytes());
 
             // receive response code
@@ -610,10 +609,11 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
         validateJavaObject(jsonData, map);
+        System.out.println("json data: " + jsonData);
 
         String dbName = (String) map.get("database");
         String tblName = (String) map.get("table");
-        double time = (Double) map.get("time");
+        double elapsedTime = (Double) map.get("elapsed_time");
         if (!dbName.equals(request.getTable().getDatabase().getName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
                     request.getTable().getDatabase().getName(), dbName);
@@ -625,7 +625,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             throw new ClientException(msg);
         }
 
-        return new ImportResult(request.getTable());
+        return new ImportResult(request.getTable(), elapsedTime);
     }
 
     @Override
@@ -1045,9 +1045,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         String V3_TABLE_DELETE = "/v3/table/delete/%s/%s";
 
-        String V3_IMPORT = "/v3/table/import/%s/%s/%s";
-
-        String V3_EXPORT = "/v3/table/import/%s/%s/%s";
+        String V3_TABLE_IMPORT = "/v3/table/import/%s/%s/msgpack.gz";
 
         String V3_EXPORTJOB_SUBMIT = "/v3/export/run/%s/%s";
 
@@ -1063,8 +1061,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     }
 
     static class HttpConnectionImpl {
-        private static Logger LOG = Logger.getLogger(HttpConnectionImpl.class.getName());
-
         private static final SimpleDateFormat RFC2822FORMAT =
             new SimpleDateFormat( "E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH );
 
