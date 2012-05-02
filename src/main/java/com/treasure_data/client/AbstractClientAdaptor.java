@@ -17,13 +17,9 @@
 //
 package com.treasure_data.client;
 
-import java.util.logging.Logger;
-
 import com.treasure_data.auth.TreasureDataCredentials;
 
 public abstract class AbstractClientAdaptor implements ClientAdaptor {
-    private static Logger LOG = Logger.getLogger(AbstractClientAdaptor.class.getName());
-
     private Config conf;
 
     public AbstractClientAdaptor(Config conf) {

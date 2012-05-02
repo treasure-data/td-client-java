@@ -19,7 +19,6 @@ package com.treasure_data.client;
 
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.AuthenticateRequest;
