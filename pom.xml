@@ -20,7 +20,7 @@
   <scm>
     <connection>scm:git:git://github.com/treasure-data/td-client-java.git</connection>
     <developerConnection>scm:git:git@github.com:treasure-data/td-client-java.git</developerConnection>
-    <url>scm:git:git://github.com/treasure-data/td-client-java.git</url>
+    <url>https://github.com/treasure-data/td-client-java</url>
   </scm>
 
   <developers>
