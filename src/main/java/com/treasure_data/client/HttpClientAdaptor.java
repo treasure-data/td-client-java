@@ -552,7 +552,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
         validateJavaObject(jsonData, tableMap);
-        System.out.println(jsonData);
 
         String dbName = tableMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
