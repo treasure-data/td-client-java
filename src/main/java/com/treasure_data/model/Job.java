@@ -67,7 +67,7 @@ public class Job extends AbstractModel {
     }
 
     public Job(Database database, String query) {
-        this(null, Job.Type.HIVE, database, query, null);
+        this(database, query, null);
     }
 
     public Job(Database database, String query, String resultTable) {
