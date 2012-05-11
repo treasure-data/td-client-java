@@ -608,7 +608,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
         validateJavaObject(jsonData, map);
-        System.out.println("json data: " + jsonData);
 
         String dbName = (String) map.get("database");
         String tblName = (String) map.get("table");
@@ -880,7 +879,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             // receive response body
             jsonData = conn.getResponseBody();
             validateJSONData(jsonData);
-            System.out.println("jsonData: " + jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
