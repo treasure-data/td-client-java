@@ -96,15 +96,15 @@ public class TreasureDataClient {
 
     public void authenticate(String email, String password)
             throws ClientException {
-        AuthenticateResult result = clientAdaptor.authenticate(
-                new AuthenticateRequest(email, password));
-        TreasureDataCredentials credentials =  result.getTreasureDataCredentials();
-        setTreasureDataCredentials(credentials);
+        authenticate(new AuthenticateRequest(email, password));
     }
 
     public AuthenticateResult authenticate(AuthenticateRequest request)
             throws ClientException {
-        return clientAdaptor.authenticate(request);
+        AuthenticateResult result = clientAdaptor.authenticate(request);
+        TreasureDataCredentials credentials =  result.getTreasureDataCredentials();
+        setTreasureDataCredentials(credentials);
+        return result;
     }
 
     // Server Status API
