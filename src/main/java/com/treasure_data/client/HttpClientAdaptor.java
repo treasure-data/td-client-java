@@ -123,7 +123,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public AuthenticateResult authenticate(AuthenticateRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        validateCredentials(request);
 
         String jsonData = null;
         try {
