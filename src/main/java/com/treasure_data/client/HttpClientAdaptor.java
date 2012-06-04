@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONValue;
@@ -1149,6 +1150,10 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                     conn.setRequestProperty(e.getKey(), e.getValue());
                 }
             }
+
+            if (LOG.isLoggable(Level.FINE)) {
+                LOG.fine(sbuf.toString());
+            }
             conn.connect();
         }
 
@@ -1228,7 +1233,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // environment variables
             hostAndPort = System.getenv(Config.TD_ENV_API_SERVER);
-            if (hostAndPort != null) {
+            if (hostAndPort != null && !hostAndPort.isEmpty()) {
                 return hostAndPort;
             }
 
