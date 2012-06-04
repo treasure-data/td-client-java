@@ -36,6 +36,10 @@ public class TableSummary extends Table {
     public TableSummary(Database database, String name, Table.Type type,
             long count, String schema, String createdAt, String updatedAt) {
         super(database, name, type);
+        this.count = count;
+        this.schema = schema;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public long getCount() {

@@ -32,18 +32,20 @@ public class TestListTables {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Test @Ignore
+    @Test
     public void testListTables00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
 
-        ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
+        //ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
+        ListTablesRequest request = new ListTablesRequest(new Database("mugatest"));
         ListTablesResult result = clientAdaptor.listTables(request);
         List<TableSummary> tables = result.getTables();
         for (TableSummary table : tables) {
             System.out.println(table.getDatabase().getName());
             System.out.println(table.getName());
+            System.out.println(table.getSchema());
             System.out.println(table.getType());
             System.out.println(table.getCount());
         }
