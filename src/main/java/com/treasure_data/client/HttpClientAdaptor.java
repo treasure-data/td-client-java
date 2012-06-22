@@ -594,7 +594,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
             // receive response code
             int code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Delete table failed (%s (%d): %s)",
+                String msg = String.format("Delete partial table failed (%s (%d): %s)",
                         new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
                 LOG.severe(msg);
                 throw new ClientException(msg);
@@ -1113,7 +1113,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         String V3_TABLE_DELETE = "/v3/table/delete/%s/%s";
 
-        String V3_TABLE_DELETE_PARTIAL = "/v3/table/delete/%s/%s";
+        String V3_TABLE_DELETE_PARTIAL = "/v3/table/partialdelete/%s/%s";
 
         String V3_TABLE_IMPORT = "/v3/table/import/%s/%s/msgpack.gz";
 
