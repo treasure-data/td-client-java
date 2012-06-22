@@ -26,6 +26,8 @@ import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
+import com.treasure_data.model.DeletePartialTableRequest;
+import com.treasure_data.model.DeletePartialTableResult;
 import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.DeleteTableResult;
 import com.treasure_data.model.ExportRequest;
@@ -75,6 +77,8 @@ public interface ClientAdaptor {
     CreateTableResult createTable(CreateTableRequest request) throws ClientException;
 
     DeleteTableResult deleteTable(DeleteTableRequest request) throws ClientException;
+
+    DeletePartialTableResult deletePartialTable(DeletePartialTableRequest request) throws ClientException;
 
     // Import and Export API
 

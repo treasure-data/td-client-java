@@ -54,6 +54,8 @@ import com.treasure_data.model.Database;
 import com.treasure_data.model.DatabaseSummary;
 import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
+import com.treasure_data.model.DeletePartialTableRequest;
+import com.treasure_data.model.DeletePartialTableResult;
 import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.DeleteTableResult;
 import com.treasure_data.model.ExportRequest;
@@ -570,6 +572,68 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     }
 
     @Override
+    public DeletePartialTableResult deletePartialTable(DeletePartialTableRequest request)
+            throws ClientException {
+        request.setCredentials(getConfig().getCredentials());
+        checkCredentials(request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_TABLE_DELETE_PARTIAL,
+                    e(request.getDatabase().getName()),
+                    e(request.getTable().getName()));
+            Map<String, String> header = null;
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("from", "" + request.getFrom());
+            params.put("to", "" + request.getTo());
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Delete table failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data
+        @SuppressWarnings("unchecked")
+        Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
+        validateJavaObject(jsonData, tableMap);
+
+        String dbName = tableMap.get("database");
+        if (!dbName.equals(request.getDatabase().getName())) {
+            String msg = String.format("invalid database name: expected=%s, actual=%s",
+                    request.getDatabase().getName(), dbName);
+            throw new ClientException(msg);
+        }
+        String tableName = tableMap.get("table");
+        if (!tableName.equals(request.getTable().getName())) {
+            String msg = String.format("invalid table name: expected=%s, actual=%s",
+                    request.getTable().getName(), dbName);
+            throw new ClientException(msg);
+        }
+        String message = tableMap.get("message");
+
+        return new DeletePartialTableResult(request.getDatabase(), tableName, message);
+    }
+
+    @Override
     public ImportResult importData(ImportRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         checkCredentials(request);
@@ -1048,6 +1112,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         String V3_TABLE_CREATE = "/v3/table/create/%s/%s/%s";
 
         String V3_TABLE_DELETE = "/v3/table/delete/%s/%s";
+
+        String V3_TABLE_DELETE_PARTIAL = "/v3/table/delete/%s/%s";
 
         String V3_TABLE_IMPORT = "/v3/table/import/%s/%s/msgpack.gz";
 
