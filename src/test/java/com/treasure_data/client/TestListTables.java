@@ -32,7 +32,7 @@ public class TestListTables {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
     }
 
-    @Test
+    @Test @Ignore
     public void testListTables00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
