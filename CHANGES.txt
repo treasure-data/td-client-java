@@ -1,4 +1,7 @@
 Release 0.1.1 - 20XX/XX/XX
+  NEW FEATURES
+    Adds new API: deletePartialTable method in TreasureDataClient class
+
   BUG FIXMES
     Fixes bug: cannot submit query strings with Job API
 
