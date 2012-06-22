@@ -31,6 +31,8 @@ import com.treasure_data.model.Database;
 import com.treasure_data.model.DatabaseSummary;
 import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
+import com.treasure_data.model.DeletePartialTableRequest;
+import com.treasure_data.model.DeletePartialTableResult;
 import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.DeleteTableResult;
 import com.treasure_data.model.ExportRequest;
@@ -193,6 +195,17 @@ public class TreasureDataClient {
     public DeleteTableResult deleteTable(DeleteTableRequest request)
             throws ClientException {
 	return clientAdaptor.deleteTable(request);
+    }
+
+    public void deletePartiallTable(String databaseName, String tableName,
+            long from, long to) throws ClientException {
+        clientAdaptor.deletePartialTable(new DeletePartialTableRequest(
+                new Table(new Database(databaseName), tableName), from, to));
+    }
+
+    public DeletePartialTableResult deletePartiallTable(DeletePartialTableRequest request)
+            throws ClientException {
+        return clientAdaptor.deletePartialTable(request);
     }
 
     // TODO #MN add it in next version
