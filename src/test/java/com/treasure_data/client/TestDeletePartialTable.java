@@ -96,8 +96,8 @@ public class TestDeletePartialTable {
     private void deletePartialTable(HttpClientAdaptor clientAdaptor,
             String databaseName, String tableName) throws Exception {
         long baseTime = 1337000400;//1340000000
-        long from = 1337000400 + 3600 * 10;
-        long to = 1337000400 + 3600 * 20;
+        long from = 1337000400 + 3600 * 50;
+        long to = 1337000400 + 3600 * 60;
         DeletePartialTableRequest req = new DeletePartialTableRequest(
                 new Table(new Database(databaseName), tableName), from, to);
         DeletePartialTableResult res = clientAdaptor.deletePartialTable(req);
