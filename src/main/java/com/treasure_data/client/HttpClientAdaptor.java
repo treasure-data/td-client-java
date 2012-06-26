@@ -613,24 +613,19 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         // parse JSON data
         @SuppressWarnings("unchecked")
-        Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, tableMap);
+        Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
+        validateJavaObject(jsonData, jobMap);
 
-        String dbName = tableMap.get("database");
+        String jobID = jobMap.get("job_id");
+        String dbName = jobMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
                     request.getDatabase().getName(), dbName);
             throw new ClientException(msg);
         }
-        String tableName = tableMap.get("table");
-        if (!tableName.equals(request.getTable().getName())) {
-            String msg = String.format("invalid table name: expected=%s, actual=%s",
-                    request.getTable().getName(), dbName);
-            throw new ClientException(msg);
-        }
-        String message = tableMap.get("message");
 
-        return new DeletePartialTableResult(request.getDatabase(), tableName, message);
+        Job job = new Job(jobID, Job.Type.MAPRED, request.getDatabase(), null, null);
+        return new DeletePartialTableResult(job);
     }
 
     @Override

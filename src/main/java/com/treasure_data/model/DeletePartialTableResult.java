@@ -17,16 +17,10 @@
 //
 package com.treasure_data.model;
 
-public class DeletePartialTableResult extends TableSpecifyResult<Table> {
+public class DeletePartialTableResult extends SubmitJobResult {
 
-    private String message;
-
-    public DeletePartialTableResult(Database database, String tableName, String message) {
-        super(new Table(database, tableName));
-        this.message = message;
+    public DeletePartialTableResult(Job job) {
+        super(job);
     }
 
-    public String getMessage() {
-        return message;
-    }
 }

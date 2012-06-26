@@ -34,6 +34,7 @@ import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.DeleteTableResult;
 import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
+import com.treasure_data.model.Job;
 import com.treasure_data.model.Request;
 import com.treasure_data.model.Table;
 
@@ -96,12 +97,14 @@ public class TestDeletePartialTable {
     private void deletePartialTable(HttpClientAdaptor clientAdaptor,
             String databaseName, String tableName) throws Exception {
         long baseTime = 1337000400;//1340000000
-        long from = 1337000400 + 3600 * 50;
-        long to = 1337000400 + 3600 * 60;
+        //long from = 1337000400 + 3600 * 90;
+        long from = 1338775200 - 3600 * 10;
+        //long to = 1337000400 + 3600 * 100;
+        long to = 1338775200 + 3600 * 30;
         DeletePartialTableRequest req = new DeletePartialTableRequest(
                 new Table(new Database(databaseName), tableName), from, to);
         DeletePartialTableResult res = clientAdaptor.deletePartialTable(req);
-        System.out.println(res.getMessage());
+        System.out.println(res.getJobID());
     }
 
     @Test
@@ -161,9 +164,8 @@ public class TestDeletePartialTable {
         @Override
         String getResponseBody() throws IOException {
             Map<String, String> map = new HashMap<String, String>();
+            map.put("job_id", "12345");
             map.put("database", "testdb");
-            map.put("table", "testtbl");
-            map.put("message", "Successfully");
             String jsonData = JSONValue.toJSONString(map);
             return jsonData;
         }
@@ -191,8 +193,8 @@ public class TestDeletePartialTable {
         DeletePartialTableRequest request = new DeletePartialTableRequest(new Table(
                 new Database(databaseName), tableName, Table.Type.LOG), 3600 * 100, 3600 * 200);
         DeletePartialTableResult result = clientAdaptor.deletePartialTable(request);
-        assertEquals(databaseName, result.getDatabase().getName());
-        assertEquals(tableName, result.getTableName());
+        Job job = result.getJob();
+        assertEquals(databaseName, job.getDatabase().getName());
     }
 
     static class HttpConnectionImplforDeletePartialTable02 extends HttpConnectionImpl {
