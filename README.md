@@ -85,15 +85,140 @@ directory.  File name will be td-client-${client.version}-jar-with-dependencies.
 For more detail, see pom.xml.
 
 **Replace ${client.version} with the current version of Treasure Data Cloud for Java.**
-**The current version is 0.1.0.**
+**The current version is 0.1.1.**
 
 ## Quickstart
 
-### Small example with a client library for Treasure Data Cloud
+### List Databases and Tables
 
-The following program is a small example of td-client.
+Below is an example of listing databases and tables.
 
-under construction...
+    import java.io.IOException;
+    import java.util.List;
+    import java.util.Properties;
+    
+    import com.treasure_data.client.ClientException;
+    import com.treasure_data.client.TreasureDataClient;
+    import com.treasure_data.model.DatabaseSummary;
+    import com.treasure_data.model.TableSummary;
+    
+    public class Main {
+        static {
+            try {
+                Properties props = System.getProperties();
+                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+            } catch (IOException e) {
+                // do something
+            }
+        }
+    
+        public void doApp() throws ClientException {
+            TreasureDataClient client = new TreasureDataClient();
+    
+            List<DatabaseSummary> databases = client.listDatabases();
+            for (DatabaseSummary database : databases) {
+                String databaseName = database.getName();
+                List<TableSummary> tables = client.listTables(databaseName);
+                for (TableSummary table : tables) {
+                    System.out.println(databaseName);
+                    System.out.println(table.getName());
+                    System.out.println(table.getCount());
+                }
+            }
+        }
+    }
+
+please configure your treasure-data.properties file using the commands shown below:
+
+    td.api.key=<your API key>
+    td.api.server.host=api.treasure-data.com
+    td.api.server.port=80
+
+### Issue Queries
+
+Below is an example of issuing a query from a Java program. The query API is asynchronous, and you can wait for the query to complete by polling the job periodically.
+
+    import org.msgpack.unpacker.Unpacker;
+    import org.msgpack.unpacker.UnpackerIterator;
+    
+    import com.treasure_data.client.ClientException;
+    import com.treasure_data.client.TreasureDataClient;
+    import com.treasure_data.model.Database;
+    import com.treasure_data.model.Job;
+    import com.treasure_data.model.JobResult;
+    import com.treasure_data.model.JobSummary;
+    
+    public class Main {
+        static {
+            try {
+                Properties props = System.getProperties();
+                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+            } catch (IOException e) {
+                // do something
+            }
+        }
+    
+        public void doApp() throws ClientException {
+            TreasureDataClient client = new TreasureDataClient();
+
+            Job job = new Job(new Database("testdb"), "SELECT COUNT(1) FROM www_access");
+            client.submitJob(job);
+            System.out.println(job.getJobID());
+    
+            while (true) {
+                JobSummary jobSummary = client.showJob(job);
+                System.out.println(jobSummary.getStatus());
+                if (jobSummary.getStatus() == JobSummary.Status.SUCCESS) {
+                    break;
+                }
+    
+                try {
+                    Thread.sleep(2 * 1000);
+                } catch (InterruptedException e) {
+                }
+            }
+    
+            JobResult jobResult = client.getJobResult(job);
+            Unpacker unpacker = jobResult.getResult();
+            UnpackerIterator iter = unpacker.iterator();
+            while (iter.hasNext()) {
+                System.out.println(iter.next());
+            }
+        }
+    }
+
+### List and Get the Status of Jobs
+
+Below is an example of listing and get the status of jobs.
+
+    import java.io.IOException;
+    import java.util.List;
+    import java.util.Properties;
+
+    import com.treasure_data.client.ClientException;
+    import com.treasure_data.client.TreasureDataClient;
+    import com.treasure_data.model.JobSummary;
+    
+    public class Main {
+        static {
+            try {
+                Properties props = System.getProperties();
+                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+            } catch (IOException e) {
+                // do something
+            }
+        }
+    
+        public void doApp() throws ClientException {
+            TreasureDataClient client = new TreasureDataClient();
+    
+            List<JobSummary> jobs = client.listJobs(0, 127);
+            for (JobSummary job : jobs) {
+                System.out.println(job.getJobID());
+                System.out.println(job.getStatus());
+            }
+        }
+    }
 
 ## License
 
