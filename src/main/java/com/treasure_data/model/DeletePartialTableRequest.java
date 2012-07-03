@@ -31,11 +31,23 @@ public class DeletePartialTableRequest extends TableSpecifyRequest<Table> {
     }
 
     private void validateParameters() {
-        if (to <= 0 || to % 3600 != 0) {
-            throw new IllegalArgumentException("Invalid parameter: to = " + from);
+        if (to <= 0) {
+            throw new IllegalArgumentException(String.format(
+                    "'to' must be a positive number: to=%d", to));
+        } else if (to % 3600 != 0) {
+            throw new IllegalArgumentException(String.format(
+                    "'to' parameter must be a multiple of 3600: to=%d", to));
         }
-        if (from <= 0 || to - from <= 0 || from % 3600 != 0) {
-            throw new IllegalArgumentException("Invalid parameter: from = " + from);
+
+        if (from < 0) {
+            throw new IllegalArgumentException(String.format(
+                    "'from' must be a positive number (>= 0): from=%d", from));
+        } else if (to - from <= 0) {
+            throw new IllegalArgumentException(String.format(
+                    "'from' must be less than 'to': from=%d", from));
+        } else if (from % 3600 != 0) {
+            throw new IllegalArgumentException(String.format(
+                    "'from' parameter must be a multiple of 3600: from=%d", from));
         }
     }
 

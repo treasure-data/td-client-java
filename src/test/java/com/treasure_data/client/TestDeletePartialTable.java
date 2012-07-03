@@ -113,6 +113,15 @@ public class TestDeletePartialTable {
             new DeletePartialTableRequest(new Table(new Database(databaseName),
                     tableName, Table.Type.LOG), 3600 * 100, 3600 * 200);
         }
+        { // from = 0, to = 0
+            try {
+                new DeletePartialTableRequest(new Table(new Database(databaseName),
+                        tableName, Table.Type.LOG), 0, 0);
+                fail();
+            } catch (Throwable t) {
+                assertTrue(t instanceof IllegalArgumentException);
+            }
+        }
         { // from = -1, to = 3600 * 200
             try {
                 new DeletePartialTableRequest(new Table(new Database(databaseName),
