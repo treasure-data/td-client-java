@@ -19,13 +19,16 @@ package com.treasure_data.model.bulkimport;
 
 import java.util.List;
 
-public class ListFilesResult extends BulkImportSpecifyResult<Session> {
+public class ListPartsResult extends BulkImportSpecifyResult<Session> {
 
-    public ListFilesResult(Session sess) {
+    private List<String> parts;
+
+    public ListPartsResult(Session sess, List<String> parts) {
         super(sess);
+        this.parts = parts;
     }
 
-    public List<String> getUploadedFiles() {
-        return get().getUploadedFiles();
+    public List<String> getParts() {
+        return parts;
     }
 }

@@ -17,9 +17,9 @@
 //
 package com.treasure_data.model.bulkimport;
 
-public class ListFilesRequest extends BulkImportSpecifyRequest<Session> {
+public class ListPartsRequest extends BulkImportSpecifyRequest<Session> {
 
-    public ListFilesRequest(Session sess) {
+    public ListPartsRequest(Session sess) {
         super(sess);
     }
 }
