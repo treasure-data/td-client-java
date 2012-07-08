@@ -22,36 +22,36 @@ import com.treasure_data.model.bulkimport.CommitSessionRequest;
 import com.treasure_data.model.bulkimport.CommitSessionResult;
 import com.treasure_data.model.bulkimport.CreateSessionRequest;
 import com.treasure_data.model.bulkimport.CreateSessionResult;
-import com.treasure_data.model.bulkimport.DeleteFileRequest;
-import com.treasure_data.model.bulkimport.DeleteFileResult;
+import com.treasure_data.model.bulkimport.DeletePartRequest;
+import com.treasure_data.model.bulkimport.DeletePartResult;
 import com.treasure_data.model.bulkimport.DeleteSessionRequest;
 import com.treasure_data.model.bulkimport.DeleteSessionResult;
 import com.treasure_data.model.bulkimport.FreezeSessionRequest;
 import com.treasure_data.model.bulkimport.FreezeSessionResult;
 import com.treasure_data.model.bulkimport.GetErrorRecordsRequest;
 import com.treasure_data.model.bulkimport.GetErrorRecordsResult;
-import com.treasure_data.model.bulkimport.ListFilesRequest;
-import com.treasure_data.model.bulkimport.ListFilesResult;
+import com.treasure_data.model.bulkimport.ListPartsRequest;
+import com.treasure_data.model.bulkimport.ListPartsResult;
 import com.treasure_data.model.bulkimport.ListSessionsRequest;
 import com.treasure_data.model.bulkimport.ListSessionsResult;
 import com.treasure_data.model.bulkimport.PerformSessionRequest;
 import com.treasure_data.model.bulkimport.PerformSessionResult;
 import com.treasure_data.model.bulkimport.UnfreezeSessionRequest;
 import com.treasure_data.model.bulkimport.UnfreezeSessionResult;
-import com.treasure_data.model.bulkimport.UploadFileRequest;
-import com.treasure_data.model.bulkimport.UploadFileResult;
+import com.treasure_data.model.bulkimport.UploadPartRequest;
+import com.treasure_data.model.bulkimport.UploadPartResult;
 
 public interface BulkImportClientAdaptor {
 
     ListSessionsResult listSessions(ListSessionsRequest request) throws ClientException;
 
-    ListFilesResult listFiles(ListFilesRequest request) throws ClientException;
+    ListPartsResult listParts(ListPartsRequest request) throws ClientException;
 
     CreateSessionResult createSession(CreateSessionRequest request) throws ClientException;
 
-    UploadFileResult uploadFile(UploadFileRequest request) throws ClientException;
+    UploadPartResult uploadPart(UploadPartRequest request) throws ClientException;
 
-    DeleteFileResult deleteFile(DeleteFileRequest request) throws ClientException;
+    DeletePartResult deletePart(DeletePartRequest request) throws ClientException;
 
     PerformSessionResult performSession(PerformSessionRequest request) throws ClientException;
 
