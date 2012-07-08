@@ -31,6 +31,8 @@ public class Session extends AbstractModel {
 
     public Session(String name, String databaseName, String tableName) {
         super(name);
+        this.databaseName = databaseName;
+        this.tableName = tableName;
     }
 
     public String getDatabaseName() {
@@ -43,5 +45,11 @@ public class Session extends AbstractModel {
 
     public List<String> getUploadedFiles() {
         return files;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Session{name=%s, db=%s, tbl=%s}",
+                getName(), getDatabaseName(), getTableName());
     }
 }
