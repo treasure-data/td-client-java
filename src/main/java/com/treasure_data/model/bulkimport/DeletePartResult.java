@@ -17,9 +17,9 @@
 //
 package com.treasure_data.model.bulkimport;
 
-public class DeleteFileResult extends BulkImportSpecifyResult<Session> {
+public class DeletePartResult extends BulkImportSpecifyResult<Session> {
 
-    public DeleteFileResult(Session sess) {
+    public DeletePartResult(Session sess) {
         super(sess);
     }
 

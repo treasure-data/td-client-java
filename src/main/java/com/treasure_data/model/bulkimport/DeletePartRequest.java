@@ -17,16 +17,16 @@
 //
 package com.treasure_data.model.bulkimport;
 
-public class DeleteFileRequest extends BulkImportSpecifyRequest<Session> {
+public class DeletePartRequest extends BulkImportSpecifyRequest<Session> {
 
-    private String fileID;
+    private String partID;
 
-    public DeleteFileRequest(Session sess, String fileID) {
+    public DeletePartRequest(Session sess, String partID) {
         super(sess);
-        this.fileID = fileID;
+        this.partID = partID;
     }
 
-    public String getFileID() {
-        return fileID;
+    public String getPartID() {
+        return partID;
     }
 }
