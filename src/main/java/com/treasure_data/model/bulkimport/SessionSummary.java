@@ -18,9 +18,71 @@
 package com.treasure_data.model.bulkimport;
 
 public class SessionSummary extends Session {
-
-    public SessionSummary(String name, String databaseName, String tableName) {
-        super(name, databaseName, tableName);
+    public static enum Status {
+        READY, UPLOADING, UNKNOWN;
     }
 
+    public static Status toStatus(String statusName) {
+        if (statusName == null) {
+            throw new NullPointerException();
+        }
+
+        if (statusName.equals("ready")) {
+            return Status.READY;
+        } else if (statusName.equals("uploading")) {
+            return Status.UPLOADING;
+        } else {
+            return Status.UNKNOWN;
+        }
+    }
+
+    public static String toStatusName(Status status) {
+        if (status == null) {
+            throw new NullPointerException();
+        }
+
+        switch (status) {
+        case READY:
+            return "ready";
+        case UPLOADING:
+            return "uploading";
+        default:
+            return "unknown";
+        }
+    }
+
+    private Status status;
+
+    private boolean uploadFrozen;
+
+    private String jobID; // nullable
+
+    private long validRecords;
+
+    private long errorRecords;
+
+    private long validParts;
+
+    private long errorParts;
+
+    public SessionSummary(String name, String databaseName, String tableName,
+            Status status, boolean uploadFrozen, String jobID,
+            long validRecords, long errorRecords,
+            long validParts, long errorParts) {
+        super(name, databaseName, tableName);
+        this.status = status;
+        this.uploadFrozen = uploadFrozen;
+        this.jobID = jobID;
+        this.validRecords = validRecords;
+        this.errorRecords = errorRecords;
+        this.validParts = validParts;
+        this.errorParts = errorParts;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("SessionSummary{name=%s, db=%s, tbl=%s, frozen=%b, stat=%s, jid=%s, vr=%d, er=%d, vp=%d, ep=%d}",
+                getName(), getDatabaseName(), getTableName(), toStatusName(status),
+                uploadFrozen, jobID, validRecords, errorRecords, validParts, errorParts);
+    }
 }
