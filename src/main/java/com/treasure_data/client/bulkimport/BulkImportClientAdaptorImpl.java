@@ -45,16 +45,16 @@ import com.treasure_data.model.bulkimport.CommitSessionRequest;
 import com.treasure_data.model.bulkimport.CommitSessionResult;
 import com.treasure_data.model.bulkimport.CreateSessionRequest;
 import com.treasure_data.model.bulkimport.CreateSessionResult;
-import com.treasure_data.model.bulkimport.DeleteFileRequest;
-import com.treasure_data.model.bulkimport.DeleteFileResult;
+import com.treasure_data.model.bulkimport.DeletePartRequest;
+import com.treasure_data.model.bulkimport.DeletePartResult;
 import com.treasure_data.model.bulkimport.DeleteSessionRequest;
 import com.treasure_data.model.bulkimport.DeleteSessionResult;
 import com.treasure_data.model.bulkimport.FreezeSessionRequest;
 import com.treasure_data.model.bulkimport.FreezeSessionResult;
 import com.treasure_data.model.bulkimport.GetErrorRecordsRequest;
 import com.treasure_data.model.bulkimport.GetErrorRecordsResult;
-import com.treasure_data.model.bulkimport.ListFilesRequest;
-import com.treasure_data.model.bulkimport.ListFilesResult;
+import com.treasure_data.model.bulkimport.ListPartsRequest;
+import com.treasure_data.model.bulkimport.ListPartsResult;
 import com.treasure_data.model.bulkimport.ListSessions;
 import com.treasure_data.model.bulkimport.ListSessionsRequest;
 import com.treasure_data.model.bulkimport.ListSessionsResult;
@@ -64,8 +64,8 @@ import com.treasure_data.model.bulkimport.Session;
 import com.treasure_data.model.bulkimport.SessionSummary;
 import com.treasure_data.model.bulkimport.UnfreezeSessionRequest;
 import com.treasure_data.model.bulkimport.UnfreezeSessionResult;
-import com.treasure_data.model.bulkimport.UploadFileRequest;
-import com.treasure_data.model.bulkimport.UploadFileResult;
+import com.treasure_data.model.bulkimport.UploadPartRequest;
+import com.treasure_data.model.bulkimport.UploadPartResult;
 
 public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     private static Logger LOG = Logger.getLogger(BulkImportClientAdaptorImpl.class.getName());
@@ -95,7 +95,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
         String V3_UPLOAD_PART = "/v3/bulk_import/upload_part/%s/%s";
 
-        String V3_DELETE_PART = "/v3/bulk_import/delete_part/&s/%s";
+        String V3_DELETE_PART = "/v3/bulk_import/delete_part/%s/%s";
 
         String V3_LIST_PARTS = "/v3/bulk_import/list_parts/%s";
 
@@ -151,121 +151,147 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public ListSessionsResult listSessions(ListSessionsRequest request)
             throws ClientException {
-        return null;
-//        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-//        validator.checkCredentials(clientAdaptor, request);
-//
-//        String jsonData = null;
-//        try {
-//            conn = createConnection();
-//
-//            // send request
-//            String path = HttpURL.V3_LIST;
-//            Map<String, String> header = null;
-//            Map<String, String> params = null;
-//            conn.doGetRequest(request, path, header, params);
-//
-//            // receive response code and body
-//            int code = conn.getResponseCode();
-//            if (code != HttpURLConnection.HTTP_OK) {
-//                String msg = String.format("List databases failed (%s (%d): %s)",
-//                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-//                LOG.severe(msg);
-//                throw new ClientException(msg);
-//            }
-//
-//            // receive response body
-//            jsonData = conn.getResponseBody();
-//            validator.validateJSONData(jsonData);
-//        } catch (IOException e) {
-//            throw new ClientException(e);
-//        } finally {
-//            if (conn != null) {
-//                conn.disconnect();
-//            }
-//        }
-//
-//        // parse JSON data
-//        @SuppressWarnings("rawtypes")
-//        Map map = (Map) JSONValue.parse(jsonData);
-//        validator.validateJavaObject(jsonData, map);
-//
-//        // TODO #MN "bulk_imports"
-//        @SuppressWarnings("unchecked")
-//        Iterator<Map<String, Object>> dbMaps =
-//            ((List<Map<String, Object>>) map.get("databases")).iterator();
-//        List<DatabaseSummary> databases = new ArrayList<DatabaseSummary>();
-//        while (dbMaps.hasNext()) {
-//            Map<String, Object> dbMap = dbMaps.next();
-//            String name = (String) dbMap.get("name");
-//            long count = (Long) dbMap.get("count");
-//            String createdAt = (String) dbMap.get("created_at");
-//            String updatedAt = (String) dbMap.get("updated_at");
-//            databases.add(new DatabaseSummary(name, count, createdAt, updatedAt));
-//        }
-//
-//        return new ListSessionsResult(new ListSessions<SessionSummary>(sessions));
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = HttpURL.V3_LIST;
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doGetRequest(request, path, header, params);
+
+            // receive response code and body
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("List sessions failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data
+        // {"bulk_imports":
+        //   [
+        //     {"name":"t01",
+        //      "database":"sfdb",
+        //      "table":"bi02",
+        //      "status":"ready",
+        //      "upload_frozen":false,
+        //      "job_id":"70220",
+        //      "valid_records":100,
+        //      "error_records":10,
+        //      "valid_parts":2,
+        //      "error_parts":1},
+        //     {"name":"sess01",
+        //      "database":"mugadb",
+        //      "table":"test04",
+        //      "status":"uploading",
+        //      "upload_frozen":false,
+        //      "job_id":null,
+        //      "valid_records":null,
+        //      "error_records":null,
+        //      "valid_parts":null,
+        //      "error_parts":null}]}
+        @SuppressWarnings("rawtypes")
+        Map map = (Map) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        @SuppressWarnings("unchecked")
+        Iterator<Map<String, Object>> sessIter =
+            ((List<Map<String, Object>>) map.get("bulk_imports")).iterator();
+        List<SessionSummary> sessions = new ArrayList<SessionSummary>();
+        while (sessIter.hasNext()) {
+            Map<String, Object> sess = sessIter.next();
+            String name = (String) sess.get("name");
+            String database = (String) sess.get("database");
+            String table = (String) sess.get("table");
+            String status = (String) sess.get("status");
+            boolean upload_frozen = (Boolean) sess.get("upload_frozen");
+            String job_id = (String) sess.get("job_id");
+            Long vr = (Long) sess.get("valid_records");
+            long valid_records = vr != null ? vr : 0;
+            Long er = (Long) sess.get("error_records");
+            long error_records = er != null ? er : 0;
+            Long vp = (Long) sess.get("valid_parts");
+            long valid_parts = vp != null ? vp : 0;
+            Long ep = (Long) sess.get("error_parts");
+            long error_parts = ep != null ? ep : 0;
+            SessionSummary summary = new SessionSummary(name, database, table,
+                    SessionSummary.toStatus(status), upload_frozen, job_id,
+                    valid_records, error_records, valid_parts, error_parts);
+            sessions.add(summary);
+        }
+
+        return new ListSessionsResult(new ListSessions<SessionSummary>(sessions));
     }
 
     @Override
-    public ListFilesResult listFiles(ListFilesRequest request)
+    public ListPartsResult listParts(ListPartsRequest request)
             throws ClientException {
-        return null;
-//        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-//        validator.checkCredentials(clientAdaptor, request);
-//
-//        String jsonData = null;
-//        try {
-//            conn = createConnection();
-//
-//            // send request
-//            String path = String.format(HttpURL.V3_LIST_PARTS,
-//                    e(request.getSessionName()));
-//            Map<String, String> header = null;
-//            Map<String, String> params = null;
-//            conn.doGetRequest(request, path, header, params);
-//
-//            // receive response code and body
-//            int code = conn.getResponseCode();
-//            if (code != HttpURLConnection.HTTP_OK) {
-//                String msg = String.format("List databases failed (%s (%d): %s)",
-//                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-//                LOG.severe(msg);
-//                throw new ClientException(msg);
-//            }
-//
-//            // receive response body
-//            jsonData = conn.getResponseBody();
-//            validator.validateJSONData(jsonData);
-//        } catch (IOException e) {
-//            throw new ClientException(e);
-//        } finally {
-//            if (conn != null) {
-//                conn.disconnect();
-//            }
-//        }
-//
-//        // parse JSON data
-//        @SuppressWarnings("rawtypes")
-//        Map map = (Map) JSONValue.parse(jsonData);
-//        validator.validateJavaObject(jsonData, map);
-//
-//        // TODO #MN "parts"
-//        @SuppressWarnings("unchecked")
-//        Iterator<Map<String, Object>> dbMaps =
-//            ((List<Map<String, Object>>) map.get("databases")).iterator();
-//        List<DatabaseSummary> databases = new ArrayList<DatabaseSummary>();
-//        while (dbMaps.hasNext()) {
-//            Map<String, Object> dbMap = dbMaps.next();
-//            String name = (String) dbMap.get("name");
-//            long count = (Long) dbMap.get("count");
-//            String createdAt = (String) dbMap.get("created_at");
-//            String updatedAt = (String) dbMap.get("updated_at");
-//            databases.add(new DatabaseSummary(name, count, createdAt, updatedAt));
-//        }
-//
-//        // session
-//        return new ListFilesResult(session);
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_LIST_PARTS,
+                    e(request.getSessionName()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doGetRequest(request, path, header, params);
+
+            // receive response code and body
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("List parts failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data {"name":"t01","parts":["error01","ok01"]}
+        @SuppressWarnings("rawtypes")
+        Map map = (Map) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        String sessName = (String) map.get("name");
+        if (!request.getSessionName().equals(sessName)) {
+            String msg = String.format("invalid name: expected=%s, actual=%s",
+                    request.getSessionName(), sessName);
+            throw new ClientException(msg);
+        }
+
+        @SuppressWarnings("unchecked")
+        List<String> parts = (List<String>) map.get("parts");
+        return new ListPartsResult(request.getSession(), parts);
     }
 
     @Override
@@ -290,7 +316,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
             // receive response code
             int code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Create database failed (%s (%d): %s)",
+                String msg = String.format("Create session failed (%s (%d): %s)",
                         new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
                 LOG.severe(msg);
                 throw new ClientException(msg);
@@ -307,13 +333,13 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
             }
         }
 
-        // parse JSON data
-        @SuppressWarnings("unchecked")
-        Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
+        // parse JSON data {"name":"sess01"}
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        Map map = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        String sessName = map.get("name");
-        if (!sessName.equals(request.getDatabaseName())) {
+        String sessName = (String) map.get("name");
+        if (!request.getSessionName().equals(sessName)) {
             String msg = String.format("invalid name: expected=%s, actual=%s",
                     request.getSessionName(), sessName);
             throw new ClientException(msg);
@@ -323,99 +349,107 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     }
 
     @Override
-    public UploadFileResult uploadFile(UploadFileRequest request)
+    public UploadPartResult uploadPart(UploadPartRequest request)
             throws ClientException {
-        return null;
-//        // TODO #MN rename uploadFile to uploadData
-//        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-//        validator.checkCredentials(clientAdaptor, request);
-//
-//        String jsonData = null;
-//        try {
-//            conn = createConnection();
-//
-//            // send request
-//            String path = String.format(HttpURL.V3_UPLOAD_PART,
-//                    e(request.getSessionName()),
-//                    e(request.getFileID()));
-//            conn.doPutRequest(request, path, request.getBytes());
-//
-//            // receive response code
-//            int code = conn.getResponseCode();
-//            if (code != HttpURLConnection.HTTP_OK) {
-//                String msg = String.format("Import data failed (%s (%d): %s)",
-//                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-//                LOG.severe(msg);
-//                throw new ClientException(msg);
-//            }
-//
-//            // receive response body
-//            jsonData = conn.getResponseBody();
-//            validator.validateJSONData(jsonData);
-//        } catch (IOException e) {
-//            throw new ClientException(e);
-//        } finally {
-//            if (conn != null) {
-//                conn.disconnect();
-//            }
-//        }
-//
-//        // parse JSON data
-//        @SuppressWarnings("unchecked")
-//        Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
-//        validator.validateJavaObject(jsonData, map);
-//
-//        // TODO session
-//        return new UploadFileResult(session);
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_UPLOAD_PART,
+                    e(request.getSessionName()),
+                    e(request.getPartID()));
+            conn.doPutRequest(request, path, request.getBytes());
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Upload part failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data {"name":"sess01"}
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        String sessName = (String) map.get("name");
+        if (!request.getSessionName().equals(sessName)) {
+            String msg = String.format("invalid name: expected=%s, actual=%s",
+                    request.getSessionName(), sessName);
+            throw new ClientException(msg);
+        }
+
+        return new UploadPartResult(request.getSession());
     }
 
     @Override
-    public DeleteFileResult deleteFile(DeleteFileRequest request)
+    public DeletePartResult deletePart(DeletePartRequest request)
             throws ClientException {
-        return null;
-//        // TODO #MN rename deleteFile to deleteData
-//        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-//        validator.checkCredentials(clientAdaptor, request);
-//
-//        String jsonData = null;
-//        try {
-//            conn = createConnection();
-//
-//            // send request
-//            String path = String.format(HttpURL.V3_DELETE_PART,
-//                    e(request.getSessionName()),
-//                    e(request.getFileID()));
-//            Map<String, String> header = null;
-//            Map<String, String> params = null;
-//            conn.doPostRequest(request, path, header, params);
-//
-//            // receive response code
-//            int code = conn.getResponseCode();
-//            if (code != HttpURLConnection.HTTP_OK) {
-//                String msg = String.format("Delete table failed (%s (%d): %s)",
-//                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-//                LOG.severe(msg);
-//                throw new ClientException(msg);
-//            }
-//
-//            // receive response body
-//            jsonData = conn.getResponseBody();
-//            validator.validateJSONData(jsonData);
-//        } catch (IOException e) {
-//            throw new ClientException(e);
-//        } finally {
-//            if (conn != null) {
-//                conn.disconnect();
-//            }
-//        }
-//
-//        // parse JSON data
-//        @SuppressWarnings("unchecked")
-//        Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
-//        validator.validateJavaObject(jsonData, tableMap);
-//
-//        // TODO session
-//        return new DeleteFileResult(session);
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_DELETE_PART,
+                    e(request.getSessionName()),
+                    e(request.getPartID()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Delete part failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data {"name":"sess01"}
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        String sessName = (String) map.get("name");
+        if (!request.getSessionName().equals(sessName)) {
+            String msg = String.format("invalid name: expected=%s, actual=%s",
+                    request.getSessionName(), sessName);
+            throw new ClientException(msg);
+        }
+
+        return new DeletePartResult(request.getSession());
     }
 
     @Override
@@ -442,22 +476,157 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public DeleteSessionResult deleteSession(DeleteSessionRequest request)
             throws ClientException {
-        // TODO Auto-generated method stub
-        return null;
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_DELETE,
+                    e(request.getSessionName()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Delete session failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data {"name":"sess01"}
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        String sessName = map.get("name");
+        if (!request.getSessionName().equals(sessName)) {
+            String msg = String.format("invalid name: expected=%s, actual=%s",
+                    request.getSessionName(), sessName);
+            throw new ClientException(msg);
+        }
+
+        return new DeleteSessionResult(request.getSession());
     }
 
     @Override
     public FreezeSessionResult freezeSession(FreezeSessionRequest request)
             throws ClientException {
-        // TODO Auto-generated method stub
-        return null;
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_FREEZE,
+                    e(request.getSessionName()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Freeze session failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data {"name":"sess01"}
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        String sessName = map.get("name");
+        if (!request.getSessionName().equals(sessName)) {
+            String msg = String.format("invalid name: expected=%s, actual=%s",
+                    request.getSessionName(), sessName);
+            throw new ClientException(msg);
+        }
+
+        return new FreezeSessionResult(request.getSession());
     }
 
     @Override
     public UnfreezeSessionResult unfreezeSession(UnfreezeSessionRequest request)
             throws ClientException {
-        // TODO Auto-generated method stub
-        return null;
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_UNFREEZE,
+                    e(request.getSessionName()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Unfreeze session failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data {"name":"sess01"}
+        @SuppressWarnings("unchecked")
+        Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        String sessName = map.get("name");
+        if (!request.getSessionName().equals(sessName)) {
+            String msg = String.format("invalid name: expected=%s, actual=%s",
+                    request.getSessionName(), sessName);
+            throw new ClientException(msg);
+        }
+
+        return new UnfreezeSessionResult(request.getSession());
     }
 
 }
