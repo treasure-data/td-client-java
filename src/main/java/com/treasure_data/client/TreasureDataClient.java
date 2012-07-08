@@ -88,6 +88,10 @@ public class TreasureDataClient {
 	clientAdaptor = createClientAdaptor(credentials, props);
     }
 
+    public ClientAdaptor getClientAdaptor() {
+        return clientAdaptor;
+    }
+
     public TreasureDataCredentials getTreasureDataCredentials() {
         return clientAdaptor.getTreasureDataCredentials();
     }

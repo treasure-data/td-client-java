@@ -101,10 +101,13 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         }
     }
 
+    private Validator validator;
+
     private HttpConnectionImpl conn = null;
 
     HttpClientAdaptor(Config conf) {
 	super(conf);
+	validator = new Validator();
     }
 
     HttpConnectionImpl getConnection() {
@@ -150,7 +153,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -162,7 +165,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, map);
+        validator.validateJavaObject(jsonData, map);
         //String user = map.get("user");
         String apiKey = map.get("apikey");
         TreasureDataCredentials credentails = new TreasureDataCredentials(apiKey);
@@ -192,11 +195,11 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
                 LOG.severe(msg);
             } else {
                 String jsonData = conn.getResponseBody();
-                validateJSONData(jsonData);
+                validator.validateJSONData(jsonData);
 
                 @SuppressWarnings("rawtypes")
                 Map map = (Map) JSONValue.parse(jsonData);
-                validateJavaObject(jsonData, map);
+                validator.validateJavaObject(jsonData, map);
 
                 msg = (String) map.get("status");
             }
@@ -214,7 +217,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public ListDatabasesResult listDatabases(ListDatabasesRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -237,7 +240,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -249,7 +252,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, map);
+        validator.validateJavaObject(jsonData, map);
 
         @SuppressWarnings("unchecked")
         Iterator<Map<String, Object>> dbMaps =
@@ -271,7 +274,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public CreateDatabaseResult createDatabase(CreateDatabaseRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -295,7 +298,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -307,7 +310,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> dbMap = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, dbMap);
+        validator.validateJavaObject(jsonData, dbMap);
 
         String dbName = dbMap.get("database");
         if (!dbName.equals(request.getDatabaseName())) {
@@ -323,7 +326,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public DeleteDatabaseResult deleteDatabase(DeleteDatabaseRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -347,7 +350,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -359,7 +362,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> dbMap = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, dbMap);
+        validator.validateJavaObject(jsonData, dbMap);
 
         String dbName = dbMap.get("database");
         if (!dbName.equals(request.getDatabaseName())) {
@@ -380,7 +383,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         }
 
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -404,7 +407,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -415,7 +418,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, map);
+        validator.validateJavaObject(jsonData, map);
 
         String dbName = (String) map.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
@@ -449,7 +452,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public CreateTableResult createTable(CreateTableRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -475,7 +478,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -487,7 +490,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, tableMap);
+        validator.validateJavaObject(jsonData, tableMap);
 
         String dbName = tableMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
@@ -516,7 +519,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public DeleteTableResult deleteTable(DeleteTableRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -541,7 +544,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -553,7 +556,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, tableMap);
+        validator.validateJavaObject(jsonData, tableMap);
 
         String dbName = tableMap.get("database");
         if (!dbName.equals(request.getDatabase().getName())) {
@@ -575,7 +578,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public DeletePartialTableResult deletePartialTable(DeletePartialTableRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -602,7 +605,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -614,7 +617,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, jobMap);
+        validator.validateJavaObject(jsonData, jobMap);
 
         String jobID = jobMap.get("job_id");
         String dbName = jobMap.get("database");
@@ -631,7 +634,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     @Override
     public ImportResult importData(ImportRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -654,7 +657,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -666,7 +669,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, map);
+        validator.validateJavaObject(jsonData, map);
 
         String dbName = (String) map.get("database");
         String tblName = (String) map.get("table");
@@ -688,7 +691,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     @Override
     public ExportResult exportData(ExportRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -743,7 +746,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -755,7 +758,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, jobMap);
+        validator.validateJavaObject(jsonData, jobMap);
 
         String jobID = jobMap.get("job_id");
         String dbName = jobMap.get("database");
@@ -773,7 +776,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public SubmitJobResult submitJob(SubmitJobRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -808,7 +811,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -820,7 +823,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, jobMap);
+        validator.validateJavaObject(jsonData, jobMap);
 
         String jobID = jobMap.get("job_id");
         String dbName = jobMap.get("database");
@@ -838,7 +841,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     @Override
     public ListJobsResult listJobs(ListJobsRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -873,7 +876,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -884,7 +887,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, map);
+        validator.validateJavaObject(jsonData, map);
 
         long count = (Long) map.get("count");
         long from = (Long) map.get("from");
@@ -913,7 +916,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     @Override
     public KillJobResult killJob(KillJobRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -937,7 +940,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -949,7 +952,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, map);
+        validator.validateJavaObject(jsonData, map);
 
         JobSummary.Status status = JobSummary.toStatus(map.get("former_status"));
         String jobID = map.get("job_id");
@@ -966,7 +969,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public ShowJobResult showJob(ShowJobRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         String jsonData = null;
         try {
@@ -990,7 +993,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // receive response body
             jsonData = conn.getResponseBody();
-            validateJSONData(jsonData);
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
@@ -1002,7 +1005,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap =
             (Map<String, String>) JSONValue.parse(jsonData);
-        validateJavaObject(jsonData, jobMap);
+        validator.validateJavaObject(jsonData, jobMap);
 
         Job.Type type = Job.toType(jobMap.get("type"));
         String jobID = jobMap.get("job_id");
@@ -1020,7 +1023,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
     public GetJobResultResult getJobResult(GetJobResultRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
-        checkCredentials(request);
+        validator.checkCredentials(this, request);
 
         Unpacker unpacker = null;
         try {
@@ -1063,34 +1066,6 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         return new GetJobResultResult(request.getJobResult());
     }
 
-    private void checkCredentials(Request<?> request) throws ClientException {
-        String apiKey = request.getCredentials().getAPIKey();
-        if (apiKey != null) {
-            return;
-        }
-
-        apiKey = getTreasureDataCredentials().getAPIKey();
-        if (apiKey != null) {
-            request.setCredentials(this.getTreasureDataCredentials());
-        }
-
-        throw new ClientException("api key is not set.");
-    }
-
-    private void validateJSONData(String jsonData) throws ClientException {
-        if (jsonData == null) {
-            throw new ClientException(
-                    "JSON data that was returned by server is null");
-        }
-    }
-
-    private void validateJavaObject(String jsonData, Object obj) throws ClientException {
-        if (obj == null) {
-            throw new ClientException(String.format(
-                    "Server error (invalid JSON Data): %s", jsonData));
-        }
-    }
-
     static interface HttpURL {
         String V3_USER_AUTHENTICATE = "/v3/user/authenticate";
 
@@ -1123,194 +1098,5 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
         String V3_JOB_SHOW = "/v3/job/show/%s";
 
         String V3_JOB_RESULT = "/v3/job/result/%s";
-    }
-
-    static class HttpConnectionImpl {
-        private static final SimpleDateFormat RFC2822FORMAT =
-            new SimpleDateFormat( "E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH );
-
-        private HttpURLConnection conn = null;
-
-        HttpConnectionImpl() {
-        }
-
-        void doGetRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append("http://").append(getApiServerPath()).append(path);
-
-            // parameters
-            if (params != null && !params.isEmpty()) {
-                sbuf.append("?");
-                int paramSize = params.size();
-                Iterator<Map.Entry<String, String>> iter = params.entrySet().iterator();
-                for (int i = 0; i < paramSize; ++i) {
-                    Map.Entry<String, String> e = iter.next();
-                    sbuf.append(e.getKey()).append("=").append(e.getValue());
-                    if (i + 1 != paramSize) {
-                        sbuf.append("&");
-                    }
-                }
-            }
-
-            // create connection object with url
-            URL url = new URL(sbuf.toString());
-            conn = (HttpURLConnection) url.openConnection();
-
-            // header
-            conn.setRequestMethod("GET");
-            String apiKey = request.getCredentials().getAPIKey();
-            if (apiKey != null) {
-                conn.setRequestProperty("Authorization", "TD1 " + apiKey);
-            }
-            conn.setRequestProperty("Date", toRFC2822Format(new Date()));
-            if (header != null && !header.isEmpty()) {
-                for (Map.Entry<String, String> e : header.entrySet()) {
-                    conn.setRequestProperty(e.getKey(), e.getValue());
-                }
-            }
-
-            // do connection to server
-            conn.connect();
-        }
-
-        void doPostRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append("http://").append(getApiServerPath()).append(path);
-
-            // parameters
-            if (params != null && !params.isEmpty()) {
-                sbuf.append("?");
-                int paramSize = params.size();
-                Iterator<Map.Entry<String, String>> iter = params.entrySet().iterator();
-                for (int i = 0; i < paramSize; ++i) {
-                    Map.Entry<String, String> e = iter.next();
-                    sbuf.append(e.getKey()).append("=").append(e.getValue());
-                    if (i + 1 != paramSize) {
-                        sbuf.append("&");
-                    }
-                }
-                URL url = new URL(sbuf.toString());
-                conn = (HttpURLConnection) url.openConnection();
-            } else {
-                URL url = new URL(sbuf.toString());
-                conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestProperty("Content-Length", "0");
-            }
-
-            // header
-            conn.setRequestMethod("POST");
-            String apiKey = request.getCredentials().getAPIKey();
-            if (apiKey != null) {
-                conn.setRequestProperty("Authorization", "TD1 " + apiKey);
-            }
-            conn.setRequestProperty("Date", toRFC2822Format(new Date()));
-            if (header != null && !header.isEmpty()) {
-                for (Map.Entry<String, String> e : header.entrySet()) {
-                    conn.setRequestProperty(e.getKey(), e.getValue());
-                }
-            }
-
-            if (LOG.isLoggable(Level.FINE)) {
-                LOG.fine(sbuf.toString());
-            }
-            conn.connect();
-        }
-
-        HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
-                throws IOException {
-            StringBuilder sbuf = new StringBuilder();
-            sbuf.append("http://").append(getApiServerPath()).append(path);
-
-            URL url = new URL(sbuf.toString());
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(600 * 1000);
-            conn.setRequestMethod("PUT");
-            //conn.setRequestProperty("Content-Type", "application/octet-stream");
-            conn.setRequestProperty("Content-Length", "" + bytes.length);
-
-            String apiKey = request.getCredentials().getAPIKey();
-            if (apiKey != null) {
-                conn.setRequestProperty("Authorization", "TD1 " + apiKey);
-            }
-            conn.setRequestProperty("Date", toRFC2822Format(new Date()));
-            conn.setDoOutput(true);
-            conn.setUseCaches (false);
-            //conn.connect();
-
-            // body
-            BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
-            out.write(bytes);
-            out.flush();
-            //out.close();
-
-            return conn;
-        }
-
-        int getResponseCode() throws IOException {
-            return conn.getResponseCode();
-        }
-
-        String getResponseMessage() throws IOException {
-            return conn.getResponseMessage();
-        }
-
-        String getResponseBody() throws IOException {
-            StringBuilder sbuf = new StringBuilder();
-            BufferedReader reader = new BufferedReader( 
-                    new InputStreamReader(conn.getInputStream()));
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                sbuf.append(line);
-            }
-            reader.close();
-            return sbuf.toString();
-        }
-
-        void disconnect() {
-            conn.disconnect();
-        }
-
-        Unpacker getResponseBodyBinary() throws IOException {
-            BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
-            MessagePack msgpack = new MessagePack();
-            BufferUnpacker unpacker = msgpack.createBufferUnpacker();
-            byte[] buf = new byte[1024];
-
-            int len = 0;
-            while ((len = in.read(buf)) != -1) {
-                unpacker.feed(buf, 0, len);
-            }
-
-            return unpacker;
-        }
-
-        private String getApiServerPath() {
-            String hostAndPort = "";
-
-            // environment variables
-            hostAndPort = System.getenv(Config.TD_ENV_API_SERVER);
-            if (hostAndPort != null && !hostAndPort.isEmpty()) {
-                return hostAndPort;
-            }
-
-            // system properties
-            Properties props = System.getProperties();
-            String host = props.getProperty(
-                    Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULT);
-            int port = Integer.parseInt(props.getProperty(
-                    Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULT));
-            hostAndPort = host + ":" + port;
-
-            return hostAndPort;
-        }
-
-        private static String toRFC2822Format(Date from) {
-            return RFC2822FORMAT.format(from);
-        }
     }
 }
