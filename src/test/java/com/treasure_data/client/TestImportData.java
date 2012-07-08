@@ -20,7 +20,7 @@ import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 
 import com.treasure_data.auth.TreasureDataCredentials;
-import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
+import com.treasure_data.client.HttpConnectionImpl;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
@@ -88,24 +88,24 @@ public class TestImportData {
 
     static class HttpConnectionImplforImportData01 extends HttpConnectionImpl {
         @Override
-        HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
+        public HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
                 throws IOException {
             // do nothing
             return null;
         }
 
         @Override
-        int getResponseCode() throws IOException {
+        public int getResponseCode() throws IOException {
             return HttpURLConnection.HTTP_OK;
         }
 
         @Override
-        String getResponseMessage() throws IOException {
+        public String getResponseMessage() throws IOException {
             return "";
         }
 
         @Override
-        String getResponseBody() throws IOException {
+        public String getResponseBody() throws IOException {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("database", "testdb");
             map.put("table", "testtbl");
@@ -115,7 +115,7 @@ public class TestImportData {
         }
 
         @Override
-        void disconnect() {
+        public void disconnect() {
             // do nothing
         }
     }
@@ -144,29 +144,29 @@ public class TestImportData {
 
     static class HttpConnectionImplforImportData02 extends HttpConnectionImpl {
         @Override
-        HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
+        public HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
                 throws IOException {
             // do nothing
             return null;
         }
 
         @Override
-        int getResponseCode() throws IOException {
+        public int getResponseCode() throws IOException {
             return HttpURLConnection.HTTP_OK;
         }
 
         @Override
-        String getResponseMessage() throws IOException {
+        public String getResponseMessage() throws IOException {
             return "";
         }
 
         @Override
-        String getResponseBody() throws IOException {
+        public String getResponseBody() throws IOException {
             return "foobar"; // invalid JSON data
         }
 
         @Override
-        void disconnect() {
+        public void disconnect() {
             // do nothing
         }
     }
@@ -198,29 +198,29 @@ public class TestImportData {
 
     static class HttpConnectionImplforImportData03 extends HttpConnectionImpl {
         @Override
-        HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
+        public HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
                 throws IOException {
             // do nothing
             return null;
         }
 
         @Override
-        int getResponseCode() throws IOException {
+        public int getResponseCode() throws IOException {
             return HttpURLConnection.HTTP_BAD_REQUEST;
         }
 
         @Override
-        String getResponseMessage() throws IOException {
+        public String getResponseMessage() throws IOException {
             return "";
         }
 
         @Override
-        String getResponseBody() throws IOException {
+        public String getResponseBody() throws IOException {
             return "";
         }
 
         @Override
-        void disconnect() {
+        public void disconnect() {
             // do nothing
         }
     }

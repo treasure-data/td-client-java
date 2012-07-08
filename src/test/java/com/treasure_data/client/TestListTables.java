@@ -18,7 +18,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
-import com.treasure_data.client.HttpClientAdaptor.HttpConnectionImpl;
+import com.treasure_data.client.HttpConnectionImpl;
 import com.treasure_data.model.Database;
 import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
@@ -53,24 +53,24 @@ public class TestListTables {
 
     static class HttpConnectionImplforListTables01 extends HttpConnectionImpl {
         @Override
-        void doGetRequest(Request<?> request, String path, Map<String, String> header,
+        public void doGetRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             // do nothing
         }
 
         @Override
-        int getResponseCode() throws IOException {
+        public int getResponseCode() throws IOException {
             return HttpURLConnection.HTTP_OK;
         }
 
         @Override
-        String getResponseMessage() throws IOException {
+        public String getResponseMessage() throws IOException {
             return "";
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
         @Override
-        String getResponseBody() throws IOException {
+        public String getResponseBody() throws IOException {
             Map map = new HashMap();
             map.put("database", "testdb");
             List tbls = new ArrayList();
@@ -90,7 +90,7 @@ public class TestListTables {
         }
 
         @Override
-        void disconnect() {
+        public void disconnect() {
             // do nothing
         }
     }
@@ -116,28 +116,28 @@ public class TestListTables {
 
     static class HttpConnectionImplforListTables02 extends HttpConnectionImpl {
         @Override
-        void doGetRequest(Request<?> request, String path, Map<String, String> header,
+        public void doGetRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             // do nothing
         }
 
         @Override
-        int getResponseCode() throws IOException {
+        public int getResponseCode() throws IOException {
             return HttpURLConnection.HTTP_OK;
         }
 
         @Override
-        String getResponseMessage() throws IOException {
+        public String getResponseMessage() throws IOException {
             return "";
         }
 
         @Override
-        String getResponseBody() throws IOException {
+        public String getResponseBody() throws IOException {
             return "foobar"; // invalid JSON data
         }
 
         @Override
-        void disconnect() {
+        public void disconnect() {
             // do nothing
         }
     }
@@ -164,28 +164,28 @@ public class TestListTables {
 
     static class HttpConnectionImplforListTables03 extends HttpConnectionImpl {
         @Override
-        void doGetRequest(Request<?> request, String path, Map<String, String> header,
+        public void doGetRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             // do nothing
         }
 
         @Override
-        int getResponseCode() throws IOException {
+        public int getResponseCode() throws IOException {
             return HttpURLConnection.HTTP_BAD_REQUEST;
         }
 
         @Override
-        String getResponseMessage() throws IOException {
+        public String getResponseMessage() throws IOException {
             return "";
         }
 
         @Override
-        String getResponseBody() throws IOException {
+        public String getResponseBody() throws IOException {
             return "";
         }
 
         @Override
-        void disconnect() {
+        public void disconnect() {
             // do nothing
         }
     }
