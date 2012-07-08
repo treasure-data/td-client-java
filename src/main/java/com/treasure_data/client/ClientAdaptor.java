@@ -52,6 +52,8 @@ import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 
 public interface ClientAdaptor {
+    Config getConfig();
+
     TreasureDataCredentials getTreasureDataCredentials();
 
     void setTreasureDataCredentials(TreasureDataCredentials credentials);
