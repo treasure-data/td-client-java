@@ -19,7 +19,7 @@ package com.treasure_data.model;
 
 import java.util.List;
 
-abstract class AbstractListModels<T extends AbstractModel>
+public abstract class AbstractListModels<T extends AbstractModel>
         extends AbstractModel implements ListModels<T> {
 
     private List<T> list;
