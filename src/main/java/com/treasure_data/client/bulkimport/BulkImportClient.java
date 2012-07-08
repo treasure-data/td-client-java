@@ -25,8 +25,8 @@ import com.treasure_data.model.bulkimport.CommitSessionRequest;
 import com.treasure_data.model.bulkimport.CommitSessionResult;
 import com.treasure_data.model.bulkimport.CreateSessionRequest;
 import com.treasure_data.model.bulkimport.CreateSessionResult;
-import com.treasure_data.model.bulkimport.DeleteFileRequest;
-import com.treasure_data.model.bulkimport.DeleteFileResult;
+import com.treasure_data.model.bulkimport.DeletePartRequest;
+import com.treasure_data.model.bulkimport.DeletePartResult;
 import com.treasure_data.model.bulkimport.DeleteSessionRequest;
 import com.treasure_data.model.bulkimport.DeleteSessionResult;
 import com.treasure_data.model.bulkimport.ErrorRecords;
@@ -34,8 +34,8 @@ import com.treasure_data.model.bulkimport.FreezeSessionRequest;
 import com.treasure_data.model.bulkimport.FreezeSessionResult;
 import com.treasure_data.model.bulkimport.GetErrorRecordsRequest;
 import com.treasure_data.model.bulkimport.GetErrorRecordsResult;
-import com.treasure_data.model.bulkimport.ListFilesRequest;
-import com.treasure_data.model.bulkimport.ListFilesResult;
+import com.treasure_data.model.bulkimport.ListPartsRequest;
+import com.treasure_data.model.bulkimport.ListPartsResult;
 import com.treasure_data.model.bulkimport.ListSessionsRequest;
 import com.treasure_data.model.bulkimport.ListSessionsResult;
 import com.treasure_data.model.bulkimport.PerformSessionRequest;
@@ -44,8 +44,8 @@ import com.treasure_data.model.bulkimport.Session;
 import com.treasure_data.model.bulkimport.SessionSummary;
 import com.treasure_data.model.bulkimport.UnfreezeSessionRequest;
 import com.treasure_data.model.bulkimport.UnfreezeSessionResult;
-import com.treasure_data.model.bulkimport.UploadFileRequest;
-import com.treasure_data.model.bulkimport.UploadFileResult;
+import com.treasure_data.model.bulkimport.UploadPartRequest;
+import com.treasure_data.model.bulkimport.UploadPartResult;
 
 public class BulkImportClient {
 
@@ -76,12 +76,12 @@ public class BulkImportClient {
      * @throws ClientException
      * @see td command: bulk_import:show <name>
      */
-    public List<String> listFiles(Session sess) throws ClientException {
-        return listFiles(new ListFilesRequest(sess)).getUploadedFiles();
+    public List<String> listParts(Session sess) throws ClientException {
+        return listParts(new ListPartsRequest(sess)).getParts();
     }
 
-    public ListFilesResult listFiles(ListFilesRequest request) throws ClientException {
-        return clientAdaptor.listFiles(request);
+    public ListPartsResult listParts(ListPartsRequest request) throws ClientException {
+        return clientAdaptor.listParts(request);
     }
 
     /**
@@ -105,37 +105,37 @@ public class BulkImportClient {
     }
 
     /**
-     * Upload or re-upload a file into a bulk import session.
+     * Upload or re-upload a part into a bulk import session.
      *
      * @param sess
-     * @param fileID
-     * @param fileName  path.msgpack.gz
+     * @param partID    a part name
+     * @param bytes     data
      * @throws ClientException
      * @see td command: bulk_import:upload_part <name> <id> <path.msgpack.gz>
      */
-    public void uploadFile(Session sess, String fileID, byte[] bytes) throws ClientException {
-        uploadFile(new UploadFileRequest(sess, fileID, bytes));
+    public void uploadPart(Session sess, String partID, byte[] bytes) throws ClientException {
+        uploadPart(new UploadPartRequest(sess, partID, bytes));
     }
 
-    public UploadFileResult uploadFile(UploadFileRequest request) throws ClientException {
-        return clientAdaptor.uploadFile(request);
+    public UploadPartResult uploadPart(UploadPartRequest request) throws ClientException {
+        return clientAdaptor.uploadPart(request);
     }
 
     /**
      * Delete an uploaded file from a bulk iport session.
      *
      * @param sess
-     * @param fileID
+     * @param partID
      * @throws ClientException
      * @see td command: bulk_import:delete_part <name> <id>
      */
-    public void deleteFile(Session sess, String fileID) throws ClientException {
-        deleteFile(new DeleteFileRequest(sess, fileID));
+    public void deletePart(Session sess, String partID) throws ClientException {
+        deletePart(new DeletePartRequest(sess, partID));
     }
 
-    public DeleteFileResult deleteFile(DeleteFileRequest request)
+    public DeletePartResult deletePart(DeletePartRequest request)
             throws ClientException {
-        return clientAdaptor.deleteFile(request);
+        return clientAdaptor.deletePart(request);
     }
 
     /**
@@ -187,10 +187,14 @@ public class BulkImportClient {
     /**
      * Delete a bulk import session.
      *
-     * @param sess
+     * @param sessionName
      * @throws ClientException
      * @see td command: bulk_import:delete <name>
      */
+    public void deleteSession(String sessionName) throws ClientException {
+        deleteSession(new Session(sessionName, null, null));
+    }
+
     public void deleteSession(Session sess) throws ClientException {
         deleteSession(new DeleteSessionRequest(sess));
     }
@@ -205,6 +209,7 @@ public class BulkImportClient {
      * uploadings to a bulk import session.
      *
      * @param sess
+     * @return 
      * @throws ClientException
      * @see td command: bulk_import:freeze <name>
      */
