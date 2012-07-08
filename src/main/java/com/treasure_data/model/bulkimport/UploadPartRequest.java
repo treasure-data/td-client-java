@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model.bulkimport;
 
-public class UploadFileRequest extends BulkImportSpecifyRequest<Session> {
+public class UploadPartRequest extends BulkImportSpecifyRequest<Session> {
 
     public static enum Format {
         MSGPACKGZ, UNKNOWN,
@@ -40,21 +40,21 @@ public class UploadFileRequest extends BulkImportSpecifyRequest<Session> {
         }
     }
 
-    private String fileID;
+    private String partID;
 
     private Format format;
 
     private byte[] bytes;
 
-    public UploadFileRequest(Session sess, String fileID, byte[] bytes) {
+    public UploadPartRequest(Session sess, String partID, byte[] bytes) {
         super(sess);
-        this.fileID = fileID;
+        this.partID = partID;
         this.format = Format.MSGPACKGZ;
         this.bytes = bytes;
     }
 
-    public String getFileID() {
-        return fileID;
+    public String getPartID() {
+        return partID;
     }
 
     public Format getFormat() {

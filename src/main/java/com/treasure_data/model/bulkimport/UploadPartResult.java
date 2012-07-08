@@ -17,9 +17,9 @@
 //
 package com.treasure_data.model.bulkimport;
 
-public class UploadFileResult extends BulkImportSpecifyResult<Session> {
+public class UploadPartResult extends BulkImportSpecifyResult<Session> {
 
-    public UploadFileResult(Session sess) {
+    public UploadPartResult(Session sess) {
         super(sess);
     }
 
