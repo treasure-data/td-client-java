@@ -19,7 +19,7 @@ package com.treasure_data.model;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 
-abstract class AbstractRequest<T extends AbstractModel> implements Request<T> {
+public abstract class AbstractRequest<T extends AbstractModel> implements Request<T> {
     private TreasureDataCredentials credentials;
 
     private T model;

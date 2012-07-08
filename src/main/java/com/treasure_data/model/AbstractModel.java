@@ -17,7 +17,7 @@
 //
 package com.treasure_data.model;
 
-abstract class AbstractModel implements Model {
+public abstract class AbstractModel implements Model {
     private String name;
 
     protected AbstractModel() {
