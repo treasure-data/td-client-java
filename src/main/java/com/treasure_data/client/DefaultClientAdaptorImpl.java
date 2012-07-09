@@ -17,30 +17,16 @@
 //
 package com.treasure_data.client;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONValue;
-import org.msgpack.MessagePack;
-import org.msgpack.unpacker.BufferUnpacker;
 import org.msgpack.unpacker.Unpacker;
 
 import com.treasure_data.auth.TreasureDataCredentials;
@@ -76,7 +62,6 @@ import com.treasure_data.model.ListJobsResult;
 import com.treasure_data.model.ListTables;
 import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
-import com.treasure_data.model.Request;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
 import com.treasure_data.model.ServerStatus;
@@ -89,23 +74,16 @@ import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.Table;
 import com.treasure_data.model.TableSummary;
 
-public class HttpClientAdaptor extends AbstractClientAdaptor {
+public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
+        implements DefaultClientAdaptor {
 
-    private static Logger LOG = Logger.getLogger(HttpClientAdaptor.class.getName());
-
-    public static String e(String s) throws ClientException {
-        try {
-            return URLEncoder.encode(s, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new ClientException(e);
-        }
-    }
+    private static Logger LOG = Logger.getLogger(DefaultClientAdaptorImpl.class.getName());
 
     private Validator validator;
 
     private HttpConnectionImpl conn = null;
 
-    HttpClientAdaptor(Config conf) {
+    DefaultClientAdaptorImpl(Config conf) {
 	super(conf);
 	validator = new Validator();
     }
@@ -282,7 +260,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_DATABASE_CREATE,
-                    e(request.getDatabaseName()));
+                    HttpConnectionImpl.e(request.getDatabaseName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -334,7 +312,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_DATABASE_DELETE,
-                    e(request.getDatabaseName()));
+                    HttpConnectionImpl.e(request.getDatabaseName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -391,7 +369,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_TABLE_LIST,
-                    e(request.getDatabase().getName()));
+                    HttpConnectionImpl.e(request.getDatabase().getName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
@@ -460,9 +438,9 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_TABLE_CREATE,
-                    e(request.getDatabase().getName()),
-                    e(request.getTableName()),
-                    e(Table.toTypeName(request.getTable().getType())));
+                    HttpConnectionImpl.e(request.getDatabase().getName()),
+                    HttpConnectionImpl.e(request.getTableName()),
+                    HttpConnectionImpl.e(Table.toTypeName(request.getTable().getType())));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -527,8 +505,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_TABLE_DELETE,
-                    e(request.getDatabase().getName()),
-                    e(request.getTable().getName()));
+                    HttpConnectionImpl.e(request.getDatabase().getName()),
+                    HttpConnectionImpl.e(request.getTable().getName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -586,8 +564,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_TABLE_DELETE_PARTIAL,
-                    e(request.getDatabase().getName()),
-                    e(request.getTable().getName()));
+                    HttpConnectionImpl.e(request.getDatabase().getName()),
+                    HttpConnectionImpl.e(request.getTable().getName()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
             params.put("from", "" + request.getFrom());
@@ -642,8 +620,8 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_TABLE_IMPORT,
-                    e(request.getTable().getDatabase().getName()),
-                    e(request.getTable().getName()));
+                    HttpConnectionImpl.e(request.getTable().getDatabase().getName()),
+                    HttpConnectionImpl.e(request.getTable().getName()));
             conn.doPutRequest(request, path, request.getBytes());
 
             // receive response code
@@ -699,16 +677,16 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_EXPORTJOB_SUBMIT,
-                    e(request.getDatabase().getName()), e(request.getTable().getName()));
+                    HttpConnectionImpl.e(request.getDatabase().getName()), HttpConnectionImpl.e(request.getTable().getName()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
             if (request.getAccessKeyID() != null) {
-                params.put("access_key_id", e(request.getAccessKeyID()));
+                params.put("access_key_id", HttpConnectionImpl.e(request.getAccessKeyID()));
             } else {
                 throw new IllegalArgumentException("access_key_id is null");
             }
             if (request.getSecretAccessKey() != null) {
-                params.put("secret_access_key", e(request.getSecretAccessKey()));
+                params.put("secret_access_key", HttpConnectionImpl.e(request.getSecretAccessKey()));
             } else {
                 throw new IllegalArgumentException("secret_access_key is null");
             }
@@ -784,19 +762,19 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_SUBMIT,
-                    e(request.getDatabase().getName()));
+                    HttpConnectionImpl.e(request.getDatabase().getName()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
             if (request.getJob().getQuery() != null) {
                 // query is required
-                params.put("query", e(request.getJob().getQuery()));
+                params.put("query", HttpConnectionImpl.e(request.getJob().getQuery()));
             } else {
                 throw new IllegalArgumentException("query is null");
             }
             params.put("version", "0.7");
             if (request.getJob().getResultTable() != null) {
                 // result table is not required
-                params.put("result", e(request.getJob().getResultTable()));
+                params.put("result", HttpConnectionImpl.e(request.getJob().getResultTable()));
             }
             conn.doPostRequest(request, path, header, params);
 
@@ -924,7 +902,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_KILL,
-                    e(request.getJob().getJobID()));
+                    HttpConnectionImpl.e(request.getJob().getJobID()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -977,7 +955,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_SHOW,
-                    e(request.getJob().getJobID()));
+                    HttpConnectionImpl.e(request.getJob().getJobID()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
@@ -1031,7 +1009,7 @@ public class HttpClientAdaptor extends AbstractClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_JOB_RESULT,
-                    e(request.getJobResult().getJob().getJobID()));
+                    HttpConnectionImpl.e(request.getJobResult().getJob().getJobID()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
             if (request.getJobResult().getFormat() != JobResult.Format.MSGPACK) {

@@ -51,7 +51,7 @@ import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 
-public interface ClientAdaptor {
+public interface DefaultClientAdaptor {
     Config getConfig();
 
     TreasureDataCredentials getTreasureDataCredentials();
