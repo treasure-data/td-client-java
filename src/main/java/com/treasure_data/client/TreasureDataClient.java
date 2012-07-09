@@ -66,15 +66,15 @@ public class TreasureDataClient {
     /**
      * adaptor factory method
      */
-    static ClientAdaptor createClientAdaptor(
+    static DefaultClientAdaptor createClientAdaptor(
 	    TreasureDataCredentials credentials, Properties props) {
 	Config conf = new Config();
 	conf.setCredentials(credentials);
-	ClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+	DefaultClientAdaptor clientAdaptor = new DefaultClientAdaptorImpl(conf);
 	return clientAdaptor;
     }
 
-    private ClientAdaptor clientAdaptor;
+    private DefaultClientAdaptor clientAdaptor;
 
     public TreasureDataClient() {
         this(System.getProperties());
@@ -88,7 +88,11 @@ public class TreasureDataClient {
 	clientAdaptor = createClientAdaptor(credentials, props);
     }
 
-    public ClientAdaptor getClientAdaptor() {
+    public Config getConfig() {
+        return clientAdaptor.getConfig();
+    }
+
+    public DefaultClientAdaptor getClientAdaptor() {
         return clientAdaptor;
     }
 
