@@ -17,6 +17,8 @@
 //
 package com.treasure_data.client.bulkimport;
 
+import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -26,8 +28,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 import org.json.simple.JSONValue;
+import org.msgpack.MessagePack;
+import org.msgpack.unpacker.BufferUnpacker;
+import org.msgpack.unpacker.Unpacker;
+import org.msgpack.unpacker.UnpackerIterator;
 
 import com.treasure_data.client.ClientAdaptor;
 import com.treasure_data.client.ClientException;
@@ -66,6 +73,7 @@ import com.treasure_data.model.bulkimport.UnfreezeSessionRequest;
 import com.treasure_data.model.bulkimport.UnfreezeSessionResult;
 import com.treasure_data.model.bulkimport.UploadPartRequest;
 import com.treasure_data.model.bulkimport.UploadPartResult;
+import com.treasure_data.model.bulkimport.SessionSummary.Status;
 
 public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     private static Logger LOG = Logger.getLogger(BulkImportClientAdaptorImpl.class.getName());
@@ -455,22 +463,163 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public PerformSessionResult performSession(PerformSessionRequest request)
             throws ClientException {
-        // TODO Auto-generated method stub
-        return null;
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_PERFORM,
+                    e(request.getSessionName()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Perform session failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data {"name":"sess01","job_id":"127949"}
+        @SuppressWarnings({ "rawtypes" })
+        Map map = (Map) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        String sessName = (String) map.get("name");
+        if (!request.getSessionName().equals(sessName)) {
+            String msg = String.format("invalid name: expected=%s, actual=%s",
+                    request.getSessionName(), sessName);
+            throw new ClientException(msg);
+        }
+        String job_id = (String) map.get("job_id");
+
+        return new PerformSessionResult(request.getSession());
     }
 
     @Override
     public GetErrorRecordsResult getErrorRecords(GetErrorRecordsRequest request)
             throws ClientException {
-        // TODO Auto-generated method stub
-        return null;
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        Unpacker unpacker = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_ERROR_RECORDS,
+                    e(request.getSessionName()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doGetRequest(request, path, header, params);
+
+            // receive response code and body
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Get error_records failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            try {
+                unpacker = getResponseBodyBinaryWithGZip(conn);
+            } catch (EOFException e) {
+                // ignore
+            }
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        return new GetErrorRecordsResult(request.getSession(), unpacker);
+    }
+
+    private Unpacker getResponseBodyBinaryWithGZip(HttpConnectionImpl conn) throws IOException {
+        GZIPInputStream in = new GZIPInputStream(conn.getInputStream());
+        MessagePack msgpack = new MessagePack();
+        BufferUnpacker unpacker = msgpack.createBufferUnpacker();
+        byte[] buf = new byte[1024];
+
+        int len = 0;
+        while ((len = in.read(buf)) != -1) {
+            unpacker.feed(buf, 0, len);
+        }
+
+        return unpacker;
     }
 
     @Override
     public CommitSessionResult commitSession(CommitSessionRequest request)
             throws ClientException {
-        // TODO Auto-generated method stub
-        return null;
+        request.setCredentials(clientAdaptor.getConfig().getCredentials());
+        validator.checkCredentials(clientAdaptor, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_COMMIT,
+                    e(request.getSessionName()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Commit session failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data {"name":"sess01"}
+        @SuppressWarnings({ "rawtypes" })
+        Map map = (Map) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        String sessName = (String) map.get("name");
+        if (!request.getSessionName().equals(sessName)) {
+            String msg = String.format("invalid name: expected=%s, actual=%s",
+                    request.getSessionName(), sessName);
+            throw new ClientException(msg);
+        }
+
+        return new CommitSessionResult(request.getSession());
     }
 
     @Override
