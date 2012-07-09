@@ -23,8 +23,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -228,6 +230,14 @@ public class HttpConnectionImpl {
         hostAndPort = host + ":" + port;
 
         return hostAndPort;
+    }
+
+    public static String e(String s) throws ClientException {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new ClientException(e);
+        }
     }
 
     private static String toRFC2822Format(Date from) {
