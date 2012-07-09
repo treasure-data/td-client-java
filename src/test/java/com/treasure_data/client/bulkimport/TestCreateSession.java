@@ -19,7 +19,7 @@ import org.msgpack.packer.Packer;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.Config;
-import com.treasure_data.client.HttpClientAdaptor;
+import com.treasure_data.client.DefaultClientAdaptorImpl;
 import com.treasure_data.client.TreasureDataClient;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
