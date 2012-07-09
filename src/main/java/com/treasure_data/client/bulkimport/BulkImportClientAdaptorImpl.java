@@ -160,7 +160,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public ListSessionsResult listSessions(ListSessionsRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {
@@ -252,7 +252,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public ListPartsResult listParts(ListPartsRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {
@@ -306,7 +306,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public CreateSessionResult createSession(CreateSessionRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {
@@ -360,7 +360,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public UploadPartResult uploadPart(UploadPartRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {
@@ -411,7 +411,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public DeletePartResult deletePart(DeletePartRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {
@@ -464,7 +464,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public PerformSessionResult performSession(PerformSessionRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {
@@ -517,7 +517,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public GetErrorRecordsResult getErrorRecords(GetErrorRecordsRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         Unpacker unpacker = null;
         try {
@@ -574,7 +574,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public CommitSessionResult commitSession(CommitSessionRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {
@@ -626,7 +626,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public DeleteSessionResult deleteSession(DeleteSessionRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {
@@ -678,7 +678,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public FreezeSessionResult freezeSession(FreezeSessionRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {
@@ -730,7 +730,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     public UnfreezeSessionResult unfreezeSession(UnfreezeSessionRequest request)
             throws ClientException {
         request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.checkCredentials(clientAdaptor, request);
+        validator.validateCredentials(clientAdaptor, request);
 
         String jsonData = null;
         try {

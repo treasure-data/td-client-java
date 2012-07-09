@@ -21,7 +21,8 @@ import com.treasure_data.model.Request;
 
 public class Validator {
 
-    public void checkCredentials(ClientAdaptor clientAdaptor, Request<?> request) throws ClientException {
+    public void validateCredentials(ClientAdaptor clientAdaptor, Request<?> request)
+            throws ClientException {
         String apiKey = request.getCredentials().getAPIKey();
         if (apiKey != null) {
             return;
