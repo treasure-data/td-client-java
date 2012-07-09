@@ -19,7 +19,7 @@ package com.treasure_data.model.bulkimport;
 
 public class SessionSummary extends Session {
     public static enum Status {
-        READY, UPLOADING, UNKNOWN;
+        UPLOADING, PERFORMING, READY, COMMITTING, COMMITTED, UNKNOWN;
     }
 
     public static Status toStatus(String statusName) {
@@ -27,10 +27,16 @@ public class SessionSummary extends Session {
             throw new NullPointerException();
         }
 
+        if (statusName.equals("uploading"))
+            return Status.UPLOADING;
+        if (statusName.equals("performing"))
+            return Status.PERFORMING;
         if (statusName.equals("ready")) {
             return Status.READY;
-        } else if (statusName.equals("uploading")) {
-            return Status.UPLOADING;
+        } else if (statusName.equals("committing")) {
+            return Status.COMMITTING;
+        } else if (statusName.equals("committed")) {
+            return Status.COMMITTED;
         } else {
             return Status.UNKNOWN;
         }
@@ -42,10 +48,16 @@ public class SessionSummary extends Session {
         }
 
         switch (status) {
-        case READY:
-            return "ready";
         case UPLOADING:
             return "uploading";
+        case PERFORMING:
+            return "performing";
+        case READY:
+            return "ready";
+        case COMMITTING:
+            return "performing";
+        case COMMITTED:
+            return "committing";
         default:
             return "unknown";
         }
@@ -84,5 +96,17 @@ public class SessionSummary extends Session {
         return String.format("SessionSummary{name=%s, db=%s, tbl=%s, frozen=%b, stat=%s, jid=%s, vr=%d, er=%d, vp=%d, ep=%d}",
                 getName(), getDatabaseName(), getTableName(), toStatusName(status),
                 uploadFrozen, jobID, validRecords, errorRecords, validParts, errorParts);
+    }
+
+    public String getStatus() {
+        return toStatusName(status);
+    }
+
+    public boolean uploadFrozen() {
+        return uploadFrozen;
+    }
+
+    public String getJobID() {
+        return jobID;
     }
 }
