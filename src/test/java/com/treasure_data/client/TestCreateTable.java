@@ -37,7 +37,7 @@ public class TestCreateTable {
     public void testCreateTable00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         String databaseName = "db1";
         try {
@@ -97,7 +97,7 @@ public class TestCreateTable {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforCreateTable01());
 
         String databaseName = "testdb";
@@ -144,7 +144,7 @@ public class TestCreateTable {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforCreateTable02());
 
         String databaseName = "testdb";
@@ -195,7 +195,7 @@ public class TestCreateTable {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforCreateTable03());
 
         String databaseName = "testdb";

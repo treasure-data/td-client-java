@@ -38,7 +38,7 @@ public class TestAuthenticate {
 
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         String email = props.getProperty("td.api.user");
         String password = props.getProperty("td.api.password");
@@ -88,7 +88,7 @@ public class TestAuthenticate {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforAuthenticate01());
 
         String email = "muga";
@@ -135,7 +135,7 @@ public class TestAuthenticate {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforAuthenticate02());
 
         try {
@@ -186,7 +186,7 @@ public class TestAuthenticate {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforAuthenticate03());
 
         try {

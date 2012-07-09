@@ -33,7 +33,7 @@ public class TestGetServerStatus {
     public void testGetServerStatus00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         GetServerStatusRequest request = new GetServerStatusRequest();
         GetServerStatusResult result = clientAdaptor.getServerStatus(request);
@@ -73,7 +73,7 @@ public class TestGetServerStatus {
     public void testGetServerStatus01() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus01());
         GetServerStatusRequest request = new GetServerStatusRequest();
         GetServerStatusResult result = clientAdaptor.getServerStatus(request);
@@ -110,7 +110,7 @@ public class TestGetServerStatus {
     public void testGetServerStatus02() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus02());
         GetServerStatusRequest request = new GetServerStatusRequest();
         try {
@@ -156,7 +156,7 @@ public class TestGetServerStatus {
     public void testGetServerStatus03() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus03());
         GetServerStatusRequest request = new GetServerStatusRequest();
         GetServerStatusResult result = clientAdaptor.getServerStatus(request);

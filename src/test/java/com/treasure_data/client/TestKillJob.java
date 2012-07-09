@@ -34,7 +34,7 @@ public class TestKillJob {
     public void testKillJob00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         KillJobRequest request = new KillJobRequest(new Job("47555"));
         KillJobResult result = clientAdaptor.killJob(request);
@@ -82,7 +82,7 @@ public class TestKillJob {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforKillJob01());
 
         String jobID = "12345";
@@ -129,7 +129,7 @@ public class TestKillJob {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforKillJob02());
 
         try {
@@ -179,7 +179,7 @@ public class TestKillJob {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforKillJob03());
 
         try {

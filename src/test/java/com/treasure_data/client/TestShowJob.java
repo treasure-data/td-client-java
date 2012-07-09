@@ -34,7 +34,7 @@ public class TestShowJob {
     public void testShowJob00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         ShowJobRequest request = new ShowJobRequest(new Job("47555"));
         ShowJobResult result = clientAdaptor.showJob(request);
@@ -90,7 +90,7 @@ public class TestShowJob {
     public void testShowJob01() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforShowJob01());
 
         String jobID = "12345";
@@ -136,7 +136,7 @@ public class TestShowJob {
     public void testShowJob02() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforShowJob02());
 
         try {
@@ -183,7 +183,7 @@ public class TestShowJob {
     public void testShowJob03() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforShowJob03());
 
         try {

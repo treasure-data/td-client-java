@@ -36,7 +36,7 @@ public class TestListTables {
     public void testListTables00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         //ListTablesRequest request = new ListTablesRequest(new Database("test_merge_0"));
         ListTablesRequest request = new ListTablesRequest(new Database("mugatest"));
@@ -102,7 +102,7 @@ public class TestListTables {
     public void testListTables01() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListTables01());
 
         String databaseName = "testdb";
@@ -149,7 +149,7 @@ public class TestListTables {
     public void testListTables02() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListTables02());
 
         String databaseName = "testdb";
@@ -197,7 +197,7 @@ public class TestListTables {
     public void testListTables03() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListTables03());
 
         String databaseName = "testdb";

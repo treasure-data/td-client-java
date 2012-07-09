@@ -23,7 +23,7 @@ public class TestGetJobResult {
     public void testGetJobResult00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         GetJobResultRequest request = new GetJobResultRequest(
                 new JobResult(new Job("26317")));

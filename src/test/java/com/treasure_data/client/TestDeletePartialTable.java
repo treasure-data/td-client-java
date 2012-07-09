@@ -49,7 +49,7 @@ public class TestDeletePartialTable {
     public void testDeleteTable00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         String database = "mugadb";
         String table = "test02";
@@ -61,14 +61,14 @@ public class TestDeletePartialTable {
         }
     }
 
-    private void createTable(HttpClientAdaptor clientAdaptor,
+    private void createTable(DefaultClientAdaptorImpl clientAdaptor,
             String databaseName, String tableName) throws Exception {
         CreateTableRequest req = new CreateTableRequest(
                 new Database(databaseName), tableName);
         CreateTableResult res = clientAdaptor.createTable(req);        
     }
 
-    private void importData(HttpClientAdaptor clientAdaptor, String databaseName,
+    private void importData(DefaultClientAdaptorImpl clientAdaptor, String databaseName,
             String tableName) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GZIPOutputStream gzout = new GZIPOutputStream(out);
@@ -94,7 +94,7 @@ public class TestDeletePartialTable {
         ImportResult result = clientAdaptor.importData(request);
     }
 
-    private void deletePartialTable(HttpClientAdaptor clientAdaptor,
+    private void deletePartialTable(DefaultClientAdaptorImpl clientAdaptor,
             String databaseName, String tableName) throws Exception {
         //long baseTime = 1337000400;//1340000000
         long from = 1337000400 + 3600 * 90;
@@ -192,7 +192,7 @@ public class TestDeletePartialTable {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforDeletePartialTable01());
 
         String databaseName = "testdb";
@@ -241,7 +241,7 @@ public class TestDeletePartialTable {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforDeletePartialTable02());
 
         String databaseName = "testdb";
@@ -293,7 +293,7 @@ public class TestDeletePartialTable {
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforDeletePartialTable03());
 
         String databaseName = "testdb";

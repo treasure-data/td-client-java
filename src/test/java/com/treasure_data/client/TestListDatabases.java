@@ -35,7 +35,7 @@ public class TestListDatabases {
     public void testListDatabases00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         ListDatabasesRequest request = new ListDatabasesRequest();
         ListDatabasesResult result = clientAdaptor.listDatabases(request);
@@ -97,7 +97,7 @@ public class TestListDatabases {
     public void testListDatabases01() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases01());
 
         ListDatabasesRequest request = new ListDatabasesRequest();
@@ -143,7 +143,7 @@ public class TestListDatabases {
     public void testListDatabases02() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases02());
 
         ListDatabasesRequest request = new ListDatabasesRequest();
@@ -190,7 +190,7 @@ public class TestListDatabases {
     public void testListDatabases03() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases03());
 
         ListDatabasesRequest request = new ListDatabasesRequest();

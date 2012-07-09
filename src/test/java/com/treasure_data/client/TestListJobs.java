@@ -35,7 +35,7 @@ public class TestListJobs {
     public void testListJobs00() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         ListJobsRequest request = new ListJobsRequest();
         ListJobsResult result = clientAdaptor.listJobs(request);
@@ -118,7 +118,7 @@ public class TestListJobs {
     public void testListDatabases01() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListJobs01());
 
         ListJobsRequest request = new ListJobsRequest();
@@ -170,7 +170,7 @@ public class TestListJobs {
     public void testListDatabases02() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListJobs02());
 
         try {
@@ -217,7 +217,7 @@ public class TestListJobs {
     public void testListDatabases03() throws Exception {
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
-        HttpClientAdaptor clientAdaptor = new HttpClientAdaptor(conf);
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListJobs03());
 
         try {
