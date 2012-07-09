@@ -17,13 +17,18 @@
 //
 package com.treasure_data.model.bulkimport;
 
+import org.msgpack.unpacker.Unpacker;
+
 public class GetErrorRecordsResult extends BulkImportSpecifyResult<Session> {
 
-    public GetErrorRecordsResult(Session sess) {
+    private Unpacker unpacker;
+
+    public GetErrorRecordsResult(Session sess, Unpacker unpacker) {
         super(sess);
+        this.unpacker = unpacker;
     }
 
-    public ErrorRecords getErrorRecords() {
-        return new ErrorRecords();
+    public Unpacker getErrorRecords() {
+        return unpacker;
     }
 }
