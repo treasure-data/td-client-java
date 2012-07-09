@@ -53,7 +53,7 @@ public class BulkImportClient {
     private BulkImportClientAdaptor clientAdaptor;
 
     public BulkImportClient(TreasureDataClient client) {
-        clientAdaptor = new BulkImportClientAdaptorImpl(client.getClientAdaptor());
+        clientAdaptor = new BulkImportClientAdaptorImpl(client);
     }
 
     /**

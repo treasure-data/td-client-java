@@ -17,12 +17,9 @@
 //
 package com.treasure_data.client.bulkimport;
 
-import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,20 +31,12 @@ import org.json.simple.JSONValue;
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.BufferUnpacker;
 import org.msgpack.unpacker.Unpacker;
-import org.msgpack.unpacker.UnpackerIterator;
 
-import com.treasure_data.client.ClientAdaptor;
+import com.treasure_data.client.AbstractClientAdaptor;
 import com.treasure_data.client.ClientException;
-import com.treasure_data.client.HttpClientAdaptor;
 import com.treasure_data.client.HttpConnectionImpl;
+import com.treasure_data.client.TreasureDataClient;
 import com.treasure_data.client.Validator;
-import com.treasure_data.model.CreateDatabaseResult;
-import com.treasure_data.model.Database;
-import com.treasure_data.model.DatabaseSummary;
-import com.treasure_data.model.DeleteTableResult;
-import com.treasure_data.model.ImportResult;
-import com.treasure_data.model.ListDatabases;
-import com.treasure_data.model.ListDatabasesResult;
 import com.treasure_data.model.bulkimport.CommitSessionRequest;
 import com.treasure_data.model.bulkimport.CommitSessionResult;
 import com.treasure_data.model.bulkimport.CreateSessionRequest;
@@ -67,34 +56,16 @@ import com.treasure_data.model.bulkimport.ListSessionsRequest;
 import com.treasure_data.model.bulkimport.ListSessionsResult;
 import com.treasure_data.model.bulkimport.PerformSessionRequest;
 import com.treasure_data.model.bulkimport.PerformSessionResult;
-import com.treasure_data.model.bulkimport.Session;
 import com.treasure_data.model.bulkimport.SessionSummary;
 import com.treasure_data.model.bulkimport.UnfreezeSessionRequest;
 import com.treasure_data.model.bulkimport.UnfreezeSessionResult;
 import com.treasure_data.model.bulkimport.UploadPartRequest;
 import com.treasure_data.model.bulkimport.UploadPartResult;
-import com.treasure_data.model.bulkimport.SessionSummary.Status;
 
-public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
-    private static Logger LOG = Logger.getLogger(BulkImportClientAdaptorImpl.class.getName());
+public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
+        implements BulkImportClientAdaptor {
 
     static interface HttpURL {
-        /*
-  get  'v3/bulk_import/list'                => 'bulk_import#list'
-  post 'v3/bulk_import/create/:name/:database/:table' => 'bulk_import#create'
-  post 'v3/bulk_import/delete/:name'        => 'bulk_import#delete'
-  put  'v3/bulk_import/upload_part/:name/:part'  => 'bulk_import#upload_part'
-  post 'v3/bulk_import/delete_part/:name/:part'  => 'bulk_import#delete_part'
-  get  'v3/bulk_import/list_parts/:name'    => 'bulk_import#list_parts'
-  post 'v3/bulk_import/freeze/:name'        => 'bulk_import#freeze'
-  post 'v3/bulk_import/unfreeze/:name'      => 'bulk_import#unfreeze'
-  post 'v3/bulk_import/perform/:name'       => 'bulk_import#perform'
-  post 'v3/bulk_import/commit/:name'        => 'bulk_import#commit'
-  get  'v3/bulk_import/error_records/:name' => 'bulk_import#error_records'
-  post 'v3/bulk_import/perform_finished/:id' => 'bulk_import#perform_finished'
-  post 'v3/bulk_import/commit_finished/:id'  => 'bulk_import#commit_finished'
-         */
-
         String V3_LIST = "/v3/bulk_import/list";
 
         String V3_CREATE = "/v3/bulk_import/create/%s/%s/%s";
@@ -122,22 +93,17 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
         String V3_COMMIT_FINISHED = "/v3/bulk_import/commit_finished/%s";
     }
 
-    public static String e(String s) throws ClientException {
-        try {
-            return URLEncoder.encode(s, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new ClientException(e);
-        }
-    }
+    private static Logger LOG = Logger.getLogger(BulkImportClientAdaptorImpl.class.getName());
 
-    private ClientAdaptor clientAdaptor;
+    private TreasureDataClient client;
 
     private Validator validator;
 
     private HttpConnectionImpl conn;
 
-    BulkImportClientAdaptorImpl(ClientAdaptor clientAdaptor) {
-        this.clientAdaptor = clientAdaptor;
+    BulkImportClientAdaptorImpl(TreasureDataClient client) {
+        super(client.getConfig());
+        this.client = client;
         validator = new Validator();
     }
 
@@ -159,8 +125,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public ListSessionsResult listSessions(ListSessionsRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -251,8 +217,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public ListPartsResult listParts(ListPartsRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -260,7 +226,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_LIST_PARTS,
-                    e(request.getSessionName()));
+                    HttpConnectionImpl.e(request.getSessionName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
@@ -305,8 +271,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public CreateSessionResult createSession(CreateSessionRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -314,9 +280,9 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_CREATE,
-                    e(request.getSessionName()),
-                    e(request.getDatabaseName()),
-                    e(request.getTableName()));
+                    HttpConnectionImpl.e(request.getSessionName()),
+                    HttpConnectionImpl.e(request.getDatabaseName()),
+                    HttpConnectionImpl.e(request.getTableName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -359,8 +325,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public UploadPartResult uploadPart(UploadPartRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -368,8 +334,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_UPLOAD_PART,
-                    e(request.getSessionName()),
-                    e(request.getPartID()));
+                    HttpConnectionImpl.e(request.getSessionName()),
+                    HttpConnectionImpl.e(request.getPartID()));
             conn.doPutRequest(request, path, request.getBytes());
 
             // receive response code
@@ -410,8 +376,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public DeletePartResult deletePart(DeletePartRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -419,8 +385,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_DELETE_PART,
-                    e(request.getSessionName()),
-                    e(request.getPartID()));
+                    HttpConnectionImpl.e(request.getSessionName()),
+                    HttpConnectionImpl.e(request.getPartID()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -463,8 +429,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public PerformSessionResult performSession(PerformSessionRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -472,7 +438,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_PERFORM,
-                    e(request.getSessionName()));
+                    HttpConnectionImpl.e(request.getSessionName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -508,6 +474,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
                     request.getSessionName(), sessName);
             throw new ClientException(msg);
         }
+        @SuppressWarnings("unused")
         String job_id = (String) map.get("job_id");
 
         return new PerformSessionResult(request.getSession());
@@ -516,8 +483,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public GetErrorRecordsResult getErrorRecords(GetErrorRecordsRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         Unpacker unpacker = null;
         try {
@@ -525,7 +492,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_ERROR_RECORDS,
-                    e(request.getSessionName()));
+                    HttpConnectionImpl.e(request.getSessionName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
@@ -573,8 +540,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public CommitSessionResult commitSession(CommitSessionRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -582,7 +549,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_COMMIT,
-                    e(request.getSessionName()));
+                    HttpConnectionImpl.e(request.getSessionName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -625,8 +592,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public DeleteSessionResult deleteSession(DeleteSessionRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -634,7 +601,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_DELETE,
-                    e(request.getSessionName()));
+                    HttpConnectionImpl.e(request.getSessionName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -677,8 +644,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public FreezeSessionResult freezeSession(FreezeSessionRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -686,7 +653,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_FREEZE,
-                    e(request.getSessionName()));
+                    HttpConnectionImpl.e(request.getSessionName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -729,8 +696,8 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
     @Override
     public UnfreezeSessionResult unfreezeSession(UnfreezeSessionRequest request)
             throws ClientException {
-        request.setCredentials(clientAdaptor.getConfig().getCredentials());
-        validator.validateCredentials(clientAdaptor, request);
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
 
         String jsonData = null;
         try {
@@ -738,7 +705,7 @@ public class BulkImportClientAdaptorImpl implements BulkImportClientAdaptor {
 
             // send request
             String path = String.format(HttpURL.V3_UNFREEZE,
-                    e(request.getSessionName()));
+                    HttpConnectionImpl.e(request.getSessionName()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
