@@ -19,6 +19,8 @@ package com.treasure_data.client.bulkimport;
 
 import java.util.List;
 
+import org.msgpack.unpacker.Unpacker;
+
 import com.treasure_data.client.ClientException;
 import com.treasure_data.client.TreasureDataClient;
 import com.treasure_data.model.bulkimport.CommitSessionRequest;
@@ -159,7 +161,7 @@ public class BulkImportClient {
      *
      * @see td command: bulk_import:error_records <name>
      */
-    public ErrorRecords getErrorRecords(Session sess) throws ClientException {
+    public Unpacker getErrorRecords(Session sess) throws ClientException {
         return getErrorRecords(new GetErrorRecordsRequest(sess)).getErrorRecords();
     }
 
