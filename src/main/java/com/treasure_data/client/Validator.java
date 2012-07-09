@@ -21,7 +21,22 @@ import com.treasure_data.model.Request;
 
 public class Validator {
 
-    public void validateCredentials(ClientAdaptor clientAdaptor, Request<?> request)
+    public void validateCredentials(TreasureDataClient client, Request<?> request)
+            throws ClientException {
+        String apiKey = request.getCredentials().getAPIKey();
+        if (apiKey != null) {
+            return;
+        }
+
+        apiKey = client.getTreasureDataCredentials().getAPIKey();
+        if (apiKey != null) {
+            request.setCredentials(client.getTreasureDataCredentials());
+        }
+
+        throw new ClientException("api key is not set.");
+    }
+
+    public void validateCredentials(DefaultClientAdaptor clientAdaptor, Request<?> request)
             throws ClientException {
         String apiKey = request.getCredentials().getAPIKey();
         if (apiKey != null) {
