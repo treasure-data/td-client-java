@@ -19,7 +19,7 @@ package com.treasure_data.client;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 
-public abstract class AbstractClientAdaptor implements ClientAdaptor {
+public abstract class AbstractClientAdaptor {
     private Config conf;
 
     public AbstractClientAdaptor(Config conf) {
