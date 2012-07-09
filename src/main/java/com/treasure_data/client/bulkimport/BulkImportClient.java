@@ -69,6 +69,16 @@ public class BulkImportClient {
         return clientAdaptor.listSessions(request);
     }
 
+    public SessionSummary showSession(String sessionName) throws ClientException {
+        List<SessionSummary> ss = listSessions();
+        for (SessionSummary s : ss) {
+            if (sessionName.equals(s.getName())) {
+                return s;
+            }
+        }
+        return null;
+    }
+
     /**
      * Show a list of uploaded files.
      *
