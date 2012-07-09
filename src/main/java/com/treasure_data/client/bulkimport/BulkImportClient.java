@@ -31,7 +31,6 @@ import com.treasure_data.model.bulkimport.DeletePartRequest;
 import com.treasure_data.model.bulkimport.DeletePartResult;
 import com.treasure_data.model.bulkimport.DeleteSessionRequest;
 import com.treasure_data.model.bulkimport.DeleteSessionResult;
-import com.treasure_data.model.bulkimport.ErrorRecords;
 import com.treasure_data.model.bulkimport.FreezeSessionRequest;
 import com.treasure_data.model.bulkimport.FreezeSessionResult;
 import com.treasure_data.model.bulkimport.GetErrorRecordsRequest;
