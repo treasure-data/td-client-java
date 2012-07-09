@@ -1,6 +1,9 @@
-Release 0.1.1 - 20XX/XX/XX
+Release 0.1.2 - 20XX/XX/XX
   NEW FEATURES
     Adds new API: supports bulk import operation
+
+Release 0.1.1
+  NEW FEATURES
     Adds new API: deletePartialTable method in TreasureDataClient class
 
   BUG FIXMES
