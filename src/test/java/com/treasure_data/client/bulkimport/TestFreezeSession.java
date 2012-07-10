@@ -2,6 +2,7 @@ package com.treasure_data.client.bulkimport;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,7 +78,9 @@ public class TestFreezeSession {
                     gzout.close();
                     byte[] bytes = out.toByteArray();
 
-                    UploadPartRequest request = new UploadPartRequest(sess, parts.get(i), bytes);
+                    //UploadPartRequest request = new UploadPartRequest(sess, parts.get(i), bytes);
+                    UploadPartRequest request = new UploadPartRequest(sess, parts.get(i),
+                            new ByteArrayInputStream(bytes), bytes.length);
                     UploadPartResult result = biclient.uploadPart(request);
                 }
             }
