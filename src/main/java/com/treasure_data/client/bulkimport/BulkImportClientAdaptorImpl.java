@@ -336,7 +336,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             String path = String.format(HttpURL.V3_UPLOAD_PART,
                     HttpConnectionImpl.e(request.getSessionName()),
                     HttpConnectionImpl.e(request.getPartID()));
-            conn.doPutRequest(request, path, request.getBytes());
+            conn.doPutRequest(request, path, request.getInputStream(), request.getSize());
 
             // receive response code
             int code = conn.getResponseCode();
