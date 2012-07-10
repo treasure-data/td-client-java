@@ -17,6 +17,7 @@
 //
 package com.treasure_data.client.bulkimport;
 
+import java.io.InputStream;
 import java.util.List;
 
 import org.msgpack.unpacker.Unpacker;
@@ -126,6 +127,10 @@ public class BulkImportClient {
      */
     public void uploadPart(Session sess, String partID, byte[] bytes) throws ClientException {
         uploadPart(new UploadPartRequest(sess, partID, bytes));
+    }
+
+    public void uploadPart(Session sess, String partID, InputStream in, int size) throws ClientException {
+        uploadPart(new UploadPartRequest(sess, partID, in, size));
     }
 
     public UploadPartResult uploadPart(UploadPartRequest request) throws ClientException {
