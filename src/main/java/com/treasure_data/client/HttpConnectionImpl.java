@@ -167,6 +167,42 @@ public class HttpConnectionImpl {
         return conn;
     }
 
+    public HttpURLConnection doPutRequest(Request<?> request, String path,
+            InputStream in, int size) throws IOException {
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("http://").append(getApiServerPath()).append(path);
+
+        URL url = new URL(sbuf.toString());
+        conn = (HttpURLConnection) url.openConnection();
+        conn.setReadTimeout(600 * 1000);
+        conn.setRequestMethod("PUT");
+        // conn.setRequestProperty("Content-Type", "application/octet-stream");
+        conn.setRequestProperty("Content-Length", "" + size);
+
+        String apiKey = request.getCredentials().getAPIKey();
+        if (apiKey != null) {
+            conn.setRequestProperty("Authorization", "TD1 " + apiKey);
+        }
+        conn.setRequestProperty("Date", toRFC2822Format(new Date()));
+        conn.setDoOutput(true);
+        conn.setUseCaches(false);
+        // conn.connect();
+
+        // body
+        BufferedInputStream bin = new BufferedInputStream(in);
+        BufferedOutputStream out = new BufferedOutputStream(
+                conn.getOutputStream());
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = bin.read(buf)) != -1) {
+            out.write(buf, 0, len);
+        }
+        out.flush();
+        // out.close();
+
+        return conn;
+    }
+
     public int getResponseCode() throws IOException {
         return conn.getResponseCode();
     }
