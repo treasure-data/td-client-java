@@ -17,6 +17,9 @@
 //
 package com.treasure_data.model.bulkimport;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 public class UploadPartRequest extends BulkImportSpecifyRequest<Session> {
 
     public static enum Format {
@@ -44,13 +47,20 @@ public class UploadPartRequest extends BulkImportSpecifyRequest<Session> {
 
     private Format format;
 
-    private byte[] bytes;
+    private InputStream in;
+
+    private int size;
 
     public UploadPartRequest(Session sess, String partID, byte[] bytes) {
+        this(sess, partID, new ByteArrayInputStream(bytes), bytes.length);
+    }
+
+    public UploadPartRequest(Session sess, String partID, InputStream in, int size) {
         super(sess);
         this.partID = partID;
         this.format = Format.MSGPACKGZ;
-        this.bytes = bytes;
+        this.in = in;
+        this.size = size;
     }
 
     public String getPartID() {
@@ -61,7 +71,11 @@ public class UploadPartRequest extends BulkImportSpecifyRequest<Session> {
         return format;
     }
 
-    public byte[] getBytes() {
-        return bytes;
+    public InputStream getInputStream() {
+        return in;
+    }
+
+    public int getSize() {
+        return size;
     }
 }
