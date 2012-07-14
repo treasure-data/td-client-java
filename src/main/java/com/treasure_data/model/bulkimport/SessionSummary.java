@@ -55,9 +55,9 @@ public class SessionSummary extends Session {
         case READY:
             return "ready";
         case COMMITTING:
-            return "performing";
-        case COMMITTED:
             return "committing";
+        case COMMITTED:
+            return "committed";
         default:
             return "unknown";
         }
