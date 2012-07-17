@@ -25,13 +25,13 @@ Java >= 1.6
 
 You can download all-in-one jar file for Treasure Data Logger.
 
-    $ wget http://maven.treasure-data.com/maven2/com/treasure_data/td-client/${client.version}/td-client-${client.version}-jar-with-dependencies.jar
+    $ wget http://maven.treasure-data.com/com/treasure_data/td-client/${client.version}/td-client-${client.version}-jar-with-dependencies.jar
 
 To use Treasure Data Cloud for Java, set the above jar file to your classpath.
 
-### Install from Maven2 repository
+### Install from Maven repository
 
-Treasure Data Logger for Java is released on Treasure Data's Maven2 repository.
+Treasure Data Logger for Java is released on Treasure Data's Maven repository.
 You can configure your pom.xml as follows to use it:
 
     <dependencies>
@@ -47,12 +47,12 @@ You can configure your pom.xml as follows to use it:
     <repositories>
       <repository>
         <id>treasure-data.com</id>
-        <name>Treasure Data's Maven2 Repository</name>
-        <url>http://maven.treasure-data.com/maven2</url>
+        <name>Treasure Data's Maven Repository</name>
+        <url>http://maven.treasure-data.com/</url>
       </repository>
       <repository>
         <id>fluentd.org</id>
-        <name>Fluentd's Maven2 Repository</name>
+        <name>Fluentd's Maven Repository</name>
         <url>http://fluentd.org/maven2</url>
       </repository>
     </repositories>
@@ -64,8 +64,8 @@ To install td-client From SBT (a build tool for Scala), please add the following
     /* in build.sbt */
     // Repositories
     resolvers ++= Seq(
-      "td-client     Maven2 Repository" at "http://treasure-data.com/maven2/",
-      "fluent-logger Maven2 Repository" at "http://fluentd.org/maven2/"
+      "td-client     Maven Repository" at "http://maven.treasure-data.com/",
+      "fluent-logger Maven Repository" at "http://fluentd.org/maven2/"
     )
     // Dependencies
     libraryDependencies ++= Seq(
