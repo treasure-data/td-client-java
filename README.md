@@ -25,7 +25,7 @@ Java >= 1.6
 
 You can download all-in-one jar file for Treasure Data Logger.
 
-    $ wget http://treasure-data.com/maven2/com/treasure_data/td-client/${client.version}/td-client-${client.version}-jar-with-dependencies.jar
+    $ wget http://maven.treasure-data.com/maven2/com/treasure_data/td-client/${client.version}/td-client-${client.version}-jar-with-dependencies.jar
 
 To use Treasure Data Cloud for Java, set the above jar file to your classpath.
 
@@ -48,7 +48,7 @@ You can configure your pom.xml as follows to use it:
       <repository>
         <id>treasure-data.com</id>
         <name>Treasure Data's Maven2 Repository</name>
-        <url>http://treasure-data.com/maven2</url>
+        <url>http://maven.treasure-data.com/maven2</url>
       </repository>
       <repository>
         <id>fluentd.org</id>
@@ -85,7 +85,7 @@ directory.  File name will be td-client-${client.version}-jar-with-dependencies.
 For more detail, see pom.xml.
 
 **Replace ${client.version} with the current version of Treasure Data Cloud for Java.**
-**The current version is 0.1.1.**
+**The current version is 0.1.2.**
 
 ## Quickstart
 
