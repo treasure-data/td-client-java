@@ -34,15 +34,15 @@
   <distributionManagement>
       <repository>
           <uniqueVersion>false</uniqueVersion>
-          <id>msgpack.org</id>
-          <name>Repository at msgpack.org</name>
-          <url>file://${project.build.directory}/../maven2/</url>
+          <id>maven.treasure-data.com</id>
+          <name>Repository at maven.treasure-data.com</name>
+          <url>dav:http://maven.treasure-data.com</url>
       </repository>
       <snapshotRepository>
-          <uniqueVersion>true</uniqueVersion>
-          <id>msgpack.org</id>
-          <name>Repository at msgpack.org</name>
-          <url>file://${project.build.directory}/../maven2/</url>
+          <uniqueVersion>false</uniqueVersion>
+          <id>maven.treasure-data.com</id>
+          <name>Snapshot Repository at maven.treasure-data.com</name>
+          <url>dav:http://maven.treasure-data.com/snapshot</url>
       </snapshotRepository>
   </distributionManagement>
 
@@ -130,6 +130,13 @@
         </executions>
       </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav-jackrabbit</artifactId>
+        <version>1.0-beta-7</version>
+      </extension>
+    </extensions>
   </build>
 
   <reporting>
