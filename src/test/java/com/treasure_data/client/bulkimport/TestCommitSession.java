@@ -55,14 +55,14 @@ public class TestCommitSession {
         String tableName = "test04";
         Session sess = null;
         try { // create
-//            {
+            {
 //                CreateSessionRequest request = new CreateSessionRequest(sessionName, databaseName, tableName);
 //                CreateSessionResult result = biclient.createSession(request);
 //                sess = result.getSession();
 //                System.out.println(sess);
-//            }
-//
-//            { // upload
+            }
+
+            { // upload
 //                List<String> parts = new ArrayList<String>();
 //                parts.add("01d");
 //                parts.add("02d");
@@ -84,25 +84,28 @@ public class TestCommitSession {
 //                    UploadPartRequest request = new UploadPartRequest(sess, parts.get(i), bytes);
 //                    UploadPartResult result = biclient.uploadPart(request);
 //                }
-//            }
-//
-//            { // freeze
+            }
+
+            { // freeze
+//                sess = new Session(sessionName, databaseName, tableName);
 //                FreezeSessionRequest request = new FreezeSessionRequest(sess);
 //                FreezeSessionResult result = biclient.freezeSession(request);
-//            }
-//
-//            { // perform
+            }
+
+            { // perform
+//                sess = new Session(sessionName, databaseName, tableName);
 //                PerformSessionRequest request = new PerformSessionRequest(sess);
 //                PerformSessionResult result = biclient.performSession(request);
-//            }
+            }
 
             { // commit
-                sess = new Session(sessionName, null, null);
-                CommitSessionRequest request = new CommitSessionRequest(sess);
-                CommitSessionResult result = biclient.commitSession(request);
+//                sess = new Session(sessionName, databaseName, tableName);
+//                CommitSessionRequest request = new CommitSessionRequest(sess);
+//                CommitSessionResult result = biclient.commitSession(request);
             }
         } finally {
             // delete
+//            sess = new Session(sessionName, databaseName, tableName);
 //            DeleteSessionRequest request = new DeleteSessionRequest(sess);
 //            DeleteSessionResult result = biclient.deleteSession(request);
 //            System.out.println(result.getSessionName());
