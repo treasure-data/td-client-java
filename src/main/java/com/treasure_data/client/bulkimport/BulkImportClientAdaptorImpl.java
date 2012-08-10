@@ -256,13 +256,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         Map map = (Map) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        String sessName = (String) map.get("name");
-        if (!request.getSessionName().equals(sessName)) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getSessionName(), sessName);
-            throw new ClientException(msg);
-        }
-
         @SuppressWarnings("unchecked")
         List<String> parts = (List<String>) map.get("parts");
         return new ListPartsResult(request.getSession(), parts);
@@ -312,13 +305,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         Map map = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        String sessName = (String) map.get("name");
-        if (!request.getSessionName().equals(sessName)) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getSessionName(), sessName);
-            throw new ClientException(msg);
-        }
-
         return new CreateSessionResult(request.getSession());
     }
 
@@ -362,13 +348,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
-
-        String sessName = (String) map.get("name");
-        if (!request.getSessionName().equals(sessName)) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getSessionName(), sessName);
-            throw new ClientException(msg);
-        }
 
         return new UploadPartResult(request.getSession());
     }
@@ -416,13 +395,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        String sessName = (String) map.get("name");
-        if (!request.getSessionName().equals(sessName)) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getSessionName(), sessName);
-            throw new ClientException(msg);
-        }
-
         return new DeletePartResult(request.getSession());
     }
 
@@ -467,15 +439,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings({ "rawtypes" })
         Map map = (Map) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
-
-        String sessName = (String) map.get("name");
-        if (!request.getSessionName().equals(sessName)) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getSessionName(), sessName);
-            throw new ClientException(msg);
-        }
-        @SuppressWarnings("unused")
-        String job_id = (String) map.get("job_id");
 
         return new PerformSessionResult(request.getSession());
     }
@@ -579,13 +542,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         Map map = (Map) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        String sessName = (String) map.get("name");
-        if (!request.getSessionName().equals(sessName)) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getSessionName(), sessName);
-            throw new ClientException(msg);
-        }
-
         return new CommitSessionResult(request.getSession());
     }
 
@@ -630,13 +586,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
-
-        String sessName = map.get("name");
-        if (!request.getSessionName().equals(sessName)) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getSessionName(), sessName);
-            throw new ClientException(msg);
-        }
 
         return new DeleteSessionResult(request.getSession());
     }
@@ -683,13 +632,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        String sessName = map.get("name");
-        if (!request.getSessionName().equals(sessName)) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getSessionName(), sessName);
-            throw new ClientException(msg);
-        }
-
         return new FreezeSessionResult(request.getSession());
     }
 
@@ -734,13 +676,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
-
-        String sessName = map.get("name");
-        if (!request.getSessionName().equals(sessName)) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getSessionName(), sessName);
-            throw new ClientException(msg);
-        }
 
         return new UnfreezeSessionResult(request.getSession());
     }
