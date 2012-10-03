@@ -17,9 +17,13 @@
 //
 package com.treasure_data.client;
 
+import java.util.regex.Pattern;
+
 import com.treasure_data.model.Request;
 
 public class Validator {
+
+    private static Pattern databaseNamePat = Pattern.compile("^([a-z0-9_]+)$");
 
     public void validateCredentials(TreasureDataClient client, Request<?> request)
             throws ClientException {
@@ -63,5 +67,24 @@ public class Validator {
             throw new ClientException(String.format(
                     "Server error (invalid JSON Data): %s", jsonData));
         }
+    }
+
+    public void validateDatabaseName(String name) throws ClientException {
+        if (name == null || name.isEmpty()) {
+            throw new ClientException("Empty name is not allowed");
+        }
+        if (name.length() < 3 || 256 < name.length()) {
+            throw new ClientException(String.format(
+                    "Name must be 3 to 256 characters, got %d characters.",
+                    name.length()));
+        }
+        if (!databaseNamePat.matcher(name).matches()) {
+            throw new ClientException(
+                    "Name must consist only of lower-case alphabets, numbers and '_'.");
+        }
+    }
+
+    public void validateTableName(String name) throws ClientException {
+        validateDatabaseName(name);
     }
 }

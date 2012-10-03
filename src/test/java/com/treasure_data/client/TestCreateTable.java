@@ -27,28 +27,23 @@ import com.treasure_data.model.Request;
 import com.treasure_data.model.Table;
 
 public class TestCreateTable {
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
-
     @Test @Ignore
     public void testCreateTable00() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
-        String databaseName = "db1";
+        String databaseName = "mugadb";
+        Database database = new Database(databaseName);
         try {
-            // create database
-            CreateDatabaseResult ret =
-                clientAdaptor.createDatabase(new CreateDatabaseRequest(databaseName));
-            Database database = ret.getDatabase();
-
-            CreateTableRequest request = new CreateTableRequest(database, "test01");
+            CreateTableRequest request = new CreateTableRequest(database, "+test01");
             CreateTableResult result = clientAdaptor.createTable(request);
             System.out.println(result.getTable().getName());
+        } catch (ClientException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
         } finally {
             // delete database
             clientAdaptor.deleteDatabase(new DeleteDatabaseRequest(databaseName));

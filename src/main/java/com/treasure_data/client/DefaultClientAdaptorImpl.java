@@ -251,6 +251,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public CreateDatabaseResult createDatabase(CreateDatabaseRequest request)
             throws ClientException {
+        validator.validateDatabaseName(request.getDatabaseName());
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
@@ -429,6 +430,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public CreateTableResult createTable(CreateTableRequest request)
             throws ClientException {
+        validator.validateTableName(request.getTableName());
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
