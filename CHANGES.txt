@@ -2,6 +2,9 @@ Release 0.1.3 - 20XX/XX/XX
   NEW FEATURES
     Adds new API: supports RetryClient, which is to retry http requests
 
+  IMPROVEMENTS
+    added {database,table} name validations to {createDatabase,createTable} methods
+
 Release 0.1.2 - 2012/07/18
   NEW FEATURES
     Adds new API: supports bulk import operation
