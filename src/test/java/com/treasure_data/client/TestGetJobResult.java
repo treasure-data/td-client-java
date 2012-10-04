@@ -5,6 +5,7 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.msgpack.unpacker.UnpackerIterator;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.GetJobResultRequest;
@@ -13,16 +14,12 @@ import com.treasure_data.model.Job;
 import com.treasure_data.model.JobResult;
 
 public class TestGetJobResult {
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
-
     @Test @Ignore
     public void testGetJobResult00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         GetJobResultRequest request = new GetJobResultRequest(
