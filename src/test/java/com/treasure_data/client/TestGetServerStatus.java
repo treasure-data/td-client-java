@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -23,14 +22,10 @@ import com.treasure_data.model.GetServerStatusResult;
 
 public class TestGetServerStatus {
 
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
-
     @Test @Ignore
     public void testGetServerStatus00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -71,8 +66,10 @@ public class TestGetServerStatus {
      */
     @Test
     public void testGetServerStatus01() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus01());
         GetServerStatusRequest request = new GetServerStatusRequest();
@@ -108,8 +105,10 @@ public class TestGetServerStatus {
      */
     @Test
     public void testGetServerStatus02() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus02());
         GetServerStatusRequest request = new GetServerStatusRequest();
@@ -154,8 +153,10 @@ public class TestGetServerStatus {
      */
     @Test
     public void testGetServerStatus03() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforGetServerStatus03());
         GetServerStatusRequest request = new GetServerStatusRequest();

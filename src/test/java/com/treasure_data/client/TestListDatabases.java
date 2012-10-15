@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,14 +24,11 @@ import com.treasure_data.model.ListDatabasesResult;
 import com.treasure_data.model.Request;
 
 public class TestListDatabases {
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
 
     @Test @Ignore
     public void testListDatabases00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -95,8 +91,10 @@ public class TestListDatabases {
      */
     @Test
     public void testListDatabases01() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases01());
 
@@ -141,8 +139,10 @@ public class TestListDatabases {
      */
     @Test
     public void testListDatabases02() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases02());
 
@@ -188,8 +188,10 @@ public class TestListDatabases {
      */
     @Test
     public void testListDatabases03() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials());
+        conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
         clientAdaptor.setConnection(new HttpConnectionImplforListDatabases03());
 

@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,19 +24,15 @@ import com.treasure_data.model.Request;
 import com.treasure_data.model.Table;
 
 public class TestExportData {
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
 
     @Test @Ignore
     public void testExportData00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
-        Properties props = System.getProperties();
         String bucketName = props.getProperty("td.client.export.bucket");
         String accessKeyID = props.getProperty("td.client.accesskey.id");
         String secretAccessKey = props.getProperty("td.client.secret.accesskey");
@@ -88,7 +83,7 @@ public class TestExportData {
     @Test
     public void testExportData01() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -137,7 +132,7 @@ public class TestExportData {
     @Test
     public void testExportData02() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -189,7 +184,7 @@ public class TestExportData {
     @Test
     public void testExportData03() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);

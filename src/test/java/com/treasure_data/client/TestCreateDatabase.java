@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -23,14 +22,11 @@ import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.Request;
 
 public class TestCreateDatabase {
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
 
     @Test @Ignore
     public void testCreateDatabase00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -83,7 +79,7 @@ public class TestCreateDatabase {
     @Test
     public void testCreateDatabase01() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -129,7 +125,7 @@ public class TestCreateDatabase {
     @Test
     public void testCreateDatabase02() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -179,7 +175,7 @@ public class TestCreateDatabase {
     @Test
     public void testCreateDatabase03() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);

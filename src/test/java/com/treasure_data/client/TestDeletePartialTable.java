@@ -21,17 +21,11 @@ import org.msgpack.packer.Packer;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpConnectionImpl;
-import com.treasure_data.model.CreateDatabaseRequest;
-import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
-import com.treasure_data.model.DeleteDatabaseRequest;
-import com.treasure_data.model.DeleteDatabaseResult;
 import com.treasure_data.model.DeletePartialTableRequest;
 import com.treasure_data.model.DeletePartialTableResult;
-import com.treasure_data.model.DeleteTableRequest;
-import com.treasure_data.model.DeleteTableResult;
 import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.Job;
@@ -39,14 +33,11 @@ import com.treasure_data.model.Request;
 import com.treasure_data.model.Table;
 
 public class TestDeletePartialTable {
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
 
     @Test @Ignore
     public void testDeleteTable00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -189,7 +180,7 @@ public class TestDeletePartialTable {
     @Test
     public void testDeleteTable01() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -238,7 +229,7 @@ public class TestDeletePartialTable {
     @Test
     public void testDeleteTable02() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -290,7 +281,7 @@ public class TestDeletePartialTable {
     @Test
     public void testDeleteTable03() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);

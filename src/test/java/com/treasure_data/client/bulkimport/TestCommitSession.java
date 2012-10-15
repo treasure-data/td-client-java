@@ -1,49 +1,23 @@
 package com.treasure_data.client.bulkimport;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.zip.GZIPOutputStream;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.MessagePack;
-import org.msgpack.packer.Packer;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.TreasureDataClient;
-import com.treasure_data.model.bulkimport.CommitSessionRequest;
-import com.treasure_data.model.bulkimport.CommitSessionResult;
-import com.treasure_data.model.bulkimport.CreateSessionRequest;
-import com.treasure_data.model.bulkimport.CreateSessionResult;
-import com.treasure_data.model.bulkimport.DeleteSessionRequest;
-import com.treasure_data.model.bulkimport.DeleteSessionResult;
-import com.treasure_data.model.bulkimport.FreezeSessionRequest;
-import com.treasure_data.model.bulkimport.FreezeSessionResult;
-import com.treasure_data.model.bulkimport.PerformSessionRequest;
-import com.treasure_data.model.bulkimport.PerformSessionResult;
 import com.treasure_data.model.bulkimport.Session;
-import com.treasure_data.model.bulkimport.UploadPartRequest;
-import com.treasure_data.model.bulkimport.UploadPartResult;
 
 public class TestCommitSession {
 
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
-
     @Test @Ignore
     public void test00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         TreasureDataClient client = new TreasureDataClient(
-                new TreasureDataCredentials(), System.getProperties());
+                new TreasureDataCredentials(), props);
         BulkImportClient biclient = new BulkImportClient(client);
 
         MessagePack msgpack = new MessagePack();

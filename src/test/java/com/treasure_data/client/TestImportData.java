@@ -13,7 +13,6 @@ import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
 import org.json.simple.JSONValue;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.MessagePack;
@@ -31,14 +30,11 @@ import com.treasure_data.model.Request;
 import com.treasure_data.model.Table;
 
 public class TestImportData {
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
 
     @Test @Ignore
     public void testImportData00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -126,7 +122,7 @@ public class TestImportData {
     @Test
     public void testImportData01() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -177,7 +173,7 @@ public class TestImportData {
     @Test
     public void testImportData02() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -231,7 +227,7 @@ public class TestImportData {
     @Test
     public void testImportData03() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);

@@ -2,10 +2,8 @@ package com.treasure_data.client;
 
 import java.util.Properties;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.msgpack.unpacker.UnpackerIterator;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.GetJobResultRequest;

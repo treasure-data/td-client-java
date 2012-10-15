@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -23,19 +21,11 @@ import com.treasure_data.model.AuthenticateResult;
 import com.treasure_data.model.Request;
 
 public class TestAuthenticate {
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
 
     @Test @Ignore
     public void testAuthenticate00() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials());
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -85,7 +75,7 @@ public class TestAuthenticate {
     @Test
     public void testAuthenticate01() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -132,7 +122,7 @@ public class TestAuthenticate {
     @Test
     public void testAuthenticate02() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -183,7 +173,7 @@ public class TestAuthenticate {
     @Test
     public void testAuthenticate03() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);

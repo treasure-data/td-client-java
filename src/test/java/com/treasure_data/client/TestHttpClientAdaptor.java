@@ -26,7 +26,7 @@ public class TestHttpClientAdaptor {
 
         {
             Properties props = new Properties();
-            props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+            props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
             clientAdaptor.setTreasureDataCredentials(new TreasureDataCredentials(props));
             TreasureDataCredentials credentails = clientAdaptor.getTreasureDataCredentials();
             assertTrue(credentails != null);

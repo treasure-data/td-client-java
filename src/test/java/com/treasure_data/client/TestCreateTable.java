@@ -11,22 +11,19 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.HttpConnectionImpl;
-import com.treasure_data.model.CreateDatabaseRequest;
-import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
 import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.Request;
-import com.treasure_data.model.Table;
 
 public class TestCreateTable {
+
     @Test @Ignore
     public void testCreateTable00() throws Exception {
         Properties props = new Properties();
@@ -89,7 +86,7 @@ public class TestCreateTable {
     @Test
     public void testCreateTable01() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -136,7 +133,7 @@ public class TestCreateTable {
     @Test
     public void testCreateTable02() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
@@ -187,7 +184,7 @@ public class TestCreateTable {
     @Test
     public void testCreateTable03() throws Exception {
         Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
