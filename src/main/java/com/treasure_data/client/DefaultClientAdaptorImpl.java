@@ -536,8 +536,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             }
         }
 
-        // parse JSON data
         @SuppressWarnings({ "unchecked", "rawtypes" })
+        // {"database":"mugadb","table1":"test04","table2":"test04_1342157288"}
         Map map = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
