@@ -14,7 +14,7 @@ public class TestTreasureDataCredentials {
     @Test
     public void testConstructor01() throws IOException {
         Properties props = new Properties();
-        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+        props.load(TestTreasureDataClient.class.getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         TreasureDataCredentials credentials = new TreasureDataCredentials(props);
         assertTrue(credentials.getAPIKey() != null);
     }
