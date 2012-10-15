@@ -93,7 +93,7 @@ public class TestSwapTable {
 
     static class HttpConnectionImplforSwapTable01 extends HttpConnectionImpl {
         @Override
-        public void doGetRequest(Request<?> request, String path, Map<String, String> header,
+        public void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             // do nothing
         }
@@ -150,7 +150,7 @@ public class TestSwapTable {
 
     static class HttpConnectionImplforSwapTable02 extends HttpConnectionImpl {
         @Override
-        public void doGetRequest(Request<?> request, String path, Map<String, String> header,
+        public void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             // do nothing
         }
@@ -202,7 +202,7 @@ public class TestSwapTable {
 
     static class HttpConnectionImplforSwapTable03 extends HttpConnectionImpl {
         @Override
-        public void doGetRequest(Request<?> request, String path, Map<String, String> header,
+        public void doPostRequest(Request<?> request, String path, Map<String, String> header,
                 Map<String, String> params) throws IOException {
             // do nothing
         }
