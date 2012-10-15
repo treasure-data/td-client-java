@@ -50,6 +50,8 @@ import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
+import com.treasure_data.model.SwapTableRequest;
+import com.treasure_data.model.SwapTableResult;
 
 public interface DefaultClientAdaptor {
     Config getConfig();
@@ -77,6 +79,8 @@ public interface DefaultClientAdaptor {
     ListTablesResult listTables(ListTablesRequest request) throws ClientException;
 
     CreateTableResult createTable(CreateTableRequest request) throws ClientException;
+
+    SwapTableResult swapTable(SwapTableRequest request) throws ClientException;
 
     DeleteTableResult deleteTable(DeleteTableRequest request) throws ClientException;
 

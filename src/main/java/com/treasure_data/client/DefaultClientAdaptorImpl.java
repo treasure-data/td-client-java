@@ -71,6 +71,8 @@ import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
+import com.treasure_data.model.SwapTableRequest;
+import com.treasure_data.model.SwapTableResult;
 import com.treasure_data.model.Table;
 import com.treasure_data.model.TableSummary;
 
@@ -493,6 +495,54 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
         Table table = new Table(request.getDatabase(), tableName, tableType);
         return new CreateTableResult(table);
+    }
+
+    @Override
+    public SwapTableResult swapTable(SwapTableRequest request)
+            throws ClientException {
+        request.setCredentials(getConfig().getCredentials());
+        validator.validateCredentials(this, request);
+
+        String jsonData = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_TABLE_SWAP,
+                    HttpConnectionImpl.e(request.getDatabaseName()),
+                    HttpConnectionImpl.e(request.getTableName1()),
+                    HttpConnectionImpl.e(request.getTableName2()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            int code = conn.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String msg = String.format("Swap table failed (%s (%d): %s)",
+                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
+                LOG.severe(msg);
+                throw new ClientException(msg);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            throw new ClientException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        Map map = (Map<String, String>) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        return new SwapTableResult(request.getDatabaseName(),
+                request.getTableName1(), request.getTableName2());
     }
 
     @Override
@@ -1060,6 +1110,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         String V3_TABLE_LIST = "/v3/table/list/%s";
 
         String V3_TABLE_CREATE = "/v3/table/create/%s/%s/%s";
+
+        String V3_TABLE_SWAP = "/v3/table/swap/%s/%s/%s";
 
         String V3_TABLE_DELETE = "/v3/table/delete/%s/%s";
 

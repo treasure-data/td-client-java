@@ -59,6 +59,8 @@ import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
+import com.treasure_data.model.SwapTableRequest;
+import com.treasure_data.model.SwapTableResult;
 import com.treasure_data.model.Table;
 import com.treasure_data.model.TableSummary;
 
@@ -187,6 +189,15 @@ public class TreasureDataClient {
         CreateTableResult result = createTable(new CreateTableRequest(
                 database, tableName));
         return result.getTable();
+    }
+
+    public void swapTable(String databaseName, String tableName1, String tableName2)
+            throws ClientException {
+        swapTable(new SwapTableRequest(databaseName, tableName1, tableName2));
+    }
+
+    public SwapTableResult swapTable(SwapTableRequest request) throws ClientException {
+        return clientAdaptor.swapTable(request);
     }
 
     public CreateTableResult createTable(CreateTableRequest request)
