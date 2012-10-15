@@ -1,5 +1,6 @@
 Release 0.1.3 - 20XX/XX/XX
   NEW FEATURES
+    Adds new API: supports swapTable method in TreasureDataClient class
     Adds new API: supports RetryClient, which is to retry http requests
 
   IMPROVEMENTS
