@@ -72,7 +72,7 @@ public abstract class FileConverter {
                 if (!key.equals("time")) {
                     Templates.TString.write(pk, (String) pair.getValue());
                 } else {
-                    Templates.TLong.write(pk, Long.parseLong((String) pair.getValue()));
+                    Templates.TLong.write(pk, (Long) pair.getValue());
                 }
             }
             pk.writeMapEnd();
@@ -152,6 +152,7 @@ public abstract class FileConverter {
 
     public void convertStream(InputStream in, OutputStream out, List<String> columns)
             throws ClientException {
+
         // create reader/packer
         Packer packer = createGZMsgpackPacker(out);
         BufferedReader reader = createBufferedReader(in);
@@ -189,8 +190,9 @@ public abstract class FileConverter {
         for (int i = 0; i < values.size(); i++) {
             if (timeColIndex == i) {
                 record.put(columns.get(i), Long.parseLong(values.get(i)));
+            } else {
+                record.put(columns.get(i), values.get(i));
             }
-            record.put(columns.get(i), values.get(i));
         }
 
         try {
