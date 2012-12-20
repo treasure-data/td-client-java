@@ -112,8 +112,19 @@ public class BulkImportClient {
                 sessName, databaseName, tableName)).getSession();
     }
 
-    public CreateSessionResult createSession(CreateSessionRequest request) throws ClientException {
+    public CreateSessionResult createSession(CreateSessionRequest request)
+            throws ClientException {
         return clientAdaptor.createSession(request);
+    }
+
+    public void prepareCSVPart(String inputFileName, String outputFileName, String columns)
+            throws ClientException {
+        new CSVFileConverter().convertFile(inputFileName, outputFileName, columns);
+    }
+
+    public void prepareTSVPart(String inputFileName, String outputFileName, String columns)
+            throws ClientException {
+        new TSVFileConverter().convertFile(inputFileName, outputFileName, columns);
     }
 
     /**
@@ -125,11 +136,13 @@ public class BulkImportClient {
      * @throws ClientException
      * @see td command: bulk_import:upload_part <name> <id> <path.msgpack.gz>
      */
-    public void uploadPart(Session sess, String partID, byte[] bytes) throws ClientException {
+    public void uploadPart(Session sess, String partID, byte[] bytes)
+            throws ClientException {
         uploadPart(new UploadPartRequest(sess, partID, bytes));
     }
 
-    public void uploadPart(Session sess, String partID, InputStream in, int size) throws ClientException {
+    public void uploadPart(Session sess, String partID, InputStream in, int size)
+            throws ClientException {
         uploadPart(new UploadPartRequest(sess, partID, in, size));
     }
 

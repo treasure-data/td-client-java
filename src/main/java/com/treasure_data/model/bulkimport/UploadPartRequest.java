@@ -19,11 +19,12 @@ package com.treasure_data.model.bulkimport;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Properties;
 
 public class UploadPartRequest extends BulkImportSpecifyRequest<Session> {
 
     public static enum Format {
-        MSGPACKGZ, UNKNOWN,
+        MSGPACKGZ,
     }
 
     public static String toFormatName(Format format) {
@@ -31,7 +32,7 @@ public class UploadPartRequest extends BulkImportSpecifyRequest<Session> {
         case MSGPACKGZ:
             return "msgpack.gz";
         default:
-            return "unknown";
+            return "msgpack.gz";
         }
     }
 
@@ -39,7 +40,7 @@ public class UploadPartRequest extends BulkImportSpecifyRequest<Session> {
         if (formatName.equals("msgpack.gz")) {
             return Format.MSGPACKGZ;
         } else {
-            return Format.UNKNOWN;
+            return Format.MSGPACKGZ;
         }
     }
 
