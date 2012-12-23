@@ -69,11 +69,11 @@ public class TreasureDataClient {
      * adaptor factory method
      */
     static DefaultClientAdaptor createClientAdaptor(
-	    TreasureDataCredentials credentials, Properties props) {
-	Config conf = new Config();
-	conf.setCredentials(credentials);
-	DefaultClientAdaptor clientAdaptor = new DefaultClientAdaptorImpl(conf);
-	return clientAdaptor;
+            TreasureDataCredentials credentials, Properties props) {
+        Config conf = new Config();
+        conf.setCredentials(credentials);
+        DefaultClientAdaptor clientAdaptor = new DefaultClientAdaptorImpl(conf);
+        return clientAdaptor;
     }
 
     private DefaultClientAdaptor clientAdaptor;
@@ -86,8 +86,9 @@ public class TreasureDataClient {
         this(new TreasureDataCredentials(props), props);
     }
 
-    public TreasureDataClient(TreasureDataCredentials credentials, Properties props) {
-	clientAdaptor = createClientAdaptor(credentials, props);
+    public TreasureDataClient(TreasureDataCredentials credentials,
+            Properties props) {
+        clientAdaptor = createClientAdaptor(credentials, props);
     }
 
     public Config getConfig() {
@@ -114,7 +115,8 @@ public class TreasureDataClient {
     public AuthenticateResult authenticate(AuthenticateRequest request)
             throws ClientException {
         AuthenticateResult result = clientAdaptor.authenticate(request);
-        TreasureDataCredentials credentials =  result.getTreasureDataCredentials();
+        TreasureDataCredentials credentials = result
+                .getTreasureDataCredentials();
         setTreasureDataCredentials(credentials);
         return result;
     }
@@ -122,8 +124,8 @@ public class TreasureDataClient {
     // Server Status API
 
     public ServerStatus getServerStatus() throws ClientException {
-        return clientAdaptor.getServerStatus(
-                new GetServerStatusRequest()).getServerStatus();
+        return clientAdaptor.getServerStatus(new GetServerStatusRequest())
+                .getServerStatus();
     }
 
     public GetServerStatusResult getServerStatus(GetServerStatusRequest request)
@@ -142,15 +144,14 @@ public class TreasureDataClient {
         return clientAdaptor.listDatabases(request);
     }
 
-    public Database createDatabase(String databaseName)
-            throws ClientException {
-        return createDatabase(
-                new CreateDatabaseRequest(databaseName)).getDatabase();
+    public Database createDatabase(String databaseName) throws ClientException {
+        return createDatabase(new CreateDatabaseRequest(databaseName))
+                .getDatabase();
     }
 
     public CreateDatabaseResult createDatabase(CreateDatabaseRequest request)
             throws ClientException {
-	return clientAdaptor.createDatabase(request);
+        return clientAdaptor.createDatabase(request);
     }
 
     public void deleteDatabase(String databaseName) throws ClientException {
@@ -159,7 +160,7 @@ public class TreasureDataClient {
 
     public DeleteDatabaseResult deleteDatabase(DeleteDatabaseRequest request)
             throws ClientException {
-	return clientAdaptor.deleteDatabase(request);
+        return clientAdaptor.deleteDatabase(request);
     }
 
     // Table API
@@ -176,7 +177,7 @@ public class TreasureDataClient {
 
     public ListTablesResult listTables(ListTablesRequest request)
             throws ClientException {
-	return clientAdaptor.listTables(request);
+        return clientAdaptor.listTables(request);
     }
 
     public Table createTable(String databaseName, String tableName)
@@ -186,23 +187,24 @@ public class TreasureDataClient {
 
     public Table createTable(Database database, String tableName)
             throws ClientException {
-        CreateTableResult result = createTable(new CreateTableRequest(
-                database, tableName));
+        CreateTableResult result = createTable(new CreateTableRequest(database,
+                tableName));
         return result.getTable();
     }
 
-    public void swapTable(String databaseName, String tableName1, String tableName2)
-            throws ClientException {
+    public void swapTable(String databaseName, String tableName1,
+            String tableName2) throws ClientException {
         swapTable(new SwapTableRequest(databaseName, tableName1, tableName2));
     }
 
-    public SwapTableResult swapTable(SwapTableRequest request) throws ClientException {
+    public SwapTableResult swapTable(SwapTableRequest request)
+            throws ClientException {
         return clientAdaptor.swapTable(request);
     }
 
     public CreateTableResult createTable(CreateTableRequest request)
             throws ClientException {
-	return clientAdaptor.createTable(request);
+        return clientAdaptor.createTable(request);
     }
 
     public void deleteTable(String databaseName, String tableName)
@@ -213,7 +215,7 @@ public class TreasureDataClient {
 
     public DeleteTableResult deleteTable(DeleteTableRequest request)
             throws ClientException {
-	return clientAdaptor.deleteTable(request);
+        return clientAdaptor.deleteTable(request);
     }
 
     public void deletePartiallTable(String databaseName, String tableName,
@@ -222,8 +224,8 @@ public class TreasureDataClient {
                 new Table(new Database(databaseName), tableName), from, to));
     }
 
-    public DeletePartialTableResult deletePartiallTable(DeletePartialTableRequest request)
-            throws ClientException {
+    public DeletePartialTableResult deletePartiallTable(
+            DeletePartialTableRequest request) throws ClientException {
         return clientAdaptor.deletePartialTable(request);
     }
 
@@ -231,9 +233,10 @@ public class TreasureDataClient {
     //TableSchema updateTableSchema(UpdateTableSchemaRequest request) throws ClientException;
 
     // Import API
-    public ImportResult importData(String databaseName, String tableName, byte[] data)
-            throws ClientException {
-        return importData(new Table(new Database(databaseName), tableName), data);
+    public ImportResult importData(String databaseName, String tableName,
+            byte[] data) throws ClientException {
+        return importData(new Table(new Database(databaseName), tableName),
+                data);
     }
 
     public ImportResult importData(Table table, byte[] data)
@@ -241,13 +244,15 @@ public class TreasureDataClient {
         return importData(new ImportRequest(table, data));
     }
 
-    public ImportResult importData(ImportRequest request) throws ClientException {
+    public ImportResult importData(ImportRequest request)
+            throws ClientException {
         return clientAdaptor.importData(request);
     }
 
     // Export API
 
-    public ExportResult exportData(ExportRequest request) throws ClientException {
+    public ExportResult exportData(ExportRequest request)
+            throws ClientException {
         return clientAdaptor.exportData(request);
     }
 
@@ -266,7 +271,8 @@ public class TreasureDataClient {
         return listJobs(new ListJobsRequest(from, to)).getJobs();
     }
 
-    public ListJobsResult listJobs(ListJobsRequest request) throws ClientException {
+    public ListJobsResult listJobs(ListJobsRequest request)
+            throws ClientException {
         return clientAdaptor.listJobs(request);
     }
 
@@ -295,11 +301,12 @@ public class TreasureDataClient {
     }
 
     public JobResult getJobResult(Job job) throws ClientException {
-        return getJobResult(new GetJobResultRequest(
-                new JobResult(job))).getJobResult();
+        return getJobResult(new GetJobResultRequest(new JobResult(job)))
+                .getJobResult();
     }
 
-    public GetJobResultResult getJobResult(GetJobResultRequest request) throws ClientException {
+    public GetJobResultResult getJobResult(GetJobResultRequest request)
+            throws ClientException {
         return clientAdaptor.getJobResult(request);
     }
 
