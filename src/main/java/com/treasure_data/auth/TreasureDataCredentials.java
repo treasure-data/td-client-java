@@ -47,7 +47,7 @@ public class TreasureDataCredentials {
     public TreasureDataCredentials() {
         this(System.getProperties());
     }
-    
+
     public TreasureDataCredentials(Properties props) {
         this(checkAPIKey(props));
     }
@@ -61,12 +61,12 @@ public class TreasureDataCredentials {
     }
 
     public String getAPIKey() {
-	return apiKey;
+        return apiKey;
     }
 
     @Override
     public String toString() {
-	return String.format("%s{apiKey=%s}", this.getClass().getName(),
-		apiKey != null ? apiKey : "null");
+        return String.format("%s{apiKey=%s}", getClass().getName(),
+                apiKey != null ? apiKey : "null");
     }
 }
