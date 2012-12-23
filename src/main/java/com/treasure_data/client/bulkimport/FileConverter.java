@@ -44,9 +44,9 @@ import org.msgpack.unpacker.Unpacker;
 import com.treasure_data.client.ClientException;
 
 public abstract class FileConverter {
-    static final Template<Map<String, Object>> tmpl = new ExtendedTemplate(); // TODO should change name
+    static final Template<Map<String, Object>> tmpl = new ExtTemplate();
 
-    static class ExtendedTemplate implements Template<Map<String, Object>> {
+    static class ExtTemplate implements Template<Map<String, Object>> {
         @Override
         public void write(Packer pk, Map<String, Object> v) throws IOException {
             write(pk, v, false);
