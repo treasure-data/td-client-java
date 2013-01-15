@@ -246,8 +246,9 @@ public class HttpConnectionImpl {
     }
 
     public Unpacker getResponseBodyBinaryWithGZip() throws IOException {
-        GZIPInputStream in = new GZIPInputStream(getInputStream());
+        InputStream in = new GZIPInputStream(getInputStream());
         MessagePack msgpack = new MessagePack();
+        // TODO Unpacker unpacker = msgpack.createUnpacker(in);
         BufferUnpacker unpacker = msgpack.createBufferUnpacker();
         byte[] buf = new byte[1024];
 
