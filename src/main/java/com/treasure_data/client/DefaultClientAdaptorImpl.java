@@ -50,6 +50,7 @@ import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.JobResult;
+import com.treasure_data.model.JobResult2;
 import com.treasure_data.model.JobSummary;
 import com.treasure_data.model.KillJobRequest;
 import com.treasure_data.model.KillJobResult;
@@ -1083,11 +1084,15 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             }
 
             // receive response body
-            unpacker = conn.getResponseBodyBinaryWithGZip();
+            if (!(request.getJobResult() instanceof JobResult2)) {
+                unpacker = conn.getResponseBodyBinaryWithGZip();
+            } else {
+                unpacker = conn.getResponseBodyBinaryWithGZip2();
+            }
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {
-            if (conn != null) {
+            if (conn != null && !(request.getJobResult() instanceof JobResult2)) {
                 conn.disconnect();
             }
         }

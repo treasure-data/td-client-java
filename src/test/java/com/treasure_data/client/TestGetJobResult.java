@@ -12,6 +12,7 @@ import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.JobResult;
+import com.treasure_data.model.JobResult2;
 
 public class TestGetJobResult {
     @Test @Ignore
@@ -23,14 +24,19 @@ public class TestGetJobResult {
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         GetJobResultRequest request = new GetJobResultRequest(
-                new JobResult(new Job("1515829")));
+                //new JobResult(new Job("1515829")));
+                new JobResult2(new Job("1515829"), 1));
         GetJobResultResult result = clientAdaptor.getJobResult(request);
         System.out.println(result.getJob().getJobID());
         Unpacker unpacker = result.getJobResult().getResult();
         UnpackerIterator iter = unpacker.iterator();
+        int cnt = 0;
         while (iter.hasNext()) {
+            cnt++;
             System.out.println(iter.next());
         }
+        unpacker.close();
+        System.out.println(cnt);
     }
 
 }
