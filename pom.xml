@@ -20,8 +20,13 @@
   <scm>
     <connection>scm:git:git://github.com/treasure-data/td-client-java.git</connection>
     <developerConnection>scm:git:git@github.com:treasure-data/td-client-java.git</developerConnection>
-    <url>https://github.com/treasure-data/td-client-java</url>
+    <url>scm:git:git://github.com/treasure-data/td-client-java.git</url>
   </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/treasure-data/td-client-java/issues</url>
+  </issueManagement>
 
   <developers>
     <developer>
@@ -64,7 +69,7 @@
     <dependency>
       <groupId>org.msgpack</groupId>
       <artifactId>msgpack</artifactId>
-      <version>0.6.6</version>
+      <version>0.6.7</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -128,6 +133,14 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-scm-plugin</artifactId>
+        <version>1.6</version>
+        <configuration>
+          <pushChanges>false</pushChanges>
+        </configuration>
       </plugin>
     </plugins>
     <extensions>
