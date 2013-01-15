@@ -22,12 +22,14 @@ import org.msgpack.unpacker.Unpacker;
 public class JobResult extends AbstractModel {
 
     public static enum Format {
-        MSGPACK, JSON, UNKNOWN,
+        MSGPACK, MSGPACKGZ, JSON, UNKNOWN,
     }
 
     public static Format toFormat(String formatName) {
         if (formatName.equals("msgpack")) {
             return Format.MSGPACK;
+        } else if (formatName.equals("msgpack.gz")) {
+            return Format.MSGPACKGZ;
         } else if (formatName.equals("json")) {
             return Format.JSON;
         } else {
@@ -39,6 +41,8 @@ public class JobResult extends AbstractModel {
         switch (format) {
         case MSGPACK:
             return "msgpack";
+        case MSGPACKGZ:
+            return "msgpack.gz";
         case JSON:
             return "json";
         default:
@@ -55,7 +59,7 @@ public class JobResult extends AbstractModel {
     public JobResult(Job job) {
         super(job.getJobID());
         this.job = job;
-        this.format = Format.MSGPACK;
+        this.format = Format.MSGPACKGZ;
     }
 
     public Job getJob() {

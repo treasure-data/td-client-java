@@ -4,6 +4,8 @@ import java.util.Properties;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.msgpack.unpacker.Unpacker;
+import org.msgpack.unpacker.UnpackerIterator;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.GetJobResultRequest;
@@ -21,9 +23,14 @@ public class TestGetJobResult {
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         GetJobResultRequest request = new GetJobResultRequest(
-                new JobResult(new Job("26317")));
+                new JobResult(new Job("1515829")));
         GetJobResultResult result = clientAdaptor.getJobResult(request);
         System.out.println(result.getJob().getJobID());
+        Unpacker unpacker = result.getJobResult().getResult();
+        UnpackerIterator iter = unpacker.iterator();
+        while (iter.hasNext()) {
+            System.out.println(iter.next());
+        }
     }
 
 }

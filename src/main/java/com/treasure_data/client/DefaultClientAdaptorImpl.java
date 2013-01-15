@@ -1064,12 +1064,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
                     HttpConnectionImpl.e(request.getJobResult().getJob().getJobID()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
-            if (request.getJobResult().getFormat() != JobResult.Format.MSGPACK) {
+            if (request.getJobResult().getFormat() != JobResult.Format.MSGPACKGZ) {
                 String msg = String.format("Doesn't support format",
                         request.getJobResult().getFormat());
                 throw new UnsupportedOperationException(msg);
             } else {
-                params.put("format", JobResult.toFormatName(JobResult.Format.MSGPACK));
+                params.put("format", JobResult.toFormatName(JobResult.Format.MSGPACKGZ));
             }
             conn.doGetRequest(request, path, header, params);
 
@@ -1083,7 +1083,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             }
 
             // receive response body
-            unpacker = conn.getResponseBodyBinary();
+            unpacker = conn.getResponseBodyBinaryWithGZip();
         } catch (IOException e) {
             throw new ClientException(e);
         } finally {

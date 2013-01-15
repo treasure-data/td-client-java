@@ -471,7 +471,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response body
             try {
-                unpacker = getResponseBodyBinaryWithGZip(conn);
+                unpacker = conn.getResponseBodyBinaryWithGZip();
             } catch (EOFException e) {
                 // ignore
             }
@@ -484,20 +484,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         }
 
         return new GetErrorRecordsResult(request.getSession(), unpacker);
-    }
-
-    private Unpacker getResponseBodyBinaryWithGZip(HttpConnectionImpl conn) throws IOException {
-        GZIPInputStream in = new GZIPInputStream(conn.getInputStream());
-        MessagePack msgpack = new MessagePack();
-        BufferUnpacker unpacker = msgpack.createBufferUnpacker();
-        byte[] buf = new byte[1024];
-
-        int len = 0;
-        while ((len = in.read(buf)) != -1) {
-            unpacker.feed(buf, 0, len);
-        }
-
-        return unpacker;
     }
 
     @Override

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.BufferUnpacker;
@@ -231,7 +232,21 @@ public class HttpConnectionImpl {
     }
 
     public Unpacker getResponseBodyBinary() throws IOException {
-        BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
+        BufferedInputStream in = new BufferedInputStream(getInputStream());
+        MessagePack msgpack = new MessagePack();
+        BufferUnpacker unpacker = msgpack.createBufferUnpacker();
+        byte[] buf = new byte[1024];
+
+        int len = 0;
+        while ((len = in.read(buf)) != -1) {
+            unpacker.feed(buf, 0, len);
+        }
+
+        return unpacker;
+    }
+
+    public Unpacker getResponseBodyBinaryWithGZip() throws IOException {
+        GZIPInputStream in = new GZIPInputStream(getInputStream());
         MessagePack msgpack = new MessagePack();
         BufferUnpacker unpacker = msgpack.createBufferUnpacker();
         byte[] buf = new byte[1024];
