@@ -18,6 +18,7 @@
 package com.treasure_data.model;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.treasure_data.client.ClientException;
 
@@ -27,6 +28,7 @@ import com.treasure_data.client.ClientException;
 public class JobResult2 extends JobResult {
 
     private int experimentalCode = 0;
+    private InputStream in;
 
     public JobResult2(Job job) {
         this(job, 0);
@@ -49,5 +51,13 @@ public class JobResult2 extends JobResult {
                 throw new ClientException(e);
             }
         }
+    }
+
+    public void setResultInputStream(InputStream in) {
+        this.in = in;
+    }
+
+    public InputStream getResultInputStream() {
+        return in;
     }
 }

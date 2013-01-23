@@ -1086,8 +1086,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             // receive response body
             if (!(request.getJobResult() instanceof JobResult2)) {
                 unpacker = conn.getResponseBodyBinaryWithGZip();
+                request.getJobResult().setResult(unpacker);
             } else {
-                unpacker = conn.getResponseBodyBinaryWithGZip2();
+                ((JobResult2) request.getJobResult()).setResultInputStream(conn.getInputStream());
             }
         } catch (IOException e) {
             throw new ClientException(e);
@@ -1097,7 +1098,6 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             }
         }
 
-        request.getJobResult().setResult(unpacker);
         return new GetJobResultResult(request.getJobResult());
     }
 
