@@ -17,6 +17,8 @@
 //
 package com.treasure_data.client;
 
+import java.util.Properties;
+
 import com.treasure_data.auth.TreasureDataCredentials;
 
 public class Config implements Constants {
@@ -39,6 +41,15 @@ public class Config implements Constants {
     public static final String TD_AUTO_CREATE_TABLE_DEFAULT = "false";
 
     private TreasureDataCredentials credentials;
+    private Properties props;
+
+    public Config() {
+        this(System.getProperties());
+    }
+
+    public Config(Properties props) {
+        this.props = props;
+    }
 
     public void setCredentials(TreasureDataCredentials credentials) {
 	this.credentials = credentials;
@@ -48,4 +59,7 @@ public class Config implements Constants {
 	return credentials;
     }
 
+    public Properties getProperties() {
+        return props;
+    }
 }

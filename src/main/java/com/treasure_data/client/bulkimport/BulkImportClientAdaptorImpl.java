@@ -113,7 +113,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
 
     HttpConnectionImpl createConnection() {
         if (conn == null) {
-            conn = new HttpConnectionImpl();
+            conn = new HttpConnectionImpl(client.getConfig().getProperties());
         }
         return conn;
     }

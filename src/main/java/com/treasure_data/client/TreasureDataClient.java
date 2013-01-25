@@ -70,7 +70,7 @@ public class TreasureDataClient {
      */
     static DefaultClientAdaptor createClientAdaptor(
             TreasureDataCredentials credentials, Properties props) {
-        Config conf = new Config();
+        Config conf = new Config(props);
         conf.setCredentials(credentials);
         DefaultClientAdaptor clientAdaptor = new DefaultClientAdaptorImpl(conf);
         return clientAdaptor;

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONValue;
@@ -97,7 +98,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
     HttpConnectionImpl createConnection() {
         if (conn == null) {
-            conn = new HttpConnectionImpl();
+            conn = new HttpConnectionImpl(getConfig().getProperties());
         }
         return conn;
     }
