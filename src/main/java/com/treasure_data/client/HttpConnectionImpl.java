@@ -50,8 +50,14 @@ public class HttpConnectionImpl {
         new SimpleDateFormat( "E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH );
 
     private HttpURLConnection conn = null;
+    private Properties props;
 
     public HttpConnectionImpl() {
+        this(System.getProperties());
+    }
+
+    public HttpConnectionImpl(Properties props) {
+        this.props = props;
     }
 
     public void doGetRequest(Request<?> request, String path, Map<String, String> header,
@@ -76,6 +82,9 @@ public class HttpConnectionImpl {
         // create connection object with url
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
+        conn.setReadTimeout(Integer.parseInt(props.getProperty(
+                Config.TD_CLIENT_READ_TIMEOUT,
+                Config.TD_CLIENT_READ_TIMEOUT_DEFAULTVALUE)));
 
         // header
         conn.setRequestMethod("GET");
@@ -118,6 +127,9 @@ public class HttpConnectionImpl {
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Length", "0");
         }
+        conn.setReadTimeout(Integer.parseInt(props.getProperty(
+                Config.TD_CLIENT_READ_TIMEOUT,
+                Config.TD_CLIENT_READ_TIMEOUT_DEFAULTVALUE)));
 
         // header
         conn.setRequestMethod("POST");
@@ -145,7 +157,9 @@ public class HttpConnectionImpl {
 
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
-        conn.setReadTimeout(600 * 1000);
+        conn.setReadTimeout(Integer.parseInt(props.getProperty(
+                Config.TD_CLIENT_READ_TIMEOUT,
+                Config.TD_CLIENT_READ_TIMEOUT_DEFAULTVALUE)));
         conn.setRequestMethod("PUT");
         //conn.setRequestProperty("Content-Type", "application/octet-stream");
         conn.setRequestProperty("Content-Length", "" + bytes.length);
