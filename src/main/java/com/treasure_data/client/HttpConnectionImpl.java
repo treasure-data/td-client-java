@@ -52,12 +52,24 @@ public class HttpConnectionImpl {
     private HttpURLConnection conn = null;
     private Properties props;
 
+    private int getReadTimeout;
+    private int putReadTimeout;
+    private int postReadTimeout;
+
     public HttpConnectionImpl() {
         this(System.getProperties());
     }
 
     public HttpConnectionImpl(Properties props) {
-        this.props = props;
+        getReadTimeout = Integer.parseInt(props.getProperty(
+                Config.TD_CLIENT_GETMETHOD_READ_TIMEOUT,
+                Config.TD_CLIENT_GETMETHOD_READ_TIMEOUT_DEFAULTVALUE));
+        putReadTimeout = Integer.parseInt(props.getProperty(
+                Config.TD_CLIENT_PUTMETHOD_READ_TIMEOUT,
+                Config.TD_CLIENT_PUTMETHOD_READ_TIMEOUT_DEFAULTVALUE));
+        postReadTimeout = Integer.parseInt(props.getProperty(
+                Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT,
+                Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT_DEFAULTVALUE));
     }
 
     public void doGetRequest(Request<?> request, String path, Map<String, String> header,
@@ -82,9 +94,7 @@ public class HttpConnectionImpl {
         // create connection object with url
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
-        conn.setReadTimeout(Integer.parseInt(props.getProperty(
-                Config.TD_CLIENT_READ_TIMEOUT,
-                Config.TD_CLIENT_READ_TIMEOUT_DEFAULTVALUE)));
+        conn.setReadTimeout(getReadTimeout);
 
         // header
         conn.setRequestMethod("GET");
@@ -127,9 +137,7 @@ public class HttpConnectionImpl {
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Length", "0");
         }
-        conn.setReadTimeout(Integer.parseInt(props.getProperty(
-                Config.TD_CLIENT_READ_TIMEOUT,
-                Config.TD_CLIENT_READ_TIMEOUT_DEFAULTVALUE)));
+        conn.setReadTimeout(postReadTimeout);
 
         // header
         conn.setRequestMethod("POST");
@@ -157,9 +165,8 @@ public class HttpConnectionImpl {
 
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
-        conn.setReadTimeout(Integer.parseInt(props.getProperty(
-                Config.TD_CLIENT_READ_TIMEOUT,
-                Config.TD_CLIENT_READ_TIMEOUT_DEFAULTVALUE)));
+        conn.setReadTimeout(putReadTimeout);
+
         conn.setRequestMethod("PUT");
         //conn.setRequestProperty("Content-Type", "application/octet-stream");
         conn.setRequestProperty("Content-Length", "" + bytes.length);
@@ -189,7 +196,7 @@ public class HttpConnectionImpl {
 
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
-        conn.setReadTimeout(600 * 1000);
+        conn.setReadTimeout(putReadTimeout);
         conn.setRequestMethod("PUT");
         // conn.setRequestProperty("Content-Type", "application/octet-stream");
         conn.setRequestProperty("Content-Length", "" + size);
