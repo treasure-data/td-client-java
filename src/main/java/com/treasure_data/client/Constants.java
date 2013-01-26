@@ -22,6 +22,12 @@ public interface Constants {
     String TD_CLIENT_CONNECT_TIMEOUT = "td.client.connect.timeout";
     String TD_CLIENT_CONNECT_TIMEOUT_DEFAULTVALUE = "" + 60 * 1000; // millis
 
-    String TD_CLIENT_READ_TIMEOUT = "td.client.read.timeout";
-    String TD_CLIENT_READ_TIMEOUT_DEFAULTVALUE = "" + 600 * 1000; // millis
+    String TD_CLIENT_GETMETHOD_READ_TIMEOUT = "td.client.read.timeout";
+    String TD_CLIENT_GETMETHOD_READ_TIMEOUT_DEFAULTVALUE = "" + 600 * 1000; // millis
+
+    String TD_CLIENT_PUTMETHOD_READ_TIMEOUT = "td.client.read.timeout";
+    String TD_CLIENT_PUTMETHOD_READ_TIMEOUT_DEFAULTVALUE = "" + 600 * 1000; // millis
+
+    String TD_CLIENT_POSTMETHOD_READ_TIMEOUT = "td.client.read.timeout";
+    String TD_CLIENT_POSTMETHOD_READ_TIMEOUT_DEFAULTVALUE = "" + 600 * 1000; // millis
 }
