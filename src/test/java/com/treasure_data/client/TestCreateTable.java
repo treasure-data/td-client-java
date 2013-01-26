@@ -35,7 +35,7 @@ public class TestCreateTable {
         String databaseName = "mugadb";
         Database database = new Database(databaseName);
         try {
-            CreateTableRequest request = new CreateTableRequest(database, "+test01");
+            CreateTableRequest request = new CreateTableRequest(database, "test01");
             CreateTableResult result = clientAdaptor.createTable(request);
             System.out.println(result.getTable().getName());
         } catch (ClientException e) {
@@ -43,7 +43,7 @@ public class TestCreateTable {
             e.printStackTrace();
         } finally {
             // delete database
-            clientAdaptor.deleteDatabase(new DeleteDatabaseRequest(databaseName));
+            //clientAdaptor.deleteDatabase(new DeleteDatabaseRequest(databaseName));
         }
     }
 
