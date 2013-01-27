@@ -306,9 +306,9 @@ public class HttpConnectionImpl {
         // system properties
         Properties props = System.getProperties();
         String host = props.getProperty(
-                Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULT);
+                Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULTVALUE);
         int port = Integer.parseInt(props.getProperty(
-                Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULT));
+                Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULTVALUE));
         hostAndPort = host + ":" + port;
 
         return hostAndPort;

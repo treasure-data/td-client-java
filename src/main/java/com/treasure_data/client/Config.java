@@ -22,23 +22,6 @@ import java.util.Properties;
 import com.treasure_data.auth.TreasureDataCredentials;
 
 public class Config implements Constants {
-    public static final String TD_ENV_API_KEY = "TREASURE_DATA_API_KEY";
-
-    public static final String TD_ENV_API_SERVER = "TD_API_SERVER";
-
-    public static final String TD_API_KEY = "td.api.key";
-
-    public static final String TD_API_SERVER_HOST = "td.api.server.host";
-
-    public static final String TD_API_SERVER_HOST_DEFAULT = "api.treasure-data.com";
-
-    public static final String TD_API_SERVER_PORT = "td.api.server.port";
-
-    public static final String TD_API_SERVER_PORT_DEFAULT = "80";
-
-    public static final String TD_AUTO_CREATE_TABLE = "td.create.table.auto";
-
-    public static final String TD_AUTO_CREATE_TABLE_DEFAULT = "false";
 
     private TreasureDataCredentials credentials;
     private Properties props;
