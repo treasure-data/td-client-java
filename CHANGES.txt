@@ -1,6 +1,6 @@
 Release 0.1.4 - 20XX/XX/XX
   IMPROVEMENTS
-    Changes JobResult2 API
+    Changes JobResult and JobResult2 API
     Adds system properties for setting 'read timeout' to td-client
 
 Release 0.1.3 - 2013/01/15
