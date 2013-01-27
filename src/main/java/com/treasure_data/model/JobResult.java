@@ -54,6 +54,8 @@ public class JobResult extends AbstractModel {
 
     private Format format;
 
+    private long resultSize;
+
     private Unpacker result;
 
     public JobResult(Job job) {
@@ -64,6 +66,14 @@ public class JobResult extends AbstractModel {
 
     public Job getJob() {
         return job;
+    }
+
+    public void setResultSize(long size) {
+        this.resultSize = size;
+    }
+
+    public long getResultSize() {
+        return resultSize;
     }
 
     public void setResult(Unpacker result) {
