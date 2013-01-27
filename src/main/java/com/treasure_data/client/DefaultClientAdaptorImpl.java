@@ -1084,6 +1084,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
                 throw new ClientException(msg);
             }
 
+            request.getJobResult().setResultSize((long) conn.getContentLength());
+
             // receive response body
             if (!(request.getJobResult() instanceof JobResult2)) {
                 unpacker = conn.getResponseBodyBinaryWithGZip();

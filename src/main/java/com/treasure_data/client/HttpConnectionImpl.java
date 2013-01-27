@@ -252,6 +252,10 @@ public class HttpConnectionImpl {
         conn.disconnect();
     }
 
+    public int getContentLength() throws IOException {
+        return conn.getContentLength();
+    }
+
     public Unpacker getResponseBodyBinary() throws IOException {
         BufferedInputStream in = new BufferedInputStream(getInputStream());
         MessagePack msgpack = new MessagePack();
