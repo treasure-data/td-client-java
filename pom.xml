@@ -51,6 +51,15 @@
       </snapshotRepository>
   </distributionManagement>
 
+  <properties>
+    <!--  version properties for dependencies -->
+    <msgpack.version>0.6.7</msgpack.version>
+    <junit.version>4.8.2</junit.version>
+    <mockito.version>1.9.5</mockito.version>
+
+    <!-- version properties for plugins -->
+  </properties>
+
   <repositories>
     <repository>
       <id>fluentd.org</id>
@@ -69,18 +78,18 @@
     <dependency>
       <groupId>org.msgpack</groupId>
       <artifactId>msgpack</artifactId>
-      <version>0.6.7</version>
+      <version>${msgpack.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.2</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.9.5</version>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
