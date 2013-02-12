@@ -113,6 +113,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         request.setCredentials(getConfig().getCredentials());
 
         String jsonData = null;
+        String message = null;
+        int code = 0;
         try {
             conn = createConnection();
 
@@ -125,19 +127,23 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Authentication failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Authentication failed", message, code));
+                throw new HttpClientException(
+                        "Authentication failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "authenticate", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message,
+                    code));
+            throw new HttpClientException("Authentication failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -159,6 +165,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
 
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -169,25 +177,26 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doGetRequest(request, path, header, params);
 
             // receive response code and body
-            String msg = null;
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                msg = String.format("Server is down (%s (%d): %s)",
-                        conn.getResponseMessage(), code, conn.getResponseBody());
-                LOG.severe(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage("Server is down",
+                        message, code));
             } else {
                 String jsonData = conn.getResponseBody();
                 validator.validateJSONData(jsonData);
 
+                // { "status": "ok" }
                 @SuppressWarnings("rawtypes")
                 Map map = (Map) JSONValue.parse(jsonData);
                 validator.validateJavaObject(jsonData, map);
-
-                msg = (String) map.get("status");
+                message = (String) map.get("status");
             }
-            return new GetServerStatusResult(new ServerStatus(msg));
+            return new GetServerStatusResult(new ServerStatus(message));
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "getServerStatus", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Server is down", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -202,6 +211,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        String message = null;
+        int code = 0;
         try {
             conn = createConnection();
 
@@ -212,19 +223,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doGetRequest(request, path, header, params);
 
             // receive response code and body
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("List databases failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "List databases failed", message, code));
+                throw new HttpClientException(
+                        "List databases failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "listDatabases", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("List databases failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -260,6 +274,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -271,19 +287,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Create database failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Create database failed", message, code));
+                throw new HttpClientException("Create database failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "createDatabase", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Create database failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -312,6 +331,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -323,19 +344,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Delete database failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Delete database failed", message, code));
+                throw new HttpClientException("Delete database failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "deleteDatabase", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Delete database failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -351,7 +375,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         if (!dbName.equals(request.getDatabaseName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
                     request.getDatabaseName(), dbName);
-            throw new ClientException(msg);
+            throw new ClientException(msg); // TODO
         }
 
         return new DeleteDatabaseResult(request.getDatabase());
@@ -362,13 +386,15 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             throws ClientException {
         // validate request
         if (request.getDatabase() == null) {
-            throw new ClientException("database is not specified");
+            throw new ClientException("database is not specified"); // TODO
         }
 
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -380,19 +406,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doGetRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("List tables failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "List tables failed", message, code));
+                throw new HttpClientException("List tables failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "listTables", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("List tables failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -439,6 +468,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -452,19 +483,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Create table failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Create table failed", message, code));
+                throw new HttpClientException("Create table failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "createTable", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Create table failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -506,6 +540,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -519,19 +555,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Swap table failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Swap table failed", message, code));
+                throw new HttpClientException("Swap table failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "swapTable", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Swap table failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -554,6 +593,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -566,19 +607,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Delete table failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Delete table failed", message, code));
+                throw new HttpClientException("Delete table failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "deleteTable", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Delete table failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -613,6 +657,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -627,19 +673,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Delete partial table failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Delete partial table failed", message, code));
+                throw new HttpClientException("Delete partial table failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "deletePartialTable", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Delete partial table failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -669,6 +718,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -679,19 +730,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPutRequest(request, path, request.getBytes());
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Import data failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Import data failed", message, code));
+                throw new HttpClientException("Import data failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "importData", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Import data failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -726,6 +780,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -768,19 +824,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Submit job failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Export failed", message, code));
+                throw new HttpClientException("Export failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "exportData", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Export failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -797,7 +856,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         if (!dbName.equals(request.getDatabase().getName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
                     request.getDatabase().getName(), dbName);
-            throw new ClientException(msg);
+            throw new ClientException(msg); // TODO
         }
 
         Job job = new Job(jobID, Job.Type.MAPRED, request.getDatabase(), null, null);
@@ -811,6 +870,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -833,19 +894,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Submit job failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Submit job failed", message, code));
+                throw new HttpClientException("Submit job failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "submitJob", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Submit job failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -862,7 +926,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         if (!dbName.equals(request.getDatabase().getName())) {
             String msg = String.format("invalid database name: expected=%s, actual=%s",
                     request.getDatabase().getName(), dbName);
-            throw new ClientException(msg);
+            throw new ClientException(msg); // TODO
         }
 
         Job job = request.getJob();
@@ -876,6 +940,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -898,19 +964,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doGetRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("List jobs failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "List jobs failed", message, code));
+                throw new HttpClientException("List jobs failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "listJobs", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("List jobs failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -951,6 +1020,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -962,19 +1033,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Kill job failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Kill job failed", message, code));
+                throw new HttpClientException("Kill job failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "killJob", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Kill job failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -991,7 +1065,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         if (!jobID.equals(request.getJob().getJobID())) {
             String msg = String.format("invalid job ID: expected=%s, actual=%s",
                     request.getJob().getJobID(), jobID);
-            throw new ClientException(msg);
+            throw new ClientException(msg); // TODO
         }
 
         return new KillJobResult(jobID, status);
@@ -1004,6 +1078,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -1015,19 +1091,22 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doGetRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Show jobs failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Show jobs failed", message, code));
+                throw new HttpClientException("Show jobs failed",
+                        message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "showJob", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Show jobs failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -1058,6 +1137,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(this, request);
 
         Unpacker unpacker = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -1076,12 +1157,13 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             conn.doGetRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Get job result failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                message = conn.getResponseMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Get job result failed", message, code));
+                throw new HttpClientException("Get job result failed",
+                        message, code);
             }
 
             request.getJobResult().setResultSize((long) conn.getContentLength());
@@ -1094,7 +1176,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
                 ((JobResult2) request.getJobResult()).setResultInputStream(conn.getInputStream());
             }
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "getJobResult", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Get job result failed", message, code, e);
         } finally {
             if (conn != null && !(request.getJobResult() instanceof JobResult2)) {
                 conn.disconnect();
