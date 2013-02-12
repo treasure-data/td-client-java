@@ -106,6 +106,7 @@ public class TestAuthenticate {
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
+        // check behavior
         try {
             String email = "muga";
             String password = "nishizawa";
@@ -131,6 +132,7 @@ public class TestAuthenticate {
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
+        // check behavior
         try {
             String email = "muga";
             String password = "nishizawa";
@@ -156,6 +158,7 @@ public class TestAuthenticate {
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
+        // check behavior
         try {
             String email = "muga";
             String password = "nishizawa";
@@ -173,7 +176,6 @@ public class TestAuthenticate {
     public void throwClientErrorWhenGetResponseMessageThrowsIOError()
             throws Exception {
         int expectedCode = HttpURLConnection.HTTP_BAD_REQUEST;
-        String expectedMessage = "something";
 
         // create mock HttpConnectionImpl object
         doNothing().when(conn).doPostRequest(any(Request.class),
@@ -183,6 +185,7 @@ public class TestAuthenticate {
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
+        // check behavior
         try {
             String email = "muga";
             String password = "nishizawa";
@@ -212,6 +215,7 @@ public class TestAuthenticate {
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
+        // check behavior
         try {
             String email = "muga";
             String password = "nishizawa";
