@@ -179,8 +179,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code and body
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage("Server is down",
                         message, code));
             } else {
@@ -225,8 +225,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code and body
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "List databases failed", message, code));
                 throw new HttpClientException(
@@ -289,8 +289,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Create database failed", message, code));
                 throw new HttpClientException("Create database failed",
@@ -340,8 +340,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Delete database failed", message, code));
                 throw new HttpClientException("Delete database failed",
@@ -464,8 +464,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Create table failed", message, code));
                 throw new HttpClientException("Create table failed",
@@ -519,8 +519,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Swap table failed", message, code));
                 throw new HttpClientException("Swap table failed",
@@ -571,8 +571,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Delete table failed", message, code));
                 throw new HttpClientException("Delete table failed",
@@ -625,8 +625,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Delete partial table failed", message, code));
                 throw new HttpClientException("Delete partial table failed",
@@ -757,8 +757,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Export failed", message, code));
                 throw new HttpClientException("Export failed",
@@ -821,8 +821,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Submit job failed", message, code));
                 throw new HttpClientException("Submit job failed",
@@ -953,8 +953,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Kill job failed", message, code));
                 throw new HttpClientException("Kill job failed",
