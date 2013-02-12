@@ -395,8 +395,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "List tables failed", message, code));
                 throw new HttpClientException("List tables failed",
@@ -884,8 +884,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "List jobs failed", message, code));
                 throw new HttpClientException("List jobs failed",
@@ -1005,8 +1005,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Show jobs failed", message, code));
                 throw new HttpClientException("Show jobs failed",
