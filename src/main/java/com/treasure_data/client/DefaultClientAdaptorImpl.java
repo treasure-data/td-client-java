@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONValue;
@@ -157,6 +156,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         //String user = map.get("user");
         String apiKey = map.get("apikey");
         TreasureDataCredentials credentails = new TreasureDataCredentials(apiKey);
+
         return new AuthenticateResult(credentails);
     }
 
@@ -313,13 +313,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("unchecked")
         Map<String, String> dbMap = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, dbMap);
-
         String dbName = dbMap.get("database");
-        if (!dbName.equals(request.getDatabaseName())) {
-            String msg = String.format("invalid name: expected=%s, actual=%s",
-                    request.getDatabaseName(), dbName);
-            throw new ClientException(msg);
-        }
 
         return new CreateDatabaseResult(new Database(dbName));
     }
@@ -371,13 +365,6 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         Map<String, String> dbMap = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, dbMap);
 
-        String dbName = dbMap.get("database");
-        if (!dbName.equals(request.getDatabaseName())) {
-            String msg = String.format("invalid database name: expected=%s, actual=%s",
-                    request.getDatabaseName(), dbName);
-            throw new ClientException(msg); // TODO
-        }
-
         return new DeleteDatabaseResult(request.getDatabase());
     }
 
@@ -386,7 +373,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             throws ClientException {
         // validate request
         if (request.getDatabase() == null) {
-            throw new ClientException("database is not specified"); // TODO
+            throw new ClientException("database is not specified");
         }
 
         request.setCredentials(getConfig().getCredentials());
@@ -431,14 +418,6 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
-
-        String dbName = (String) map.get("database");
-        if (!dbName.equals(request.getDatabase().getName())) {
-            String msg = String.format("invalid database name: expected=%s, actual=%s",
-                    request.getDatabase().getName(), dbName);
-            throw new ClientException(msg);
-        }
-
         @SuppressWarnings("unchecked")
         Iterator<Map<String, Object>> tableMapIter =
             ((List<Map<String, Object>>) map.get("tables")).iterator();
@@ -509,27 +488,10 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("unchecked")
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, tableMap);
-
-        String dbName = tableMap.get("database");
-        if (!dbName.equals(request.getDatabase().getName())) {
-            String msg = String.format("invalid database name: expected=%s, actual=%s",
-                    request.getDatabase().getName(), dbName);
-            throw new ClientException(msg);
-        }
         String tableName = tableMap.get("table");
-        if (!tableName.equals(request.getTableName())) {
-            String msg = String.format("invalid table name: expected=%s, actual=%s",
-                    request.getTableName(), dbName);
-            throw new ClientException(msg);
-        }
         Table.Type tableType = Table.toType(tableMap.get("type"));
-        if (tableType != request.getTable().getType()) {
-            String msg = String.format("invalid table type: expected=%s, actual=%s",
-                    request.getTable().getType(), tableType);
-            throw new ClientException(msg);
-        }
-
         Table table = new Table(request.getDatabase(), tableName, tableType);
+
         return new CreateTableResult(table);
     }
 
@@ -633,19 +595,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("unchecked")
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, tableMap);
-
-        String dbName = tableMap.get("database");
-        if (!dbName.equals(request.getDatabase().getName())) {
-            String msg = String.format("invalid database name: expected=%s, actual=%s",
-                    request.getDatabase().getName(), dbName);
-            throw new ClientException(msg);
-        }
         String tableName = tableMap.get("table");
-        if (!tableName.equals(request.getTable().getName())) {
-            String msg = String.format("invalid table name: expected=%s, actual=%s",
-                    request.getTable().getName(), dbName);
-            throw new ClientException(msg);
-        }
 
         return new DeleteTableResult(request.getDatabase(), tableName);
     }
@@ -699,16 +649,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, jobMap);
-
         String jobID = jobMap.get("job_id");
-        String dbName = jobMap.get("database");
-        if (!dbName.equals(request.getDatabase().getName())) {
-            String msg = String.format("invalid database name: expected=%s, actual=%s",
-                    request.getDatabase().getName(), dbName);
-            throw new ClientException(msg);
-        }
-
         Job job = new Job(jobID, Job.Type.MAPRED, request.getDatabase(), null, null);
+
         return new DeletePartialTableResult(job);
     }
 
@@ -757,19 +700,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        String dbName = (String) map.get("database");
-        String tblName = (String) map.get("table");
         double elapsedTime = (Double) map.get("elapsed_time");
-        if (!dbName.equals(request.getTable().getDatabase().getName())) {
-            String msg = String.format("invalid database name: expected=%s, actual=%s",
-                    request.getTable().getDatabase().getName(), dbName);
-            throw new ClientException(msg);
-        }
-        if (!tblName.equals(request.getTable().getName())) {
-            String msg = String.format("invalid table name: expected=%s, actual=%s",
-                    request.getTable().getDatabase().getName(), tblName);
-            throw new ClientException(msg);
-        }
 
         return new ImportResult(request.getTable(), elapsedTime);
     }
@@ -852,14 +783,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateJavaObject(jsonData, jobMap);
 
         String jobID = jobMap.get("job_id");
-        String dbName = jobMap.get("database");
-        if (!dbName.equals(request.getDatabase().getName())) {
-            String msg = String.format("invalid database name: expected=%s, actual=%s",
-                    request.getDatabase().getName(), dbName);
-            throw new ClientException(msg); // TODO
-        }
-
         Job job = new Job(jobID, Job.Type.MAPRED, request.getDatabase(), null, null);
+
         return new ExportResult(job);
     }
 
@@ -920,17 +845,10 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("unchecked")
         Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, jobMap);
-
         String jobID = jobMap.get("job_id");
-        String dbName = jobMap.get("database");
-        if (!dbName.equals(request.getDatabase().getName())) {
-            String msg = String.format("invalid database name: expected=%s, actual=%s",
-                    request.getDatabase().getName(), dbName);
-            throw new ClientException(msg); // TODO
-        }
-
         Job job = request.getJob();
         job.setJobID(jobID);
+
         return new SubmitJobResult(job);
     }
 
@@ -1059,14 +977,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
-
         JobSummary.Status status = JobSummary.toStatus(map.get("former_status"));
         String jobID = map.get("job_id");
-        if (!jobID.equals(request.getJob().getJobID())) {
-            String msg = String.format("invalid job ID: expected=%s, actual=%s",
-                    request.getJob().getJobID(), jobID);
-            throw new ClientException(msg); // TODO
-        }
 
         return new KillJobResult(jobID, status);
     }
@@ -1127,6 +1039,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
         // TODO different object from request's one
         JobSummary job = new JobSummary(jobID, type, null, null, result,
                 status, null, null, query, resultSchema);
+
         return new ShowJobResult(job);
     }
 
