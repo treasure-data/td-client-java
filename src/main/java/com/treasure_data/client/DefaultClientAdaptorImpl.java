@@ -127,8 +127,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Authentication failed", message, code));
                 throw new HttpClientException(
@@ -149,6 +149,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             }
         }
 
+        // { "user":"myemailaddress","apikey":"myapikey" }
         // parse JSON data
         @SuppressWarnings("unchecked")
         Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
