@@ -1,35 +1,51 @@
 package com.treasure_data.client;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
 import org.json.simple.JSONValue;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 
 import com.treasure_data.auth.TreasureDataCredentials;
-import com.treasure_data.client.HttpConnectionImpl;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
 import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
-import com.treasure_data.model.Request;
 import com.treasure_data.model.Table;
 
-public class TestImportData {
+public class TestImportData extends PutMethodTestUtil {
+
+    private ImportRequest request;
+    private String databaseName;
+    private String tableName;
+
+    @Before
+    public void createResources() throws Exception {
+        super.createResources();
+        databaseName = "testdb";
+        tableName = "testtbl";
+        byte[] bytes = new byte[32];
+        request = new ImportRequest(new Table(new Database(databaseName), tableName), bytes);
+    }
+
+    @After
+    public void deleteResources() throws Exception {
+        super.deleteResources();
+        clientAdaptor = null;
+        conn = null;
+    }
 
     @Test @Ignore
     public void testImportData00() throws Exception {
@@ -82,167 +98,24 @@ public class TestImportData {
         return out.toByteArray();
     }
 
-    static class HttpConnectionImplforImportData01 extends HttpConnectionImpl {
-        @Override
-        public HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
-                throws IOException {
-            // do nothing
-            return null;
-        }
-
-        @Override
-        public int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_OK;
-        }
-
-        @Override
-        public String getResponseMessage() throws IOException {
-            return "";
-        }
-
-        @Override
-        public String getResponseBody() throws IOException {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("database", "testdb");
-            map.put("table", "testtbl");
-            map.put("elapsed_time", 32.3);
-            String jsonData = JSONValue.toJSONString(map);
-            return jsonData;
-        }
-
-        @Override
-        public void disconnect() {
-            // do nothing
-        }
+    @Override
+    public void doBusinessLogic() throws Exception {
+        clientAdaptor.importData(request);
     }
 
-    /**
-     * check normal behavior of client
-     */
-    @Test
-    public void testImportData01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforImportData01());
-
-        String databaseName = "testdb";
-        String tableName = "testtbl";
-        Table table = new Table(new Database(databaseName), tableName);
-        byte[] data = new byte[0];
-        ImportRequest request = new ImportRequest(table, data);
+    @Override
+    public void checkNormalBehavior0() throws Exception {
         ImportResult result = clientAdaptor.importData(request);
         assertEquals(databaseName, result.getTable().getDatabase().getName());
         assertEquals(tableName, result.getTable().getName());
     }
 
-    static class HttpConnectionImplforImportData02 extends HttpConnectionImpl {
-        @Override
-        public HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
-                throws IOException {
-            // do nothing
-            return null;
-        }
-
-        @Override
-        public int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_OK;
-        }
-
-        @Override
-        public String getResponseMessage() throws IOException {
-            return "";
-        }
-
-        @Override
-        public String getResponseBody() throws IOException {
-            return "foobar"; // invalid JSON data
-        }
-
-        @Override
-        public void disconnect() {
-            // do nothing
-        }
-    }
-
-    /**
-     * check behavior when receiving *invalid JSON data* as response body
-     */
-    @Test
-    public void testImportData02() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforImportData02());
-
-        try {
-            String databaseName = "testdb";
-            String tableName = "testtbl";
-            Table table = new Table(new Database(databaseName), tableName);
-            byte[] data = new byte[0];
-            ImportRequest request = new ImportRequest(table, data);
-            clientAdaptor.importData(request);
-            fail();
-        } catch (Throwable t) {
-            assertTrue(t instanceof ClientException);
-        }
-    }
-
-    static class HttpConnectionImplforImportData03 extends HttpConnectionImpl {
-        @Override
-        public HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
-                throws IOException {
-            // do nothing
-            return null;
-        }
-
-        @Override
-        public int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_BAD_REQUEST;
-        }
-
-        @Override
-        public String getResponseMessage() throws IOException {
-            return "";
-        }
-
-        @Override
-        public String getResponseBody() throws IOException {
-            return "";
-        }
-
-        @Override
-        public void disconnect() {
-            // do nothing
-        }
-    }
-
-    /**
-     * check behavior when receiving non-OK response code
-     */
-    @Test
-    public void testImportData03() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforImportData03());
-
-        try {
-            String databaseName = "testdb";
-            String tableName = "testtbl";
-            Table table = new Table(new Database(databaseName), tableName);
-            byte[] data = new byte[0];
-            ImportRequest request = new ImportRequest(table, data);
-            clientAdaptor.importData(request);
-            fail();
-        } catch (Throwable t) {
-            assertTrue(t instanceof ClientException);
-        }
+    @Override
+    public String getJSONTextForChecking() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("database", databaseName);
+        map.put("table", tableName);
+        map.put("elapsed_time", 32.3);
+        return JSONValue.toJSONString(map);
     }
 }
