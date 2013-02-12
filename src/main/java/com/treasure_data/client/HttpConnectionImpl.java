@@ -158,7 +158,7 @@ public class HttpConnectionImpl {
         conn.connect();
     }
 
-    public HttpURLConnection doPutRequest(Request<?> request, String path, byte[] bytes)
+    public void doPutRequest(Request<?> request, String path, byte[] bytes)
             throws IOException {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("http://").append(getApiServerPath()).append(path);
@@ -185,8 +185,6 @@ public class HttpConnectionImpl {
         out.write(bytes);
         out.flush();
         //out.close();
-
-        return conn;
     }
 
     public HttpURLConnection doPutRequest(Request<?> request, String path,
