@@ -3,6 +3,11 @@ package com.treasure_data.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -13,6 +18,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -24,6 +31,30 @@ import com.treasure_data.model.ListDatabasesResult;
 import com.treasure_data.model.Request;
 
 public class TestListDatabases {
+
+    private DefaultClientAdaptorImpl clientAdaptor;
+    private HttpConnectionImpl conn;
+    private ListDatabasesRequest request;
+
+    @Before
+    public void createResources() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials(props));
+        clientAdaptor = new DefaultClientAdaptorImpl(conf);
+
+        conn = spy(new HttpConnectionImpl());
+
+        request = new ListDatabasesRequest();
+    }
+
+    @After
+    public void deleteResources() throws Exception {
+        clientAdaptor = null;
+        conn = null;
+        request = null;
+    }
 
     @Test @Ignore
     public void testListDatabases00() throws Exception {
@@ -41,26 +72,11 @@ public class TestListDatabases {
         }
     }
 
-    static class HttpConnectionImplforListDatabases01 extends HttpConnectionImpl {
-        @Override
-        public void doGetRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            // do nothing
-        }
-
-        @Override
-        public int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_OK;
-        }
-
-        @Override
-        public String getResponseMessage() throws IOException {
-            return "";
-        }
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        @Override
-        public String getResponseBody() throws IOException {
+    @Test
+    public void checkNormalBehavior() throws Exception {
+        // create mock HttpConnectionImpl class
+        String jsonText;
+        {
             List ary = new ArrayList();
             Map m0 = new HashMap();
             m0.put("name", "foo");
@@ -76,29 +92,17 @@ public class TestListDatabases {
             ary.add(m1);
             Map map = new HashMap();
             map.put("databases", ary);
-            String jsonData = JSONValue.toJSONString(map);
-            return jsonData;
+            jsonText = JSONValue.toJSONString(map);
         }
+        doNothing().when(conn).doGetRequest(any(Request.class),
+                any(String.class), any(Map.class), any(Map.class));
+        doReturn(HttpURLConnection.HTTP_OK).when(conn).getResponseCode();
+        doReturn("something").when(conn).getResponseMessage();
+        doReturn(jsonText).when(conn).getResponseBody();
+        doNothing().when(conn).disconnect();
+        clientAdaptor.setConnection(conn);
 
-        @Override
-        public void disconnect() {
-            // do nothing
-        }
-    }
-
-    /**
-     * check normal behavior of client
-     */
-    @Test
-    public void testListDatabases01() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforListDatabases01());
-
-        ListDatabasesRequest request = new ListDatabasesRequest();
+        // check behavior
         ListDatabasesResult result = clientAdaptor.listDatabases(request);
         List<DatabaseSummary> databases = result.getDatabases();
         assertEquals(2, databases.size());
@@ -106,47 +110,19 @@ public class TestListDatabases {
         assertEquals("bar", databases.get(1).getName());
     }
 
-    static class HttpConnectionImplforListDatabases02 extends HttpConnectionImpl {
-        @Override
-        public void doGetRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            // do nothing
-        }
-
-        @Override
-        public int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_OK;
-        }
-
-        @Override
-        public String getResponseMessage() throws IOException {
-            return "";
-        }
-
-        @Override
-        public String getResponseBody() throws IOException {
-            return "foobar"; // invalid JSON data
-        }
-
-        @Override
-        public void disconnect() {
-            // do nothing
-        }
-    }
-
-    /**
-     * check behavior when receiving *invalid JSON data* as response body
-     */
     @Test
-    public void testListDatabases02() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforListDatabases02());
+    public void throwClientErrorWhenReceivedInvalidJSONAsResponseBody()
+            throws Exception {
+        // create mock HttpConnectionImpl class
+        doNothing().when(conn).doGetRequest(any(Request.class),
+                any(String.class), any(Map.class), any(Map.class));
+        doReturn(HttpURLConnection.HTTP_OK).when(conn).getResponseCode();
+        doReturn("something").when(conn).getResponseMessage();
+        doReturn("invalid_json").when(conn).getResponseBody();
+        doNothing().when(conn).disconnect();
+        clientAdaptor.setConnection(conn);
 
-        ListDatabasesRequest request = new ListDatabasesRequest();
+        // check behavior
         try {
             clientAdaptor.listDatabases(request);
             fail();
@@ -155,52 +131,106 @@ public class TestListDatabases {
         }
     }
 
-    static class HttpConnectionImplforListDatabases03 extends HttpConnectionImpl {
-        @Override
-        public void doGetRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            // do nothing
-        }
-
-        @Override
-        public int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_BAD_REQUEST;
-        }
-
-        @Override
-        public String getResponseMessage() throws IOException {
-            return "";
-        }
-
-        @Override
-        public String getResponseBody() throws IOException {
-            return "";
-        }
-
-        @Override
-        public void disconnect() {
-            // do nothing
-        }
-    }
-
-    /**
-     * check behavior when receiving non-OK response code
-     */
     @Test
-    public void testListDatabases03() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforListDatabases03());
+    public void throwClientErrorWhenReceivedNonOKResponseCode()
+            throws Exception {
+        int expectedCode = HttpURLConnection.HTTP_BAD_REQUEST;
+        String expectedMessage = "something";
 
-        ListDatabasesRequest request = new ListDatabasesRequest();
+        // create mock HttpConnectionImpl class
+        doNothing().when(conn).doGetRequest(any(Request.class),
+                any(String.class), any(Map.class), any(Map.class));
+        doReturn(expectedCode).when(conn).getResponseCode();
+        doReturn(expectedMessage).when(conn).getResponseMessage();
+        doReturn("something").when(conn).getResponseBody();
+        doNothing().when(conn).disconnect();
+        clientAdaptor.setConnection(conn);
+
         try {
             clientAdaptor.listDatabases(request);
             fail();
         } catch (Throwable t) {
-            assertTrue(t instanceof ClientException);
+            assertTrue(t instanceof HttpClientException);
+            HttpClientException e = (HttpClientException) t;
+            assertEquals(expectedCode, e.getResponseCode());
+            assertEquals(expectedMessage, e.getResponseMessage());
+        }
+    }
+
+    @Test
+    public void throwClientErrorWhenGetResponseCodeThrowsIOError()
+            throws Exception {
+        // create mock HttpConnectionImpl class
+        doNothing().when(conn).doGetRequest(any(Request.class),
+                any(String.class), any(Map.class), any(Map.class));
+        doThrow(new IOException()).when(conn).getResponseCode();
+        doReturn("something").when(conn).getResponseMessage();
+        doReturn("something").when(conn).getResponseBody();
+        doNothing().when(conn).disconnect();
+        clientAdaptor.setConnection(conn);
+
+        // check behavior
+        try {
+            clientAdaptor.listDatabases(request);
+            fail();
+        } catch (Throwable t) {
+            assertTrue(t instanceof HttpClientException);
+            HttpClientException e = (HttpClientException) t;
+            assertTrue(e.getCause() instanceof IOException);
+        }
+    }
+
+    @Test
+    public void throwClientErrorWhenGetResponseMessageThrowsIOError()
+            throws Exception {
+        int expectedCode = HttpURLConnection.HTTP_BAD_REQUEST;
+
+        // create mock HttpConnectionImpl class
+        doNothing().when(conn).doGetRequest(any(Request.class),
+                any(String.class), any(Map.class), any(Map.class));
+        doReturn(expectedCode).when(conn).getResponseCode();
+        doThrow(new IOException()).when(conn).getResponseMessage();
+        doReturn("something").when(conn).getResponseBody();
+        doNothing().when(conn).disconnect();
+        clientAdaptor.setConnection(conn);
+
+        // check behavior
+        try {
+            clientAdaptor.listDatabases(request);
+            fail();
+        } catch (Throwable t) {
+            assertTrue(t instanceof HttpClientException);
+            HttpClientException e = (HttpClientException) t;
+            assertTrue(e.getCause() instanceof IOException);
+            assertEquals(expectedCode, e.getResponseCode());
+        }
+    }
+
+    @Test
+    public void throwClientErrorWhenGetResponseBodyThrowsIOError()
+            throws Exception {
+        int expectedCode = HttpURLConnection.HTTP_OK;
+        String expectedMessage = "something";
+
+        // create mock HttpConnectionImpl class
+        doNothing().when(conn).doGetRequest(any(Request.class),
+                any(String.class), any(Map.class), any(Map.class));
+        doReturn(expectedCode).when(conn).getResponseCode();
+        doReturn(expectedMessage).when(conn).getResponseMessage();
+        doThrow(new IOException()).when(conn).getResponseBody();
+        doNothing().when(conn).disconnect();
+        clientAdaptor.setConnection(conn);
+
+        // check behavior
+        try {
+            clientAdaptor.listDatabases(request);
+            fail();
+        } catch (Throwable t) {
+            assertTrue(t instanceof HttpClientException);
+            HttpClientException e = (HttpClientException) t;
+            assertTrue(e.getCause() instanceof IOException);
+            assertEquals(expectedCode, e.getResponseCode());
+            assertEquals(expectedMessage, e.getResponseMessage());
         }
     }
 }
