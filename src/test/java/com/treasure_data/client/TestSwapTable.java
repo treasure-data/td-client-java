@@ -1,18 +1,16 @@
 package com.treasure_data.client;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
 import org.json.simple.JSONValue;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.MessagePack;
@@ -24,12 +22,34 @@ import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
 import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
-import com.treasure_data.model.Request;
 import com.treasure_data.model.SwapTableRequest;
 import com.treasure_data.model.SwapTableResult;
 import com.treasure_data.model.Table;
 
-public class TestSwapTable {
+public class TestSwapTable extends PostMethodTestUtil {
+
+    private String databaseName;
+    private String tableName1;
+    private String tableName2;
+    private SwapTableRequest request;
+
+    @Before
+    public void createResources() throws Exception {
+        super.createResources();
+        databaseName = "testdb";
+        tableName1 = "origtbl";
+        tableName2 = "newtbl";
+        request = new SwapTableRequest(databaseName, tableName1, tableName2);
+    }
+
+    @After
+    public void deleteResources() throws Exception {
+        super.deleteResources();
+        databaseName = null;
+        tableName1 = null;
+        tableName2 = null;
+        request = null;
+    }
 
     @Test @Ignore
     public void test00() throws Exception {
@@ -67,9 +87,7 @@ public class TestSwapTable {
             }
         } finally {
             // delete
-
         }
-
     }
 
     private byte[] createData() throws Exception {
@@ -91,164 +109,26 @@ public class TestSwapTable {
         return out.toByteArray();
     }
 
-    static class HttpConnectionImplforSwapTable01 extends HttpConnectionImpl {
-        @Override
-        public void doPostRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            // do nothing
-        }
-
-        @Override
-        public int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_OK;
-        }
-
-        @Override
-        public String getResponseMessage() throws IOException {
-            return "";
-        }
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        @Override
-        public String getResponseBody() throws IOException {
-            //{"database":"mugadb","table1":"test04","table2":"test04_1342157288"}
-            Map map = new HashMap();
-            map.put("database", "mugadb");
-            map.put("table1", "tableName1");
-            map.put("table2", "tableName2");
-            String jsonData = JSONValue.toJSONString(map);
-            return jsonData;
-        }
-
-        @Override
-        public void disconnect() {
-            // do nothing
-        }
-    }
-
-    /**
-     * check normal behavior of client
-     */
-    @Test
-    public void testSwapTable01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforSwapTable01());
-
-        String dbName = "mugadb";
-        String tblName1 = "tableName1";
-        String tblName2 = "tableName2";
-        SwapTableRequest request = new SwapTableRequest(dbName, tblName1, tblName2);
+    @Override
+    public void checkNormalBehavior0() throws Exception {
         SwapTableResult result = clientAdaptor.swapTable(request);
-        assertEquals(dbName, result.getDatabaseName());
-        assertEquals(tblName1, result.getTableName1());
-        assertEquals(tblName2, result.getTableName2());
+        assertEquals(databaseName, result.getDatabaseName());
+        assertEquals(tableName1, result.getTableName1());
+        assertEquals(tableName2, result.getTableName2());
     }
 
-    static class HttpConnectionImplforSwapTable02 extends HttpConnectionImpl {
-        @Override
-        public void doPostRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            // do nothing
-        }
-
-        @Override
-        public int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_OK;
-        }
-
-        @Override
-        public String getResponseMessage() throws IOException {
-            return "";
-        }
-
-        @Override
-        public String getResponseBody() throws IOException {
-            return "foobar"; // invalid JSON data
-        }
-
-        @Override
-        public void disconnect() {
-            // do nothing
-        }
+    @Override
+    public String getJSONTextForChecking() {
+        // {"database":"mugadb","table1":"test04","table2":"test04_1342157288"}
+        Map map = new HashMap();
+        map.put("database", databaseName);
+        map.put("table1", tableName1);
+        map.put("table2", tableName2);
+        return JSONValue.toJSONString(map);
     }
 
-    /**
-     * check behavior when receiving *invalid JSON data* as response body
-     */
-    @Test
-    public void testSwapTable02() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforSwapTable02());
-
-        try {
-            String dbName = "mugadb";
-            String tblName1 = "tableName1";
-            String tblName2 = "tableName2";
-            SwapTableRequest request = new SwapTableRequest(dbName, tblName1, tblName2);
-            clientAdaptor.swapTable(request);
-            fail();
-        } catch (Throwable t) {
-            assertTrue(t instanceof ClientException);
-        }
-    }
-
-    static class HttpConnectionImplforSwapTable03 extends HttpConnectionImpl {
-        @Override
-        public void doPostRequest(Request<?> request, String path, Map<String, String> header,
-                Map<String, String> params) throws IOException {
-            // do nothing
-        }
-
-        @Override
-        public int getResponseCode() throws IOException {
-            return HttpURLConnection.HTTP_BAD_REQUEST;
-        }
-
-        @Override
-        public String getResponseMessage() throws IOException {
-            return "";
-        }
-
-        @Override
-        public String getResponseBody() throws IOException {
-            return "";
-        }
-
-        @Override
-        public void disconnect() {
-            // do nothing
-        }
-    }
-
-    /**
-     * check behavior when receiving non-OK response code
-     */
-    @Test
-    public void testSwapTable03() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-        clientAdaptor.setConnection(new HttpConnectionImplforSwapTable03());
-
-        try {
-            String dbName = "mugadb";
-            String tblName1 = "tableName1";
-            String tblName2 = "tableName2";
-            SwapTableRequest request = new SwapTableRequest(dbName, tblName1, tblName2);
-            clientAdaptor.swapTable(request);
-            fail();
-        } catch (Throwable t) {
-            assertTrue(t instanceof ClientException);
-        }
+    @Override
+    public void doBusinessLogic() throws Exception {
+        clientAdaptor.swapTable(request);
     }
 }
