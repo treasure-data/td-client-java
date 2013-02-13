@@ -117,16 +117,6 @@ public class BulkImportClient {
         return clientAdaptor.createSession(request);
     }
 
-    public void prepareCSVPart(String inputFileName, String outputFileName, String columns)
-            throws ClientException {
-        new CSVFileConverter().convertFile(inputFileName, outputFileName, columns);
-    }
-
-    public void prepareTSVPart(String inputFileName, String outputFileName, String columns)
-            throws ClientException {
-        new TSVFileConverter().convertFile(inputFileName, outputFileName, columns);
-    }
-
     /**
      * Upload or re-upload a part into a bulk import session.
      *
