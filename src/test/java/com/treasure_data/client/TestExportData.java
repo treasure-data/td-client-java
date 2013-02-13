@@ -19,7 +19,8 @@ import com.treasure_data.model.ExportResult;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.Table;
 
-public class TestExportData extends PostMethodTestUtil {
+public class TestExportData extends
+        PostMethodTestUtil<ExportRequest, ExportResult> {
 
     private String databaseName;
     private String tableName;

@@ -23,7 +23,8 @@ import com.treasure_data.model.DeleteTableRequest;
 import com.treasure_data.model.DeleteTableResult;
 import com.treasure_data.model.Table;
 
-public class TestDeleteTable extends PostMethodTestUtil {
+public class TestDeleteTable extends
+        PostMethodTestUtil<DeleteTableRequest, DeleteTableResult> {
 
     private String databaseName;
     private String tableName;

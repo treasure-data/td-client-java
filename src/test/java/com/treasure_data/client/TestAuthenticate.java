@@ -16,9 +16,10 @@ import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.AuthenticateRequest;
 import com.treasure_data.model.AuthenticateResult;
 
-public class TestAuthenticate extends PostMethodTestUtil {
+public class TestAuthenticate extends
+        PostMethodTestUtil<AuthenticateRequest, AuthenticateResult> {
 
-    private AuthenticateRequest request;
+    protected AuthenticateRequest request;
 
     @Before
     public void createResources() throws Exception {

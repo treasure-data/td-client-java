@@ -1072,8 +1072,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response code
             code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                message = conn.getResponseMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Get job result failed", message, code));
                 throw new HttpClientException("Get job result failed",

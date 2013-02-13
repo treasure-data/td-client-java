@@ -6,14 +6,11 @@ import static org.mockito.Mockito.doNothing;
 import org.junit.Ignore;
 
 import com.treasure_data.model.Request;
+import com.treasure_data.model.Result;
 
 @Ignore
-public class PutMethodTestUtil extends AnyMethodTestUtil {
-
-    @Override
-    public void doBusinessLogic() throws Exception {
-        throw new UnsupportedOperationException();
-    }
+public class PutMethodTestUtil<REQ extends Request<?>, RET extends Result<?>>
+        extends AnyMethodTestUtil<REQ, RET> {
 
     public void callMockDoMethodRequest() throws Exception {
         doNothing().when(conn).doPutRequest(any(Request.class),

@@ -15,6 +15,8 @@ import com.treasure_data.model.JobResult;
 import com.treasure_data.model.JobResult2;
 
 public class TestGetJobResult {
+    // TODO #MN need test more
+
     @Test @Ignore
     public void testGetJobResult00() throws Exception {
         Properties props = System.getProperties();

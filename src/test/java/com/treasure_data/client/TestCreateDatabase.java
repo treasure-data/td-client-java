@@ -17,7 +17,8 @@ import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.DeleteDatabaseRequest;
 
-public class TestCreateDatabase extends PostMethodTestUtil {
+public class TestCreateDatabase extends
+        PostMethodTestUtil<CreateDatabaseRequest, CreateDatabaseResult> {
 
     private String databaseName;
     private CreateDatabaseRequest request;

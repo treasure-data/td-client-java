@@ -8,9 +8,11 @@ import java.util.Map;
 import org.junit.Ignore;
 
 import com.treasure_data.model.Request;
+import com.treasure_data.model.Result;
 
 @Ignore
-public class GetMethodTestUtil extends AnyMethodTestUtil {
+public class GetMethodTestUtil<REQ extends Request<?>, RET extends Result<?>>
+        extends AnyMethodTestUtil<REQ, RET> {
 
     @SuppressWarnings("unchecked")
     public void callMockDoMethodRequest() throws Exception {

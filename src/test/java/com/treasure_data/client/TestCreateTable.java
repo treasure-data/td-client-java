@@ -17,7 +17,8 @@ import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
 
-public class TestCreateTable extends PostMethodTestUtil {
+public class TestCreateTable extends
+        PostMethodTestUtil<CreateTableRequest, CreateTableResult> {
 
     private String databaseName;
     private String tableName;

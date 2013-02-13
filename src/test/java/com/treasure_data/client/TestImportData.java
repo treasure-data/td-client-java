@@ -43,8 +43,9 @@ public class TestImportData extends PutMethodTestUtil {
     @After
     public void deleteResources() throws Exception {
         super.deleteResources();
-        clientAdaptor = null;
-        conn = null;
+        databaseName = null;
+        tableName = null;
+        request = null;
     }
 
     @Test @Ignore

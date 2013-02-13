@@ -29,7 +29,8 @@ import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.Table;
 
-public class TestDeletePartialTable extends PostMethodTestUtil {
+public class TestDeletePartialTable extends
+        PostMethodTestUtil<DeletePartialTableRequest, DeletePartialTableResult> {
 
     private String databaseName;
     private String tableName;

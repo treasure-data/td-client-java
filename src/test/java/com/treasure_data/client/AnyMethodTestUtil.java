@@ -18,9 +18,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.model.Request;
+import com.treasure_data.model.Result;
 
 @Ignore
-public abstract class AnyMethodTestUtil {
+public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Result<?>> {
 
     protected DefaultClientAdaptorImpl clientAdaptor;
     protected HttpConnectionImpl conn;
