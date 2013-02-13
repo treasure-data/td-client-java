@@ -25,11 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 
 import org.json.simple.JSONValue;
-import org.msgpack.MessagePack;
-import org.msgpack.unpacker.BufferUnpacker;
 import org.msgpack.unpacker.Unpacker;
 
 import com.treasure_data.client.AbstractClientAdaptor;
