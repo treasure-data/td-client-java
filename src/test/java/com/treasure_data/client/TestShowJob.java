@@ -18,7 +18,8 @@ import com.treasure_data.model.JobSummary;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 
-public class TestShowJob extends GetMethodTestUtil {
+public class TestShowJob extends
+        GetMethodTestUtil<ShowJobRequest, ShowJobResult> {
 
     private ShowJobRequest request;
     private String jobID;

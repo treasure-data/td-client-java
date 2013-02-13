@@ -18,7 +18,8 @@ import com.treasure_data.model.Job;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 
-public class TestSubmitJob extends PostMethodTestUtil {
+public class TestSubmitJob extends
+        PostMethodTestUtil<SubmitJobRequest, SubmitJobResult> {
 
     private Job job;
     private SubmitJobRequest request;

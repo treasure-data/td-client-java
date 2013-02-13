@@ -20,7 +20,8 @@ import com.treasure_data.model.JobSummary;
 import com.treasure_data.model.ListJobsRequest;
 import com.treasure_data.model.ListJobsResult;
 
-public class TestListJobs extends GetMethodTestUtil {
+public class TestListJobs extends
+        GetMethodTestUtil<ListJobsRequest, ListJobsResult> {
 
     private ListJobsRequest request;
 

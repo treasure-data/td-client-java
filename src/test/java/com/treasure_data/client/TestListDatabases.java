@@ -19,7 +19,8 @@ import com.treasure_data.model.DatabaseSummary;
 import com.treasure_data.model.ListDatabasesRequest;
 import com.treasure_data.model.ListDatabasesResult;
 
-public class TestListDatabases extends GetMethodTestUtil {
+public class TestListDatabases extends
+        GetMethodTestUtil<ListDatabasesRequest, ListDatabasesResult> {
 
     private ListDatabasesRequest request;
 

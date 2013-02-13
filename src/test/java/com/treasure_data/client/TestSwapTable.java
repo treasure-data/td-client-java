@@ -26,7 +26,8 @@ import com.treasure_data.model.SwapTableRequest;
 import com.treasure_data.model.SwapTableResult;
 import com.treasure_data.model.Table;
 
-public class TestSwapTable extends PostMethodTestUtil {
+public class TestSwapTable extends
+        PostMethodTestUtil<SwapTableRequest, SwapTableResult> {
 
     private String databaseName;
     private String tableName1;

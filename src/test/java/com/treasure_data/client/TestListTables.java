@@ -20,7 +20,8 @@ import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.TableSummary;
 
-public class TestListTables extends GetMethodTestUtil {
+public class TestListTables extends
+        GetMethodTestUtil<ListTablesRequest, ListTablesResult> {
 
     private ListTablesRequest request;
     private String databaseName;

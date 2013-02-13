@@ -25,7 +25,8 @@ import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.Table;
 
-public class TestImportData extends PutMethodTestUtil {
+public class TestImportData extends
+        PutMethodTestUtil<ImportRequest, ImportResult> {
 
     private ImportRequest request;
     private String databaseName;

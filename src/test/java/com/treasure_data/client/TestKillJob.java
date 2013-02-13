@@ -18,7 +18,8 @@ import com.treasure_data.model.JobSummary;
 import com.treasure_data.model.KillJobRequest;
 import com.treasure_data.model.KillJobResult;
 
-public class TestKillJob extends PostMethodTestUtil {
+public class TestKillJob extends
+        PostMethodTestUtil<KillJobRequest, KillJobResult> {
 
     private Job job;
     private KillJobRequest request;
