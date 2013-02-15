@@ -1,6 +1,7 @@
 Release 0.2.0 - 20XX/XX/XX
   IMPROVEMENTS
     Changes JobResult and JobResult2 API
+    Changes return value of TreasureDataClient#getServerStatus(..)
     Adds system properties for setting 'read timeout' to td-client
     Adds HttpClientException
 
