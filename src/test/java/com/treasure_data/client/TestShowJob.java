@@ -19,10 +19,15 @@ import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 
 public class TestShowJob extends
-        GetMethodTestUtil<ShowJobRequest, ShowJobResult> {
+        GetMethodTestUtil<ShowJobRequest, ShowJobResult, DefaultClientAdaptorImpl> {
 
     private ShowJobRequest request;
     private String jobID;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

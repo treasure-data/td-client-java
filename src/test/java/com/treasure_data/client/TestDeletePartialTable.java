@@ -30,11 +30,16 @@ import com.treasure_data.model.Job;
 import com.treasure_data.model.Table;
 
 public class TestDeletePartialTable extends
-        PostMethodTestUtil<DeletePartialTableRequest, DeletePartialTableResult> {
+        PostMethodTestUtil<DeletePartialTableRequest, DeletePartialTableResult, DefaultClientAdaptorImpl> {
 
     private String databaseName;
     private String tableName;
     private DeletePartialTableRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

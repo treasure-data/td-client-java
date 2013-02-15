@@ -17,9 +17,14 @@ import com.treasure_data.model.AuthenticateRequest;
 import com.treasure_data.model.AuthenticateResult;
 
 public class TestAuthenticate extends
-        PostMethodTestUtil<AuthenticateRequest, AuthenticateResult> {
+        PostMethodTestUtil<AuthenticateRequest, AuthenticateResult, DefaultClientAdaptorImpl> {
 
     protected AuthenticateRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

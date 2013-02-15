@@ -17,11 +17,17 @@ import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.DeleteDatabaseRequest;
 
-public class TestCreateDatabase extends
-        PostMethodTestUtil<CreateDatabaseRequest, CreateDatabaseResult> {
+public class TestCreateDatabase
+        extends
+        PostMethodTestUtil<CreateDatabaseRequest, CreateDatabaseResult, DefaultClientAdaptorImpl> {
 
     private String databaseName;
     private CreateDatabaseRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

@@ -20,9 +20,14 @@ import com.treasure_data.model.ListDatabasesRequest;
 import com.treasure_data.model.ListDatabasesResult;
 
 public class TestListDatabases extends
-        GetMethodTestUtil<ListDatabasesRequest, ListDatabasesResult> {
+        GetMethodTestUtil<ListDatabasesRequest, ListDatabasesResult, DefaultClientAdaptorImpl> {
 
     private ListDatabasesRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

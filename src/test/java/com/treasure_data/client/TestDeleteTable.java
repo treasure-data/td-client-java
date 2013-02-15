@@ -24,11 +24,16 @@ import com.treasure_data.model.DeleteTableResult;
 import com.treasure_data.model.Table;
 
 public class TestDeleteTable extends
-        PostMethodTestUtil<DeleteTableRequest, DeleteTableResult> {
+        PostMethodTestUtil<DeleteTableRequest, DeleteTableResult, DefaultClientAdaptorImpl> {
 
     private String databaseName;
     private String tableName;
     private DeleteTableRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

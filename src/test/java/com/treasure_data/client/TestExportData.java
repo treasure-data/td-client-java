@@ -20,11 +20,16 @@ import com.treasure_data.model.Job;
 import com.treasure_data.model.Table;
 
 public class TestExportData extends
-        PostMethodTestUtil<ExportRequest, ExportResult> {
+        PostMethodTestUtil<ExportRequest, ExportResult, DefaultClientAdaptorImpl> {
 
     private String databaseName;
     private String tableName;
     private ExportRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

@@ -21,9 +21,14 @@ import com.treasure_data.model.ListJobsRequest;
 import com.treasure_data.model.ListJobsResult;
 
 public class TestListJobs extends
-        GetMethodTestUtil<ListJobsRequest, ListJobsResult> {
+        GetMethodTestUtil<ListJobsRequest, ListJobsResult, DefaultClientAdaptorImpl> {
 
     private ListJobsRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

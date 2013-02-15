@@ -27,12 +27,17 @@ import com.treasure_data.model.SwapTableResult;
 import com.treasure_data.model.Table;
 
 public class TestSwapTable extends
-        PostMethodTestUtil<SwapTableRequest, SwapTableResult> {
+        PostMethodTestUtil<SwapTableRequest, SwapTableResult, DefaultClientAdaptorImpl> {
 
     private String databaseName;
     private String tableName1;
     private String tableName2;
     private SwapTableRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

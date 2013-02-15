@@ -19,10 +19,15 @@ import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 
 public class TestSubmitJob extends
-        PostMethodTestUtil<SubmitJobRequest, SubmitJobResult> {
+        PostMethodTestUtil<SubmitJobRequest, SubmitJobResult, DefaultClientAdaptorImpl> {
 
     private Job job;
     private SubmitJobRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

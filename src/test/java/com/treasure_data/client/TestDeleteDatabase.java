@@ -19,10 +19,15 @@ import com.treasure_data.model.DeleteDatabaseRequest;
 import com.treasure_data.model.DeleteDatabaseResult;
 
 public class TestDeleteDatabase extends
-        PostMethodTestUtil<DeleteDatabaseRequest, DeleteDatabaseResult> {
+        PostMethodTestUtil<DeleteDatabaseRequest, DeleteDatabaseResult, DefaultClientAdaptorImpl> {
 
     private String databaseName;
     private DeleteDatabaseRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

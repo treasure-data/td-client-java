@@ -18,11 +18,16 @@ import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
 
 public class TestCreateTable extends
-        PostMethodTestUtil<CreateTableRequest, CreateTableResult> {
+        PostMethodTestUtil<CreateTableRequest, CreateTableResult, DefaultClientAdaptorImpl> {
 
     private String databaseName;
     private String tableName;
     private CreateTableRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

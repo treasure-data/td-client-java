@@ -23,9 +23,14 @@ import com.treasure_data.model.GetServerStatusRequest;
 import com.treasure_data.model.GetServerStatusResult;
 
 public class TestGetServerStatus extends
-        GetMethodTestUtil<GetServerStatusRequest, GetServerStatusResult> {
+        GetMethodTestUtil<GetServerStatusRequest, GetServerStatusResult, DefaultClientAdaptorImpl> {
 
     private GetServerStatusRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

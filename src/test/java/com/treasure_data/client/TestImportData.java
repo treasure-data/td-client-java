@@ -26,11 +26,16 @@ import com.treasure_data.model.ImportResult;
 import com.treasure_data.model.Table;
 
 public class TestImportData extends
-        PutMethodTestUtil<ImportRequest, ImportResult> {
+        PutMethodTestUtil<ImportRequest, ImportResult, DefaultClientAdaptorImpl> {
 
     private ImportRequest request;
     private String databaseName;
     private String tableName;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

@@ -21,10 +21,15 @@ import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.TableSummary;
 
 public class TestListTables extends
-        GetMethodTestUtil<ListTablesRequest, ListTablesResult> {
+        GetMethodTestUtil<ListTablesRequest, ListTablesResult, DefaultClientAdaptorImpl> {
 
     private ListTablesRequest request;
     private String databaseName;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {

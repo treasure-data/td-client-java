@@ -19,10 +19,15 @@ import com.treasure_data.model.KillJobRequest;
 import com.treasure_data.model.KillJobResult;
 
 public class TestKillJob extends
-        PostMethodTestUtil<KillJobRequest, KillJobResult> {
+        PostMethodTestUtil<KillJobRequest, KillJobResult, DefaultClientAdaptorImpl> {
 
     private Job job;
     private KillJobRequest request;
+
+    @Override
+    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        return new DefaultClientAdaptorImpl(conf);
+    }
 
     @Before
     public void createResources() throws Exception {
