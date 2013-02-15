@@ -84,26 +84,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
 
     private Validator validator;
 
-    private HttpConnectionImpl conn = null;
-
     DefaultClientAdaptorImpl(Config conf) {
 	super(conf);
 	validator = new Validator();
-    }
-
-    HttpConnectionImpl getConnection() {
-        return conn;
-    }
-
-    HttpConnectionImpl createConnection() {
-        if (conn == null) {
-            conn = new HttpConnectionImpl(getConfig().getProperties());
-        }
-        return conn;
-    }
-
-    void setConnection(HttpConnectionImpl conn) {
-        this.conn = conn;
     }
 
     @Override

@@ -21,6 +21,7 @@ import com.treasure_data.auth.TreasureDataCredentials;
 
 public abstract class AbstractClientAdaptor {
     private Config conf;
+    protected HttpConnectionImpl conn = null;
 
     public AbstractClientAdaptor(Config conf) {
 	this.conf = conf;
@@ -36,5 +37,20 @@ public abstract class AbstractClientAdaptor {
 
     public void setTreasureDataCredentials(TreasureDataCredentials credentials) {
         conf.setCredentials(credentials);
+    }
+
+    protected HttpConnectionImpl getConnection() {
+        return conn;
+    }
+
+    protected HttpConnectionImpl createConnection() {
+        if (conn == null) {
+            conn = new HttpConnectionImpl(getConfig().getProperties());
+        }
+        return conn;
+    }
+
+    protected void setConnection(HttpConnectionImpl conn) {
+        this.conn = conn;
     }
 }

@@ -31,6 +31,7 @@ import org.msgpack.unpacker.Unpacker;
 
 import com.treasure_data.client.AbstractClientAdaptor;
 import com.treasure_data.client.ClientException;
+import com.treasure_data.client.HttpClientException;
 import com.treasure_data.client.HttpConnectionImpl;
 import com.treasure_data.client.TreasureDataClient;
 import com.treasure_data.client.Validator;
@@ -61,35 +62,6 @@ import com.treasure_data.model.bulkimport.UploadPartResult;
 
 public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         implements BulkImportClientAdaptor {
-
-    static interface HttpURL {
-        String V3_LIST = "/v3/bulk_import/list";
-
-        String V3_CREATE = "/v3/bulk_import/create/%s/%s/%s";
-
-        String V3_DELETE = "/v3/bulk_import/delete/%s";
-
-        String V3_UPLOAD_PART = "/v3/bulk_import/upload_part/%s/%s";
-
-        String V3_DELETE_PART = "/v3/bulk_import/delete_part/%s/%s";
-
-        String V3_LIST_PARTS = "/v3/bulk_import/list_parts/%s";
-
-        String V3_FREEZE = "/v3/bulk_import/freeze/%s";
-
-        String V3_UNFREEZE = "/v3/bulk_import/unfreeze/%s";
-
-        String V3_PERFORM = "/v3/bulk_import/perform/%s";
-
-        String V3_COMMIT = "/v3/bulk_import/commit/%s";
-
-        String V3_ERROR_RECORDS = "/v3/bulk_import/error_records/%s";
-
-        String V3_PERFORM_FINISHED = "/v3/bulk_import/perform_finished/%s";
-
-        String V3_COMMIT_FINISHED = "/v3/bulk_import/commit_finished/%s";
-    }
-
     private static Logger LOG = Logger.getLogger(BulkImportClientAdaptorImpl.class.getName());
 
     private TreasureDataClient client;
@@ -104,21 +76,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator = new Validator();
     }
 
-    HttpConnectionImpl getConnection() {
-        return conn;
-    }
-
-    HttpConnectionImpl createConnection() {
-        if (conn == null) {
-            conn = new HttpConnectionImpl(client.getConfig().getProperties());
-        }
-        return conn;
-    }
-
-    void setConnection(HttpConnectionImpl conn) {
-        this.conn = conn;
-    }
-
     @Override
     public ListSessionsResult listSessions(ListSessionsRequest request)
             throws ClientException {
@@ -126,6 +83,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        String message = null;
+        int code = 0;
         try {
             conn = createConnection();
 
@@ -136,19 +95,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doGetRequest(request, path, header, params);
 
             // receive response code and body
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("List sessions failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "List sessions failed", message, code));
+                throw new HttpClientException(
+                        "List sessions failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "listSessions", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("List sessions failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -158,26 +120,15 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         // parse JSON data
         // {"bulk_imports":
         //   [
-        //     {"name":"t01",
-        //      "database":"sfdb",
-        //      "table":"bi02",
-        //      "status":"ready",
-        //      "upload_frozen":false,
-        //      "job_id":"70220",
-        //      "valid_records":100,
-        //      "error_records":10,
-        //      "valid_parts":2,
-        //      "error_parts":1},
-        //     {"name":"sess01",
-        //      "database":"mugadb",
-        //      "table":"test04",
-        //      "status":"uploading",
-        //      "upload_frozen":false,
-        //      "job_id":null,
-        //      "valid_records":null,
-        //      "error_records":null,
-        //      "valid_parts":null,
-        //      "error_parts":null}]}
+        //     {"name":"t01", "database":"sfdb", "table":"bi02",
+        //      "status":"ready", "upload_frozen":false,
+        //      "job_id":"70220", "valid_records":100,
+        //      "error_records":10, "valid_parts":2, "error_parts":1},
+        //     {"name":"sess01", "database":"mugadb", "table":"test04",
+        //      "status":"uploading", "upload_frozen":false,
+        //      "job_id":null, "valid_records":null,
+        //      "error_records":null, "valid_parts":null, "error_parts":null}
+        //   ]}
         @SuppressWarnings("rawtypes")
         Map map = (Map) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
@@ -218,6 +169,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -229,19 +182,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doGetRequest(request, path, header, params);
 
             // receive response code and body
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("List parts failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "List parts failed", message, code));
+                throw new HttpClientException(
+                        "List parts failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "listParts", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("List parts failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -265,6 +221,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -278,19 +236,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Create session failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "Create session failed", message, code));
+                throw new HttpClientException(
+                        "Create session failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "createSession", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Create session failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -312,6 +273,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -322,19 +285,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPutRequest(request, path, request.getInputStream(), request.getSize());
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Upload part failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "Upload part failed", message, code));
+                throw new HttpClientException(
+                        "Upload part failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "uploadPart", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Upload part failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -356,6 +322,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -368,19 +336,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Delete part failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "Delete part failed", message, code));
+                throw new HttpClientException(
+                        "Delete part failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "deletePart", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Delete part failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -402,6 +373,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -413,19 +386,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Perform session failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "Perform session failed", message, code));
+                throw new HttpClientException(
+                        "Perform session failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "performSession", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Perform session failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -447,6 +423,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         Unpacker unpacker = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -458,12 +436,13 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doGetRequest(request, path, header, params);
 
             // receive response code and body
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Get error_records failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "Get error_records failed", message, code));
+                throw new HttpClientException(
+                        "Get error_records failed", message, code);
             }
 
             // receive response body
@@ -473,7 +452,9 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                 // ignore
             }
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "getErrorRecords", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Get error_records failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -490,6 +471,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -501,19 +484,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Commit session failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "Commit session failed", message, code));
+                throw new HttpClientException(
+                        "Commit session failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "commitSession", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Commit session failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -535,6 +521,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -546,19 +534,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Delete session failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "Delete session failed", message, code));
+                throw new HttpClientException(
+                        "Delete session failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "deleteSession", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Delete session failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -580,6 +571,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -591,19 +584,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Freeze session failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "Freeze session failed", message, code));
+                throw new HttpClientException(
+                        "Freeze session failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "freezeSession", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Freeze session failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -625,6 +621,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         validator.validateCredentials(client, request);
 
         String jsonData = null;
+        int code = 0;
+        String message = null;
         try {
             conn = createConnection();
 
@@ -636,19 +634,22 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
-            int code = conn.getResponseCode();
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                String msg = String.format("Unfreeze session failed (%s (%d): %s)",
-                        new Object[] { conn.getResponseMessage(), code, conn.getResponseBody() });
-                LOG.severe(msg);
-                throw new ClientException(msg);
+                LOG.severe(HttpClientException.toMessage(
+                        "Unfreeze session failed", message, code));
+                throw new HttpClientException(
+                        "Unfreeze session failed", message, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            throw new ClientException(e);
+            LOG.throwing(getClass().getName(), "unfreezeSession", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Unfreeze session failed", message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -663,4 +664,31 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         return new UnfreezeSessionResult(request.getSession());
     }
 
+    static interface HttpURL {
+        String V3_LIST = "/v3/bulk_import/list";
+
+        String V3_CREATE = "/v3/bulk_import/create/%s/%s/%s";
+
+        String V3_DELETE = "/v3/bulk_import/delete/%s";
+
+        String V3_UPLOAD_PART = "/v3/bulk_import/upload_part/%s/%s";
+
+        String V3_DELETE_PART = "/v3/bulk_import/delete_part/%s/%s";
+
+        String V3_LIST_PARTS = "/v3/bulk_import/list_parts/%s";
+
+        String V3_FREEZE = "/v3/bulk_import/freeze/%s";
+
+        String V3_UNFREEZE = "/v3/bulk_import/unfreeze/%s";
+
+        String V3_PERFORM = "/v3/bulk_import/perform/%s";
+
+        String V3_COMMIT = "/v3/bulk_import/commit/%s";
+
+        String V3_ERROR_RECORDS = "/v3/bulk_import/error_records/%s";
+
+        String V3_PERFORM_FINISHED = "/v3/bulk_import/perform_finished/%s";
+
+        String V3_COMMIT_FINISHED = "/v3/bulk_import/commit_finished/%s";
+    }
 }
