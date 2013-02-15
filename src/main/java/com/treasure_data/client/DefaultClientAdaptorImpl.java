@@ -77,16 +77,17 @@ import com.treasure_data.model.SwapTableResult;
 import com.treasure_data.model.Table;
 import com.treasure_data.model.TableSummary;
 
-public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
-        implements DefaultClientAdaptor {
+public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
+        DefaultClientAdaptor {
 
-    private static Logger LOG = Logger.getLogger(DefaultClientAdaptorImpl.class.getName());
+    private static Logger LOG = Logger.getLogger(DefaultClientAdaptorImpl.class
+            .getName());
 
     private Validator validator;
 
     DefaultClientAdaptorImpl(Config conf) {
-	super(conf);
-	validator = new Validator();
+        super(conf);
+        validator = new Validator();
     }
 
     @Override
@@ -149,6 +150,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
 
+        String jsonData = null;
         int code = 0;
         String message = null;
         try {
@@ -164,19 +166,15 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
-                LOG.severe(HttpClientException.toMessage("Server is down",
-                        message, code));
-            } else {
-                String jsonData = conn.getResponseBody();
-                validator.validateJSONData(jsonData);
-
-                // { "status": "ok" }
-                @SuppressWarnings("rawtypes")
-                Map map = (Map) JSONValue.parse(jsonData);
-                validator.validateJavaObject(jsonData, map);
-                message = (String) map.get("status");
+                LOG.severe(HttpClientException.toMessage(
+                        "Server is down", message, code));
+                throw new HttpClientException(
+                        "Server is down", message, code);
             }
-            return new GetServerStatusResult(new ServerStatus(message));
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
         } catch (IOException e) {
             LOG.throwing(getClass().getName(), "getServerStatus", e);
             LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
@@ -186,6 +184,14 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor
                 conn.disconnect();
             }
         }
+
+        // { "status": "ok" }
+        @SuppressWarnings("rawtypes")
+        Map map = (Map) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+        String status = (String) map.get("status");
+
+        return new GetServerStatusResult(new ServerStatus(message));
     }
 
     @Override
