@@ -45,10 +45,36 @@ public class RetryClient {
         }
     }
 
+    public void retry(Retryable r, int retryCount, long waitSec) throws IOException {
+        int count = 0;
+        boolean notRetry = false;
+        while (true) {
+            try {
+                r.doTry();
+                break;
+            } catch (ClientException e) {
+                LOG.warning(e.getMessage());
+                if (e instanceof HttpClientException
+                        && ((HttpClientException) e).getResponseCode() < 400) {
+                    count++;
+                    waitRetry(waitSec);
+                } else {
+                    LOG.info("turned notRetry flag: " + notRetry);
+                    notRetry = true;
+                }
+            } finally {
+                if (count >= retryCount || notRetry) {
+                    throw new IOException("Retry out error");
+                }
+            }
+        }
+    }
+
     private void waitRetry(long sec) {
         try {
             Thread.sleep(sec * 1000);
         } catch (InterruptedException e) {
+            // ignore
         }
     }
 }
