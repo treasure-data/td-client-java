@@ -1,6 +1,6 @@
 package com.treasure_data.client.bulkimport;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
+import org.json.simple.JSONValue;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -17,6 +19,8 @@ import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.client.Config;
+import com.treasure_data.client.PostMethodTestUtil;
 import com.treasure_data.client.TreasureDataClient;
 import com.treasure_data.model.bulkimport.CreateSessionRequest;
 import com.treasure_data.model.bulkimport.CreateSessionResult;
@@ -30,16 +34,13 @@ import com.treasure_data.model.bulkimport.UnfreezeSessionResult;
 import com.treasure_data.model.bulkimport.UploadPartRequest;
 import com.treasure_data.model.bulkimport.UploadPartResult;
 
-public class TestUnfreezeSession {
-
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
+public class TestUnfreezeSession
+    extends PostMethodTestUtil<UnfreezeSessionRequest, UnfreezeSessionResult, BulkImportClientAdaptorImpl> {
 
     @Test @Ignore
     public void test00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         TreasureDataClient client = new TreasureDataClient(
                 new TreasureDataCredentials(), System.getProperties());
         BulkImportClient biclient = new BulkImportClient(client);
@@ -99,6 +100,56 @@ public class TestUnfreezeSession {
             DeleteSessionResult result = biclient.deleteSession(request);
             System.out.println(result.getSessionName());
         }
-
     }
+
+    private String sessionName;
+    private String databaseName;
+    private String tableName;
+    private UnfreezeSessionRequest request;
+
+    @Override
+    public BulkImportClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        Properties props = System.getProperties();
+        props.setProperty("td.api.key", "xxxx");
+        TreasureDataClient client = new TreasureDataClient(props);
+        return new BulkImportClientAdaptorImpl(client);
+    }
+
+    @Before
+    public void createResources() throws Exception {
+        super.createResources();
+        sessionName = "testSess";
+        databaseName = "testdb";
+        tableName = "testtbl";
+        request = new UnfreezeSessionRequest(new Session(sessionName, databaseName, tableName));
+    }
+
+    @After
+    public void deleteResources() throws Exception {
+        super.deleteResources();
+        sessionName = null;
+        databaseName = null;
+        tableName = null;
+        request = null;
+    }
+
+    @Override
+    public void checkNormalBehavior0() throws Exception {
+        UnfreezeSessionResult result = clientAdaptor.unfreezeSession(request);
+        assertEquals(sessionName, result.getSession().getName());
+    }
+
+    @Override
+    public String getJSONTextForChecking() {
+        // {"name":"sess01"}
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("name", sessionName);
+        return JSONValue.toJSONString(map);
+    }
+
+    @Override
+    public void doBusinessLogic() throws Exception {
+        clientAdaptor.unfreezeSession(request);
+    }
+
 }
