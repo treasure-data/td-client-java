@@ -11,8 +11,8 @@ import com.treasure_data.model.Request;
 import com.treasure_data.model.Result;
 
 @Ignore
-public class PutMethodTestUtil2<REQ extends Request<?>, RET extends Result<?>>
-        extends AnyMethodTestUtil<REQ, RET> {
+public class PutMethodTestUtil2<REQ extends Request<?>, RET extends Result<?>, CLIENT extends AbstractClientAdaptor>
+        extends AnyMethodTestUtil<REQ, RET, CLIENT> {
 
     public void callMockDoMethodRequest() throws Exception {
         doNothing().when(conn).doPutRequest(any(Request.class),

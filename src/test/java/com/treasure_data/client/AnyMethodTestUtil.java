@@ -22,9 +22,9 @@ import com.treasure_data.model.Request;
 import com.treasure_data.model.Result;
 
 @Ignore
-public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Result<?>> {
+public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Result<?>, CLIENT extends AbstractClientAdaptor> {
 
-    protected DefaultClientAdaptorImpl clientAdaptor;
+    protected CLIENT clientAdaptor;
     protected HttpConnectionImpl conn;
 
     @Before
@@ -33,9 +33,13 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config();
         conf.setCredentials(new TreasureDataCredentials(props));
-        clientAdaptor = new DefaultClientAdaptorImpl(conf);
+        clientAdaptor = createClientAdaptorImpl(conf);
 
         conn = spy(new HttpConnectionImpl());
+    }
+
+    protected CLIENT createClientAdaptorImpl(Config conf) {
+        throw new UnsupportedOperationException();
     }
 
     @After
