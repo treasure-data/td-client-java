@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doReturn;
 
 import java.net.HttpURLConnection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -18,6 +19,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.model.DatabaseSummary;
+import com.treasure_data.model.ListDatabasesResult;
 import com.treasure_data.model.Request;
 import com.treasure_data.model.GetServerStatusRequest;
 import com.treasure_data.model.GetServerStatusResult;
@@ -73,24 +76,5 @@ public class TestGetServerStatus extends
         Map<String, String> map = new HashMap<String, String>();
         map.put("status", "ok");
         return JSONValue.toJSONString(map);
-    }
-
-    @Test @Override
-    public void throwClientErrorWhenReceivedNonOKResponseCode()
-            throws Exception {
-        String notExpectedMessage = "ok";
-
-        // create mock HttpConnectionImpl class
-        doNothing().when(conn).doGetRequest(any(Request.class),
-                any(String.class), any(Map.class), any(Map.class));
-        doReturn(HttpURLConnection.HTTP_BAD_REQUEST).when(conn).getResponseCode();
-        doReturn("something").when(conn).getResponseMessage();
-        doReturn("something").when(conn).getResponseBody();
-        doNothing().when(conn).disconnect();
-        clientAdaptor.setConnection(conn);
-
-        // check behavior
-        GetServerStatusResult result = clientAdaptor.getServerStatus(request);
-        assertTrue(!notExpectedMessage.equals(result.getServerStatus().getMessage()));
     }
 }

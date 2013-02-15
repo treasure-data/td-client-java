@@ -191,7 +191,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         validator.validateJavaObject(jsonData, map);
         String status = (String) map.get("status");
 
-        return new GetServerStatusResult(new ServerStatus(message));
+        return new GetServerStatusResult(new ServerStatus(status));
     }
 
     @Override
