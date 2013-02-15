@@ -112,7 +112,7 @@ public class TestListParts
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        ListPartsResult result = clientAdaptor.listParts(request);
+        ListPartsResult result = doBusinessLogic();
         assertEquals(sessionName, result.getSession().getName());
         assertTrue(result.getParts() instanceof List);
     }
@@ -130,7 +130,7 @@ public class TestListParts
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.listParts(request);
+    public ListPartsResult doBusinessLogic() throws Exception {
+        return clientAdaptor.listParts(request);
     }
 }

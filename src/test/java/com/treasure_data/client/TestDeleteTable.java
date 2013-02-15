@@ -80,7 +80,7 @@ public class TestDeleteTable extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        DeleteTableResult result = clientAdaptor.deleteTable(request);
+        DeleteTableResult result = doBusinessLogic();
         assertEquals(databaseName, result.getDatabase().getName());
         assertEquals(tableName, result.getTableName());
     }
@@ -95,7 +95,7 @@ public class TestDeleteTable extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.deleteTable(request);
+    public DeleteTableResult doBusinessLogic() throws Exception {
+        return clientAdaptor.deleteTable(request);
     }
 }

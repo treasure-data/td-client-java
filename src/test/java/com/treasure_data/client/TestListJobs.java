@@ -59,13 +59,13 @@ public class TestListJobs extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.listJobs(request);
+    public ListJobsResult doBusinessLogic() throws Exception {
+        return clientAdaptor.listJobs(request);
     }
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        ListJobsResult result = clientAdaptor.listJobs(request);
+        ListJobsResult result = doBusinessLogic();
         List<JobSummary> jobs = result.getJobs();
 
         // confirm

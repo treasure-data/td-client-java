@@ -61,7 +61,7 @@ public class TestSubmitJob extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        SubmitJobResult result = clientAdaptor.submitJob(request);
+        SubmitJobResult result = doBusinessLogic();
         Job job = result.getJob();
         assertEquals("12345", job.getJobID());
     }
@@ -75,7 +75,7 @@ public class TestSubmitJob extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.submitJob(request);
+    public SubmitJobResult doBusinessLogic() throws Exception {
+        return clientAdaptor.submitJob(request);
     }
 }

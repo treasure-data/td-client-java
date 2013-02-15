@@ -67,13 +67,13 @@ public class TestListTables extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.listTables(request);
+    public ListTablesResult doBusinessLogic() throws Exception {
+        return clientAdaptor.listTables(request);
     }
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        ListTablesResult result = clientAdaptor.listTables(request);
+        ListTablesResult result = doBusinessLogic();
         List<TableSummary> tables = result.getTables();
         assertEquals(2, tables.size());
         assertEquals("foo", tables.get(0).getName());

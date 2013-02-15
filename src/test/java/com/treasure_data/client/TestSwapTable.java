@@ -117,7 +117,7 @@ public class TestSwapTable extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        SwapTableResult result = clientAdaptor.swapTable(request);
+        SwapTableResult result = doBusinessLogic();
         assertEquals(databaseName, result.getDatabaseName());
         assertEquals(tableName1, result.getTableName1());
         assertEquals(tableName2, result.getTableName2());
@@ -134,7 +134,7 @@ public class TestSwapTable extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.swapTable(request);
+    public SwapTableResult doBusinessLogic() throws Exception {
+        return clientAdaptor.swapTable(request);
     }
 }

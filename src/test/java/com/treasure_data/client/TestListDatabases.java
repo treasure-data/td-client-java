@@ -58,13 +58,13 @@ public class TestListDatabases extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.listDatabases(request);
+    public ListDatabasesResult doBusinessLogic() throws Exception {
+        return clientAdaptor.listDatabases(request);
     }
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        ListDatabasesResult result = clientAdaptor.listDatabases(request);
+        ListDatabasesResult result = doBusinessLogic();
         List<DatabaseSummary> databases = result.getDatabases();
         assertEquals(2, databases.size());
         assertEquals("foo", databases.get(0).getName());

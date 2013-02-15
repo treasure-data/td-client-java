@@ -25,7 +25,7 @@ import com.treasure_data.model.bulkimport.DeleteSessionResult;
 import com.treasure_data.model.bulkimport.Session;
 
 public class TestCreateSession
-        extends PostMethodTestUtil<CommitSessionRequest, CommitSessionResult, BulkImportClientAdaptorImpl> {
+        extends PostMethodTestUtil<CreateSessionRequest, CreateSessionResult, BulkImportClientAdaptorImpl> {
 
     @Test @Ignore
     public void test00() throws Exception {
@@ -87,7 +87,7 @@ public class TestCreateSession
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        CreateSessionResult result = clientAdaptor.createSession(request);
+        CreateSessionResult result = doBusinessLogic();
         assertEquals(sessionName, result.getSession().getName());
     }
 
@@ -100,7 +100,7 @@ public class TestCreateSession
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.createSession(request);
+    public CreateSessionResult doBusinessLogic() throws Exception {
+        return clientAdaptor.createSession(request);
     }
 }

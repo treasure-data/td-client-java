@@ -137,7 +137,7 @@ public class TestPerformSession
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        PerformSessionResult result = clientAdaptor.performSession(request);
+        PerformSessionResult result = doBusinessLogic();
         assertEquals(sessionName, result.getSession().getName());
     }
 
@@ -150,7 +150,7 @@ public class TestPerformSession
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.performSession(request);
+    public PerformSessionResult doBusinessLogic() throws Exception {
+        return clientAdaptor.performSession(request);
     }
 }

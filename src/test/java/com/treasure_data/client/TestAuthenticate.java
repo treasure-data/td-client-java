@@ -57,7 +57,7 @@ public class TestAuthenticate extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        AuthenticateResult result = clientAdaptor.authenticate(request);
+        AuthenticateResult result = doBusinessLogic();
         String gotApiKey = result.getTreasureDataCredentials().getAPIKey();
         assertEquals("xxxxapikey", gotApiKey);
     }
@@ -71,7 +71,7 @@ public class TestAuthenticate extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.authenticate(request);
+    public AuthenticateResult doBusinessLogic() throws Exception {
+        return clientAdaptor.authenticate(request);
     }
 }

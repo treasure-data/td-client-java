@@ -37,7 +37,7 @@ import com.treasure_data.model.bulkimport.UploadPartRequest;
 import com.treasure_data.model.bulkimport.UploadPartResult;
 
 public class TestFreezeSession
-    extends PostMethodTestUtil<CommitSessionRequest, CommitSessionResult, BulkImportClientAdaptorImpl> {
+    extends PostMethodTestUtil<FreezeSessionRequest, FreezeSessionResult, BulkImportClientAdaptorImpl> {
 
     @Test @Ignore
     public void test00() throws Exception {
@@ -136,7 +136,7 @@ public class TestFreezeSession
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        FreezeSessionResult result = clientAdaptor.freezeSession(request);
+        FreezeSessionResult result = doBusinessLogic();
         assertEquals(sessionName, result.getSession().getName());
     }
 
@@ -149,8 +149,8 @@ public class TestFreezeSession
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.freezeSession(request);
+    public FreezeSessionResult doBusinessLogic() throws Exception {
+        return clientAdaptor.freezeSession(request);
     }
 
 

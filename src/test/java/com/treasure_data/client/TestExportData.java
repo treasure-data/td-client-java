@@ -70,7 +70,7 @@ public class TestExportData extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        ExportResult result = clientAdaptor.exportData(request);
+        ExportResult result = doBusinessLogic();
         Job job = result.getJob();
         assertEquals(databaseName, job.getDatabase().getName());
         assertEquals("12345", job.getJobID());
@@ -85,7 +85,7 @@ public class TestExportData extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.exportData(request);
+    public ExportResult doBusinessLogic() throws Exception {
+        return clientAdaptor.exportData(request);
     }
 }

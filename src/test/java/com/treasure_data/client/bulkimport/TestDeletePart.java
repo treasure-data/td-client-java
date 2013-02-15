@@ -35,7 +35,7 @@ import com.treasure_data.model.bulkimport.UploadPartRequest;
 import com.treasure_data.model.bulkimport.UploadPartResult;
 
 public class TestDeletePart
-    extends PostMethodTestUtil<CommitSessionRequest, CommitSessionResult, BulkImportClientAdaptorImpl> {
+    extends PostMethodTestUtil<DeletePartRequest, DeletePartResult, BulkImportClientAdaptorImpl> {
         
 
     @Test @Ignore
@@ -136,7 +136,7 @@ public class TestDeletePart
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        DeletePartResult result = clientAdaptor.deletePart(request);
+        DeletePartResult result = doBusinessLogic();
         assertEquals(sessionName, result.getSession().getName());
     }
 
@@ -149,7 +149,7 @@ public class TestDeletePart
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.deletePart(request);
+    public DeletePartResult doBusinessLogic() throws Exception {
+        return clientAdaptor.deletePart(request);
     }
 }

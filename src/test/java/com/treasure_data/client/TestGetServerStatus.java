@@ -61,13 +61,13 @@ public class TestGetServerStatus extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.getServerStatus(request);
+    public GetServerStatusResult doBusinessLogic() throws Exception {
+        return clientAdaptor.getServerStatus(request);
     }
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        GetServerStatusResult result = clientAdaptor.getServerStatus(request);
+        GetServerStatusResult result = doBusinessLogic();
         assertEquals("ok", result.getServerStatus().getMessage());
     }
 

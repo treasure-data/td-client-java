@@ -70,7 +70,7 @@ public class TestCreateTable extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        CreateTableResult result = clientAdaptor.createTable(request);
+        CreateTableResult result = doBusinessLogic();
         assertEquals(databaseName, result.getDatabase().getName());
     }
 
@@ -84,7 +84,7 @@ public class TestCreateTable extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.createTable(request);
+    public CreateTableResult doBusinessLogic() throws Exception {
+        return clientAdaptor.createTable(request);
     }
 }

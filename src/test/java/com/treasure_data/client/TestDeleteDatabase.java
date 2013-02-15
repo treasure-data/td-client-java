@@ -66,7 +66,7 @@ public class TestDeleteDatabase extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        DeleteDatabaseResult result = clientAdaptor.deleteDatabase(request);
+        DeleteDatabaseResult result = doBusinessLogic();
         assertEquals(databaseName, result.getDatabaseName());
     }
 
@@ -78,7 +78,7 @@ public class TestDeleteDatabase extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.deleteDatabase(request);
+    public DeleteDatabaseResult doBusinessLogic() throws Exception {
+        return clientAdaptor.deleteDatabase(request);
     }
 }

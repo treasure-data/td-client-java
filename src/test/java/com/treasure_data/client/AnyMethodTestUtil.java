@@ -48,7 +48,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         conn = null;
     }
 
-    protected void doBusinessLogic() throws Exception {
+    protected RET doBusinessLogic() throws Exception {
         throw new UnsupportedOperationException();
     }
 

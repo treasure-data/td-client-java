@@ -64,7 +64,7 @@ public class TestCreateDatabase
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        CreateDatabaseResult result = clientAdaptor.createDatabase(request);
+        CreateDatabaseResult result = doBusinessLogic();
         assertEquals(databaseName, result.getDatabase().getName());
     }
 
@@ -76,7 +76,7 @@ public class TestCreateDatabase
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.createDatabase(request);
+    public CreateDatabaseResult doBusinessLogic() throws Exception {
+        return clientAdaptor.createDatabase(request);
     }
 }

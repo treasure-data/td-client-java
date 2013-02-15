@@ -106,13 +106,13 @@ public class TestImportData extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.importData(request);
+    public ImportResult doBusinessLogic() throws Exception {
+        return clientAdaptor.importData(request);
     }
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        ImportResult result = clientAdaptor.importData(request);
+        ImportResult result = doBusinessLogic();
         assertEquals(databaseName, result.getTable().getDatabase().getName());
         assertEquals(tableName, result.getTable().getName());
     }

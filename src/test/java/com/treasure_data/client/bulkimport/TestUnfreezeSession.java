@@ -135,7 +135,7 @@ public class TestUnfreezeSession
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        UnfreezeSessionResult result = clientAdaptor.unfreezeSession(request);
+        UnfreezeSessionResult result = doBusinessLogic();
         assertEquals(sessionName, result.getSession().getName());
     }
 
@@ -148,8 +148,8 @@ public class TestUnfreezeSession
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.unfreezeSession(request);
+    public UnfreezeSessionResult doBusinessLogic() throws Exception {
+        return clientAdaptor.unfreezeSession(request);
     }
 
 }

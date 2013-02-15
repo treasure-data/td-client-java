@@ -58,7 +58,7 @@ public class TestKillJob extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        KillJobResult result = clientAdaptor.killJob(request);
+        KillJobResult result = doBusinessLogic();
         assertEquals("12345", result.getJobID());
         assertEquals(JobSummary.Status.RUNNING, result.getFormerStatus());
     }
@@ -72,7 +72,7 @@ public class TestKillJob extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.killJob(request);
+    public KillJobResult doBusinessLogic() throws Exception {
+        return clientAdaptor.killJob(request);
     }
 }

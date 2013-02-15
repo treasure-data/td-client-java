@@ -157,7 +157,7 @@ public class TestGetErrorRecords
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        GetErrorRecordsResult result = clientAdaptor.getErrorRecords(request);
+        GetErrorRecordsResult result = doBusinessLogic();
         assertEquals(sessionName, result.getSession().getName());
     }
 
@@ -170,7 +170,7 @@ public class TestGetErrorRecords
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.getErrorRecords(request);
+    public GetErrorRecordsResult doBusinessLogic() throws Exception {
+        return clientAdaptor.getErrorRecords(request);
     }
 }

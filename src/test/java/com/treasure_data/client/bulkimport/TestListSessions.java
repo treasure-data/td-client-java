@@ -103,7 +103,7 @@ public class TestListSessions
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        ListSessionsResult result = clientAdaptor.listSessions(request);
+        ListSessionsResult result = doBusinessLogic();
         assertTrue(result.getSessions() instanceof List);
     }
 
@@ -145,7 +145,7 @@ public class TestListSessions
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.listSessions(request);
+    public ListSessionsResult doBusinessLogic() throws Exception {
+        return clientAdaptor.listSessions(request);
     }
 }

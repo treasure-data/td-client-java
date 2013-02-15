@@ -59,13 +59,13 @@ public class TestShowJob extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.showJob(request);
+    public ShowJobResult doBusinessLogic() throws Exception {
+        return clientAdaptor.showJob(request);
     }
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        ShowJobResult result = clientAdaptor.showJob(request);
+        ShowJobResult result = doBusinessLogic();
         assertEquals(jobID, result.getJob().getJobID());
         assertEquals(Job.Type.HIVE, result.getJob().getType());
         assertEquals(JobSummary.Status.SUCCESS, result.getJob().getStatus());

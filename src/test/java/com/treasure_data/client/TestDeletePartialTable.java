@@ -167,7 +167,7 @@ public class TestDeletePartialTable extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        DeletePartialTableResult result = clientAdaptor.deletePartialTable(request);
+        DeletePartialTableResult result = doBusinessLogic();
         Job job = result.getJob();
         assertEquals(databaseName, job.getDatabase().getName());
     }
@@ -181,7 +181,7 @@ public class TestDeletePartialTable extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.deletePartialTable(request);
+    public DeletePartialTableResult doBusinessLogic() throws Exception {
+        return clientAdaptor.deletePartialTable(request);
     }
 }

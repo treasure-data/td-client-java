@@ -133,7 +133,7 @@ public class TestCommitSession extends
 
     @Override
     public void checkNormalBehavior0() throws Exception {
-        CommitSessionResult result = clientAdaptor.commitSession(request);
+        CommitSessionResult result = doBusinessLogic();
         assertEquals(sessionName, result.getSession().getName());
     }
 
@@ -146,7 +146,7 @@ public class TestCommitSession extends
     }
 
     @Override
-    public void doBusinessLogic() throws Exception {
-        clientAdaptor.commitSession(request);
+    public CommitSessionResult doBusinessLogic() throws Exception {
+        return clientAdaptor.commitSession(request);
     }
 }
