@@ -1,4 +1,4 @@
-Release 0.2.0 - 20XX/XX/XX
+Release 0.2.0 - 2013/02/18
   IMPROVEMENTS
     Changes JobResult and JobResult2 API
     Changes return value of TreasureDataClient#getServerStatus(..)
