@@ -56,9 +56,9 @@
     <msgpack.version>0.6.7</msgpack.version>
     <junit.version>4.8.2</junit.version>
     <mockito.version>1.9.5</mockito.version>
-    <maven-surefire-plugin.version>2.13</maven-surefire-plugin.version>
 
     <!-- version properties for plugins -->
+    <maven-surefire-plugin.version>2.13</maven-surefire-plugin.version>
   </properties>
 
   <repositories>
