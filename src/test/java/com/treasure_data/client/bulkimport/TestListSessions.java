@@ -30,14 +30,11 @@ import com.treasure_data.model.bulkimport.SessionSummary;
 public class TestListSessions
     extends GetMethodTestUtil<ListSessionsRequest, ListSessionsResult, BulkImportClientAdaptorImpl>{
 
-    @Before
-    public void setUp() throws Exception {
-        Properties props = System.getProperties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-    }
-
     @Test @Ignore
     public void test00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+
         TreasureDataClient client = new TreasureDataClient(
                 new TreasureDataCredentials(), System.getProperties());
         BulkImportClient biclient = new BulkImportClient(client);
