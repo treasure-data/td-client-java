@@ -8,7 +8,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Properties;
 
@@ -16,6 +18,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.msgpack.MessagePack;
+import org.msgpack.unpacker.Unpacker;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.Request;
@@ -26,6 +30,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
 
     protected CLIENT clientAdaptor;
     protected HttpConnectionImpl conn;
+    protected boolean responsedBinary = false;
 
     @Before
     public void createResources() throws Exception {
@@ -60,16 +65,23 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         throw new UnsupportedOperationException();
     }
 
+    protected Unpacker getMockResponseBodyBinary() {
+        throw new UnsupportedOperationException();
+    }
+
     protected abstract void callMockDoMethodRequest() throws Exception;
 
     @Test
     public void checkNormalBehavior() throws Exception {
         // create mock HttpConnectionImpl object
-        String jsonText = getJSONTextForChecking();
         callMockDoMethodRequest();
         doReturn(HttpURLConnection.HTTP_OK).when(conn).getResponseCode();
         doReturn("something").when(conn).getResponseMessage();
-        doReturn(jsonText).when(conn).getResponseBody();
+        if (!responsedBinary) {
+            doReturn(getJSONTextForChecking()).when(conn).getResponseBody();
+        } else {
+            doReturn(getMockResponseBodyBinary()).when(conn).getResponseBodyBinary();
+        }
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
@@ -89,7 +101,13 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         callMockDoMethodRequest();
         doReturn(HttpURLConnection.HTTP_OK).when(conn).getResponseCode();
         doReturn("something").when(conn).getResponseMessage();
-        doReturn("invalid_json").when(conn).getResponseBody();
+        if (!responsedBinary) {
+            doReturn("invalid_json").when(conn).getResponseBody();
+        } else {
+            InputStream in = new ByteArrayInputStream(new byte[] { 0x01 });
+            Unpacker unpacker = new MessagePack().createUnpacker(in);
+            doReturn(unpacker).when(conn).getResponseBodyBinary();
+        }
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
@@ -202,7 +220,11 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         callMockDoMethodRequest();
         doReturn(expectedCode).when(conn).getResponseCode();
         doReturn("something").when(conn).getResponseMessage();
-        doThrow(new IOException()).when(conn).getResponseBody();
+        if (!responsedBinary) {
+            doThrow(new IOException()).when(conn).getResponseBody();
+        } else {
+            doReturn(new IOException()).when(conn).getResponseBodyBinary();
+        }
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 

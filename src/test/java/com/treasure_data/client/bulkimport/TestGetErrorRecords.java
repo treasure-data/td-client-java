@@ -2,8 +2,16 @@ package com.treasure_data.client.bulkimport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,10 +26,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.MessagePack;
 import org.msgpack.packer.Packer;
+import org.msgpack.unpacker.Unpacker;
+import org.msgpack.unpacker.UnpackerIterator;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.client.ClientException;
 import com.treasure_data.client.Config;
 import com.treasure_data.client.GetMethodTestUtil;
+import com.treasure_data.client.HttpClientException;
 import com.treasure_data.client.TreasureDataClient;
 import com.treasure_data.model.bulkimport.CommitSessionRequest;
 import com.treasure_data.model.bulkimport.CommitSessionResult;
@@ -39,12 +51,11 @@ import com.treasure_data.model.bulkimport.Session;
 import com.treasure_data.model.bulkimport.UploadPartRequest;
 import com.treasure_data.model.bulkimport.UploadPartResult;
 
-@Ignore
 public class TestGetErrorRecords
     extends GetMethodTestUtil<GetErrorRecordsRequest, GetErrorRecordsResult, BulkImportClientAdaptorImpl> {
 
     @Test @Ignore
-    public void test00() throws Exception {
+    public void test01() throws Exception {
         Properties props = System.getProperties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
 
@@ -54,74 +65,16 @@ public class TestGetErrorRecords
 
         MessagePack msgpack = new MessagePack();
         long baseTime = System.currentTimeMillis() / 1000;
-
-
-        String sessionName = "sess01";
-        String databaseName = "mugadb";
-        String tableName = "test04";
-        Session sess = null;
-        try { // create
-//            {
-//                CreateSessionRequest request = new CreateSessionRequest(sessionName, databaseName, tableName);
-//                CreateSessionResult result = biclient.createSession(request);
-//                sess = result.getSession();
-//                System.out.println(sess);
-//            }
-//
-//            { // upload
-//                List<String> parts = new ArrayList<String>();
-//                parts.add("01d");
-//                parts.add("02d");
-//                parts.add("03d");
-//
-//                for (int i = 0; i < parts.size(); i++) {
-//                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-//                    GZIPOutputStream gzout = new GZIPOutputStream(out);
-//                    Packer pk = msgpack.createPacker(gzout);
-//                    Map<String, Object> src = new HashMap<String, Object>();
-//                    src.put("k", i);
-//                    src.put("v", "muga:" + i);
-//                    src.put("time", baseTime + 3600 * i);
-//                    pk.write(src);
-//                    gzout.finish();
-//                    gzout.close();
-//                    byte[] bytes = out.toByteArray();
-//
-//                    UploadPartRequest request = new UploadPartRequest(sess, parts.get(i), bytes);
-//                    UploadPartResult result = biclient.uploadPart(request);
-//                }
-//            }
-//
-//            { // freeze
-//                FreezeSessionRequest request = new FreezeSessionRequest(sess);
-//                FreezeSessionResult result = biclient.freezeSession(request);
-//            }
-//
-//            { // perform
-//                PerformSessionRequest request = new PerformSessionRequest(sess);
-//                PerformSessionResult result = biclient.performSession(request);
-//            }
-//
-//            { // commit
-//                sess = new Session(sessionName, null, null);
-//                CommitSessionRequest request = new CommitSessionRequest(sess);
-//                CommitSessionResult result = biclient.commitSession(request);
-//            }
-
-            { // get error records
-                sess = new Session(sessionName, null, null);
-                //sess = new Session("t01", null, null);
-                GetErrorRecordsRequest request = new GetErrorRecordsRequest(sess);
-                GetErrorRecordsResult result = biclient.getErrorRecords(request);
+        Unpacker unpacker = biclient.getErrorRecords(new Session("mugasess", null, null));
+        UnpackerIterator iter = unpacker.iterator();
+        while (true) {
+            boolean hasNext = iter.hasNext();
+            System.out.println("hasNext: " + hasNext);
+            if (!hasNext) {
+                break;
             }
-
-        } finally {
-            // delete
-//            DeleteSessionRequest request = new DeleteSessionRequest(sess);
-//            DeleteSessionResult result = biclient.deleteSession(request);
-//            System.out.println(result.getSessionName());
+            System.out.println(iter.next());
         }
-
     }
 
     private String sessionName;
@@ -144,6 +97,7 @@ public class TestGetErrorRecords
         databaseName = "testdb";
         tableName = "testtbl";
         request = new GetErrorRecordsRequest(new Session(sessionName, databaseName, tableName));
+        responsedBinary = true;
     }
 
     @After
@@ -156,21 +110,30 @@ public class TestGetErrorRecords
     }
 
     @Override
+    public Unpacker getMockResponseBodyBinary() {
+        return new MessagePack().createBufferUnpacker();
+    }
+
+    @Override
     public void checkNormalBehavior0() throws Exception {
         GetErrorRecordsResult result = doBusinessLogic();
         assertEquals(sessionName, result.getSession().getName());
     }
 
     @Override
-    public String getJSONTextForChecking() {
-        // {"name":"sess01"}
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("name", sessionName);
-        return JSONValue.toJSONString(map);
-    }
-
-    @Override
     public GetErrorRecordsResult doBusinessLogic() throws Exception {
         return clientAdaptor.getErrorRecords(request);
+    }
+
+    @Test @Ignore
+    public void throwClientErrorWhenReceivedInvalidJSONAsResponseBody()
+            throws Exception {
+        super.throwClientErrorWhenReceivedInvalidJSONAsResponseBody();
+    }
+
+    @Test @Ignore
+    public void throwClientErrorWhenGetResponseBodyThrowsIOError()
+            throws Exception {
+        super.throwClientErrorWhenGetResponseBodyThrowsIOError();
     }
 }
