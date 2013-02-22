@@ -17,49 +17,47 @@
 //
 package com.treasure_data.model.bulkimport;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class SessionSummary extends Session {
     public static enum Status {
-        UPLOADING, PERFORMING, READY, COMMITTING, COMMITTED, UNKNOWN;
-    }
+        UPLOADING("uploading"),
+        PERFORMING("performing"),
+        READY("ready"),
+        COMMITTING("committing"),
+        COMMITTED("committed"),
+        UNKNOWN("unknown");
 
-    public static Status toStatus(String statusName) {
-        if (statusName == null) {
-            throw new NullPointerException();
+        private String statusName;
+
+        Status(String statusName) {
+            this.statusName = statusName;
         }
 
-        if (statusName.equals("uploading"))
-            return Status.UPLOADING;
-        if (statusName.equals("performing"))
-            return Status.PERFORMING;
-        if (statusName.equals("ready")) {
-            return Status.READY;
-        } else if (statusName.equals("committing")) {
-            return Status.COMMITTING;
-        } else if (statusName.equals("committed")) {
-            return Status.COMMITTED;
-        } else {
-            return Status.UNKNOWN;
-        }
-    }
-
-    public static String toStatusName(Status status) {
-        if (status == null) {
-            throw new NullPointerException();
+        public String statusName() {
+            return statusName;
         }
 
-        switch (status) {
-        case UPLOADING:
-            return "uploading";
-        case PERFORMING:
-            return "performing";
-        case READY:
-            return "ready";
-        case COMMITTING:
-            return "committing";
-        case COMMITTED:
-            return "committed";
-        default:
-            return "unknown";
+        public static Status fromString(String statusName) {
+            return StringToStatus.get(statusName);
+        }
+
+        private static class StringToStatus {
+            private static final Map<String, Status> REVERSE_DICTIONARY;
+
+            static {
+                Map<String, Status> map = new HashMap<String, Status>();
+                for (Status elem : Status.values()) {
+                    map.put(elem.statusName, elem);
+                }
+                REVERSE_DICTIONARY = Collections.unmodifiableMap(map);
+            }
+
+            static Status get(String key) {
+                return REVERSE_DICTIONARY.get(key);
+            }
         }
     }
 
@@ -94,12 +92,12 @@ public class SessionSummary extends Session {
     @Override
     public String toString() {
         return String.format("SessionSummary{name=%s, db=%s, tbl=%s, frozen=%b, stat=%s, jid=%s, vr=%d, er=%d, vp=%d, ep=%d}",
-                getName(), getDatabaseName(), getTableName(), toStatusName(status),
+                getName(), getDatabaseName(), getTableName(), status.statusName(),
                 uploadFrozen, jobID, validRecords, errorRecords, validParts, errorParts);
     }
 
     public String getStatus() {
-        return toStatusName(status);
+        return status.statusName();
     }
 
     public boolean uploadFrozen() {

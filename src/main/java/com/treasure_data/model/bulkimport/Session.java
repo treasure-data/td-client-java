@@ -20,7 +20,6 @@ package com.treasure_data.model.bulkimport;
 import com.treasure_data.model.AbstractModel;
 
 public class Session extends AbstractModel {
-
     private String databaseName;
 
     private String tableName;

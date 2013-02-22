@@ -154,7 +154,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             Long ep = (Long) sess.get("error_parts");
             long error_parts = ep != null ? ep : 0;
             SessionSummary summary = new SessionSummary(name, database, table,
-                    SessionSummary.toStatus(status), upload_frozen, job_id,
+                    SessionSummary.Status.fromString(status), upload_frozen, job_id,
                     valid_records, error_records, valid_parts, error_parts);
             sessions.add(summary);
         }
@@ -447,7 +447,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
 
             // receive response body
             try {
-                unpacker = conn.getResponseBodyBinaryWithGZip();
+                unpacker = conn.getResponseBodyBinary();
             } catch (EOFException e) {
                 // ignore
             }
