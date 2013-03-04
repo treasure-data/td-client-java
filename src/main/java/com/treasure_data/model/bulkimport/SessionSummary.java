@@ -107,4 +107,20 @@ public class SessionSummary extends Session {
     public String getJobID() {
         return jobID;
     }
+
+    public long getValidRecords() {
+        return validRecords;
+    }
+
+    public long getErrorRecords() {
+        return errorRecords;
+    }
+
+    public long getValidParts() {
+        return validParts;
+    }
+
+    public long getErrorParts() {
+        return errorParts;
+    }
 }
