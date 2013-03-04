@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -210,12 +211,17 @@ public class HttpConnectionImpl {
 
         // body
         BufferedInputStream bin = new BufferedInputStream(in);
-        BufferedOutputStream out = new BufferedOutputStream(
-                conn.getOutputStream());
+        BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
         byte[] buf = new byte[1024];
         int len;
+//        int count = 0;
+//        int flushThreshold = 128;
         while ((len = bin.read(buf)) != -1) {
             out.write(buf, 0, len);
+//            count++;
+//            if (count > flushThreshold) {
+//                out.flush();
+//            }
         }
         out.flush();
         // out.close();

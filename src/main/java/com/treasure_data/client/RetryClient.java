@@ -32,14 +32,19 @@ public class RetryClient {
         while (true) {
             try {
                 r.doTry();
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
                 break;
             } catch (ClientException e) {
                 LOG.warning(e.getMessage());
-                count++;
-                waitRetry(1);
-            } finally {
                 if (count >= retryCount) {
+                    LOG.warning("Retry count exceededs limit.");
                     throw new IOException("Retry error");
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried.");
+                    waitRetry(1);
                 }
             }
         }
