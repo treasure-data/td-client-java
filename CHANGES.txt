@@ -1,4 +1,6 @@
 Release 0.2.1 - 20XX/XX/XX
+  IMPROVEMENTS
+    Adds new methods to SessionSummary class: get{Valid,Error}{Parts,Records}()
 
 Release 0.2.0 - 2013/02/18
   IMPROVEMENTS
