@@ -39,7 +39,7 @@ public class RetryClient {
             } catch (ClientException e) {
                 LOG.warning(e.getMessage());
                 if (count >= retryCount) {
-                    LOG.warning("Retry count exceededs limit.");
+                    LOG.warning("Retry count exceeded limit.");
                     throw new IOException("Retry error");
                 } else {
                     count++;
