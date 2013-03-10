@@ -39,31 +39,11 @@ public class TestListSessions
                 new TreasureDataCredentials(), System.getProperties());
         BulkImportClient biclient = new BulkImportClient(client);
 
-        String sessionName = "sess01";
-        String databaseName = "mugadb";
-        String tableName = "test04";
-        Session sess = null;
-        try {
-            // create
-            {
-                CreateSessionRequest request = new CreateSessionRequest(sessionName, databaseName, tableName);
-                CreateSessionResult result = biclient.createSession(request);
-                sess = result.getSession();
-                System.out.println(sess);
-            }
-            {
-                ListSessionsRequest request = new ListSessionsRequest();
-                ListSessionsResult result = biclient.listSessions(request);
-                List<SessionSummary> sessions = result.getSessions();
-                for (SessionSummary session : sessions) {
-                    System.out.println(session);
-                }
-            }
-        } finally {
-            // delete
-            DeleteSessionRequest request = new DeleteSessionRequest(sess);
-            DeleteSessionResult result = biclient.deleteSession(request);
-            System.out.println(result.getSessionName());
+        ListSessionsRequest request = new ListSessionsRequest();
+        ListSessionsResult result = biclient.listSessions(request);
+        List<SessionSummary> sessions = result.getSessions();
+        for (SessionSummary session : sessions) {
+            System.out.println(session);
         }
     }
 
