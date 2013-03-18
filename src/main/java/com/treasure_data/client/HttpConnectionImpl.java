@@ -250,6 +250,21 @@ public class HttpConnectionImpl {
         return sbuf.toString();
     }
 
+    public String getErrorMessage() throws IOException {
+        StringBuilder sbuf = new StringBuilder();
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(conn.getErrorStream()));
+        while (true) {
+            String line = reader.readLine();
+            if (line == null) {
+                break;
+            }
+            sbuf.append(line);
+        }
+        reader.close();
+        return sbuf.toString();
+    }
+
     public void disconnect() {
         conn.disconnect();
     }
