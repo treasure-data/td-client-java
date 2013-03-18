@@ -100,6 +100,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "List sessions failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "List sessions failed", message, code);
             }
@@ -187,6 +188,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "List parts failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "List parts failed", message, code);
             }
@@ -241,6 +243,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "Create session failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "Create session failed", message, code);
             }
@@ -290,6 +293,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "Upload part failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "Upload part failed", message, code);
             }
@@ -341,6 +345,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "Delete part failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "Delete part failed", message, code);
             }
@@ -391,6 +396,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "Perform session failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "Perform session failed", message, code);
             }
@@ -441,6 +447,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "Get error_records failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "Get error_records failed", message, code);
             }
@@ -489,6 +496,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "Commit session failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "Commit session failed", message, code);
             }
@@ -539,6 +547,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "Delete session failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "Delete session failed", message, code);
             }
@@ -589,6 +598,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "Freeze session failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "Freeze session failed", message, code);
             }
@@ -639,6 +649,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             if (code != HttpURLConnection.HTTP_OK) {
                 LOG.severe(HttpClientException.toMessage(
                         "Unfreeze session failed", message, code));
+                LOG.severe(conn.getErrorMessage());
                 throw new HttpClientException(
                         "Unfreeze session failed", message, code);
             }
