@@ -77,6 +77,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         callMockDoMethodRequest();
         doReturn(HttpURLConnection.HTTP_OK).when(conn).getResponseCode();
         doReturn("something").when(conn).getResponseMessage();
+        doReturn("something").when(conn).getErrorMessage();
         if (!responsedBinary) {
             doReturn(getJSONTextForChecking()).when(conn).getResponseBody();
         } else {
@@ -101,6 +102,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         callMockDoMethodRequest();
         doReturn(HttpURLConnection.HTTP_OK).when(conn).getResponseCode();
         doReturn("something").when(conn).getResponseMessage();
+        doReturn("something").when(conn).getErrorMessage();
         if (!responsedBinary) {
             doReturn("invalid_json").when(conn).getResponseBody();
         } else {
@@ -135,6 +137,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         callMockDoMethodRequest();
         doReturn(expectedCode).when(conn).getResponseCode();
         doReturn(expectedMessage).when(conn).getResponseMessage();
+        doReturn("something").when(conn).getErrorMessage();
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
@@ -162,6 +165,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         callMockDoMethodRequest();
         doThrow(new IOException()).when(conn).getResponseCode();
         doReturn("something").when(conn).getResponseMessage();
+        doReturn("something").when(conn).getErrorMessage();
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
@@ -190,6 +194,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         callMockDoMethodRequest();
         doReturn(expectedCode).when(conn).getResponseCode();
         doThrow(new IOException()).when(conn).getResponseMessage();
+        doReturn("something").when(conn).getErrorMessage();
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
@@ -220,6 +225,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
         callMockDoMethodRequest();
         doReturn(expectedCode).when(conn).getResponseCode();
         doReturn("something").when(conn).getResponseMessage();
+        doReturn("something").when(conn).getErrorMessage();
         if (!responsedBinary) {
             doThrow(new IOException()).when(conn).getResponseBody();
         } else {
