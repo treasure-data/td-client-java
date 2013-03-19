@@ -98,11 +98,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "List sessions failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "List sessions failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("List sessions failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -186,11 +187,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "List parts failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "List parts failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("List parts failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -241,11 +243,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Create session failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Create session failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Create session failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -291,11 +294,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Upload part failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Upload part failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Upload part failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -343,11 +347,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Delete part failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Delete part failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Delete part failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -394,11 +399,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Perform session failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Perform session failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Perform session failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -445,11 +451,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Get error_records failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Get error_records failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Get error_records failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -494,11 +501,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Commit session failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Commit session failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Commit session failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -545,11 +553,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Delete session failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Delete session failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Delete session failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -596,11 +605,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Freeze session failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Freeze session failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Freeze session failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -647,11 +657,12 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Unfreeze session failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Unfreeze session failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Unfreeze session failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
