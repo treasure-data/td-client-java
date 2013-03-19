@@ -118,7 +118,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Authentication failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Authentication failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -173,7 +173,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Server is down", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Server is down",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -225,7 +225,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "List databases failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("List databases failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -291,7 +291,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Create database failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Create database failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -344,7 +344,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Delete database failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Delete database failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -401,7 +401,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "List tables failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("List tables failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -472,7 +472,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Create table failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Create table failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -529,7 +529,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Swap table failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Swap table failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -583,7 +583,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Delete table failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Delete table failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -639,7 +639,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Delete partial table failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Delete partial table failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -691,7 +691,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Import data failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Import data failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -775,7 +775,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Export failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Export failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -841,7 +841,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Submit job failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Submit job failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -906,7 +906,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "List jobs failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("List jobs failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -977,7 +977,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Kill job failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Kill job failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -1031,7 +1031,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Show jobs failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Show jobs failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -1100,7 +1100,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                         "Get job result failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Get job result failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             request.getJobResult().setResultSize((long) conn.getContentLength());
