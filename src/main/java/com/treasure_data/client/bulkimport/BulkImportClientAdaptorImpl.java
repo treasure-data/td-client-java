@@ -103,7 +103,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "List sessions failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("List sessions failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -192,7 +192,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "List parts failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("List parts failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -248,7 +248,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "Create session failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Create session failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -299,7 +299,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "Upload part failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Upload part failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -352,7 +352,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "Delete part failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Delete part failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -404,7 +404,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "Perform session failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Perform session failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -456,7 +456,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "Get error_records failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Get error_records failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -506,7 +506,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "Commit session failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Commit session failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -558,7 +558,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "Delete session failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Delete session failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -610,7 +610,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "Freeze session failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Freeze session failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
@@ -662,7 +662,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                         "Unfreeze session failed", message, code));
                 LOG.severe(errMessage);
                 throw new HttpClientException("Unfreeze session failed",
-                        message + " " + errMessage, code);
+                        message + ", detail = " + errMessage, code);
             }
 
             // receive response body
