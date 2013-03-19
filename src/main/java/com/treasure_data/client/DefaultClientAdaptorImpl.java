@@ -113,11 +113,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Authentication failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Authentication failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Authentication failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -167,11 +168,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Server is down", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "Server is down", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("Server is down",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -218,11 +220,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "List databases failed", message, code));
-                LOG.severe(conn.getErrorMessage());
-                throw new HttpClientException(
-                        "List databases failed", message, code);
+                LOG.severe(errMessage);
+                throw new HttpClientException("List databases failed",
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -283,11 +286,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Create database failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Create database failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -335,11 +339,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Delete database failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Delete database failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -391,11 +396,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "List tables failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("List tables failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -461,11 +467,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Create table failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Create table failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -517,11 +524,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Swap table failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Swap table failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -570,11 +578,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Delete table failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Delete table failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -625,11 +634,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Delete partial table failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Delete partial table failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -676,11 +686,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Import data failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Import data failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -759,11 +770,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Export failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Export failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -824,11 +836,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Submit job failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Submit job failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -888,11 +901,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "List jobs failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("List jobs failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -958,11 +972,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Kill job failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Kill job failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -1011,11 +1026,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Show jobs failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Show jobs failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             // receive response body
@@ -1079,11 +1095,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             code = conn.getResponseCode();
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
                         "Get job result failed", message, code));
-                LOG.severe(conn.getErrorMessage());
+                LOG.severe(errMessage);
                 throw new HttpClientException("Get job result failed",
-                        message, code);
+                        message + " " + errMessage, code);
             }
 
             request.getJobResult().setResultSize((long) conn.getContentLength());
