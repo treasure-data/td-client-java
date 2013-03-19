@@ -150,7 +150,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
             assertTrue(t instanceof HttpClientException);
             HttpClientException e = (HttpClientException) t;
             assertEquals(expectedCode, e.getResponseCode());
-            assertEquals(expectedMessage + " " + expectedErrMessage, e.getResponseMessage());
+            assertEquals(expectedMessage + ", detail = " + expectedErrMessage, e.getResponseMessage());
         }
     }
 
