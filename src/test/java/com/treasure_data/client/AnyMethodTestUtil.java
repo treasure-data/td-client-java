@@ -132,12 +132,13 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
             throws Exception {
         int expectedCode = HttpURLConnection.HTTP_BAD_REQUEST;
         String expectedMessage = "something";
+        String expectedErrMessage = "something2";
 
         // create mock HttpConnectionImpl object
         callMockDoMethodRequest();
         doReturn(expectedCode).when(conn).getResponseCode();
         doReturn(expectedMessage).when(conn).getResponseMessage();
-        doReturn("something").when(conn).getErrorMessage();
+        doReturn(expectedErrMessage).when(conn).getErrorMessage();
         doNothing().when(conn).disconnect();
         clientAdaptor.setConnection(conn);
 
@@ -149,7 +150,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
             assertTrue(t instanceof HttpClientException);
             HttpClientException e = (HttpClientException) t;
             assertEquals(expectedCode, e.getResponseCode());
-            assertEquals(expectedMessage, e.getResponseMessage());
+            assertEquals(expectedMessage + " " + expectedErrMessage, e.getResponseMessage());
         }
     }
 
