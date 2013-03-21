@@ -58,6 +58,24 @@ public class TestShowJob extends
         System.out.println(result.getJob().getResultSchema());
     }
 
+    @Test @Ignore
+    public void testShowJob01() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials());
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
+
+        ShowJobRequest request = new ShowJobRequest(new Job("2119564"));
+        ShowJobResult result = clientAdaptor.showJob(request);
+        System.out.println(result.getJobID());
+        System.out.println(result.getJob().getStatus());
+        System.out.println("cmdout:");
+        System.out.println(result.getJob().getDebug().getCmdout());
+        System.out.println("stderr:");
+        System.out.println(result.getJob().getDebug().getStderr());
+    }
+
     @Override
     public ShowJobResult doBusinessLogic() throws Exception {
         return clientAdaptor.showJob(request);
@@ -71,6 +89,7 @@ public class TestShowJob extends
         assertEquals(JobSummary.Status.SUCCESS, result.getJob().getStatus());
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public String getJSONTextForChecking() {
         Map map = new HashMap();
@@ -83,6 +102,10 @@ public class TestShowJob extends
         map.put("url", "http://console.treasure-data.com/jobs/12345");
         map.put("created_at", "Sun Jun 26 17:39:18 -0400 2011");
         map.put("updated_at", "Sun Jun 26 17:39:54 -0400 2011");
+        Map debugMap = new HashMap();
+        debugMap.put("cmdout", "commandoutput");
+        debugMap.put("stderr", "standarderror");
+        map.put("debug", debugMap);
         return JSONValue.toJSONString(map);
     }
 }
