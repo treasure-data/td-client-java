@@ -1048,19 +1048,27 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         }
 
         @SuppressWarnings("unchecked")
-        Map<String, String> jobMap =
-            (Map<String, String>) JSONValue.parse(jsonData);
+        Map<String, Object> jobMap =
+            (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, jobMap);
 
-        Job.Type type = Job.toType(jobMap.get("type"));
-        String jobID = jobMap.get("job_id");
-        JobSummary.Status status = JobSummary.toStatus(jobMap.get("status"));
-        String query = jobMap.get("query");
-        String result = jobMap.get("result");
-        String resultSchema = jobMap.get("hive_result_schema");
+        String jobID = (String) jobMap.get("job_id");
+        Job.Type type = Job.toType((String) jobMap.get("type"));
+        Database database = new Database((String) jobMap.get("database"));
+        String url = (String) jobMap.get("url");
+        JobSummary.Status status = JobSummary.toStatus((String) jobMap.get("status"));
+        String start_at = (String) jobMap.get("start_at");
+        String end_at = (String) jobMap.get("end_at");
+        String query = (String) jobMap.get("query");
+        String result = (String) jobMap.get("result");
+        String resultSchema = (String) jobMap.get("hive_result_schema");
+        Map debugMap = (Map) jobMap.get("debug");
+        JobSummary.Debug debug = new JobSummary.Debug(
+                (String) debugMap.get("cmdout"),
+                (String) debugMap.get("stderr"));
         // TODO different object from request's one
-        JobSummary job = new JobSummary(jobID, type, null, null, result,
-                status, null, null, query, resultSchema);
+        JobSummary job = new JobSummary(jobID, type, database, url, result,
+                status, start_at, end_at, query, resultSchema, debug);
 
         return new ShowJobResult(job);
     }

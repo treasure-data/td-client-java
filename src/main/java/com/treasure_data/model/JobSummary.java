@@ -68,6 +68,24 @@ public class JobSummary extends Job {
         }
     }
 
+    public static class Debug {
+        private String cmdout;
+        private String stderr;
+
+        public Debug(String cmdout, String stderr) {
+            this.cmdout = cmdout;
+            this.stderr = stderr;
+        }
+
+        public String getCmdout() {
+            return cmdout;
+        }
+
+        public String getStderr() {
+            return stderr;
+        }
+    }
+
     private Status status;
 
     private String createdAt;
@@ -78,15 +96,25 @@ public class JobSummary extends Job {
 
     private String resultSchema; // hive-specific schema
 
+    private Debug debug;
+
     public JobSummary(String jobID, JobSummary.Type type, Database database,
             String url, String resultTable, Status status, String startAt, String endAt,
             String query, String resultSchema) {
+        this(jobID, type, database, url, resultTable, status, startAt, endAt,
+                query, resultSchema, null);
+    }
+
+    public JobSummary(String jobID, JobSummary.Type type, Database database,
+            String url, String resultTable, Status status, String startAt, String endAt,
+            String query, String resultSchema, Debug debug) {
         super(jobID, type, database, url, resultTable);
         this.status = status;
         this.startAt = startAt;
         this.endAt = endAt;
         setQuery(query);
         this.resultSchema = resultSchema;
+        this.debug = debug;
     }
 
     public void setStatus(JobSummary.Status status) {
@@ -123,5 +151,9 @@ public class JobSummary extends Job {
 
     public String getResultSchema() {
         return resultSchema;
+    }
+
+    public Debug getDebug() {
+        return debug;
     }
 }
