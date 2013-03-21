@@ -20,6 +20,8 @@ package com.treasure_data.model;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.msgpack.unpacker.Unpacker;
+
 import com.treasure_data.client.ClientException;
 
 /**
@@ -27,20 +29,10 @@ import com.treasure_data.client.ClientException;
  */
 public class JobResult2 extends JobResult {
 
-    private int experimentalCode = 0;
     private InputStream in;
 
     public JobResult2(Job job) {
-        this(job, 0);
-    }
-
-    public JobResult2(Job job, int experimentCode) {
         super(job);
-        this.experimentalCode = experimentCode;
-    }
-
-    public int getExperimentalCode() {
-        return experimentalCode;
     }
 
     public void close() throws ClientException {
