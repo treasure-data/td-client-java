@@ -134,6 +134,11 @@ Please configure your treasure-data.properties file using the commands shown bel
     td.api.server.host=api.treasure-data.com
     td.api.server.port=80
 
+If you configure http proxy, please add the following lines to your treasure-data.properties.
+
+    http.proxyHost=<your proxy server's host>
+    http.proxyPort=<your proxy server's port>
+
 ### Issue Queries
 
 Below is an example of issuing a query from a Java program. The query API is asynchronous, and you can wait for the query to complete by polling the job periodically.
