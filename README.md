@@ -128,7 +128,7 @@ Below is an example of listing databases and tables.
         }
     }
 
-please configure your treasure-data.properties file using the commands shown below:
+Please configure your treasure-data.properties file using the commands shown below:
 
     td.api.key=<your API key>
     td.api.server.host=api.treasure-data.com
