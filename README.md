@@ -171,15 +171,28 @@ Below is an example of issuing a query from a Java program. The query API is asy
             System.out.println(job.getJobID());
     
             while (true) {
-                JobSummary jobSummary = client.showJob(job);
-                System.out.println(jobSummary.getStatus());
-                if (jobSummary.getStatus() == JobSummary.Status.SUCCESS) {
+                JobSummary js = result.getJob();
+                JobSummary.Status stat = js.getStatus();
+                if (stat == JobSummary.Status.SUCCESS) {
                     break;
+                } else if (stat == JobSummary.Status.ERROR) {
+                    String msg = String.format("Job '%s' failed: got Job status 'error'", jobID);
+                    if (js.getDebug() != null) {
+                        System.out.println("cmdout:");
+                        System.out.println(js.getDebug().getCmdout());
+                        System.out.println("stderr:");
+                        System.out.println(js.getDebug().getStderr());
+                    }
+                    throw new ClientException(msg);
+                } else if (stat == JobSummary.Status.KILLED) {
+                    String msg = String.format("Job '%s' failed: got Job status 'killed'", jobID);
+                    throw new ClientException(msg);
                 }
-    
+
                 try {
                     Thread.sleep(2 * 1000);
                 } catch (InterruptedException e) {
+                    // do something
                 }
             }
     
