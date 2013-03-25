@@ -1,3 +1,5 @@
+Release 0.2.5 - 20XX/XX/XX
+
 Release 0.2.4 - 2013/03/26
   IMPROVEMENTS
     Adds debug info. to JobSummary class
