@@ -65,6 +65,8 @@ import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
+import com.treasure_data.model.RenameTableRequest;
+import com.treasure_data.model.RenameTableResult;
 import com.treasure_data.model.ServerStatus;
 import com.treasure_data.model.GetServerStatusRequest;
 import com.treasure_data.model.GetServerStatusResult;
@@ -497,6 +499,61 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         Table table = new Table(request.getDatabase(), tableName, tableType);
 
         return new CreateTableResult(table);
+    }
+
+    @Override
+    public RenameTableResult renameTable(RenameTableRequest request)
+            throws ClientException {
+        request.setCredentials(getConfig().getCredentials());
+        validator.validateCredentials(this, request);
+
+        String jsonData = null;
+        int code = 0;
+        String message = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_TABLE_RENAME,
+                    HttpConnectionImpl.e(request.getDatabaseName()),
+                    HttpConnectionImpl.e(request.getOrigTableName()),
+                    HttpConnectionImpl.e(request.getNewTableName()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Rename table failed", message, code));
+                LOG.severe(errMessage);
+                throw new HttpClientException("Rename table failed",
+                        message + ", detail = " + errMessage, code);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            LOG.throwing(getClass().getName(), "renameTable", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Rename table failed", message, code, e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        // {"database":"mugadb","table":"test04","type":"log"}
+        Map map = (Map<String, String>) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, map);
+
+        return new RenameTableResult(request.getDatabaseName(),
+                request.getOrigTableName(), request.getNewTableName());
     }
 
     @Override
@@ -1147,6 +1204,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         String V3_TABLE_LIST = "/v3/table/list/%s";
 
         String V3_TABLE_CREATE = "/v3/table/create/%s/%s/%s";
+
+        String V3_TABLE_RENAME = "/v3/table/rename/%s/%s/%s";
 
         String V3_TABLE_SWAP = "/v3/table/swap/%s/%s/%s";
 

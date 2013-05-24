@@ -46,6 +46,8 @@ import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
 import com.treasure_data.model.GetServerStatusRequest;
 import com.treasure_data.model.GetServerStatusResult;
+import com.treasure_data.model.RenameTableRequest;
+import com.treasure_data.model.RenameTableResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
@@ -79,6 +81,8 @@ public interface DefaultClientAdaptor {
     ListTablesResult listTables(ListTablesRequest request) throws ClientException;
 
     CreateTableResult createTable(CreateTableRequest request) throws ClientException;
+
+    RenameTableResult renameTable(RenameTableRequest request) throws ClientException;
 
     SwapTableResult swapTable(SwapTableRequest request) throws ClientException;
 

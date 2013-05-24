@@ -52,6 +52,8 @@ import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
+import com.treasure_data.model.RenameTableRequest;
+import com.treasure_data.model.RenameTableResult;
 import com.treasure_data.model.ServerStatus;
 import com.treasure_data.model.GetServerStatusRequest;
 import com.treasure_data.model.GetServerStatusResult;
@@ -190,6 +192,15 @@ public class TreasureDataClient {
         CreateTableResult result = createTable(new CreateTableRequest(database,
                 tableName));
         return result.getTable();
+    }
+
+    public void renameTable(String databaseName, String origTableName,
+            String newTableName) throws ClientException {
+        renameTable(new RenameTableRequest(databaseName, origTableName, newTableName));
+    }
+
+    public RenameTableResult renameTable(RenameTableRequest request) throws ClientException {
+        return clientAdaptor.renameTable(request);
     }
 
     public void swapTable(String databaseName, String tableName1,
