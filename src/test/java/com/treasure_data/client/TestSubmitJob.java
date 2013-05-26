@@ -17,6 +17,7 @@ import com.treasure_data.model.Database;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
+import com.treasure_data.model.Job.Priority;
 
 public class TestSubmitJob extends
         PostMethodTestUtil<SubmitJobRequest, SubmitJobResult, DefaultClientAdaptorImpl> {
@@ -52,10 +53,11 @@ public class TestSubmitJob extends
         DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
 
         Database database = new Database("mugadb");
-        String q = "select * from mugatbl";
-        SubmitJobRequest request = new SubmitJobRequest(new Job(database, q, null));
+        String q = "select count(1) from score";
+        Job job = new Job(database, q, Priority.HIGH, 1);
+        SubmitJobRequest request = new SubmitJobRequest(job);
         SubmitJobResult result = clientAdaptor.submitJob(request);
-        Job job = result.getJob();
+        job = result.getJob();
         System.out.println(job.getJobID());
     }
 
