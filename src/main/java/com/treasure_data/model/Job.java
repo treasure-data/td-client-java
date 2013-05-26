@@ -17,6 +17,10 @@
 //
 package com.treasure_data.model;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Job extends AbstractModel {
 
     public static enum Type {
@@ -52,6 +56,39 @@ public class Job extends AbstractModel {
         }
     }
 
+    public static enum Priority {
+        VERYLOW(-2), LOW(-1), NORMAL(0), HIGH(1), VERYHIGH(2);
+
+        private int priority;
+
+        Priority(int priority) {
+            this.priority = priority;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        public static Priority fromInt(int p) {
+            return IntToPriority.get(p);
+        }
+
+        private static class IntToPriority {
+            private static final Map<Integer, Priority> REVERSE_DICTIONARY;
+            static {
+                Map<Integer, Priority> map = new HashMap<Integer, Priority>();
+                for (Priority p : Priority.values()) {
+                    map.put(p.getPriority(), p);
+                }
+                REVERSE_DICTIONARY = Collections.unmodifiableMap(map);
+            }
+
+            static Priority get(int p) {
+                return REVERSE_DICTIONARY.get(p);
+            }
+        }
+    }
+
     private Type type;
 
     private Database database;
@@ -62,12 +99,23 @@ public class Job extends AbstractModel {
 
     private String resultTable;
 
+    private Priority priority = Priority.NORMAL;
+
+    private int retryLimit = 0;
+
     public Job(String jobID) {
         this(jobID, Job.Type.HIVE, null, null, null);
     }
 
     public Job(Database database, String query) {
         this(database, query, null);
+    }
+
+    public Job(Database database, String query, Priority priority, int retryLimit) {
+        this(null, Job.Type.HIVE, database, null, null);
+        setQuery(query);
+        setPriority(priority);
+        setRetryLimit(retryLimit);
     }
 
     public Job(Database database, String query, String resultTable) {
@@ -121,6 +169,22 @@ public class Job extends AbstractModel {
 
     public String getQuery() {
         return query;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setRetryLimit(int retryLimit) {
+        this.retryLimit = retryLimit;
+    }
+
+    public int getRetryLimit() {
+        return retryLimit;
     }
 
     public void setResultTable(String resultTable) {

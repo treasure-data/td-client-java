@@ -887,6 +887,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 // result table is not required
                 params.put("result", HttpConnectionImpl.e(request.getJob().getResultTable()));
             }
+            params.put("priority", "" + request.getJob().getPriority().getPriority());
+            params.put("retry_limit", "" + request.getJob().getRetryLimit());
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
