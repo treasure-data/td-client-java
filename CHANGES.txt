@@ -1,3 +1,5 @@
+Release 0.2.7 - 20XX/XX/XX
+
 Release 0.2.6 - 2013/05/28
   NEW FEATURES
     Adds 'overwrite' mode to TreasureDataClient#renameTable(..)
