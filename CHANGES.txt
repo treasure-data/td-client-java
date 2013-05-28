@@ -1,6 +1,7 @@
-Release 0.2.5 - 20XX/XX/XX
+Release 0.2.5 - 2013/05/28
   NEW FEATURES
     Adds new API: renameTable method in TreasureDataClient class
+    Adds new API: new constructor in Job class: it allows users to configurate 'priority' and 'retry_limit' parameters for jobs
 
 Release 0.2.4 - 2013/03/26
   IMPROVEMENTS
