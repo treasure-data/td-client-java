@@ -23,16 +23,21 @@ import com.treasure_data.model.TableSpecifyRequest;
 public class RenameTableRequest extends TableSpecifyRequest<Table> {
 
     private String databaseName;
-
     private String origTableName;
-
     private String newTableName;
+    private boolean overwrite = false;
 
     public RenameTableRequest(String databaseName, String origTableName, String newTableName) {
+        this(databaseName, origTableName, newTableName, false);
+    }
+
+    public RenameTableRequest(String databaseName, String origTableName, String newTableName,
+            boolean overwrite) {
         super(null);
         this.databaseName = databaseName;
         this.origTableName = origTableName;
         this.newTableName = newTableName;
+        this.overwrite = overwrite;
     }
 
     public String getDatabaseName() {
@@ -45,5 +50,9 @@ public class RenameTableRequest extends TableSpecifyRequest<Table> {
 
     public String getNewTableName() {
         return newTableName;
+    }
+
+    public boolean getOverwrite() {
+        return overwrite;
     }
 }

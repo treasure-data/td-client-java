@@ -199,6 +199,12 @@ public class TreasureDataClient {
         renameTable(new RenameTableRequest(databaseName, origTableName, newTableName));
     }
 
+    public void renameTable(String databaseName, String origTableName,
+            String newTableName, boolean overwrite) throws ClientException {
+        renameTable(new RenameTableRequest(databaseName, origTableName,
+                newTableName, overwrite));
+    }
+
     public RenameTableResult renameTable(RenameTableRequest request) throws ClientException {
         return clientAdaptor.renameTable(request);
     }
