@@ -519,7 +519,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                     HttpConnectionImpl.e(request.getOrigTableName()),
                     HttpConnectionImpl.e(request.getNewTableName()));
             Map<String, String> header = null;
-            Map<String, String> params = null;
+            Map<String, String> params = new HashMap<String, String>();
             params.put("overwrite", "" + request.getOverwrite());
             conn.doPostRequest(request, path, header, params);
 
