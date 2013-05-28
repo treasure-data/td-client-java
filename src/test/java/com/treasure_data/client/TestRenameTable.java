@@ -89,6 +89,44 @@ public class TestRenameTable extends
         }
     }
 
+    @Test @Ignore
+    public void test01() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials(props));
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
+
+        String databaseName = "mugadb";
+        String origTableName = "test02";
+        String newTableName = "test03";
+        try {
+            { // create test02
+                CreateTableRequest request = new CreateTableRequest(
+                        new Database(databaseName), origTableName);
+                CreateTableResult result = clientAdaptor.createTable(request);
+                Table table = result.getTable();
+                System.out.println("create table: " + table.getName());
+            }
+            { // create test03
+                CreateTableRequest request = new CreateTableRequest(
+                        new Database(databaseName), newTableName);
+                CreateTableResult result = clientAdaptor.createTable(request);
+                Table table = result.getTable();
+                System.out.println("create table: " + table.getName());
+            }
+            { // rename
+                RenameTableRequest request =
+                        new RenameTableRequest(databaseName, origTableName, newTableName, true);
+                @SuppressWarnings("unused")
+                RenameTableResult result = clientAdaptor.renameTable(request);
+                System.out.println("rename table");
+            }
+        } finally {
+            // delete
+        }
+    }
+
     private byte[] createData() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         GZIPOutputStream gzout = new GZIPOutputStream(out);
