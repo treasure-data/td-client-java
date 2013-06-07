@@ -72,13 +72,6 @@
 
   <repositories>
     <repository>
-      <id>fluentd.org</id>
-      <url>http://fluentd.org/maven2/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
       <id>local-repo</id>
       <url>file://${basedir}/mvn-local</url>
     </repository>
