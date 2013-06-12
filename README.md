@@ -138,6 +138,9 @@ If you configure http proxy, please add the following lines to your treasure-dat
 
 Below is an example of issuing a query from a Java program. The query API is asynchronous, and you can wait for the query to complete by polling the job periodically.
 
+    import java.io.IOException;
+    import java.util.Properties;
+    
     import org.msgpack.unpacker.Unpacker;
     import org.msgpack.unpacker.UnpackerIterator;
     
@@ -163,10 +166,12 @@ Below is an example of issuing a query from a Java program. The query API is asy
 
             Job job = new Job(new Database("testdb"), "SELECT COUNT(1) FROM www_access");
             client.submitJob(job);
-            System.out.println(job.getJobID());
+            client.submitJob(job);
+            String jobID = job.getJobID();
+            System.out.println(jobID);
     
             while (true) {
-                JobSummary js = result.getJob();
+                JobSummary js = client.showJob(job);
                 JobSummary.Status stat = js.getStatus();
                 if (stat == JobSummary.Status.SUCCESS) {
                     break;
