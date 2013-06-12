@@ -233,6 +233,46 @@ Below is an example of listing and get the status of jobs.
         }
     }
 
+### Upload Data on Bulk Import Session
+
+    import java.io.BufferedInputStream;
+    import java.io.File;
+    import java.io.FileInputStream;
+    import java.io.InputStream;
+
+    import com.treasure_data.auth.TreasureDataCredentials;
+    import com.treasure_data.client.TreasureDataClient;
+    import com.treasure_data.client.bulkimport.BulkImportClient;
+    import com.treasure_data.model.bulkimport.Session;
+    
+    public class Main {
+        static {
+            try {
+                Properties props = System.getProperties();
+                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+            } catch (IOException e) {
+                // do something
+            }
+        }
+    
+        public void doApp() throws ClientException {
+            TreasureDataClient client = new TreasureDataClient();
+            BulkImportClient biclient = new BulkImportClient(client);
+    
+            String name = "session_name";
+            String database = "database_name";
+            String table = "table_name";
+            String partID = "session_part01";
+    
+            File f = new File("./sess/part01.msgpack.gz");
+            InputStream in = new BufferedInputStream(new FileInputStream(f));
+    
+            Session session = new Session(name, database, table);
+            biclient.uploadPart(session, partID, in, (int) f.length());
+        }
+    }
+
+
 ## License
 
 Apache License, Version 2.0
