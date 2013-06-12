@@ -3,8 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.treasure_data</groupId>
   <artifactId>td-client</artifactId>
-  <name>Java Client Library of Treasure Data Cloud</name>
-  <description>Java Client Library of Treasure Data Cloud.</description>
+  <name>Treasure Data Client for Java</name>
+  <description>Treasure Data Client for Java.</description>
   <version>0.2.7-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-client-java</url>
