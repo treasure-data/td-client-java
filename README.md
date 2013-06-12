@@ -1,4 +1,4 @@
-# Java Client Library for Treasure Data Cloud
+# Treasure Data Client for Java
 
 ## Overview
 
@@ -31,7 +31,7 @@ To use Treasure Data Cloud for Java, set the above jar file to your classpath.
 
 ### Install from Maven repository
 
-Treasure Data Logger for Java is released on Treasure Data's Maven repository.
+Treasure Data Client for Java is released on Treasure Data's Maven repository.
 You can configure your pom.xml as follows to use it:
 
     <dependencies>
@@ -49,11 +49,6 @@ You can configure your pom.xml as follows to use it:
         <id>treasure-data.com</id>
         <name>Treasure Data's Maven Repository</name>
         <url>http://maven.treasure-data.com/</url>
-      </repository>
-      <repository>
-        <id>fluentd.org</id>
-        <name>Fluentd's Maven Repository</name>
-        <url>http://fluentd.org/maven2</url>
       </repository>
     </repositories>
     
