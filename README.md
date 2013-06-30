@@ -238,7 +238,7 @@ Below is an example of listing and get the status of jobs.
         }
     }
 
-### Upload Data on Bulk Import Session
+### Bulk-Upload Data on Bulk Import Session
 
     import java.io.BufferedInputStream;
     import java.io.File;
