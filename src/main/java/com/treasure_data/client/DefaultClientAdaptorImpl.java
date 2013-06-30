@@ -715,9 +715,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
         // parse JSON data
         @SuppressWarnings("unchecked")
-        Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
+        Map<String, Object> jobMap = (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, jobMap);
-        String jobID = jobMap.get("job_id");
+        String jobID = getJobID(jobMap);
         Job job = new Job(jobID, Job.Type.MAPRED, request.getDatabase(), null, null);
 
         return new DeletePartialTableResult(job);
@@ -851,10 +851,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
         // parse JSON data
         @SuppressWarnings("unchecked")
-        Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
+        Map<String, Object> jobMap = (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, jobMap);
-
-        String jobID = jobMap.get("job_id");
+        String jobID = getJobID(jobMap);
         Job job = new Job(jobID, Job.Type.MAPRED, request.getDatabase(), null, null);
 
         return new ExportResult(job);
@@ -919,9 +918,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
         // parse JSON data
         @SuppressWarnings("unchecked")
-        Map<String, String> jobMap = (Map<String, String>) JSONValue.parse(jsonData);
+        Map<String, Object> jobMap = (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, jobMap);
-        String jobID = jobMap.get("job_id");
+        String jobID = getJobID(jobMap);
         Job job = request.getJob();
         job.setJobID(jobID);
 
@@ -990,18 +989,18 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         long from = (Long) map.get("from");
         long to = (Long) map.get("to");
         @SuppressWarnings("unchecked")
-        Iterator<Map<String, String>> jobMapIter =
-            ((List<Map<String, String>>) map.get("jobs")).iterator();
+        Iterator<Map<String, Object>> jobMapIter =
+            ((List<Map<String, Object>>) map.get("jobs")).iterator();
         List<JobSummary> jobs = new ArrayList<JobSummary>();
         while (jobMapIter.hasNext()) {
-            Map<String, String> jobMap = jobMapIter.next();
-            Job.Type type = Job.toType(jobMap.get("type"));
-            String jobID = jobMap.get("job_id");
-            JobSummary.Status status = JobSummary.toStatus(jobMap.get("status"));
-            String startAt = jobMap.get("start_at");
-            String endAt = jobMap.get("end_at");
-            String query = jobMap.get("query");
-            String result = jobMap.get("result");
+            Map<String, Object> jobMap = jobMapIter.next();
+            Job.Type type = Job.toType((String) jobMap.get("type"));
+            String jobID = getJobID(jobMap);
+            JobSummary.Status status = JobSummary.toStatus((String) jobMap.get("status"));
+            String startAt = (String) jobMap.get("start_at");
+            String endAt = (String) jobMap.get("end_at");
+            String query = (String) jobMap.get("query");
+            String result = (String) jobMap.get("result");
             JobSummary job = new JobSummary(jobID, type, null, null, result,
                     status, startAt, endAt, query, null);
             jobs.add(job);
@@ -1055,10 +1054,10 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
         // parse JSON data
         @SuppressWarnings("unchecked")
-        Map<String, String> map = (Map<String, String>) JSONValue.parse(jsonData);
+        Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
-        JobSummary.Status status = JobSummary.toStatus(map.get("former_status"));
-        String jobID = map.get("job_id");
+        JobSummary.Status status = JobSummary.toStatus((String) map.get("former_status"));
+        String jobID = getJobID(map);
 
         return new KillJobResult(jobID, status);
     }
@@ -1112,7 +1111,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, jobMap);
 
-        String jobID = (String) jobMap.get("job_id");
+        String jobID = getJobID(jobMap);
         Job.Type type = Job.toType((String) jobMap.get("type"));
         Database database = new Database((String) jobMap.get("database"));
         String url = (String) jobMap.get("url");
@@ -1191,6 +1190,15 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         }
 
         return new GetJobResultResult(request.getJobResult());
+    }
+
+    private static String getJobID(Map<String, Object> map) {
+        Object job_id = map.get("job_id");
+        if (job_id instanceof Number) {
+            return ((Number) job_id).toString();
+        } else {
+            return (String) job_id;
+        }
     }
 
     static interface HttpURL {
