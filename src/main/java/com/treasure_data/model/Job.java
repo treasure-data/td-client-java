@@ -24,7 +24,7 @@ import java.util.Map;
 public class Job extends AbstractModel {
 
     public static enum Type {
-        HIVE("hive"), MAPRED("mapred"), UNKNOWN("none");
+        HIVE("hive"), MAPRED("mapred"), IMPALA("impala"), UNKNOWN("none");
 
         private String type;
 
