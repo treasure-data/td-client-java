@@ -61,6 +61,23 @@ public class TestSubmitJob extends
         System.out.println(job.getJobID());
     }
 
+    @Test @Ignore
+    public void testSubmitJob01() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials(props));
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
+
+        Database database = new Database("mugadb");
+        String q = "select count(1) from www_access";
+        Job job = new Job(database, Job.Type.IMPALA, q, null);
+        SubmitJobRequest request = new SubmitJobRequest(job);
+        SubmitJobResult result = clientAdaptor.submitJob(request);
+        job = result.getJob();
+        System.out.println(job.getJobID());
+    }
+
     @Override
     public void checkNormalBehavior0() throws Exception {
         SubmitJobResult result = doBusinessLogic();
