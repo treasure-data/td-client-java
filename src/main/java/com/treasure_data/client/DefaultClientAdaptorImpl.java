@@ -873,6 +873,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
             // send request
             String path = String.format(HttpURL.V3_JOB_SUBMIT,
+                    HttpConnectionImpl.e(request.getJob().getType().type()),
                     HttpConnectionImpl.e(request.getDatabase().getName()));
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
@@ -1228,7 +1229,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
         String V3_EXPORTJOB_SUBMIT = "/v3/export/run/%s/%s";
 
-        String V3_JOB_SUBMIT = "/v3/job/issue/hive/%s";
+        String V3_JOB_SUBMIT = "/v3/job/issue/%s/%s";
 
         String V3_JOB_LIST = "/v3/job/list";
 

@@ -24,36 +24,41 @@ import java.util.Map;
 public class Job extends AbstractModel {
 
     public static enum Type {
-        HIVE, MAPRED, UNKNOWN,
+        HIVE("hive"), MAPRED("mapred"), UNKNOWN("none");
+
+        private String type;
+
+        Type(String type) {
+            this.type = type;
+        }
+
+        public String type() {
+            return this.type;
+        }
+
+        public static class StringToType {
+            private static final Map<String, Type> REVERSE_DICTIONARY;
+
+            static {
+                Map<String, Type> map = new HashMap<String, Type>();
+                for (Type elem : Type.values()) {
+                    map.put(elem.type(), elem);
+                }
+                REVERSE_DICTIONARY = Collections.unmodifiableMap(map);
+            }
+
+            static Type get(String key) {
+                return REVERSE_DICTIONARY.get(key);
+            }
+        }
     }
 
     public static Type toType(String typeName) {
-        if (typeName == null) {
-            throw new NullPointerException();
-        }
-
-        if (typeName.equals("hive")) {
-            return Type.HIVE;
-        } else if (typeName.equals("mapred")) {
-            return Type.MAPRED;
-        } else {
-            return Type.UNKNOWN;
-        }
+        return Type.StringToType.get(typeName);
     }
 
     public static String toTypeName(Type type) {
-        if (type == null) {
-            throw new NullPointerException();
-        }
-
-        switch (type) {
-        case HIVE:
-            return "hive";
-        case MAPRED:
-            return "mapred";
-        default:
-            return "unknown";
-        }
+        return type.type();
     }
 
     public static enum Priority {
@@ -120,6 +125,11 @@ public class Job extends AbstractModel {
 
     public Job(Database database, String query, String resultTable) {
         this(null, Job.Type.HIVE, database, null, null);
+        setQuery(query);
+    }
+
+    public Job(Database database, Job.Type type, String query, String resultTable) {
+        this(null, type, database, null, null);
         setQuery(query);
     }
 
