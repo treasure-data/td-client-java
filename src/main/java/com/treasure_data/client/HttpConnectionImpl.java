@@ -22,10 +22,12 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -317,7 +319,32 @@ public class HttpConnectionImpl {
         // environment variables
         hostAndPort = System.getenv(Config.TD_ENV_API_SERVER);
         if (hostAndPort != null && !hostAndPort.isEmpty()) {
-            return hostAndPort;
+            String host;
+            int port;
+            try {
+                // parse "http://api.treasure-data.com:80/"
+                URL url = new URL(hostAndPort);
+                host = url.getHost();
+                if (url.getPort() == -1) {
+                    // parse "http://api.treasure-data.com/"
+                    port = Integer.parseInt(Config.TD_API_SERVER_PORT_DEFAULTVALUE);
+                } else {
+                    port = url.getPort();
+                }
+            } catch (MalformedURLException e) {
+                // no protocol
+                // parse "api.treasure-data.com:80"
+                String[] splited = hostAndPort.split(":");
+                if (splited.length == 2) {
+                    host = splited[0];
+                    port = Integer.parseInt(splited[1]);
+                } else {
+                    // parse "api.treasure-data.com"
+                    host = hostAndPort;
+                    port = Integer.parseInt(Config.TD_API_SERVER_PORT_DEFAULTVALUE);
+                }
+            }
+            return host + ":" + port;
         }
 
         // system properties
