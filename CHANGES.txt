@@ -1,3 +1,5 @@
+Release 0.2.8 - 20XX/XX/XX
+
 Release 0.2.7 - 2013/08/21
   NEW FEATURES
     Supports Impala query type
