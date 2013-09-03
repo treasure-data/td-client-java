@@ -1,4 +1,6 @@
 Release 0.2.8 - 20XX/XX/XX
+  NEW FEATURES
+    Adds new API: showTableSchema and setTableSchema methods in TreasureDataClient class
 
 Release 0.2.7 - 2013/08/21
   NEW FEATURES
