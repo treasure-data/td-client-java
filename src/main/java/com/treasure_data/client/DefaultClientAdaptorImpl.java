@@ -70,6 +70,8 @@ import com.treasure_data.model.RenameTableResult;
 import com.treasure_data.model.ServerStatus;
 import com.treasure_data.model.GetServerStatusRequest;
 import com.treasure_data.model.GetServerStatusResult;
+import com.treasure_data.model.SetTableSchemaRequest;
+import com.treasure_data.model.SetTableSchemaResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
@@ -724,6 +726,63 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
     }
 
     @Override
+    public SetTableSchemaResult setTableSchema(SetTableSchemaRequest request)
+            throws ClientException {
+        request.setCredentials(getConfig().getCredentials());
+
+        String jsonData = null;
+        int code = 0;
+        String message = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_SCHEMA_UPDATE,
+                    HttpConnectionImpl.e(request.getDatabaseName()),
+                    HttpConnectionImpl.e(request.getTableName()));
+            Map<String, String> header = null;
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("schema", HttpConnectionImpl.e(request.getJSONString()));
+            conn.doPostRequest(request, path, header, params);
+
+            // receive response code
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Set table schema failed", message, code));
+                LOG.severe(errMessage);
+                throw new HttpClientException("Set table schema failed",
+                        message + ", detail = " + errMessage, code);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            LOG.throwing(getClass().getName(), "setTableSchema", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Set table schema failed", message, code, e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        System.out.println("json data: " + jsonData);
+        //json data: {"table":"sesstest","type":"log","database":"mugadb"}
+        // parse JSON data
+        @SuppressWarnings("unchecked")
+        Map<String, String> tblMap = (Map<String, String>) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, tblMap);
+        String dbName = tblMap.get("database");
+        String tblName = tblMap.get("table");
+
+        return new SetTableSchemaResult(request.getTableSchema());
+    }
+
+    @Override
     public ImportResult importData(ImportRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
@@ -1224,6 +1283,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         String V3_TABLE_DELETE = "/v3/table/delete/%s/%s";
 
         String V3_TABLE_DELETE_PARTIAL = "/v3/table/partialdelete/%s/%s";
+
+        String V3_SCHEMA_UPDATE = "/v3/table/update-schema/%s/%s";
 
         String V3_TABLE_IMPORT = "/v3/table/import/%s/%s/msgpack.gz";
 
