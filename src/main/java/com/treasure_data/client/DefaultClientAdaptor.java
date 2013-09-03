@@ -48,6 +48,8 @@ import com.treasure_data.model.GetServerStatusRequest;
 import com.treasure_data.model.GetServerStatusResult;
 import com.treasure_data.model.RenameTableRequest;
 import com.treasure_data.model.RenameTableResult;
+import com.treasure_data.model.SetTableSchemaRequest;
+import com.treasure_data.model.SetTableSchemaResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
@@ -89,6 +91,9 @@ public interface DefaultClientAdaptor {
     DeleteTableResult deleteTable(DeleteTableRequest request) throws ClientException;
 
     DeletePartialTableResult deletePartialTable(DeletePartialTableRequest request) throws ClientException;
+
+    // Schema API
+    SetTableSchemaResult setTableSchema(SetTableSchemaRequest request) throws ClientException;
 
     // Import and Export API
 

@@ -17,8 +17,12 @@
 //
 package com.treasure_data.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import org.json.simple.JSONValue;
+import org.msgpack.util.json.JSON;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.AuthenticateRequest;
@@ -57,6 +61,8 @@ import com.treasure_data.model.RenameTableResult;
 import com.treasure_data.model.ServerStatus;
 import com.treasure_data.model.GetServerStatusRequest;
 import com.treasure_data.model.GetServerStatusResult;
+import com.treasure_data.model.SetTableSchemaRequest;
+import com.treasure_data.model.SetTableSchemaResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 import com.treasure_data.model.SubmitJobRequest;
@@ -64,6 +70,7 @@ import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.SwapTableRequest;
 import com.treasure_data.model.SwapTableResult;
 import com.treasure_data.model.Table;
+import com.treasure_data.model.TableSchema;
 import com.treasure_data.model.TableSummary;
 
 public class TreasureDataClient {
@@ -246,8 +253,51 @@ public class TreasureDataClient {
         return clientAdaptor.deletePartialTable(request);
     }
 
+    public TableSchema showTableSchema(String database, String table)
+            throws ClientException {
+        List<TableSummary> summaries = listTables(database);
+
+        TableSummary summary = null;
+        for (TableSummary t : summaries) {
+            if (t.getName().equals(table)) {
+                summary = t;
+            }
+        }
+
+        if (summary == null) {
+            throw new ClientException("Not such table " + table);
+        }
+
+        String schemaString = summary.getSchema();
+        List schema = (List) JSONValue.parse(schemaString);
+        if (schema == null || schema.isEmpty()) {
+            return new TableSchema(new Table(new Database(database), table), null);
+        } else {
+            List<String> pairs = new ArrayList<String>();
+            for (int i = 0; i < schema.size(); i++) {
+                List<String> pair = (List<String>) schema.get(i);
+                pairs.add(pair.get(0) + ":" + pair.get(1));
+            }
+            return new TableSchema(new Table(new Database(database), table), pairs);
+        }
+    }
+
+    public void setTableSchema(String database, String table, List<String> pairsOfColsAndTypes)
+            throws ClientException {
+        setTableSchema(new SetTableSchemaRequest(new TableSchema(
+                new Table(new Database(database), table), pairsOfColsAndTypes)));
+    }
+
+    public SetTableSchemaResult setTableSchema(SetTableSchemaRequest request)
+            throws ClientException {
+        return clientAdaptor.setTableSchema(request);
+    }
+
     // TODO #MN add it in next version
-    //TableSchema updateTableSchema(UpdateTableSchemaRequest request) throws ClientException;
+    //public void addTableSchema(String database, String table, List<String> pairsOfColsAndTypes);
+    //public AddTableSchemaResult addTableSchema(AddTableSchemaRequest request);
+    //public void removeTableSchema(String database, String table, List<String> pairsOfColsAndTypes);
+    //public RemoveTableSchemaResult removeTableSchema(RemoveTableSchemaRequest request);
 
     // Import API
     public ImportResult importData(String databaseName, String tableName,
