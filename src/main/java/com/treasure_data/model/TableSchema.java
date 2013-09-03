@@ -21,14 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TableSchema extends AbstractModel {
-    private static interface Type {
+    public static interface Type {
+        String toString();
     }
 
-    private static interface ContainerType extends Type {
+    public static interface ContainerType extends Type {
         String getContainerType();
     }
 
-    private static class ArrayType implements ContainerType {
+    public static class ArrayType implements ContainerType {
         private Type elementType;
 
         private ArrayType(Type elementType) {
@@ -45,7 +46,7 @@ public class TableSchema extends AbstractModel {
         }
     }
 
-    private static class PrimitiveType implements Type {
+    public static class PrimitiveType implements Type {
         private static final PrimitiveType STRING = new PrimitiveType("string");
         private static final PrimitiveType INT = new PrimitiveType("int");
         private static final PrimitiveType LONG = new PrimitiveType("long");
