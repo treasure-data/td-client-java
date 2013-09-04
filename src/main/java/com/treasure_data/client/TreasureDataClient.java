@@ -258,10 +258,11 @@ public class TreasureDataClient {
         return clientAdaptor.showTableSchema(database, table);
     }
 
-    public void setTableSchema(String database, String table, List<String> pairsOfColsAndTypes)
+    public TableSchema setTableSchema(String database, String table, List<String> pairsOfColsAndTypes)
             throws ClientException {
-        setTableSchema(new SetTableSchemaRequest(new TableSchema(
-                new Table(new Database(database), table), pairsOfColsAndTypes)));
+        return setTableSchema(
+                new SetTableSchemaRequest(new TableSchema(new Table(new Database(database), table),
+                        pairsOfColsAndTypes))).getTableSchema();
     }
 
     public SetTableSchemaResult setTableSchema(SetTableSchemaRequest request)
@@ -269,11 +270,15 @@ public class TreasureDataClient {
         return clientAdaptor.setTableSchema(request);
     }
 
-    // TODO #MN add it in next version
-    //public void addTableSchema(String database, String table, List<String> pairsOfColsAndTypes);
-    //public AddTableSchemaResult addTableSchema(AddTableSchemaRequest request);
-    //public void removeTableSchema(String database, String table, List<String> pairsOfColsAndTypes);
-    //public RemoveTableSchemaResult removeTableSchema(RemoveTableSchemaRequest request);
+    public TableSchema addTableSchema(String database, String table, List<String> addedPairsOfColsAndTypes)
+            throws ClientException {
+        return clientAdaptor.addTableSchema(database, table, addedPairsOfColsAndTypes);
+    }
+
+    public TableSchema removeTableSchema(String database, String table, List<String> removedCols)
+            throws ClientException {
+        return clientAdaptor.removeTableSchema(database, table, removedCols);
+    }
 
     // Import API
     public ImportResult importData(String databaseName, String tableName,

@@ -17,6 +17,8 @@
 //
 package com.treasure_data.client;
 
+import java.util.List;
+
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.AuthenticateRequest;
 import com.treasure_data.model.AuthenticateResult;
@@ -98,6 +100,10 @@ public interface DefaultClientAdaptor {
 
     SetTableSchemaResult setTableSchema(SetTableSchemaRequest request) throws ClientException;
 
+    TableSchema addTableSchema(String database, String table, List<String> addedPairsOfColsAndTypes) throws ClientException;
+
+    TableSchema removeTableSchema(String database, String table, List<String> removedColList) throws ClientException;
+
     // Import and Export API
 
     ImportResult importData(ImportRequest request) throws ClientException;
@@ -115,4 +121,5 @@ public interface DefaultClientAdaptor {
     ShowJobResult showJob(ShowJobRequest request) throws ClientException;
 
     GetJobResultResult getJobResult(GetJobResultRequest request) throws ClientException;
+
 }
