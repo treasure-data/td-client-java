@@ -238,6 +238,38 @@ Below is an example of listing and get the status of jobs.
         }
     }
 
+### Show Table Schema and Update the Schema to Table
+
+    import java.io.IOException;
+    import java.util.Arrays;
+    import java.util.Properties;
+    
+    import com.treasure_data.client.ClientException;
+    import com.treasure_data.client.TreasureDataClient;
+    import com.treasure_data.model.TableSchema;
+    
+    public class Main {
+        static {
+            try {
+                Properties props = System.getProperties();
+                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
+            } catch (IOException e) {
+                // do something
+            }   
+        }
+    
+        public void doApp() throws ClientException {
+            TreasureDataClient client = new TreasureDataClient();
+            
+            // show current schema
+            TableSchema schema = client.showTableSchema("testdb", "testtbl");
+            System.out.println(schema.getPairsOfColsAndTypes());
+    
+            // set schema
+            client.setTableSchema("testdb", "testtbl", Arrays.asList("id:string", "age:int", "name:string"));
+        }
+    }
+
 ### Bulk-Upload Data on Bulk Import Session
 
     import java.io.BufferedInputStream;
