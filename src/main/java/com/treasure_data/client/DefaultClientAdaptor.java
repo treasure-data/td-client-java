@@ -56,6 +56,7 @@ import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.SwapTableRequest;
 import com.treasure_data.model.SwapTableResult;
+import com.treasure_data.model.TableSchema;
 
 public interface DefaultClientAdaptor {
     Config getConfig();
@@ -93,6 +94,8 @@ public interface DefaultClientAdaptor {
     DeletePartialTableResult deletePartialTable(DeletePartialTableRequest request) throws ClientException;
 
     // Schema API
+    TableSchema showTableSchema(String database, String table) throws ClientException;
+
     SetTableSchemaResult setTableSchema(SetTableSchemaRequest request) throws ClientException;
 
     // Import and Export API

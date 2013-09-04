@@ -255,31 +255,7 @@ public class TreasureDataClient {
 
     public TableSchema showTableSchema(String database, String table)
             throws ClientException {
-        List<TableSummary> summaries = listTables(database);
-
-        TableSummary summary = null;
-        for (TableSummary t : summaries) {
-            if (t.getName().equals(table)) {
-                summary = t;
-            }
-        }
-
-        if (summary == null) {
-            throw new ClientException("Not such table " + table);
-        }
-
-        String schemaString = summary.getSchema();
-        List schema = (List) JSONValue.parse(schemaString);
-        if (schema == null || schema.isEmpty()) {
-            return new TableSchema(new Table(new Database(database), table), null);
-        } else {
-            List<String> pairs = new ArrayList<String>();
-            for (int i = 0; i < schema.size(); i++) {
-                List<String> pair = (List<String>) schema.get(i);
-                pairs.add(pair.get(0) + ":" + pair.get(1));
-            }
-            return new TableSchema(new Table(new Database(database), table), pairs);
-        }
+        return clientAdaptor.showTableSchema(database, table);
     }
 
     public void setTableSchema(String database, String table, List<String> pairsOfColsAndTypes)
