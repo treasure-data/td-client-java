@@ -726,6 +726,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new DeletePartialTableResult(job);
     }
 
+    @Override
     public TableSchema showTableSchema(String database, String table)
             throws ClientException {
         List<TableSummary> summaries = listTables(
@@ -810,6 +811,65 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         String tblName = tblMap.get("table");
 
         return new SetTableSchemaResult(request.getTableSchema());
+    }
+
+    @Override
+    public TableSchema addTableSchema(String database, String table, List<String> addedPairList)
+            throws ClientException {
+        TableSchema current = showTableSchema(database, table);
+        List<TableSchema.Pair> currentPairs = current.getPairsOfColsAndTypes();
+
+        // if addedPairs is null or empty, return currentPairs.
+        if (addedPairList == null || addedPairList.isEmpty()) {
+            return current;
+        }
+
+        List<TableSchema.Pair> addedPairs = TableSchema.parsePairs(addedPairList);
+
+        // if currentPairs is null or empty, addedPairs are set to currentPairs directly.
+        if (currentPairs == null || currentPairs.isEmpty()) {
+            current.setPairs(addedPairs);
+            return current;
+        }
+
+        for (TableSchema.Pair addedPair : addedPairs) {
+            String addedCol = addedPair.getColumnName();
+            for (int i = 0; i < currentPairs.size(); i++) {
+                if (currentPairs.get(i).getColumnName().equals(addedCol)) {
+                    currentPairs.remove(i);
+                    break;
+                }
+            }
+        }
+        currentPairs.addAll(addedPairs);
+
+        SetTableSchemaResult result = setTableSchema(new SetTableSchemaRequest(current));
+        return result.getTableSchema();
+    }
+
+    @Override
+    public TableSchema removeTableSchema(String database, String table, List<String> removedColList)
+            throws ClientException {
+        TableSchema current = showTableSchema(database, table);
+        List<TableSchema.Pair> currentPairs = current.getPairsOfColsAndTypes();
+
+        // if currentPairs or addedPairs is null or empty, return currentPairs.
+        if (removedColList == null || removedColList.isEmpty() ||
+                currentPairs == null || currentPairs.isEmpty()) {
+            return current;
+        }
+
+        for (String removedCol : removedColList) {
+            for (int i = 0; i < currentPairs.size(); i++) {
+                if (currentPairs.get(i).getColumnName().equals(removedCol)) {
+                    currentPairs.remove(i);
+                    break;
+                }
+            }
+        }
+
+        SetTableSchemaResult result = setTableSchema(new SetTableSchemaRequest(current));
+        return result.getTableSchema();
     }
 
     @Override
