@@ -23,4 +23,7 @@ public class SetTableSchemaResult extends AbstractResult<TableSchema> {
         super(schema);
     }
 
+    public TableSchema getTableSchema() {
+        return get();
+    }
 }
