@@ -770,7 +770,6 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             }
         }
 
-        System.out.println("json data: " + jsonData);
         //json data: {"table":"sesstest","type":"log","database":"mugadb"}
         // parse JSON data
         @SuppressWarnings("unchecked")
