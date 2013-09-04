@@ -91,7 +91,19 @@ public class TableSchema extends AbstractModel {
         }
     }
 
-    private static Pair parsePair(String pairString) {
+    public static List<Pair> parsePairs(List<String> pairList) {
+        if (pairList == null || pairList.isEmpty()) {
+            return new ArrayList<Pair>();
+        }
+
+        List<Pair> pairs = new ArrayList<Pair>();
+        for (String pair : pairList) {
+            pairs.add(parsePair(pair));
+        }
+        return pairs;
+    }
+
+    public static Pair parsePair(String pairString) {
         String[] pair = pairString.split(":");
 
         if (pair.length != 2) {
@@ -133,17 +145,16 @@ public class TableSchema extends AbstractModel {
         setPairsOfColsAndTypes(pairsOfColsAndTypes);
     }
 
+    public void setPairs(List<Pair> pairs) {
+        this.pairs = pairs;
+    }
+
     public void setPairsOfColsAndTypes(List<String> pairsOfColsAndTypes) {
-        this.pairs = new ArrayList<Pair>();
         if (pairsOfColsAndTypes == null || pairsOfColsAndTypes.isEmpty()) {
-            return;
+            this.pairs = new ArrayList<Pair>();
         }
 
-        int num = pairsOfColsAndTypes.size();
-        for (int i = 0; i < num; i++) {
-            String pairString = pairsOfColsAndTypes.get(i);
-            this.pairs.add(parsePair(pairString));
-        }
+        this.pairs = parsePairs(pairsOfColsAndTypes);
     }
 
     public Database getDatabase() {
