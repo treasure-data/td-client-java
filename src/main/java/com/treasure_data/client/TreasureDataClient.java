@@ -65,6 +65,8 @@ import com.treasure_data.model.SetTableSchemaRequest;
 import com.treasure_data.model.SetTableSchemaResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
+import com.treasure_data.model.ShowJobStatusRequest;
+import com.treasure_data.model.ShowJobStatusResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.SwapTableRequest;
@@ -346,6 +348,14 @@ public class TreasureDataClient {
 
     public ShowJobResult showJob(ShowJobRequest request) throws ClientException {
         return clientAdaptor.showJob(request);
+    }
+
+    public JobSummary.Status showJobStatus(Job job) throws ClientException {
+        return showJobStatus(new ShowJobStatusRequest(job)).getJobStatus();
+    }
+
+    public ShowJobStatusResult showJobStatus(ShowJobStatusRequest request) throws ClientException {
+        return clientAdaptor.showJobStatus(request);
     }
 
     public JobResult getJobResult(Job job) throws ClientException {

@@ -74,6 +74,8 @@ import com.treasure_data.model.SetTableSchemaRequest;
 import com.treasure_data.model.SetTableSchemaResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
+import com.treasure_data.model.ShowJobStatusRequest;
+import com.treasure_data.model.ShowJobStatusResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.SwapTableRequest;
@@ -1283,6 +1285,65 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
     }
 
     @Override
+    public ShowJobStatusResult showJobStatus(ShowJobStatusRequest request)
+            throws ClientException {
+        request.setCredentials(getConfig().getCredentials());
+        validator.validateCredentials(this, request);
+
+        String jsonData = null;
+        int code = 0;
+        String message = null;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_JOBSTATUS_SHOW,
+                    HttpConnectionImpl.e(request.getJob().getJobID()));
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doGetRequest(request, path, header, params);
+
+            // receive response code
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Show job status failed", message, code));
+                LOG.severe(errMessage);
+                throw new HttpClientException("Show job status failed",
+                        message + ", detail = " + errMessage, code);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            LOG.throwing(getClass().getName(), "showJobStatus", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Show job status failed", message, code, e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // {"status":"success",
+        //  "job_id":"4702432",
+        //  "created_at":"2013-09-12 03:30:44 UTC",
+        //  "updated_at":"2013-09-12 03:30:55 UTC",
+        //  "start_at":"2013-09-12 03:30:46 UTC",
+        //  "end_at":"2013-09-12 03:30:55 UTC"}
+        @SuppressWarnings("unchecked")
+        Map<String, Object> jobMap =
+            (Map<String, Object>) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, jobMap);
+
+        JobSummary.Status status = JobSummary.toStatus((String) jobMap.get("status"));
+        return new ShowJobStatusResult(status);
+    }
+
+    @Override
     public GetJobResultResult getJobResult(GetJobResultRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
@@ -1387,6 +1448,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         String V3_JOB_KILL = "/v3/job/kill/%s";
 
         String V3_JOB_SHOW = "/v3/job/show/%s";
+
+        String V3_JOBSTATUS_SHOW = "/v3/job/status/%s";
 
         String V3_JOB_RESULT = "/v3/job/result/%s";
     }

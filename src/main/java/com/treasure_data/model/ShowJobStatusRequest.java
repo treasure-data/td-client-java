@@ -17,10 +17,13 @@
 //
 package com.treasure_data.model;
 
-public class GetJobStatusResult extends AbstractResult<Job> {
+public class ShowJobStatusRequest extends AbstractRequest<Job> {
 
-    protected GetJobStatusResult(Job job) {
+    public ShowJobStatusRequest(Job job) {
         super(job);
     }
 
+    public Job getJob() {
+        return get();
+    }
 }

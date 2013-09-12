@@ -54,6 +54,8 @@ import com.treasure_data.model.SetTableSchemaRequest;
 import com.treasure_data.model.SetTableSchemaResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
+import com.treasure_data.model.ShowJobStatusRequest;
+import com.treasure_data.model.ShowJobStatusResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.SwapTableRequest;
@@ -119,6 +121,8 @@ public interface DefaultClientAdaptor {
     KillJobResult killJob(KillJobRequest request) throws ClientException;
 
     ShowJobResult showJob(ShowJobRequest request) throws ClientException;
+
+    ShowJobStatusResult showJobStatus(ShowJobStatusRequest request) throws ClientException;
 
     GetJobResultResult getJobResult(GetJobResultRequest request) throws ClientException;
 
