@@ -2,6 +2,7 @@ Release 0.2.8 - 20XX/XX/XX
   NEW FEATURES
     Adds new API: showTableSchema and setTableSchema methods in TreasureDataClient class
     Adds new API: addTableSchema and removeTableSchema methods in TreasureDataClient class
+    Adds new API: showJobStatus method in TreasureDataClient class
 
 Release 0.2.7 - 2013/08/21
   NEW FEATURES
