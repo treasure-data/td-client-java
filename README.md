@@ -171,12 +171,12 @@ Below is an example of issuing a query from a Java program. The query API is asy
             System.out.println(jobID);
     
             while (true) {
-                JobSummary js = client.showJob(job);
-                JobSummary.Status stat = js.getStatus();
+                JobSummary.Status stat = client.showJobStatus(job);
                 if (stat == JobSummary.Status.SUCCESS) {
                     break;
                 } else if (stat == JobSummary.Status.ERROR) {
                     String msg = String.format("Job '%s' failed: got Job status 'error'", jobID);
+                    JobSummary js = client.showJob(job);
                     if (js.getDebug() != null) {
                         System.out.println("cmdout:");
                         System.out.println(js.getDebug().getCmdout());
