@@ -267,6 +267,9 @@ Below is an example of listing and get the status of jobs.
     
             // set schema
             client.setTableSchema("testdb", "testtbl", Arrays.asList("id:string", "age:int", "name:string"));
+            
+            // remove schema
+            client.removeTableSchema("testdb", "testtbl", Arrays.asList("age", "name"));
         }
     }
 
