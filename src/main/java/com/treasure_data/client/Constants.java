@@ -24,6 +24,10 @@ public interface Constants {
 
     String TD_API_KEY = "td.api.key";
 
+    String TD_INTERNAL_KEY = "td.api.internalkey";
+
+    String TD_INTERNAL_KEY_ID = "td.api.internalkeyid";
+
     String TD_API_SERVER_HOST = "td.api.server.host";
     String TD_API_SERVER_HOST_DEFAULTVALUE = "api.treasure-data.com";
 

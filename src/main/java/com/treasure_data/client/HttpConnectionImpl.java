@@ -28,6 +28,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -52,6 +54,7 @@ public class HttpConnectionImpl {
 
     private HttpURLConnection conn = null;
     private Properties props;
+    private MessageDigest md = null;
 
     private int getReadTimeout;
     private int putReadTimeout;
@@ -59,6 +62,13 @@ public class HttpConnectionImpl {
 
     public HttpConnectionImpl() {
         this(System.getProperties());
+
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        }
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
     public HttpConnectionImpl(Properties props) {
@@ -72,6 +82,34 @@ public class HttpConnectionImpl {
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT,
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT_DEFAULTVALUE));
     }
+
+    private void setRequestAuthHeader(Request<?> request, HttpURLConnection conn) throws IOException {
+        String apiKey = request.getCredentials().getAPIKey();
+        if (apiKey != null) {
+            conn.setRequestProperty("Authorization", "TD1 " + apiKey);
+        }
+        String internalKey = request.getCredentials().getInternalKey();
+        String internalKeyId = request.getCredentials().getInternalKeyId();
+        String dateStr = toRFC2822Format(new Date());
+        conn.setRequestProperty("Date", dateStr);
+
+        if (md != null && internalKey != null && internalKeyId != null) {
+            md.reset();
+            md.update((String.format("%s\n%s\n", dateStr, internalKey)).getBytes());
+            String hashedKey = byteArrayToHexString(md.digest());
+            conn.setRequestProperty("InternalAuthorization", String.format("TD2 %s:%s", internalKeyId, hashedKey));
+        }
+    }
+
+    // http://rgagnon.com/javadetails/java-0596.html
+    private static String byteArrayToHexString(byte[] b) {
+        String result = "";
+        for (int i=0; i < b.length; i++) {
+            result += Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
+        }
+        return result;
+    }
+
 
     public void doGetRequest(Request<?> request, String path, Map<String, String> header,
             Map<String, String> params) throws IOException {
@@ -99,11 +137,7 @@ public class HttpConnectionImpl {
 
         // header
         conn.setRequestMethod("GET");
-        String apiKey = request.getCredentials().getAPIKey();
-        if (apiKey != null) {
-            conn.setRequestProperty("Authorization", "TD1 " + apiKey);
-        }
-        conn.setRequestProperty("Date", toRFC2822Format(new Date()));
+        setRequestAuthHeader(request, conn);
         if (header != null && !header.isEmpty()) {
             for (Map.Entry<String, String> e : header.entrySet()) {
                 conn.setRequestProperty(e.getKey(), e.getValue());
@@ -142,11 +176,7 @@ public class HttpConnectionImpl {
 
         // header
         conn.setRequestMethod("POST");
-        String apiKey = request.getCredentials().getAPIKey();
-        if (apiKey != null) {
-            conn.setRequestProperty("Authorization", "TD1 " + apiKey);
-        }
-        conn.setRequestProperty("Date", toRFC2822Format(new Date()));
+        setRequestAuthHeader(request, conn);
         if (header != null && !header.isEmpty()) {
             for (Map.Entry<String, String> e : header.entrySet()) {
                 conn.setRequestProperty(e.getKey(), e.getValue());
@@ -172,11 +202,7 @@ public class HttpConnectionImpl {
         //conn.setRequestProperty("Content-Type", "application/octet-stream");
         conn.setRequestProperty("Content-Length", "" + bytes.length);
 
-        String apiKey = request.getCredentials().getAPIKey();
-        if (apiKey != null) {
-            conn.setRequestProperty("Authorization", "TD1 " + apiKey);
-        }
-        conn.setRequestProperty("Date", toRFC2822Format(new Date()));
+        setRequestAuthHeader(request, conn);
         conn.setDoOutput(true);
         conn.setUseCaches (false);
         //conn.connect();
@@ -200,11 +226,7 @@ public class HttpConnectionImpl {
         // conn.setRequestProperty("Content-Type", "application/octet-stream");
         conn.setRequestProperty("Content-Length", "" + size);
 
-        String apiKey = request.getCredentials().getAPIKey();
-        if (apiKey != null) {
-            conn.setRequestProperty("Authorization", "TD1 " + apiKey);
-        }
-        conn.setRequestProperty("Date", toRFC2822Format(new Date()));
+        setRequestAuthHeader(request, conn);
         conn.setDoOutput(true);
         conn.setUseCaches(false);
         // conn.connect();
