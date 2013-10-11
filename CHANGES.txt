@@ -1,3 +1,7 @@
+Release 0.2.10 - 2013/10/11
+  BUG FIXES
+    Fixed internal authentication protocol introduced in 0.2.9
+
 Release 0.2.9 - 2013/10/11
   MAINTENANCE
     Added a Treasure Data internal authentication protocol
