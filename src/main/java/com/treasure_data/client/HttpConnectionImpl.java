@@ -62,13 +62,6 @@ public class HttpConnectionImpl {
 
     public HttpConnectionImpl() {
         this(System.getProperties());
-
-        try {
-            md = MessageDigest.getInstance("SHA-1");
-        }
-        catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
     }
 
     public HttpConnectionImpl(Properties props) {
@@ -81,6 +74,13 @@ public class HttpConnectionImpl {
         postReadTimeout = Integer.parseInt(props.getProperty(
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT,
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT_DEFAULTVALUE));
+
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        }
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setRequestAuthHeader(Request<?> request, HttpURLConnection conn) throws IOException {
