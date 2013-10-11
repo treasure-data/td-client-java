@@ -97,7 +97,7 @@ public class HttpConnectionImpl {
             md.reset();
             md.update((String.format("%s\n%s\n", dateStr, internalKey)).getBytes());
             String hashedKey = byteArrayToHexString(md.digest());
-            conn.setRequestProperty("InternalAuthorization", String.format("TD2 %s:%s", internalKeyId, hashedKey));
+            conn.setRequestProperty("Internal-Authorization", String.format("TD2 %s:%s", internalKeyId, hashedKey));
         }
     }
 
