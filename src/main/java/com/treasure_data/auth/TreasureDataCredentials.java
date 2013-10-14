@@ -22,38 +22,34 @@ import java.util.Properties;
 import com.treasure_data.client.Config;
 
 public class TreasureDataCredentials {
-    private static String checkAPIKey(Properties props) {
-        String apiKey = null;
-
-        // check environment variable
-        apiKey = System.getenv(Config.TD_ENV_API_KEY);
-        if (apiKey != null) {
-            return apiKey;
+    private void setProps(Properties props) {
+        // check environment variable first for apikey
+        this.apiKey = System.getenv(Config.TD_ENV_API_KEY);
+        if (this.apiKey == null) {
+            this.apiKey = props.getProperty(Config.TD_API_KEY);
         }
 
         // check properties
-        apiKey = props.getProperty(Config.TD_API_KEY);
-        if (apiKey != null) {
-            return apiKey;
-        }
-
-        // another setting...
-
-        return apiKey;
+        this.internalKey = props.getProperty(Config.TD_INTERNAL_KEY);
+        this.internalKeyId = props.getProperty(Config.TD_INTERNAL_KEY_ID);
     }
 
     private String apiKey;
+    private String internalKey;
+    private String internalKeyId;
 
     public TreasureDataCredentials() {
         this(System.getProperties());
     }
 
     public TreasureDataCredentials(Properties props) {
-        this(checkAPIKey(props));
+        setProps(props);
     }
 
     public TreasureDataCredentials(String apiKey) {
         this.apiKey = apiKey;
+        this.internalKey = null;
+        this.internalKeyId = null;
     }
 
     public void setAPIKey(String apiKey) {
@@ -62,6 +58,14 @@ public class TreasureDataCredentials {
 
     public String getAPIKey() {
         return apiKey;
+    }
+
+    public String getInternalKey() {
+        return internalKey;
+    }
+
+    public String getInternalKeyId() {
+        return internalKeyId;
     }
 
     @Override

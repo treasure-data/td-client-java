@@ -1,4 +1,14 @@
-Release 0.2.9 - 20XX/XX/XX
+Release 0.2.11 - 2013/10/11
+  MAINTENANCE
+    Changed Treasure Data internal authentication protocol
+
+Release 0.2.10 - 2013/10/11
+  BUG FIXES
+    Fixed internal authentication protocol introduced in 0.2.9
+
+Release 0.2.9 - 2013/10/11
+  MAINTENANCE
+    Added a Treasure Data internal authentication protocol
 
 Release 0.2.8 - 2013/09/12
   NEW FEATURES
