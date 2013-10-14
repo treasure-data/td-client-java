@@ -252,8 +252,14 @@ public class HttpConnectionImpl {
 
     public String getErrorMessage() throws IOException {
         StringBuilder sbuf = new StringBuilder();
+
+        InputStream orig = conn.getErrorStream();
+        if (orig == null) {
+            return "No error message";
+        }
+
         BufferedReader reader = new BufferedReader(
-                new InputStreamReader(conn.getErrorStream()));
+                new InputStreamReader(orig));
         while (true) {
             String line = reader.readLine();
             if (line == null) {
