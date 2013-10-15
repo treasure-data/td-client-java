@@ -831,19 +831,18 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         // if currentPairs is null or empty, addedPairs are set to currentPairs directly.
         if (currentPairs == null || currentPairs.isEmpty()) {
             current.setPairs(addedPairs);
-            return current;
-        }
-
-        for (TableSchema.Pair addedPair : addedPairs) {
-            String addedCol = addedPair.getColumnName();
-            for (int i = 0; i < currentPairs.size(); i++) {
-                if (currentPairs.get(i).getColumnName().equals(addedCol)) {
-                    currentPairs.remove(i);
-                    break;
+        } else {
+            for (TableSchema.Pair addedPair : addedPairs) {
+                String addedCol = addedPair.getColumnName();
+                for (int i = 0; i < currentPairs.size(); i++) {
+                    if (currentPairs.get(i).getColumnName().equals(addedCol)) {
+                        currentPairs.remove(i);
+                        break;
+                    }
                 }
             }
+            currentPairs.addAll(addedPairs);
         }
-        currentPairs.addAll(addedPairs);
 
         SetTableSchemaResult result = setTableSchema(new SetTableSchemaRequest(current));
         return result.getTableSchema();
