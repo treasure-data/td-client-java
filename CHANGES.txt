@@ -1,4 +1,6 @@
 Release 0.2.13 - 20XX/XX/XX
+  BUG FIXES
+    Fixes bug: TreasureDataClient#addTableSchema(..) doesn't work if some schemas are appended to table of null table schema.
 
 Release 0.2.12 - 2013/10/14
   BUG FIXES
