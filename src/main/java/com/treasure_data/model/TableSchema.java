@@ -51,6 +51,7 @@ public class TableSchema extends AbstractModel {
         private static final PrimitiveType INT = new PrimitiveType("int");
         private static final PrimitiveType LONG = new PrimitiveType("long");
         private static final PrimitiveType DOUBLE = new PrimitiveType("double");
+        private static final PrimitiveType FLOAT = new PrimitiveType("float");
 
         private String type;
 
@@ -122,6 +123,8 @@ public class TableSchema extends AbstractModel {
             return PrimitiveType.LONG;
         } else if (PrimitiveType.DOUBLE.getType().equals(typeString)) {
             return PrimitiveType.DOUBLE;
+        } else if (PrimitiveType.FLOAT.getType().equals(typeString)) {
+            return PrimitiveType.FLOAT;
         } else if (typeString.startsWith("array<")) {
             // TODO refine the parser more
             typeString = typeString.substring(0, "array<".length());
