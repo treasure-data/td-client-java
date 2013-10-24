@@ -1,3 +1,7 @@
+Release 0.2.14 - 2013/10/23
+  NEW FEATURES
+    TableSchema model class supports float type.
+
 Release 0.2.13 - 2013/10/15
   BUG FIXES
     Fixes bug: TreasureDataClient#addTableSchema(..) doesn't work if some schemas are appended to table of null table schema.
