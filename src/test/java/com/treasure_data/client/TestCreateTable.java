@@ -13,8 +13,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.model.CreateItemTableRequest;
+import com.treasure_data.model.CreateLogTableRequest;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
+import com.treasure_data.model.DataType;
 import com.treasure_data.model.Database;
 
 public class TestCreateTable extends
@@ -57,6 +60,30 @@ public class TestCreateTable extends
         Database database = new Database(databaseName);
         try {
             CreateTableRequest request = new CreateTableRequest(database, "test01");
+            CreateTableResult result = clientAdaptor.createTable(request);
+            System.out.println(result.getTable().getName());
+        } catch (ClientException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // delete database
+            //clientAdaptor.deleteDatabase(new DeleteDatabaseRequest(databaseName));
+        }
+    }
+
+    @Test @Ignore
+    public void testCreateTable01() throws Exception {
+        Properties props = new Properties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        Config conf = new Config();
+        conf.setCredentials(new TreasureDataCredentials(props));
+        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
+
+        String databaseName = "mugadb";
+        Database database = new Database(databaseName);
+        try {
+            //CreateTableRequest request = new CreateItemTableRequest(database, "test01", "key", DataType.STRING);
+            CreateTableRequest request = new CreateLogTableRequest(database, "test02");
             CreateTableResult result = clientAdaptor.createTable(request);
             System.out.println(result.getTable().getName());
         } catch (ClientException e) {
