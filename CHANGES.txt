@@ -1,3 +1,7 @@
+Release 0.2.15 - 20XX/XX/XX
+  NEW FEATURES
+    Adds TreasureDataClient#createItemTable(..). It allows users to create new item tables.
+
 Release 0.2.14 - 2013/10/23
   NEW FEATURES
     TableSchema model class supports float type.
