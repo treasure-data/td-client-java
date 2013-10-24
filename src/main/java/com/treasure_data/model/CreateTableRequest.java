@@ -23,4 +23,7 @@ public class CreateTableRequest extends TableSpecifyRequest<Table> {
         super(new Table(database, tableName, Table.Type.LOG));
     }
 
+    public CreateTableRequest(Table tbl) {
+        super(tbl);
+    }
 }
