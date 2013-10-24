@@ -34,6 +34,7 @@ import com.treasure_data.model.AuthenticateRequest;
 import com.treasure_data.model.AuthenticateResult;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
+import com.treasure_data.model.CreateItemTableRequest;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
@@ -48,6 +49,7 @@ import com.treasure_data.model.ExportRequest;
 import com.treasure_data.model.ExportResult;
 import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
+import com.treasure_data.model.ItemTable;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.JobResult;
 import com.treasure_data.model.JobResult2;
@@ -454,10 +456,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         validator.validateTableName(request.getTableName());
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
+        final boolean isItemTable = request instanceof CreateItemTableRequest;
 
         String jsonData = null;
         int code = 0;
         String message = null;
+        String tableType = isItemTable ? "item" : "log";
         try {
             conn = createConnection();
 
@@ -468,6 +472,14 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                     HttpConnectionImpl.e(request.getTable().getType().type()));
             Map<String, String> header = null;
             Map<String, String> params = null;
+            if (isItemTable) {
+                ItemTable it = (ItemTable) request.getTable();
+                params = new HashMap<String, String>();
+                //'primary_key' => primary_key
+                params.put("primary_key", it.getPrimaryKey());
+                // 'primary_key_type' => primary_key_type
+                params.put("primary_key_type", it.getPrimaryKeyType().type());
+            }
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
@@ -476,19 +488,20 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             if (code != HttpURLConnection.HTTP_OK) {
                 String errMessage = conn.getErrorMessage();
                 LOG.severe(HttpClientException.toMessage(
-                        "Create table failed", message, code));
+                        String.format("Create %s table failed", tableType), message, code));
                 LOG.severe(errMessage);
-                throw new HttpClientException("Create table failed",
-                        message + ", detail = " + errMessage, code);
+                throw new HttpClientException(
+                        String.format("Create %s table failed", tableType), message + ", detail = " + errMessage, code);
             }
 
             // receive response body
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            LOG.throwing(getClass().getName(), "createTable", e);
+            LOG.throwing(getClass().getName(), isItemTable ? "createItemTable" : "createLogTable", e);
             LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
-            throw new HttpClientException("Create table failed", message, code, e);
+            throw new HttpClientException(
+                    String.format("Create %s table failed", tableType), message, code, e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -500,8 +513,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, tableMap);
         String tableName = tableMap.get("table");
-        Table.Type tableType = Table.Type.fromString(tableMap.get("type"));
-        Table table = new Table(request.getDatabase(), tableName, tableType);
+        Table.Type type = Table.Type.fromString(tableMap.get("type"));
+        Table table = new Table(request.getDatabase(), tableName, type);
 
         return new CreateTableResult(table);
     }

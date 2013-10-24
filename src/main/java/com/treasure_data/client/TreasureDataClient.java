@@ -17,20 +17,19 @@
 //
 package com.treasure_data.client;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import org.json.simple.JSONValue;
-import org.msgpack.util.json.JSON;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.AuthenticateRequest;
 import com.treasure_data.model.AuthenticateResult;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
+import com.treasure_data.model.CreateItemTableRequest;
+import com.treasure_data.model.CreateLogTableRequest;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
+import com.treasure_data.model.DataType;
 import com.treasure_data.model.Database;
 import com.treasure_data.model.DatabaseSummary;
 import com.treasure_data.model.DeleteDatabaseRequest;
@@ -43,6 +42,7 @@ import com.treasure_data.model.ExportRequest;
 import com.treasure_data.model.ExportResult;
 import com.treasure_data.model.ImportRequest;
 import com.treasure_data.model.ImportResult;
+import com.treasure_data.model.ItemTable;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.JobResult;
 import com.treasure_data.model.JobSummary;
@@ -56,6 +56,7 @@ import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
+import com.treasure_data.model.LogTable;
 import com.treasure_data.model.RenameTableRequest;
 import com.treasure_data.model.RenameTableResult;
 import com.treasure_data.model.ServerStatus;
@@ -191,16 +192,91 @@ public class TreasureDataClient {
         return clientAdaptor.listTables(request);
     }
 
+    /**
+     * Creates a log table.
+     *
+     * @param databaseName
+     * @param tableName
+     * @return
+     * @throws ClientException
+     */
     public Table createTable(String databaseName, String tableName)
             throws ClientException {
-        return createTable(new Database(databaseName), tableName);
+        return createLogTable(new Database(databaseName), tableName);
     }
 
+    /**
+     * Creates a log table.
+     *
+     * @param database
+     * @param tableName
+     * @return
+     * @throws ClientException
+     */
     public Table createTable(Database database, String tableName)
             throws ClientException {
-        CreateTableResult result = createTable(new CreateTableRequest(database,
-                tableName));
-        return result.getTable();
+        return createLogTable(database, tableName);
+    }
+
+    public LogTable createLogTable(String databaseName, String tableName)
+            throws ClientException {
+        return createLogTable(new Database(databaseName), tableName);
+    }
+
+    public LogTable createLogTable(Database database, String tableName)
+            throws ClientException {
+        return (LogTable) createTable(
+                new CreateLogTableRequest(database, tableName)).getTable();
+    }
+
+    public ItemTable createItemTable(String databaseName, String tableName,
+            String primaryKey, DataType primaryKeyType) throws ClientException {
+        return createItemTable(new Database(databaseName), tableName,
+                primaryKey, primaryKeyType);
+    }
+
+    public ItemTable createItemTable(Database database, String tableName,
+            String primaryKey, DataType primaryKeyType) throws ClientException {
+        return (ItemTable) createTable(new CreateItemTableRequest(database,
+                tableName, primaryKey, primaryKeyType)).getTable();
+    }
+
+    /**
+     * Creates a log table.
+     *
+     * @param request
+     * @return
+     * @throws ClientException
+     *
+     * @see createTable(CreateLogTableRequest)
+     */
+    public CreateTableResult createTable(CreateTableRequest request)
+            throws ClientException {
+        return clientAdaptor.createTable(request);
+    }
+
+    /**
+     * Creates a log table.
+     *
+     * @param request
+     * @return
+     * @throws ClientException
+     */
+    public CreateTableResult createTable(CreateLogTableRequest request)
+            throws ClientException {
+        return clientAdaptor.createTable(request);
+    }
+
+    /**
+     * Creates an item table.
+     *
+     * @param request
+     * @return
+     * @throws ClientException
+     */
+    public CreateTableResult createTable(CreateItemTableRequest request)
+            throws ClientException {
+        return clientAdaptor.createTable(request);
     }
 
     public void renameTable(String databaseName, String origTableName,
@@ -226,11 +302,6 @@ public class TreasureDataClient {
     public SwapTableResult swapTable(SwapTableRequest request)
             throws ClientException {
         return clientAdaptor.swapTable(request);
-    }
-
-    public CreateTableResult createTable(CreateTableRequest request)
-            throws ClientException {
-        return clientAdaptor.createTable(request);
     }
 
     public void deleteTable(String databaseName, String tableName)
