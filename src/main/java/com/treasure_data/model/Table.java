@@ -17,29 +17,42 @@
 //
 package com.treasure_data.model;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Table extends AbstractModel {
     public static enum Type {
-        LOG, ITEM, UNKNOWN,
-    }
+        LOG("log"), ITEM("item");
 
-    public static Type toType(String typeName) {
-        if (typeName.equals("log")) {
-            return Type.LOG;
-        } else if (typeName.equals("item")) {
-            return Type.ITEM;
-        } else {
-            return Type.UNKNOWN;
+        private String type;
+
+        Type(String type) {
+            this.type = type;
         }
-    }
 
-    public static String toTypeName(Type type) {
-        switch (type) {
-        case LOG:
-            return "log";
-        case ITEM:
-            return "item";
-        default:
-            return "unknown";
+        public String type() {
+            return type;
+        }
+
+        public static Type fromString(String type) {
+            return StringToType.get(type);
+        }
+
+        private static class StringToType {
+            private static final Map<String, Type> REVERSE_DICTIONARY;
+
+            static {
+                Map<String, Type> map = new HashMap<String, Type>();
+                for (Type e : Type.values()) {
+                    map.put(e.type(), e);
+                }
+                REVERSE_DICTIONARY = Collections.unmodifiableMap(map);
+            }
+
+            static Type get(String type) {
+                return REVERSE_DICTIONARY.get(type);
+            }
         }
     }
 

@@ -439,7 +439,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             String schema = (String) tableMap.get("schema");
             String createdAt = (String) tableMap.get("created_at");
             String updatedAt = (String) tableMap.get("updated_at");
-            TableSummary tbl = new TableSummary(request.getDatabase(), name, Table.toType(typeName),
+            TableSummary tbl = new TableSummary(request.getDatabase(), name, Table.Type.fromString(typeName),
                     count, schema, createdAt, updatedAt);
             tableList.add(tbl);
         }
@@ -465,7 +465,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             String path = String.format(HttpURL.V3_TABLE_CREATE,
                     HttpConnectionImpl.e(request.getDatabase().getName()),
                     HttpConnectionImpl.e(request.getTableName()),
-                    HttpConnectionImpl.e(Table.toTypeName(request.getTable().getType())));
+                    HttpConnectionImpl.e(request.getTable().getType().type()));
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
@@ -500,7 +500,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, tableMap);
         String tableName = tableMap.get("table");
-        Table.Type tableType = Table.toType(tableMap.get("type"));
+        Table.Type tableType = Table.Type.fromString(tableMap.get("type"));
         Table table = new Table(request.getDatabase(), tableName, tableType);
 
         return new CreateTableResult(table);
