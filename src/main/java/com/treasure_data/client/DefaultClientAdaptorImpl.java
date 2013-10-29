@@ -99,6 +99,18 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         validator = new Validator();
     }
 
+    public int getRetryCount() {
+        String count = this.getConfig().getProperties().getProperty(
+                Config.TD_CLIENT_RETRY_COUNT, Config.TD_CLIENT_RETRY_COUNT_DEFAULTVALUE);
+        return Integer.parseInt(count);
+    }
+
+    public long getRetryWaitTime() {
+        String time = this.getConfig().getProperties().getProperty(
+                Config.TD_CLIENT_RETRY_WAIT_TIME, Config.TD_CLIENT_RETRY_WAIT_TIME_DEFAULTVALUE);
+        return Long.parseLong(time);
+    }
+
     @Override
     public AuthenticateResult authenticate(AuthenticateRequest request)
             throws ClientException {
@@ -1022,6 +1034,33 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new ExportResult(job);
     }
 
+    public SubmitJobResult submitJob_retry(SubmitJobRequest request)
+            throws ClientException {
+        int count = 0;
+        SubmitJobResult ret;
+        while (true) {
+            try {
+                ret = submitJob(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                LOG.warning(e.getMessage());
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit.");
+                    throw new ClientException("Retry error");
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried.");
+                    waitRetry(getRetryWaitTime());
+                }
+            }
+        }
+        return ret;
+    }
+
     @Override
     public SubmitJobResult submitJob(SubmitJobRequest request)
             throws ClientException {
@@ -1173,6 +1212,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new ListJobsResult(new ListJobs<JobSummary>(count, from, to, jobs));
     }
 
+    public KillJobResult killJob_retry(KillJobRequest request)
+            throws ClientException {
+        int count = 0;
+        KillJobResult ret;
+        while (true) {
+            try {
+                ret = killJob(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                LOG.warning(e.getMessage());
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit.");
+                    throw new ClientException("Retry error");
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried.");
+                    waitRetry(getRetryWaitTime());
+                }
+            }
+        }
+        return ret;
+    }
+
     @Override
     public KillJobResult killJob(KillJobRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
@@ -1224,6 +1289,33 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         String jobID = getJobID(map);
 
         return new KillJobResult(jobID, status);
+    }
+
+    public ShowJobResult showJob_retry(ShowJobRequest request)
+            throws ClientException {
+        int count = 0;
+        ShowJobResult ret;
+        while (true) {
+            try {
+                ret = showJob(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                LOG.warning(e.getMessage());
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit.");
+                    throw new ClientException("Retry error");
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried.");
+                    waitRetry(getRetryWaitTime());
+                }
+            }
+        }
+        return ret;
     }
 
     @Override
@@ -1296,6 +1388,33 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new ShowJobResult(job);
     }
 
+    public ShowJobStatusResult showJobStatus_retry(ShowJobStatusRequest request)
+            throws ClientException {
+        int count = 0;
+        ShowJobStatusResult ret;
+        while (true) {
+            try {
+                ret = showJobStatus(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                LOG.warning(e.getMessage());
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit.");
+                    throw new ClientException("Retry error");
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried.");
+                    waitRetry(getRetryWaitTime());
+                }
+            }
+        }
+        return ret;
+    }
+
     @Override
     public ShowJobStatusResult showJobStatus(ShowJobStatusRequest request)
             throws ClientException {
@@ -1353,6 +1472,33 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
         JobSummary.Status status = JobSummary.toStatus((String) jobMap.get("status"));
         return new ShowJobStatusResult(status);
+    }
+
+    public GetJobResultResult getJobResult_retry(GetJobResultRequest request)
+            throws ClientException {
+        int count = 0;
+        GetJobResultResult ret;
+        while (true) {
+            try {
+                ret = getJobResult(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                LOG.warning(e.getMessage());
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit.");
+                    throw new ClientException("Retry error");
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried.");
+                    waitRetry(getRetryWaitTime());
+                }
+            }
+        }
+        return ret;
     }
 
     @Override
@@ -1413,6 +1559,14 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         }
 
         return new GetJobResultResult(request.getJobResult());
+    }
+
+    private void waitRetry(long time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            // ignore
+        }
     }
 
     private static String getJobID(Map<String, Object> map) {

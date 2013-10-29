@@ -114,16 +114,21 @@ public interface DefaultClientAdaptor {
 
     // Job API
 
+    SubmitJobResult submitJob_retry(SubmitJobRequest request) throws ClientException;
     SubmitJobResult submitJob(SubmitJobRequest request) throws ClientException;
 
     ListJobsResult listJobs(ListJobsRequest request) throws ClientException;
 
+    KillJobResult killJob_retry(KillJobRequest request) throws ClientException;
     KillJobResult killJob(KillJobRequest request) throws ClientException;
 
+    ShowJobResult showJob_retry(ShowJobRequest request) throws ClientException;
     ShowJobResult showJob(ShowJobRequest request) throws ClientException;
 
+    ShowJobStatusResult showJobStatus_retry(ShowJobStatusRequest request) throws ClientException;
     ShowJobStatusResult showJobStatus(ShowJobStatusRequest request) throws ClientException;
 
+    GetJobResultResult getJobResult_retry(GetJobResultRequest request) throws ClientException;
     GetJobResultResult getJobResult(GetJobResultRequest request) throws ClientException;
 
 }
