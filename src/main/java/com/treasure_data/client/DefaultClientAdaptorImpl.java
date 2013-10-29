@@ -1034,13 +1034,14 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new ExportResult(job);
     }
 
-    public SubmitJobResult submitJob_retry(SubmitJobRequest request)
+    @Override
+    public SubmitJobResult submitJob(SubmitJobRequest request)
             throws ClientException {
         int count = 0;
         SubmitJobResult ret;
         while (true) {
             try {
-                ret = submitJob(request);
+                ret = doSubmitJob(request);
                 if (count > 0) {
                     LOG.warning("Retry succeeded.");
                 }
@@ -1060,8 +1061,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return ret;
     }
 
-    @Override
-    public SubmitJobResult submitJob(SubmitJobRequest request)
+    private SubmitJobResult doSubmitJob(SubmitJobRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
@@ -1211,13 +1211,14 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new ListJobsResult(new ListJobs<JobSummary>(count, from, to, jobs));
     }
 
-    public KillJobResult killJob_retry(KillJobRequest request)
+    @Override
+    public KillJobResult killJob(KillJobRequest request)
             throws ClientException {
         int count = 0;
         KillJobResult ret;
         while (true) {
             try {
-                ret = killJob(request);
+                ret = doKillJob(request);
                 if (count > 0) {
                     LOG.warning("Retry succeeded.");
                 }
@@ -1237,8 +1238,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return ret;
     }
 
-    @Override
-    public KillJobResult killJob(KillJobRequest request) throws ClientException {
+    private KillJobResult doKillJob(KillJobRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
@@ -1290,13 +1290,14 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new KillJobResult(jobID, status);
     }
 
-    public ShowJobResult showJob_retry(ShowJobRequest request)
+    @Override
+    public ShowJobResult showJob(ShowJobRequest request)
             throws ClientException {
         int count = 0;
         ShowJobResult ret;
         while (true) {
             try {
-                ret = showJob(request);
+                ret = doShowJob(request);
                 if (count > 0) {
                     LOG.warning("Retry succeeded.");
                 }
@@ -1316,8 +1317,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return ret;
     }
 
-    @Override
-    public ShowJobResult showJob(ShowJobRequest request)
+    private ShowJobResult doShowJob(ShowJobRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
@@ -1386,13 +1386,14 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new ShowJobResult(job);
     }
 
-    public ShowJobStatusResult showJobStatus_retry(ShowJobStatusRequest request)
+    @Override
+    public ShowJobStatusResult showJobStatus(ShowJobStatusRequest request)
             throws ClientException {
         int count = 0;
         ShowJobStatusResult ret;
         while (true) {
             try {
-                ret = showJobStatus(request);
+                ret = doShowJobStatus(request);
                 if (count > 0) {
                     LOG.warning("Retry succeeded.");
                 }
@@ -1412,8 +1413,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return ret;
     }
 
-    @Override
-    public ShowJobStatusResult showJobStatus(ShowJobStatusRequest request)
+    private ShowJobStatusResult doShowJobStatus(ShowJobStatusRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
@@ -1471,13 +1471,14 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new ShowJobStatusResult(status);
     }
 
-    public GetJobResultResult getJobResult_retry(GetJobResultRequest request)
+    @Override
+    public GetJobResultResult getJobResult(GetJobResultRequest request)
             throws ClientException {
         int count = 0;
         GetJobResultResult ret;
         while (true) {
             try {
-                ret = getJobResult(request);
+                ret = doGetJobResult(request);
                 if (count > 0) {
                     LOG.warning("Retry succeeded.");
                 }
@@ -1497,8 +1498,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return ret;
     }
 
-    @Override
-    public GetJobResultResult getJobResult(GetJobResultRequest request)
+    private GetJobResultResult doGetJobResult(GetJobResultRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);

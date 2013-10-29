@@ -385,7 +385,7 @@ public class TreasureDataClient {
 
     public SubmitJobResult submitJob(SubmitJobRequest request)
             throws ClientException {
-        return clientAdaptor.submitJob_retry(request);
+        return clientAdaptor.submitJob(request);
     }
 
     public List<JobSummary> listJobs(long from, long to) throws ClientException {
@@ -406,7 +406,7 @@ public class TreasureDataClient {
     }
 
     public KillJobResult killJob(KillJobRequest request) throws ClientException {
-        return clientAdaptor.killJob_retry(request);
+        return clientAdaptor.killJob(request);
     }
 
     public JobSummary showJob(String jobID) throws ClientException {
@@ -418,7 +418,7 @@ public class TreasureDataClient {
     }
 
     public ShowJobResult showJob(ShowJobRequest request) throws ClientException {
-        return clientAdaptor.showJob_retry(request);
+        return clientAdaptor.showJob(request);
     }
 
     public JobSummary.Status showJobStatus(Job job) throws ClientException {
@@ -426,7 +426,7 @@ public class TreasureDataClient {
     }
 
     public ShowJobStatusResult showJobStatus(ShowJobStatusRequest request) throws ClientException {
-        return clientAdaptor.showJobStatus_retry(request);
+        return clientAdaptor.showJobStatus(request);
     }
 
     public JobResult getJobResult(Job job) throws ClientException {
@@ -436,7 +436,7 @@ public class TreasureDataClient {
 
     public GetJobResultResult getJobResult(GetJobResultRequest request)
             throws ClientException {
-        return clientAdaptor.getJobResult_retry(request);
+        return clientAdaptor.getJobResult(request);
     }
 
     // Job Scheduling API
