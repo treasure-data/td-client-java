@@ -1,0 +1,155 @@
+package com.treasure_data.client.bulkimport;
+
+import static org.junit.Assert.assertEquals;
+
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.zip.GZIPOutputStream;
+
+import org.json.simple.JSONValue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.msgpack.MessagePack;
+import org.msgpack.packer.Packer;
+
+import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.client.Config;
+import com.treasure_data.client.PostMethodTestUtil;
+import com.treasure_data.client.TreasureDataClient;
+import com.treasure_data.model.bulkimport.CommitSessionRequest;
+import com.treasure_data.model.bulkimport.CommitSessionResult;
+import com.treasure_data.model.bulkimport.CreateSessionRequest;
+import com.treasure_data.model.bulkimport.CreateSessionResult;
+import com.treasure_data.model.bulkimport.DeletePartRequest;
+import com.treasure_data.model.bulkimport.DeletePartResult;
+import com.treasure_data.model.bulkimport.DeleteSessionRequest;
+import com.treasure_data.model.bulkimport.DeleteSessionResult;
+import com.treasure_data.model.bulkimport.Session;
+import com.treasure_data.model.bulkimport.UploadPartRequest;
+import com.treasure_data.model.bulkimport.UploadPartResult;
+
+public class TestDeletePart
+    extends PostMethodTestUtil<DeletePartRequest, DeletePartResult, BulkImportClientAdaptorImpl> {
+        
+
+    @Test @Ignore
+    public void test00() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        TreasureDataClient client = new TreasureDataClient(
+                new TreasureDataCredentials(), props);
+        BulkImportClient biclient = new BulkImportClient(client);
+
+        MessagePack msgpack = new MessagePack();
+        long baseTime = System.currentTimeMillis() / 1000;
+
+
+        String sessionName = "sess01";
+        String databaseName = "mugadb";
+        String tableName = "test04";
+        Session sess = null;
+        try { // create
+            {
+                CreateSessionRequest request = new CreateSessionRequest(sessionName, databaseName, tableName);
+                CreateSessionResult result = biclient.createSession(request);
+                sess = result.getSession();
+                System.out.println(sess);
+            }
+
+            { // upload
+                List<String> parts = new ArrayList<String>();
+                parts.add("01d");
+                parts.add("02d");
+                parts.add("03d");
+
+                for (int i = 0; i < parts.size(); i++) {
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    GZIPOutputStream gzout = new GZIPOutputStream(out);
+                    Packer pk = msgpack.createPacker(gzout);
+                    Map<String, Object> src = new HashMap<String, Object>();
+                    src.put("k", i);
+                    src.put("v", "muga:" + i);
+                    src.put("time", baseTime + 3600 * i);
+                    pk.write(src);
+                    gzout.finish();
+                    gzout.close();
+                    byte[] bytes = out.toByteArray();
+
+                    UploadPartRequest request = new UploadPartRequest(sess, parts.get(i), bytes);
+                    UploadPartResult result = biclient.uploadPart(request);
+                }
+            }
+
+            { // delete part
+                DeletePartRequest request = new DeletePartRequest(sess, "02d");
+                DeletePartResult result = biclient.deletePart(request);
+            }
+        } finally {
+            // delete
+            DeleteSessionRequest request = new DeleteSessionRequest(sess);
+            DeleteSessionResult result = biclient.deleteSession(request);
+            System.out.println(result.getSessionName());
+        }
+
+    }
+
+
+    private String sessionName;
+    private String databaseName;
+    private String tableName;
+    private String partID;
+    private DeletePartRequest request;
+
+    @Override
+    public BulkImportClientAdaptorImpl createClientAdaptorImpl(Config conf) {
+        Properties props = System.getProperties();
+        props.setProperty("td.api.key", "xxxx");
+        TreasureDataClient client = new TreasureDataClient(props);
+        return new BulkImportClientAdaptorImpl(client);
+    }
+
+    @Before
+    public void createResources() throws Exception {
+        super.createResources();
+        sessionName = "testSess";
+        databaseName = "testdb";
+        tableName = "testtbl";
+        partID = "testPart";
+        request = new DeletePartRequest(new Session(sessionName, databaseName, tableName), partID);
+    }
+
+    @After
+    public void deleteResources() throws Exception {
+        super.deleteResources();
+        sessionName = null;
+        databaseName = null;
+        tableName = null;
+        partID = null;
+        request = null;
+    }
+
+    @Override
+    public void checkNormalBehavior0() throws Exception {
+        DeletePartResult result = doBusinessLogic();
+        assertEquals(sessionName, result.getSession().getName());
+    }
+
+    @Override
+    public String getJSONTextForChecking() {
+        // {"name":"sess01"}
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("name", sessionName);
+        return JSONValue.toJSONString(map);
+    }
+
+    @Override
+    public DeletePartResult doBusinessLogic() throws Exception {
+        return clientAdaptor.deletePart(request);
+    }
+}
