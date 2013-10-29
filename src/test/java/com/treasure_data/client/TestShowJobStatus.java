@@ -56,6 +56,17 @@ public class TestShowJobStatus extends
         System.out.println(result.getJobStatus());
     }
 
+    @Test @Ignore
+    public void testShowJobStatus01() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        TreasureDataClient client = new TreasureDataClient(props);
+
+        ShowJobStatusRequest request = new ShowJobStatusRequest(new Job("4702432"));
+        ShowJobStatusResult result = client.showJobStatus(request);
+        System.out.println(result.getJobStatus());
+    }
+
     @Override
     public ShowJobStatusResult doBusinessLogic() throws Exception {
         return clientAdaptor.showJobStatus(request);

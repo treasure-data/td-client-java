@@ -69,4 +69,26 @@ public class TestGetJobResult {
         jr.close();
         System.out.println("fin");
     }
+
+    @Test @Ignore
+    public void testGetJobResult03() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        TreasureDataClient client = new TreasureDataClient(props);
+
+        GetJobResultRequest request = new GetJobResultRequest(
+                new JobResult(new Job("1515829")));
+        GetJobResultResult result = client.getJobResult(request);
+        System.out.println(result.getJob().getJobID());
+        Unpacker unpacker = result.getJobResult().getResult();
+        UnpackerIterator iter = unpacker.iterator();
+        int cnt = 0;
+        while (iter.hasNext()) {
+            cnt++;
+            System.out.println(iter.next());
+        }
+        unpacker.close();
+        System.out.println(cnt);
+    }
+
 }

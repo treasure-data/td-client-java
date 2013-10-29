@@ -15,6 +15,8 @@ import org.junit.Test;
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.Job;
 import com.treasure_data.model.JobSummary;
+import com.treasure_data.model.KillJobRequest;
+import com.treasure_data.model.KillJobResult;
 import com.treasure_data.model.ShowJobRequest;
 import com.treasure_data.model.ShowJobResult;
 
@@ -74,6 +76,18 @@ public class TestShowJob extends
         System.out.println(result.getJob().getDebug().getCmdout());
         System.out.println("stderr:");
         System.out.println(result.getJob().getDebug().getStderr());
+    }
+
+    @Test @Ignore
+    public void testShowJob02() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        TreasureDataClient client = new TreasureDataClient(props);
+
+        ShowJobRequest request = new ShowJobRequest(new Job("5516899"));
+        ShowJobResult result = client.showJob(request);
+        System.out.println(result.getJobID());
+        System.out.println(result.getJob().getStatus());
     }
 
     @Override

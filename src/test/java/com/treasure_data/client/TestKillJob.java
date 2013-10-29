@@ -56,6 +56,17 @@ public class TestKillJob extends
         System.out.println(result.getJobID());
     }
 
+    @Test @Ignore
+    public void testKillJob01() throws Exception {
+        Properties props = System.getProperties();
+        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
+        TreasureDataClient client = new TreasureDataClient(props);
+
+        KillJobRequest request = new KillJobRequest(new Job("5516862"));
+        KillJobResult result = client.killJob(request);
+        System.out.println(result.getJobID());
+    }
+
     @Override
     public void checkNormalBehavior0() throws Exception {
         KillJobResult result = doBusinessLogic();
