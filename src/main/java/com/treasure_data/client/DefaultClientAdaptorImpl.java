@@ -99,20 +99,34 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         validator = new Validator();
     }
 
-    public int getRetryCount() {
-        String count = this.getConfig().getProperties().getProperty(
-                Config.TD_CLIENT_RETRY_COUNT, Config.TD_CLIENT_RETRY_COUNT_DEFAULTVALUE);
-        return Integer.parseInt(count);
-    }
-
-    public long getRetryWaitTime() {
-        String time = this.getConfig().getProperties().getProperty(
-                Config.TD_CLIENT_RETRY_WAIT_TIME, Config.TD_CLIENT_RETRY_WAIT_TIME_DEFAULTVALUE);
-        return Long.parseLong(time);
-    }
-
     @Override
     public AuthenticateResult authenticate(AuthenticateRequest request)
+            throws ClientException {
+        int count = 0;
+        AuthenticateResult ret;
+        while (true) {
+            try {
+                ret = doAuthenticate(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private AuthenticateResult doAuthenticate(AuthenticateRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
 
@@ -171,6 +185,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
     @Override
     public GetServerStatusResult getServerStatus(GetServerStatusRequest request)
             throws ClientException {
+        int count = 0;
+        GetServerStatusResult ret;
+        while (true) {
+            try {
+                ret = doGetServerStatus(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private GetServerStatusResult doGetServerStatus(GetServerStatusRequest request)
+            throws ClientException {
         request.setCredentials(getConfig().getCredentials());
 
         String jsonData = null;
@@ -221,6 +261,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
     @Override
     public ListDatabasesResult listDatabases(ListDatabasesRequest request)
+            throws ClientException {
+        int count = 0;
+        ListDatabasesResult ret;
+        while (true) {
+            try {
+                ret = doListDatabases(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private ListDatabasesResult doListDatabases(ListDatabasesRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
@@ -286,6 +352,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
     @Override
     public CreateDatabaseResult createDatabase(CreateDatabaseRequest request)
             throws ClientException {
+        int count = 0;
+        CreateDatabaseResult ret;
+        while (true) {
+            try {
+                ret = doCreateDatabase(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private CreateDatabaseResult doCreateDatabase(CreateDatabaseRequest request)
+            throws ClientException {
         validator.validateDatabaseName(request.getDatabaseName());
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
@@ -340,6 +432,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
     @Override
     public DeleteDatabaseResult deleteDatabase(DeleteDatabaseRequest request)
             throws ClientException {
+        int count = 0;
+        DeleteDatabaseResult ret;
+        while (true) {
+            try {
+                ret = doDeleteDatabase(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private DeleteDatabaseResult doDeleteDatabase(DeleteDatabaseRequest request)
+            throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
@@ -391,6 +509,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
     @Override
     public ListTablesResult listTables(ListTablesRequest request)
+            throws ClientException {
+        int count = 0;
+        ListTablesResult ret;
+        while (true) {
+            try {
+                ret = doListTables(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private ListTablesResult doListTables(ListTablesRequest request)
             throws ClientException {
         // validate request
         if (request.getDatabase() == null) {
@@ -465,6 +609,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
     @Override
     public CreateTableResult createTable(CreateTableRequest request)
             throws ClientException {
+        int count = 0;
+        CreateTableResult ret;
+        while (true) {
+            try {
+                ret = doCreateTable(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private CreateTableResult doCreateTable(CreateTableRequest request)
+            throws ClientException {
         validator.validateTableName(request.getTableName());
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
@@ -534,6 +704,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
     @Override
     public RenameTableResult renameTable(RenameTableRequest request)
             throws ClientException {
+        int count = 0;
+        RenameTableResult ret;
+        while (true) {
+            try {
+                ret = doRenameTable(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private RenameTableResult doRenameTable(RenameTableRequest request)
+            throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
@@ -590,6 +786,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
     @Override
     public SwapTableResult swapTable(SwapTableRequest request)
             throws ClientException {
+        int count = 0;
+        SwapTableResult ret;
+        while (true) {
+            try {
+                ret = doSwapTable(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private SwapTableResult doSwapTable(SwapTableRequest request)
+            throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
@@ -645,6 +867,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
     @Override
     public DeleteTableResult deleteTable(DeleteTableRequest request)
             throws ClientException {
+        int count = 0;
+        DeleteTableResult ret;
+        while (true) {
+            try {
+                ret = doDeleteTable(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private DeleteTableResult doDeleteTable(DeleteTableRequest request)
+            throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
@@ -698,6 +946,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
     @Override
     public DeletePartialTableResult deletePartialTable(DeletePartialTableRequest request)
+            throws ClientException {
+        int count = 0;
+        DeletePartialTableResult ret;
+        while (true) {
+            try {
+                ret = doDeletePartialTable(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private DeletePartialTableResult doDeletePartialTable(DeletePartialTableRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
@@ -786,6 +1060,32 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
     @Override
     public SetTableSchemaResult setTableSchema(SetTableSchemaRequest request)
+            throws ClientException {
+        int count = 0;
+        SetTableSchemaResult ret;
+        while (true) {
+            try {
+                ret = doSetTableSchema(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private SetTableSchemaResult doSetTableSchema(SetTableSchemaRequest request)
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
 
@@ -900,6 +1200,31 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
     @Override
     public ImportResult importData(ImportRequest request) throws ClientException {
+        int count = 0;
+        ImportResult ret;
+        while (true) {
+            try {
+                ret = doImportData(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private ImportResult doImportData(ImportRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
@@ -952,6 +1277,31 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
     @Override
     public ExportResult exportData(ExportRequest request) throws ClientException {
+        int count = 0;
+        ExportResult ret;
+        while (true) {
+            try {
+                ret = doExportData(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private ExportResult doExportData(ExportRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
@@ -1131,6 +1481,31 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
     @Override
     public ListJobsResult listJobs(ListJobsRequest request) throws ClientException {
+        int count = 0;
+        ListJobsResult ret;
+        while (true) {
+            try {
+                ret = doListJobs(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private ListJobsResult doListJobs(ListJobsRequest request) throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
 
@@ -1555,14 +1930,6 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         }
 
         return new GetJobResultResult(request.getJobResult());
-    }
-
-    private void waitRetry(long time, int retryCount) {
-        try {
-            Thread.sleep(time * (long) Math.pow(2.0, (double) retryCount) );
-        } catch (InterruptedException e) {
-            // ignore
-        }
     }
 
     private static String getJobID(Map<String, Object> map) {

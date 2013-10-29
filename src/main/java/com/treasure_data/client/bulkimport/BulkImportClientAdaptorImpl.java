@@ -79,6 +79,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public ListSessionsResult listSessions(ListSessionsRequest request)
             throws ClientException {
+        int count = 0;
+        ListSessionsResult ret;
+        while (true) {
+            try {
+                ret = doListSessions(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private ListSessionsResult doListSessions(ListSessionsRequest request)
+            throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
 
@@ -167,6 +193,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public ListPartsResult listParts(ListPartsRequest request)
             throws ClientException {
+        int count = 0;
+        ListPartsResult ret;
+        while (true) {
+            try {
+                ret = doListParts(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private ListPartsResult doListParts(ListPartsRequest request)
+            throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
 
@@ -220,6 +272,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
 
     @Override
     public CreateSessionResult createSession(CreateSessionRequest request)
+            throws ClientException {
+        int count = 0;
+        CreateSessionResult ret;
+        while (true) {
+            try {
+                ret = doCreateSession(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private CreateSessionResult doCreateSession(CreateSessionRequest request)
             throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
@@ -275,6 +353,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public UploadPartResult uploadPart(UploadPartRequest request)
             throws ClientException {
+        int count = 0;
+        UploadPartResult ret;
+        while (true) {
+            try {
+                ret = doUploadPart(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private UploadPartResult doUploadPart(UploadPartRequest request)
+            throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
 
@@ -325,6 +429,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
 
     @Override
     public DeletePartResult deletePart(DeletePartRequest request)
+            throws ClientException {
+        int count = 0;
+        DeletePartResult ret;
+        while (true) {
+            try {
+                ret = doDeletePart(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private DeletePartResult doDeletePart(DeletePartRequest request)
             throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
@@ -379,6 +509,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public PerformSessionResult performSession(PerformSessionRequest request)
             throws ClientException {
+        int count = 0;
+        PerformSessionResult ret;
+        while (true) {
+            try {
+                ret = doPerformSession(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private PerformSessionResult doPerformSession(PerformSessionRequest request)
+            throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
 
@@ -431,6 +587,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public GetErrorRecordsResult getErrorRecords(GetErrorRecordsRequest request)
             throws ClientException {
+        int count = 0;
+        GetErrorRecordsResult ret;
+        while (true) {
+            try {
+                ret = doGetErrorRecords(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private GetErrorRecordsResult doGetErrorRecords(GetErrorRecordsRequest request)
+            throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
 
@@ -480,6 +662,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
 
     @Override
     public CommitSessionResult commitSession(CommitSessionRequest request)
+            throws ClientException {
+        int count = 0;
+        CommitSessionResult ret;
+        while (true) {
+            try {
+                ret = doCommitSession(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private CommitSessionResult doCommitSession(CommitSessionRequest request)
             throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
@@ -533,6 +741,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public DeleteSessionResult deleteSession(DeleteSessionRequest request)
             throws ClientException {
+        int count = 0;
+        DeleteSessionResult ret;
+        while (true) {
+            try {
+                ret = doDeleteSession(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private DeleteSessionResult doDeleteSession(DeleteSessionRequest request)
+            throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
 
@@ -585,6 +819,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public FreezeSessionResult freezeSession(FreezeSessionRequest request)
             throws ClientException {
+        int count = 0;
+        FreezeSessionResult ret;
+        while (true) {
+            try {
+                ret = doFreezeSession(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private FreezeSessionResult doFreezeSession(FreezeSessionRequest request)
+            throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
 
@@ -636,6 +896,32 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
 
     @Override
     public UnfreezeSessionResult unfreezeSession(UnfreezeSessionRequest request)
+            throws ClientException {
+        int count = 0;
+        UnfreezeSessionResult ret;
+        while (true) {
+            try {
+                ret = doUnfreezeSession(request);
+                if (count > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (count >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    count++;
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), count);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private UnfreezeSessionResult doUnfreezeSession(UnfreezeSessionRequest request)
             throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);

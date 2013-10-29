@@ -53,4 +53,24 @@ public abstract class AbstractClientAdaptor {
     protected void setConnection(HttpConnectionImpl conn) {
         this.conn = conn;
     }
+
+    public int getRetryCount() {
+        String count = this.getConfig().getProperties().getProperty(
+                Config.TD_CLIENT_RETRY_COUNT, Config.TD_CLIENT_RETRY_COUNT_DEFAULTVALUE);
+        return Integer.parseInt(count);
+    }
+
+    public long getRetryWaitTime() {
+        String time = this.getConfig().getProperties().getProperty(
+                Config.TD_CLIENT_RETRY_WAIT_TIME, Config.TD_CLIENT_RETRY_WAIT_TIME_DEFAULTVALUE);
+        return Long.parseLong(time);
+    }
+
+    protected void waitRetry(long time, int retryCount) {
+        try {
+            Thread.sleep(time * (long) Math.pow(2.0, (double) retryCount) );
+        } catch (InterruptedException e) {
+            // ignore
+        }
+    }
 }
