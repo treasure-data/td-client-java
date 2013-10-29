@@ -36,7 +36,7 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
     public void createResources() throws Exception {
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
-        Config conf = new Config();
+        Config conf = new Config(props);
         conf.setCredentials(new TreasureDataCredentials(props));
         clientAdaptor = createClientAdaptorImpl(conf);
 
@@ -147,8 +147,9 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
             throwClientErrorWhenReceivedNonOKResponseCode0();
             fail();
         } catch (Throwable t) {
-            assertTrue(t instanceof HttpClientException);
-            HttpClientException e = (HttpClientException) t;
+            assertTrue(t instanceof ClientException);
+            assertTrue(t.getCause() instanceof HttpClientException);
+            HttpClientException e = (HttpClientException) t.getCause();
             assertEquals(expectedCode, e.getResponseCode());
             assertEquals(expectedMessage + ", detail = " + expectedErrMessage, e.getResponseMessage());
         }
@@ -175,8 +176,9 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
             throwClientErrorWhenGetResponseCodeThrowsIOError0();
             fail();
         } catch (Throwable t) {
-            assertTrue(t instanceof HttpClientException);
-            HttpClientException e = (HttpClientException) t;
+            assertTrue(t instanceof ClientException);
+            assertTrue(t.getCause() instanceof HttpClientException);
+            HttpClientException e = (HttpClientException) t.getCause();
             assertTrue(e.getCause() instanceof IOException);
         }
     }
@@ -204,8 +206,9 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
             throwClientErrorWhenGetResponseMessageThrowsIOError0();
             fail();
         } catch (Throwable t) {
-            assertTrue(t instanceof HttpClientException);
-            HttpClientException e = (HttpClientException) t;
+            assertTrue(t instanceof ClientException);
+            assertTrue(t.getCause() instanceof HttpClientException);
+            HttpClientException e = (HttpClientException) t.getCause();
             assertTrue(e.getCause() instanceof IOException);
             assertEquals(expectedCode, e.getResponseCode());
         }
@@ -240,8 +243,8 @@ public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Resu
             throwClientErrorWhenGetResponseBodyThrowsIOError0();
             fail();
         } catch (Throwable t) {
-            assertTrue(t instanceof HttpClientException);
-            HttpClientException e = (HttpClientException) t;
+            assertTrue(t instanceof ClientException);
+            HttpClientException e = (HttpClientException) t.getCause();
             assertTrue(e.getCause() instanceof IOException);
             assertEquals(expectedCode, e.getResponseCode());
             assertEquals(expectedMessage, e.getResponseMessage());
