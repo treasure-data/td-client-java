@@ -1054,7 +1054,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried.");
-                    waitRetry(getRetryWaitTime());
+                    waitRetry(getRetryWaitTime(), count);
                 }
             }
         }
@@ -1231,7 +1231,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried.");
-                    waitRetry(getRetryWaitTime());
+                    waitRetry(getRetryWaitTime(), count);
                 }
             }
         }
@@ -1311,7 +1311,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried.");
-                    waitRetry(getRetryWaitTime());
+                    waitRetry(getRetryWaitTime(), count);
                 }
             }
         }
@@ -1408,7 +1408,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried.");
-                    waitRetry(getRetryWaitTime());
+                    waitRetry(getRetryWaitTime(), count);
                 }
             }
         }
@@ -1494,7 +1494,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried.");
-                    waitRetry(getRetryWaitTime());
+                    waitRetry(getRetryWaitTime(), count);
                 }
             }
         }
@@ -1561,8 +1561,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new GetJobResultResult(request.getJobResult());
     }
 
-    private void waitRetry(long time) {
+    private void waitRetry(long time, int retryCount) {
         try {
+            time = (long) Math.pow((double) time, (double) retryCount);
             Thread.sleep(time);
         } catch (InterruptedException e) {
             // ignore
