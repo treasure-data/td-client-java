@@ -1563,7 +1563,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
     private void waitRetry(long time, int retryCount) {
         try {
-            Thread.sleep( tiem * (long) Math.pow(2.0, (double) retryCount) );
+            Thread.sleep( time * (long) Math.pow(2.0, (double) retryCount) );
         } catch (InterruptedException e) {
             // ignore
         }
