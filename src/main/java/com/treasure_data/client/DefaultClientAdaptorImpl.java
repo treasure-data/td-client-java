@@ -1047,13 +1047,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 break;
             } catch (ClientException e) {
                 // TODO FIXME
-                LOG.warning(e.getMessage());
                 if (count >= getRetryCount()) {
-                    LOG.warning("Retry count exceeded limit.");
-                    throw new ClientException("Retry error");
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
-                    LOG.warning("It failed. but will be retried.");
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
                     waitRetry(getRetryWaitTime(), count);
                 }
             }
@@ -1224,13 +1223,13 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 }
                 break;
             } catch (ClientException e) {
-                LOG.warning(e.getMessage());
+                // TODO FIXME
                 if (count >= getRetryCount()) {
-                    LOG.warning("Retry count exceeded limit.");
-                    throw new ClientException("Retry error");
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
-                    LOG.warning("It failed. but will be retried.");
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
                     waitRetry(getRetryWaitTime(), count);
                 }
             }
@@ -1304,13 +1303,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 break;
             } catch (ClientException e) {
                 // TODO FIXME
-                LOG.warning(e.getMessage());
                 if (count >= getRetryCount()) {
-                    LOG.warning("Retry count exceeded limit.");
-                    throw new ClientException("Retry error");
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
-                    LOG.warning("It failed. but will be retried.");
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
                     waitRetry(getRetryWaitTime(), count);
                 }
             }
@@ -1401,13 +1399,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 break;
             } catch (ClientException e) {
                 // TODO FIXME
-                LOG.warning(e.getMessage());
                 if (count >= getRetryCount()) {
-                    LOG.warning("Retry count exceeded limit.");
-                    throw new ClientException("Retry error");
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
-                    LOG.warning("It failed. but will be retried.");
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
                     waitRetry(getRetryWaitTime(), count);
                 }
             }
@@ -1487,13 +1484,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 break;
             } catch (ClientException e) {
                 // TODO FIXME
-                LOG.warning(e.getMessage());
                 if (count >= getRetryCount()) {
-                    LOG.warning("Retry count exceeded limit.");
-                    throw new ClientException("Retry error");
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
-                    LOG.warning("It failed. but will be retried.");
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
                     waitRetry(getRetryWaitTime(), count);
                 }
             }
