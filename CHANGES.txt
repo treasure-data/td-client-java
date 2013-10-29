@@ -1,6 +1,11 @@
-Release 0.2.15 - 20XX/XX/XX
+Release 0.2.16 - 20XX/XX/XX
+
+Release 0.2.15 - 2013/10/29
   NEW FEATURES
     Adds TreasureDataClient#createItemTable(..). It allows users to create new item tables.
+
+  IMPROVEMENTS
+    Improves TreasureDataClient#submitJob, killJob, showJob, showJobStatus and getJobResult methods to retry those requests automatically.
 
 Release 0.2.14 - 2013/10/23
   NEW FEATURES
