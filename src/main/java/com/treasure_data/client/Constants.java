@@ -53,5 +53,5 @@ public interface Constants {
     String TD_CLIENT_RETRY_COUNT_DEFAULTVALUE = "8";
 
     String TD_CLIENT_RETRY_WAIT_TIME = "td.client.retry.wait.time";
-    String TD_CLIENT_RETRY_WAIT_TIME_DEFAULTVALUE = "3000";
+    String TD_CLIENT_RETRY_WAIT_TIME_DEFAULTVALUE = "1000";
 }
