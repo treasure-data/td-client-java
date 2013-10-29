@@ -24,11 +24,11 @@ public abstract class AbstractClientAdaptor {
     protected HttpConnectionImpl conn = null;
 
     public AbstractClientAdaptor(Config conf) {
-	this.conf = conf;
+        this.conf = conf;
     }
 
     public Config getConfig() {
-	return conf;
+        return conf;
     }
 
     public TreasureDataCredentials getTreasureDataCredentials() {
