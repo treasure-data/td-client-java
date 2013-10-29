@@ -1050,7 +1050,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 // TODO FIXME
                 if (count >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
-                    throw e;
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried: " + e.getMessage());
@@ -1227,7 +1227,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 // TODO FIXME
                 if (count >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
-                    throw e;
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried: " + e.getMessage());
@@ -1306,7 +1306,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 // TODO FIXME
                 if (count >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
-                    throw e;
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried: " + e.getMessage());
@@ -1402,7 +1402,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 // TODO FIXME
                 if (count >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
-                    throw e;
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried: " + e.getMessage());
@@ -1487,7 +1487,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 // TODO FIXME
                 if (count >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
-                    throw e;
+                    throw new ClientException("Retry error", e);
                 } else {
                     count++;
                     LOG.warning("It failed. but will be retried: " + e.getMessage());
