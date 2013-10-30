@@ -643,7 +643,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         String jsonData = null;
         int code = 0;
         String message = null;
-        String tableType = isItemTable ? "item" : "log";
+        String tableType = request.getTable().getType().type();
         try {
             conn = createConnection();
 
