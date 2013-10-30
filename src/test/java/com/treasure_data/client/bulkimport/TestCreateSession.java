@@ -16,8 +16,6 @@ import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.client.Config;
 import com.treasure_data.client.PostMethodTestUtil;
 import com.treasure_data.client.TreasureDataClient;
-import com.treasure_data.model.bulkimport.CommitSessionRequest;
-import com.treasure_data.model.bulkimport.CommitSessionResult;
 import com.treasure_data.model.bulkimport.CreateSessionRequest;
 import com.treasure_data.model.bulkimport.CreateSessionResult;
 import com.treasure_data.model.bulkimport.DeleteSessionRequest;
@@ -61,7 +59,7 @@ public class TestCreateSession
 
     @Override
     public BulkImportClientAdaptorImpl createClientAdaptorImpl(Config conf) {
-        Properties props = System.getProperties();
+        Properties props = conf.getProperties();
         props.setProperty("td.api.key", "xxxx");
         TreasureDataClient client = new TreasureDataClient(props);
         return new BulkImportClientAdaptorImpl(client);

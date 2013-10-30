@@ -111,7 +111,7 @@ public class TestPerformSession
 
     @Override
     public BulkImportClientAdaptorImpl createClientAdaptorImpl(Config conf) {
-        Properties props = System.getProperties();
+        Properties props = conf.getProperties();
         props.setProperty("td.api.key", "xxxx");
         TreasureDataClient client = new TreasureDataClient(props);
         return new BulkImportClientAdaptorImpl(client);
