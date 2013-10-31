@@ -14,18 +14,19 @@ import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.CreateItemTableRequest;
-import com.treasure_data.model.CreateLogTableRequest;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.DataType;
 import com.treasure_data.model.Database;
 
-public class TestCreateTable extends
-        PostMethodTestUtil<CreateTableRequest, CreateTableResult, DefaultClientAdaptorImpl> {
+public class TestCreateItemTable extends
+        PostMethodTestUtil<CreateItemTableRequest, CreateTableResult, DefaultClientAdaptorImpl> {
 
     private String databaseName;
     private String tableName;
-    private CreateTableRequest request;
+    private String primaryKey;
+    private DataType primaryKeyType;
+    private CreateItemTableRequest request;
 
     @Override
     public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
@@ -37,7 +38,9 @@ public class TestCreateTable extends
         super.createResources();
         databaseName = "testdb";
         tableName = "testtbl";
-        request = new CreateTableRequest(new Database(databaseName), tableName);
+        primaryKey = "pk";
+        primaryKeyType = DataType.INT;
+        request = new CreateItemTableRequest(new Database(databaseName), tableName, primaryKey, primaryKeyType);
     }
 
     @After
@@ -59,31 +62,7 @@ public class TestCreateTable extends
         String databaseName = "mugadb";
         Database database = new Database(databaseName);
         try {
-            CreateTableRequest request = new CreateTableRequest(database, "test01");
-            CreateTableResult result = clientAdaptor.createTable(request);
-            System.out.println(result.getTable().getName());
-        } catch (ClientException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        } finally {
-            // delete database
-            //clientAdaptor.deleteDatabase(new DeleteDatabaseRequest(databaseName));
-        }
-    }
-
-    @Test @Ignore
-    public void testCreateTable01() throws Exception {
-        Properties props = new Properties();
-        props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
-        Config conf = new Config();
-        conf.setCredentials(new TreasureDataCredentials(props));
-        DefaultClientAdaptorImpl clientAdaptor = new DefaultClientAdaptorImpl(conf);
-
-        String databaseName = "mugadb";
-        Database database = new Database(databaseName);
-        try {
-            //CreateTableRequest request = new CreateItemTableRequest(database, "test01", "key", DataType.STRING);
-            CreateTableRequest request = new CreateLogTableRequest(database, "test02");
+            CreateTableRequest request = new CreateItemTableRequest(database, "test01", "key", DataType.STRING);
             CreateTableResult result = clientAdaptor.createTable(request);
             System.out.println(result.getTable().getName());
         } catch (ClientException e) {
@@ -106,7 +85,7 @@ public class TestCreateTable extends
         Map<String, String> map = new HashMap<String, String>();
         map.put("database", "testdb");
         map.put("table", "testtbl");
-        map.put("type", "log");
+        map.put("type", "item");
         return JSONValue.toJSONString(map);
     }
 
