@@ -2,6 +2,9 @@ Release 0.3.0 - 20XX/XX/XX
   IMPROVEMENTS
     Improves TreasureDataClient implementation. The methods that are declared in the class have features for retrying those requests automatically.
 
+  BUG FIXES
+    Fixes bug: TreasureDataClient#createTable(..) returns Table object.
+
 Release 0.2.15 - 2013/10/29
   NEW FEATURES
     Adds TreasureDataClient#createItemTable(..). It allows users to create new item tables.
