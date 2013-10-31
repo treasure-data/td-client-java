@@ -15,8 +15,6 @@ import org.junit.Test;
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.Database;
 import com.treasure_data.model.Job;
-import com.treasure_data.model.KillJobRequest;
-import com.treasure_data.model.KillJobResult;
 import com.treasure_data.model.SubmitJobRequest;
 import com.treasure_data.model.SubmitJobResult;
 import com.treasure_data.model.Job.Priority;
@@ -64,14 +62,14 @@ public class TestSubmitJob extends
     }
 
     @Test @Ignore
-    public void testSubmitJob01() throws Exception {
+    public void testSubmitJob01() throws Exception { // impala
         Properties props = System.getProperties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("treasure-data.properties"));
         TreasureDataClient client = new TreasureDataClient(props);
 
         Database database = new Database("mugadb");
         String q = "select count(1) from score";
-        Job job = new Job(database, q, Priority.HIGH, 1);
+        Job job = new Job(database, Job.Type.IMPALA, q, null);
         SubmitJobRequest request = new SubmitJobRequest(job);
         SubmitJobResult result = client.submitJob(request);
         job = result.getJob();
