@@ -67,6 +67,7 @@ import com.treasure_data.model.ListTablesRequest;
 import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
+import com.treasure_data.model.LogTable;
 import com.treasure_data.model.RenameTableRequest;
 import com.treasure_data.model.RenameTableResult;
 import com.treasure_data.model.ServerStatus;
@@ -695,8 +696,14 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         Map<String, String> tableMap = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, tableMap);
         String tableName = tableMap.get("table");
-        Table.Type type = Table.Type.fromString(tableMap.get("type"));
-        Table table = new Table(request.getDatabase(), tableName, type);
+        Table table;
+        if (!isItemTable) {
+            table = new LogTable(request.getDatabase(), tableName);
+        } else {
+            ItemTable tbl = (ItemTable) request.getTable();
+            table = new ItemTable(request.getDatabase(), tableName,
+                    tbl.getPrimaryKey(), tbl.getPrimaryKeyType());
+        }
 
         return new CreateTableResult(table);
     }
