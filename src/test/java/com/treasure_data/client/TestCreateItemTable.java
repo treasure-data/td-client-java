@@ -1,14 +1,12 @@
 package com.treasure_data.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -18,37 +16,19 @@ import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.DataType;
 import com.treasure_data.model.Database;
+import com.treasure_data.model.ItemTable;
+import com.treasure_data.model.Table;
 
-public class TestCreateItemTable extends
-        PostMethodTestUtil<CreateItemTableRequest, CreateTableResult, DefaultClientAdaptorImpl> {
+public class TestCreateItemTable extends TestCreateTableBase {
 
-    private String databaseName;
-    private String tableName;
     private String primaryKey;
     private DataType primaryKeyType;
-    private CreateItemTableRequest request;
 
     @Override
-    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
-        return new DefaultClientAdaptorImpl(conf);
-    }
-
-    @Before
-    public void createResources() throws Exception {
-        super.createResources();
-        databaseName = "testdb";
-        tableName = "testtbl";
-        primaryKey = "pk";
+    protected CreateTableRequest createRequest() {
+        primaryKey = "key";
         primaryKeyType = DataType.INT;
-        request = new CreateItemTableRequest(new Database(databaseName), tableName, primaryKey, primaryKeyType);
-    }
-
-    @After
-    public void deleteResources() throws Exception {
-        super.deleteResources();
-        databaseName = null;
-        tableName = null;
-        request = null;
+        return new CreateItemTableRequest(new Database(databaseName), tableName, primaryKey, primaryKeyType);
     }
 
     @Test @Ignore
@@ -75,22 +55,16 @@ public class TestCreateItemTable extends
     }
 
     @Override
-    public void checkNormalBehavior0() throws Exception {
-        CreateTableResult result = doBusinessLogic();
-        assertEquals(databaseName, result.getDatabase().getName());
+    public void assertTableType(CreateTableResult result) {
+        assertTrue(result.getTable() instanceof ItemTable);
     }
 
     @Override
     public String getJSONTextForChecking() {
         Map<String, String> map = new HashMap<String, String>();
-        map.put("database", "testdb");
-        map.put("table", "testtbl");
-        map.put("type", "item");
+        map.put("database", databaseName);
+        map.put("table", tableName);
+        map.put("type", Table.Type.ITEM.type());
         return JSONValue.toJSONString(map);
-    }
-
-    @Override
-    public CreateTableResult doBusinessLogic() throws Exception {
-        return clientAdaptor.createTable(request);
     }
 }

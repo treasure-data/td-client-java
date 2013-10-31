@@ -1,48 +1,28 @@
 package com.treasure_data.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import org.json.simple.JSONValue;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.treasure_data.auth.TreasureDataCredentials;
+import com.treasure_data.model.CreateLogTableRequest;
 import com.treasure_data.model.CreateTableRequest;
 import com.treasure_data.model.CreateTableResult;
 import com.treasure_data.model.Database;
+import com.treasure_data.model.LogTable;
+import com.treasure_data.model.Table;
 
-public class TestCreateLogTable extends
-        PostMethodTestUtil<CreateTableRequest, CreateTableResult, DefaultClientAdaptorImpl> {
-
-    private String databaseName;
-    private String tableName;
-    private CreateTableRequest request;
+public class TestCreateLogTable extends TestCreateTableBase {
 
     @Override
-    public DefaultClientAdaptorImpl createClientAdaptorImpl(Config conf) {
-        return new DefaultClientAdaptorImpl(conf);
-    }
-
-    @Before
-    public void createResources() throws Exception {
-        super.createResources();
-        databaseName = "testdb";
-        tableName = "testtbl";
-        request = new CreateTableRequest(new Database(databaseName), tableName);
-    }
-
-    @After
-    public void deleteResources() throws Exception {
-        super.deleteResources();
-        databaseName = null;
-        tableName = null;
-        request = null;
+    protected CreateTableRequest createRequest() {
+        return new CreateLogTableRequest(new Database(databaseName), tableName);
     }
 
     @Test @Ignore
@@ -69,22 +49,16 @@ public class TestCreateLogTable extends
     }
 
     @Override
-    public void checkNormalBehavior0() throws Exception {
-        CreateTableResult result = doBusinessLogic();
-        assertEquals(databaseName, result.getDatabase().getName());
+    public void assertTableType(CreateTableResult result) {
+        assertTrue(result.getTable() instanceof LogTable);
     }
 
     @Override
     public String getJSONTextForChecking() {
         Map<String, String> map = new HashMap<String, String>();
-        map.put("database", "testdb");
-        map.put("table", "testtbl");
-        map.put("type", "log");
+        map.put("database", databaseName);
+        map.put("table", tableName);
+        map.put("type", Table.Type.LOG.type());
         return JSONValue.toJSONString(map);
-    }
-
-    @Override
-    public CreateTableResult doBusinessLogic() throws Exception {
-        return clientAdaptor.createTable(request);
     }
 }
