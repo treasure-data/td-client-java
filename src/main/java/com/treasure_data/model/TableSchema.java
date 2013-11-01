@@ -108,7 +108,7 @@ public class TableSchema extends AbstractModel {
         String[] pair = pairString.split(":");
 
         if (pair.length != 2) {
-            throw new IllegalArgumentException(""); // TODO
+            throw new IllegalArgumentException("assertion fail");
         }
 
         return new Pair(pair[0], parseType(pair[1]));
@@ -127,11 +127,10 @@ public class TableSchema extends AbstractModel {
             return PrimitiveType.FLOAT;
         } else if (typeString.startsWith("array<")) {
             // TODO refine the parser more
-            typeString = typeString.substring(0, "array<".length());
-            typeString = typeString.substring(0, typeString.length() - 1);
-            return new ArrayType(parseType(typeString));
+            String elm = typeString.substring("array<".length(), typeString.length() - 1);
+            return new ArrayType(parseType(elm));
         } else {
-            throw new IllegalArgumentException(""); // TODO
+            throw new IllegalArgumentException("Cannot parse type: " + typeString);
         }
     }
 
