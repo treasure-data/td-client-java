@@ -20,6 +20,7 @@ package com.treasure_data.model;
 public abstract class AbstractResult<T extends AbstractModel> implements Result<T> {
 
     private T model;
+    protected int retryCount;
 
     protected AbstractResult(T model) {
         this.model = model;
@@ -27,5 +28,13 @@ public abstract class AbstractResult<T extends AbstractModel> implements Result<
 
     protected T get() {
         return model;
+    }
+
+    public void setRetryCount(int count) {
+        retryCount = count;
+    }
+
+    public int getRetryCount() {
+        return retryCount;
     }
 }
