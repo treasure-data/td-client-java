@@ -354,24 +354,30 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     public UploadPartResult uploadPart(UploadPartRequest request)
             throws ClientException {
         int count = 0;
-        UploadPartResult ret;
-        while (true) {
-            try {
-                ret = doUploadPart(request);
-                if (count > 0) {
-                    LOG.warning("Retry succeeded.");
+        UploadPartResult ret = null;
+        try {
+            while (true) {
+                try {
+                    ret = doUploadPart(request);
+                    if (count > 0) {
+                        LOG.warning("Retry succeeded.");
+                    }
+                    break;
+                } catch (ClientException e) {
+                    // TODO FIXME
+                    if (count >= getRetryCount()) {
+                        LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                        throw new ClientException("Retry error", e);
+                    } else {
+                        count++;
+                        LOG.warning("It failed. but will be retried: " + e.getMessage());
+                        waitRetry(getRetryWaitTime(), count);
+                    }
                 }
-                break;
-            } catch (ClientException e) {
-                // TODO FIXME
-                if (count >= getRetryCount()) {
-                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
-                    throw new ClientException("Retry error", e);
-                } else {
-                    count++;
-                    LOG.warning("It failed. but will be retried: " + e.getMessage());
-                    waitRetry(getRetryWaitTime(), count);
-                }
+            }
+        } finally {
+            if (ret != null) {
+                ret.setRetryCount(count);
             }
         }
         return ret;
