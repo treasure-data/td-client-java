@@ -82,9 +82,7 @@ public class TestFreezeSession
                     gzout.close();
                     byte[] bytes = out.toByteArray();
 
-                    //UploadPartRequest request = new UploadPartRequest(sess, parts.get(i), bytes);
-                    UploadPartRequest request = new UploadPartRequest(sess, parts.get(i),
-                            new ByteArrayInputStream(bytes), bytes.length);
+                    UploadPartRequest request = new UploadPartRequest(sess, parts.get(i), bytes);
                     UploadPartResult result = biclient.uploadPart(request);
                 }
             }
