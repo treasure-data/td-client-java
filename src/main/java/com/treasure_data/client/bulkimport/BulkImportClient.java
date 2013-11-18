@@ -131,9 +131,16 @@ public class BulkImportClient {
         uploadPart(new UploadPartRequest(sess, partID, bytes));
     }
 
+    public void uploadPart(Session sess, String partID, String partFileName)
+            throws ClientException {
+        uploadPart(new UploadPartRequest(sess, partID, partFileName));
+    }
+
+    @Deprecated
     public void uploadPart(Session sess, String partID, InputStream in, int size)
             throws ClientException {
-        uploadPart(new UploadPartRequest(sess, partID, in, size));
+        throw new UnsupportedOperationException(
+                "Please don't use this method. Because the method cannot upload data reliably. Please use uploadPart(Session, String) instead.");
     }
 
     public UploadPartResult uploadPart(UploadPartRequest request) throws ClientException {

@@ -21,6 +21,10 @@ import com.treasure_data.model.AbstractResult;
 
 public class BulkImportSpecifyResult<T extends Session> extends AbstractResult<T> {
 
+    protected BulkImportSpecifyResult() {
+        this(null);
+    }
+
     protected BulkImportSpecifyResult(T sess) {
         super(sess);
     }
@@ -31,5 +35,9 @@ public class BulkImportSpecifyResult<T extends Session> extends AbstractResult<T
 
     public String getSessionName() {
         return get().getName();
+    }
+
+    public void set(T model) {
+        super.set(model);
     }
 }

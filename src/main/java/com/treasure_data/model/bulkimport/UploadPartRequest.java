@@ -17,10 +17,6 @@
 //
 package com.treasure_data.model.bulkimport;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Properties;
-
 public class UploadPartRequest extends BulkImportSpecifyRequest<Session> {
 
     public static enum Format {
@@ -48,35 +44,43 @@ public class UploadPartRequest extends BulkImportSpecifyRequest<Session> {
 
     private Format format;
 
-    private InputStream in;
-
-    private int size;
+    protected boolean isMemoryData;
+    protected byte[] memoryData;
+    protected String partFileName;
 
     public UploadPartRequest(Session sess, String partID, byte[] bytes) {
-        this(sess, partID, new ByteArrayInputStream(bytes), bytes.length);
+        this(sess, partID, true, bytes, null);
     }
 
-    public UploadPartRequest(Session sess, String partID, InputStream in, int size) {
+    public UploadPartRequest(Session sess, String partID, String partFileName) {
+        this(sess, partID, false, null, partFileName);
+    }
+
+    private UploadPartRequest(Session sess, String partID, boolean isMemoryData, byte[] bytes, String partFileName) {
         super(sess);
+        this.isMemoryData = isMemoryData;
         this.partID = partID;
-        this.format = Format.MSGPACKGZ;
-        this.in = in;
-        this.size = size;
-    }
-
-    public String getPartID() {
-        return partID;
+        this.memoryData = bytes;
+        this.partFileName = partFileName;
     }
 
     public Format getFormat() {
         return format;
     }
 
-    public InputStream getInputStream() {
-        return in;
+    public boolean isMemoryData() {
+        return isMemoryData;
     }
 
-    public int getSize() {
-        return size;
+    public String getPartID() {
+        return partID;
+    }
+
+    public byte[] getMemoryData() {
+        return memoryData;
+    }
+
+    public String getPartFileName() {
+        return partFileName;
     }
 }

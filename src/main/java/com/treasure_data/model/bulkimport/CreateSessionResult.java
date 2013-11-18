@@ -19,6 +19,10 @@ package com.treasure_data.model.bulkimport;
 
 public class CreateSessionResult extends BulkImportSpecifyResult<Session> {
 
+    public CreateSessionResult() {
+        this(null);
+    }
+
     public CreateSessionResult(Session sess) {
         super(sess);
     }

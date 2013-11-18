@@ -17,8 +17,13 @@
 //
 package com.treasure_data.client.bulkimport;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -273,31 +278,30 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     @Override
     public CreateSessionResult createSession(CreateSessionRequest request)
             throws ClientException {
-        int count = 0;
-        CreateSessionResult ret;
+        CreateSessionResult result = new CreateSessionResult();
         while (true) {
             try {
-                ret = doCreateSession(request);
-                if (count > 0) {
+                doCreateSession(request, result);
+                if (result.getRetryCount() > 0) {
                     LOG.warning("Retry succeeded.");
                 }
                 break;
             } catch (ClientException e) {
                 // TODO FIXME
-                if (count >= getRetryCount()) {
+                if (result.getRetryCount() >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
                     throw new ClientException("Retry error", e);
                 } else {
-                    count++;
+                    result.incrRetryCount();
                     LOG.warning("It failed. but will be retried: " + e.getMessage());
-                    waitRetry(getRetryWaitTime(), count);
+                    waitRetry(getRetryWaitTime(), result.getRetryCount());
                 }
             }
         }
-        return ret;
+        return result;
     }
 
-    private CreateSessionResult doCreateSession(CreateSessionRequest request)
+    private void doCreateSession(CreateSessionRequest request, CreateSessionResult result)
             throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
@@ -347,43 +351,36 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         Map map = (Map<String, String>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        return new CreateSessionResult(request.getSession());
+        result.set(request.getSession());
     }
 
     @Override
     public UploadPartResult uploadPart(UploadPartRequest request)
             throws ClientException {
-        int count = 0;
-        UploadPartResult ret = null;
-        try {
-            while (true) {
-                try {
-                    ret = doUploadPart(request);
-                    if (count > 0) {
-                        LOG.warning("Retry succeeded.");
-                    }
-                    break;
-                } catch (ClientException e) {
-                    // TODO FIXME
-                    if (count >= getRetryCount()) {
-                        LOG.warning("Retry count exceeded limit: " + e.getMessage());
-                        throw new ClientException("Retry error", e);
-                    } else {
-                        count++;
-                        LOG.warning("It failed. but will be retried: " + e.getMessage());
-                        waitRetry(getRetryWaitTime(), count);
-                    }
+        UploadPartResult result = new UploadPartResult();
+        while (true) {
+            try {
+                doUploadPart(request, result);
+                if (result.getRetryCount() > 0) {
+                    LOG.warning("Retry succeeded.");
+                }
+                break;
+            } catch (ClientException e) {
+                // TODO FIXME
+                if (result.getRetryCount() >= getRetryCount()) {
+                    LOG.warning("Retry count exceeded limit: " + e.getMessage());
+                    throw new ClientException("Retry error", e);
+                } else {
+                    result.incrRetryCount();
+                    LOG.warning("It failed. but will be retried: " + e.getMessage());
+                    waitRetry(getRetryWaitTime(), result.getRetryCount());
                 }
             }
-        } finally {
-            if (ret != null) {
-                ret.setRetryCount(count);
-            }
         }
-        return ret;
+        return result;
     }
 
-    private UploadPartResult doUploadPart(UploadPartRequest request)
+    private void doUploadPart(UploadPartRequest request, UploadPartResult result)
             throws ClientException {
         request.setCredentials(client.getTreasureDataCredentials());
         validator.validateCredentials(client, request);
@@ -394,11 +391,23 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         try {
             conn = createConnection();
 
+            String partID = request.getPartID();
+            InputStream in;
+            int size;
+            if (request.isMemoryData()) {
+                in = new ByteArrayInputStream(request.getMemoryData());
+                size = request.getMemoryData().length;
+            } else {
+                String partFileName = request.getPartFileName();
+                File f = new File(partFileName);
+                in = new BufferedInputStream(new FileInputStream(f));
+                size = (int) f.length();
+            }
             // send request
             String path = String.format(HttpURL.V3_UPLOAD_PART,
                     HttpConnectionImpl.e(request.getSessionName()),
-                    HttpConnectionImpl.e(request.getPartID()));
-            conn.doPutRequest(request, path, request.getInputStream(), request.getSize());
+                    HttpConnectionImpl.e(partID));
+            conn.doPutRequest(request, path, in, size);
 
             // receive response code
             code = conn.getResponseCode();
@@ -430,7 +439,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        return new UploadPartResult(request.getSession());
+        result.set(request.getSession());
     }
 
     @Override
