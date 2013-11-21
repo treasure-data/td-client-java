@@ -232,13 +232,12 @@ public class HttpConnectionImpl {
         // conn.connect();
 
         // body
-        BufferedInputStream bin = new BufferedInputStream(in);
         BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
         byte[] buf = new byte[1024];
         int len;
 //        int count = 0;
 //        int flushThreshold = 128;
-        while ((len = bin.read(buf)) != -1) {
+        while ((len = in.read(buf)) != -1) {
             out.write(buf, 0, len);
 //            count++;
 //            if (count > flushThreshold) {
