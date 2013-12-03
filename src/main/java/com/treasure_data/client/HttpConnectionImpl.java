@@ -54,7 +54,6 @@ public class HttpConnectionImpl {
 
     private HttpURLConnection conn = null;
     private Properties props;
-    private MessageDigest md = null;
 
     private int getReadTimeout;
     private int putReadTimeout;
@@ -74,13 +73,6 @@ public class HttpConnectionImpl {
         postReadTimeout = Integer.parseInt(props.getProperty(
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT,
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT_DEFAULTVALUE));
-
-        try {
-            md = MessageDigest.getInstance("SHA-1");
-        }
-        catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
     }
 
     private void setRequestAuthHeader(Request<?> request, HttpURLConnection conn) throws IOException {
@@ -93,7 +85,13 @@ public class HttpConnectionImpl {
         String dateStr = toRFC2822Format(new Date());
         conn.setRequestProperty("Date", dateStr);
 
-        if (md != null && internalKey != null && internalKeyId != null) {
+        if (internalKey != null && internalKeyId != null) {
+            MessageDigest md;
+            try {
+                md = MessageDigest.getInstance("SHA-1");
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException("SHA-1 digest algorithm must be available but not found", e);
+            }
             md.reset();
             md.update((String.format("%s\n%s\n", dateStr, internalKey)).getBytes());
             String hashedKey = byteArrayToHexString(md.digest());
