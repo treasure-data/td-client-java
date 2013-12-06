@@ -1,3 +1,7 @@
+Release 0.3.2 - 2013/12/06
+  IMPROVEMENTS
+    HttpConnectionImpl should not ignore error of MessageDigest.getInstance("SHA-1")
+
 Release 0.3.1 - 2013/11/19
   BUG FIXES
     Fixes bug: BulkImportClient#uploadPart(..) doesn't work.
