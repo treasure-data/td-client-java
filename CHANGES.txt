@@ -1,3 +1,5 @@
+Release 0.3.4 - 20XX/XX/XX
+
 Release 0.3.3 - 2013/12/17
   BUG FIXES
     Fixes bug: 'user' and 'password' in TreasureDataClient#authenticate() method were not URL-encoded.
