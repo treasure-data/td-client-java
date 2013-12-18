@@ -141,8 +141,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             String path = HttpURL.V3_USER_AUTHENTICATE;
             Map<String, String> header = null;
             Map<String, String> params = new HashMap<String, String>();
-            params.put("user", request.getEmail());
-            params.put("password", request.getPassword());
+            params.put("user", HttpConnectionImpl.e(request.getEmail()));
+            params.put("password", HttpConnectionImpl.e(request.getPassword()));
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
