@@ -73,6 +73,7 @@ public class HttpConnectionImpl {
         postReadTimeout = Integer.parseInt(props.getProperty(
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT,
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT_DEFAULTVALUE));
+        this.props = props;
     }
 
     private void setRequestAuthHeader(Request<?> request, HttpURLConnection conn) throws IOException {
@@ -371,7 +372,6 @@ public class HttpConnectionImpl {
         }
 
         // system properties
-        Properties props = System.getProperties();
         String host = props.getProperty(
                 Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULTVALUE);
         int port = Integer.parseInt(props.getProperty(
