@@ -44,6 +44,8 @@ import com.treasure_data.model.bulkimport.PerformSessionRequest;
 import com.treasure_data.model.bulkimport.PerformSessionResult;
 import com.treasure_data.model.bulkimport.Session;
 import com.treasure_data.model.bulkimport.SessionSummary;
+import com.treasure_data.model.bulkimport.ShowSessionRequest;
+import com.treasure_data.model.bulkimport.ShowSessionResult;
 import com.treasure_data.model.bulkimport.UnfreezeSessionRequest;
 import com.treasure_data.model.bulkimport.UnfreezeSessionResult;
 import com.treasure_data.model.bulkimport.UploadPartRequest;
@@ -71,13 +73,12 @@ public class BulkImportClient {
     }
 
     public SessionSummary showSession(String sessionName) throws ClientException {
-        List<SessionSummary> ss = listSessions();
-        for (SessionSummary s : ss) {
-            if (sessionName.equals(s.getName())) {
-                return s;
-            }
-        }
-        return null;
+        return showSession(new ShowSessionRequest(
+                new Session(sessionName, null, null))).getSession();
+    }
+
+    public ShowSessionResult showSession(ShowSessionRequest request) throws ClientException {
+        return clientAdaptor.showSession(request);
     }
 
     /**
