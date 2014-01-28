@@ -1402,7 +1402,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new GetJobResultResult(request.getJobResult());
     }
 
-    private static String getJobID(Map<String, Object> map) {
+    public static String getJobID(Map<String, Object> map) {
         Object job_id = map.get("job_id");
         if (job_id instanceof Number) {
             return ((Number) job_id).toString();

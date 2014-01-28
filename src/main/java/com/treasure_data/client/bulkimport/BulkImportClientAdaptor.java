@@ -36,6 +36,8 @@ import com.treasure_data.model.bulkimport.ListSessionsRequest;
 import com.treasure_data.model.bulkimport.ListSessionsResult;
 import com.treasure_data.model.bulkimport.PerformSessionRequest;
 import com.treasure_data.model.bulkimport.PerformSessionResult;
+import com.treasure_data.model.bulkimport.ShowSessionRequest;
+import com.treasure_data.model.bulkimport.ShowSessionResult;
 import com.treasure_data.model.bulkimport.UnfreezeSessionRequest;
 import com.treasure_data.model.bulkimport.UnfreezeSessionResult;
 import com.treasure_data.model.bulkimport.UploadPartRequest;
@@ -43,7 +45,9 @@ import com.treasure_data.model.bulkimport.UploadPartResult;
 
 public interface BulkImportClientAdaptor {
 
-    ListSessionsResult listSessions(ListSessionsRequest request) throws ClientException;
+	ShowSessionResult showSession(ShowSessionRequest request) throws ClientException;
+
+	ListSessionsResult listSessions(ListSessionsRequest request) throws ClientException;
 
     ListPartsResult listParts(ListPartsRequest request) throws ClientException;
 

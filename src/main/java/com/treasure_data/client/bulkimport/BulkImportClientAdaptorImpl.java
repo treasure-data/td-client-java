@@ -31,6 +31,7 @@ import org.msgpack.unpacker.Unpacker;
 
 import com.treasure_data.client.AbstractClientAdaptor;
 import com.treasure_data.client.ClientException;
+import com.treasure_data.client.DefaultClientAdaptorImpl;
 import com.treasure_data.client.HttpClientException;
 import com.treasure_data.client.HttpConnectionImpl;
 import com.treasure_data.client.TreasureDataClient;
@@ -55,6 +56,8 @@ import com.treasure_data.model.bulkimport.ListSessionsResult;
 import com.treasure_data.model.bulkimport.PerformSessionRequest;
 import com.treasure_data.model.bulkimport.PerformSessionResult;
 import com.treasure_data.model.bulkimport.SessionSummary;
+import com.treasure_data.model.bulkimport.ShowSessionRequest;
+import com.treasure_data.model.bulkimport.ShowSessionResult;
 import com.treasure_data.model.bulkimport.UnfreezeSessionRequest;
 import com.treasure_data.model.bulkimport.UnfreezeSessionResult;
 import com.treasure_data.model.bulkimport.UploadPartRequest;
@@ -74,6 +77,79 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         super(client.getConfig());
         this.client = client;
         validator = new Validator();
+    }
+
+    @Override
+    public ShowSessionResult showSession(ShowSessionRequest request)
+            throws ClientException {
+        request.setCredentials(client.getTreasureDataCredentials());
+        validator.validateCredentials(client, request);
+
+        String jsonData = null;
+        String message = null;
+        int code = 0;
+        try {
+            conn = createConnection();
+
+            // send request
+            String path = String.format(HttpURL.V3_SHOW, request.getSessionName());
+            Map<String, String> header = null;
+            Map<String, String> params = null;
+            conn.doGetRequest(request, path, header, params);
+
+            // receive response code and body
+            code = conn.getResponseCode();
+            message = conn.getResponseMessage();
+            if (code != HttpURLConnection.HTTP_OK) {
+                String errMessage = conn.getErrorMessage();
+                LOG.severe(HttpClientException.toMessage(
+                        "Show session failed", message, code));
+                LOG.severe(errMessage);
+                throw new HttpClientException("Show session failed",
+                        message + ", detail = " + errMessage, code);
+            }
+
+            // receive response body
+            jsonData = conn.getResponseBody();
+            validator.validateJSONData(jsonData);
+        } catch (IOException e) {
+            LOG.throwing(getClass().getName(), "showSession", e);
+            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
+            throw new HttpClientException("Show session failed", message, code, e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+
+        // parse JSON data
+        //     {"name":"t01", "database":"sfdb", "table":"bi02",
+        //      "status":"ready", "upload_frozen":false,
+        //      "job_id":"70220", "valid_records":100,
+        //      "error_records":10, "valid_parts":2, "error_parts":1}
+        @SuppressWarnings("rawtypes")
+        Map sess = (Map) JSONValue.parse(jsonData);
+        validator.validateJavaObject(jsonData, sess);
+
+		String name = (String) sess.get("name");
+		String database = (String) sess.get("database");
+		String table = (String) sess.get("table");
+		String status = (String) sess.get("status");
+		boolean upload_frozen = (Boolean) sess.get("upload_frozen");
+		String job_id = DefaultClientAdaptorImpl.getJobID(sess);
+		Long vr = (Long) sess.get("valid_records");
+		long valid_records = vr != null ? vr : 0;
+		Long er = (Long) sess.get("error_records");
+		long error_records = er != null ? er : 0;
+		Long vp = (Long) sess.get("valid_parts");
+		long valid_parts = vp != null ? vp : 0;
+		Long ep = (Long) sess.get("error_parts");
+		long error_parts = ep != null ? ep : 0;
+
+		SessionSummary summary = new SessionSummary(name, database, table,
+				SessionSummary.Status.fromString(status), upload_frozen,
+				job_id, valid_records, error_records, valid_parts, error_parts);
+        return new ShowSessionResult(summary);
     }
 
     @Override
@@ -687,6 +763,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
     }
 
     static interface HttpURL {
+        String V3_SHOW = "/v3/bulk_import/show/%s";
+
         String V3_LIST = "/v3/bulk_import/list";
 
         String V3_CREATE = "/v3/bulk_import/create/%s/%s/%s";
