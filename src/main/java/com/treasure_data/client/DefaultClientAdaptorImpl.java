@@ -1939,15 +1939,6 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         return new GetJobResultResult(request.getJobResult());
     }
 
-    private static String getJobID(Map<String, Object> map) {
-        Object job_id = map.get("job_id");
-        if (job_id instanceof Number) {
-            return ((Number) job_id).toString();
-        } else {
-            return (String) job_id;
-        }
-    }
-
     static interface HttpURL {
         String V3_USER_AUTHENTICATE = "/v3/user/authenticate";
 

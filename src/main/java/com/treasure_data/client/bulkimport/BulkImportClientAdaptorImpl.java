@@ -36,6 +36,7 @@ import org.msgpack.unpacker.Unpacker;
 
 import com.treasure_data.client.AbstractClientAdaptor;
 import com.treasure_data.client.ClientException;
+import com.treasure_data.client.DefaultClientAdaptorImpl;
 import com.treasure_data.client.HttpClientException;
 import com.treasure_data.client.HttpConnectionImpl;
 import com.treasure_data.client.TreasureDataClient;
@@ -121,7 +122,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         try {
             conn = createConnection();
             // send request
-            String path = HttpURL.V3_SHOW;
+            String path = String.format(HttpURL.V3_SHOW, request.getSessionName());
             Map<String, String> header = null;
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
@@ -150,8 +151,17 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             }
         }
 
-        // TODO FIXME debug
-        System.out.println("json data: " + jsonData);
+        //json data: {
+        //  "name":"session_17418",
+        //  "status":"committed",
+        //  "job_id":17432,
+        //  "valid_records":10000000,
+        //  "error_records":0,
+        //  "valid_parts":39,
+        //  "error_parts":0,
+        //  "upload_frozen":true,
+        //  "database":null,
+        //  "table":null}
 
         @SuppressWarnings("rawtypes")
         Map sess = (Map) JSONValue.parse(jsonData);
@@ -161,7 +171,7 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         String table = (String) sess.get("table");
         String status = (String) sess.get("status");
         boolean upload_frozen = (Boolean) sess.get("upload_frozen");
-        String job_id = (String) sess.get("job_id");
+        String job_id = getJobID(sess);
         Long vr = (Long) sess.get("valid_records");
         long valid_records = vr != null ? vr : 0;
         Long er = (Long) sess.get("error_records");

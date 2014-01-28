@@ -17,6 +17,8 @@
 //
 package com.treasure_data.client;
 
+import java.util.Map;
+
 import com.treasure_data.auth.TreasureDataCredentials;
 
 public abstract class AbstractClientAdaptor {
@@ -71,6 +73,15 @@ public abstract class AbstractClientAdaptor {
             Thread.sleep(time * (long) Math.pow(2.0, (double) retryCount) );
         } catch (InterruptedException e) {
             // ignore
+        }
+    }
+
+    protected static String getJobID(Map<String, Object> map) {
+        Object job_id = map.get("job_id");
+        if (job_id instanceof Number) {
+            return ((Number) job_id).toString();
+        } else {
+            return (String) job_id;
         }
     }
 }
