@@ -1,4 +1,6 @@
 Release 0.3.4 - 20XX/XX/XX
+  NEW FEATURES
+    Adds BulkImportClient#showSession(String).
 
 Release 0.3.3 - 2013/12/17
   BUG FIXES
