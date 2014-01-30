@@ -4,6 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import org.junit.Ignore;
 
@@ -16,6 +17,6 @@ public class PutMethodTestUtil2<REQ extends Request<?>, RET extends Result<?>, C
 
     public void callMockDoMethodRequest() throws Exception {
         doNothing().when(conn).doPutRequest(any(Request.class),
-                any(String.class), any(InputStream.class), any(int.class));
+                any(String.class), any(Map.class), any(InputStream.class), any(int.class));
     }
 }
