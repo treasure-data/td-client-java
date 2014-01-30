@@ -139,7 +139,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
             // send request
             String path = HttpURL.V3_USER_AUTHENTICATE;
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = new HashMap<String, String>();
             params.put("user", HttpConnectionImpl.e(request.getEmail()));
             params.put("password", HttpConnectionImpl.e(request.getPassword()));
@@ -222,7 +223,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
             // send request
             String path = HttpURL.V3_SYSTEM_SERVER_STATUS;
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
 
@@ -300,7 +302,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
             // send request
             String path = HttpURL.V3_DATABASE_LIST;
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
 
@@ -392,7 +395,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             // send request
             String path = String.format(HttpURL.V3_DATABASE_CREATE,
                     HttpConnectionImpl.e(request.getDatabaseName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -471,7 +475,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             // send request
             String path = String.format(HttpURL.V3_DATABASE_DELETE,
                     HttpConnectionImpl.e(request.getDatabaseName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -554,7 +559,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             // send request
             String path = String.format(HttpURL.V3_TABLE_LIST,
                     HttpConnectionImpl.e(request.getDatabase().getName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
 
@@ -653,7 +659,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                     HttpConnectionImpl.e(request.getDatabase().getName()),
                     HttpConnectionImpl.e(request.getTableName()),
                     HttpConnectionImpl.e(request.getTable().getType().type()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             if (isItemTable) {
                 ItemTable it = (ItemTable) request.getTable();
@@ -751,7 +758,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                     HttpConnectionImpl.e(request.getDatabaseName()),
                     HttpConnectionImpl.e(request.getOrigTableName()),
                     HttpConnectionImpl.e(request.getNewTableName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = new HashMap<String, String>();
             params.put("overwrite", "" + request.getOverwrite());
             conn.doPostRequest(request, path, header, params);
@@ -833,7 +841,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                     HttpConnectionImpl.e(request.getDatabaseName()),
                     HttpConnectionImpl.e(request.getTableName1()),
                     HttpConnectionImpl.e(request.getTableName2()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -913,7 +922,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             String path = String.format(HttpURL.V3_TABLE_DELETE,
                     HttpConnectionImpl.e(request.getDatabase().getName()),
                     HttpConnectionImpl.e(request.getTable().getName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -993,7 +1003,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             String path = String.format(HttpURL.V3_TABLE_DELETE_PARTIAL,
                     HttpConnectionImpl.e(request.getDatabase().getName()),
                     HttpConnectionImpl.e(request.getTable().getName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = new HashMap<String, String>();
             params.put("from", "" + request.getFrom());
             params.put("to", "" + request.getTo());
@@ -1106,7 +1117,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             String path = String.format(HttpURL.V3_SCHEMA_UPDATE,
                     HttpConnectionImpl.e(request.getDatabaseName()),
                     HttpConnectionImpl.e(request.getTableName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = new HashMap<String, String>();
             params.put("schema", HttpConnectionImpl.e(request.getJSONString()));
             conn.doPostRequest(request, path, header, params);
@@ -1245,7 +1257,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             String path = String.format(HttpURL.V3_TABLE_IMPORT,
                     HttpConnectionImpl.e(request.getTable().getDatabase().getName()),
                     HttpConnectionImpl.e(request.getTable().getName()));
-            conn.doPutRequest(request, path, request.getBytes());
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
+            conn.doPutRequest(request, path, header, request.getBytes());
 
             // receive response code
             code = conn.getResponseCode();
@@ -1321,7 +1335,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             // send request
             String path = String.format(HttpURL.V3_EXPORTJOB_SUBMIT,
                     HttpConnectionImpl.e(request.getDatabase().getName()), HttpConnectionImpl.e(request.getTable().getName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = new HashMap<String, String>();
             if (request.getAccessKeyID() != null) {
                 params.put("access_key_id", HttpConnectionImpl.e(request.getAccessKeyID()));
@@ -1433,7 +1448,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             String path = String.format(HttpURL.V3_JOB_SUBMIT,
                     HttpConnectionImpl.e(request.getJob().getType().type()),
                     HttpConnectionImpl.e(request.getDatabase().getName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = new HashMap<String, String>();
             if (request.getJob().getQuery() != null) {
                 // query is required
@@ -1524,7 +1540,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
 
             // send request
             String path = String.format(HttpURL.V3_JOB_LIST);
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = new HashMap<String, String>();
             long from = request.getFrom();
             if (from < 0) {
@@ -1633,7 +1650,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             // send request
             String path = String.format(HttpURL.V3_JOB_KILL,
                     HttpConnectionImpl.e(request.getJob().getJobID()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -1713,7 +1731,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             // send request
             String path = String.format(HttpURL.V3_JOB_SHOW,
                     HttpConnectionImpl.e(request.getJob().getJobID()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
 
@@ -1809,7 +1828,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             // send request
             String path = String.format(HttpURL.V3_JOBSTATUS_SHOW,
                     HttpConnectionImpl.e(request.getJob().getJobID()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
 
@@ -1894,7 +1914,8 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             // send request
             String path = String.format(HttpURL.V3_JOB_RESULT,
                     HttpConnectionImpl.e(request.getJobResult().getJob().getJobID()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = new HashMap<String, String>();
             if (request.getJobResult().getFormat() != JobResult.Format.MSGPACKGZ) {
                 String msg = String.format("Doesn't support format",

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +124,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             conn = createConnection();
             // send request
             String path = String.format(HttpURL.V3_SHOW, request.getSessionName());
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
             // receive response code and body
@@ -227,7 +229,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
 
             // send request
             String path = HttpURL.V3_LIST;
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
 
@@ -342,7 +345,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             // send request
             String path = String.format(HttpURL.V3_LIST_PARTS,
                     HttpConnectionImpl.e(request.getSessionName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
 
@@ -423,7 +427,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                     HttpConnectionImpl.e(request.getSessionName()),
                     HttpConnectionImpl.e(request.getDatabaseName()),
                     HttpConnectionImpl.e(request.getTableName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -513,7 +518,9 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             String path = String.format(HttpURL.V3_UPLOAD_PART,
                     HttpConnectionImpl.e(request.getSessionName()),
                     HttpConnectionImpl.e(partID));
-            conn.doPutRequest(request, path, in, size);
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
+            conn.doPutRequest(request, path, header, in, size);
 
             // receive response code
             code = conn.getResponseCode();
@@ -590,7 +597,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             String path = String.format(HttpURL.V3_DELETE_PART,
                     HttpConnectionImpl.e(request.getSessionName()),
                     HttpConnectionImpl.e(request.getPartID()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -668,7 +676,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             // send request
             String path = String.format(HttpURL.V3_PERFORM,
                     HttpConnectionImpl.e(request.getSessionName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -746,7 +755,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             // send request
             String path = String.format(HttpURL.V3_ERROR_RECORDS,
                     HttpConnectionImpl.e(request.getSessionName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doGetRequest(request, path, header, params);
 
@@ -822,7 +832,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             // send request
             String path = String.format(HttpURL.V3_COMMIT,
                     HttpConnectionImpl.e(request.getSessionName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -900,7 +911,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             // send request
             String path = String.format(HttpURL.V3_DELETE,
                     HttpConnectionImpl.e(request.getSessionName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -978,7 +990,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             // send request
             String path = String.format(HttpURL.V3_FREEZE,
                     HttpConnectionImpl.e(request.getSessionName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 
@@ -1056,7 +1069,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             // send request
             String path = String.format(HttpURL.V3_UNFREEZE,
                     HttpConnectionImpl.e(request.getSessionName()));
-            Map<String, String> header = null;
+            Map<String, String> header = new HashMap<String, String>();
+            setUserAgentHeader(header);
             Map<String, String> params = null;
             conn.doPostRequest(request, path, header, params);
 

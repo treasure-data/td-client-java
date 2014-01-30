@@ -188,8 +188,12 @@ public class HttpConnectionImpl {
         conn.connect();
     }
 
-    public void doPutRequest(Request<?> request, String path, byte[] bytes)
-            throws IOException {
+    public void doPutRequest(
+            Request<?> request,
+            String path,
+            Map<String, String> header,
+            byte[] bytes)
+                    throws IOException {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("http://").append(getApiServerPath()).append(path);
 
@@ -200,6 +204,11 @@ public class HttpConnectionImpl {
         conn.setRequestMethod("PUT");
         //conn.setRequestProperty("Content-Type", "application/octet-stream");
         conn.setRequestProperty("Content-Length", "" + bytes.length);
+        if (header != null && !header.isEmpty()) {
+            for (Map.Entry<String, String> e : header.entrySet()) {
+                conn.setRequestProperty(e.getKey(), e.getValue());
+            }
+        }
 
         setRequestAuthHeader(request, conn);
         conn.setDoOutput(true);
@@ -213,8 +222,12 @@ public class HttpConnectionImpl {
         //out.close();
     }
 
-    public void doPutRequest(Request<?> request, String path,
-            InputStream in, int size) throws IOException {
+    public void doPutRequest(
+            Request<?> request,
+            String path,
+            Map<String, String> header,
+            InputStream in,
+            int size) throws IOException {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append("http://").append(getApiServerPath()).append(path);
 
@@ -224,6 +237,11 @@ public class HttpConnectionImpl {
         conn.setRequestMethod("PUT");
         // conn.setRequestProperty("Content-Type", "application/octet-stream");
         conn.setRequestProperty("Content-Length", "" + size);
+        if (header != null && !header.isEmpty()) {
+            for (Map.Entry<String, String> e : header.entrySet()) {
+                conn.setRequestProperty(e.getKey(), e.getValue());
+            }
+        }
 
         setRequestAuthHeader(request, conn);
         conn.setDoOutput(true);
