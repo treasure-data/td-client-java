@@ -17,13 +17,21 @@
 //
 package com.treasure_data.client;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import com.treasure_data.auth.TreasureDataCredentials;
 
 public abstract class AbstractClientAdaptor {
+    private static final String userAgentKey = "User-Agent";
     private Config conf;
+
     protected HttpConnectionImpl conn = null;
+    protected String userAgent = null;
 
     public AbstractClientAdaptor(Config conf) {
         this.conf = conf;
@@ -84,4 +92,39 @@ public abstract class AbstractClientAdaptor {
             return (String) job_id;
         }
     }
+
+    public void setUserAgentHeader(Map<String, String> header) {
+        if (userAgent == null) {
+            userAgent = "TD-Client-Java " + getVersion();
+        }
+
+        header.put(userAgentKey, userAgent);
+    }
+
+    protected static String getVersion() {
+        String version = "";
+
+        Class<TreasureDataClient> c = TreasureDataClient.class;
+        String className = c.getSimpleName() + ".class";
+        String classPath = c.getResource(className).toString();
+
+        if (!classPath.startsWith("jar")) {
+            return version;
+        }
+
+        String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) +
+                "/META-INF/MANIFEST.MF";
+        try {
+            Manifest manifest = new Manifest(new URL(manifestPath).openStream());
+            Attributes attr = manifest.getMainAttributes();
+            if ((version = attr.getValue("Implementation-Version")) != null) {
+                return version;
+            } else {
+                return "";
+            }
+        } catch (IOException e) {
+            return version;
+        }
+    }
+
 }
