@@ -64,6 +64,7 @@
     <maven-eclipse-plugin.version>2.5.1</maven-eclipse-plugin.version>
     <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
     <maven-javadoc-plugin.version>2.9</maven-javadoc-plugin.version>
+    <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
     <wagon-webdav-jackrabbit.version>1.0-beta-7</wagon-webdav-jackrabbit.version>
     <maven-scm-plugin.version>1.6</maven-scm-plugin.version>
     <maven-jxr-plugin.version>2.2</maven-jxr-plugin.version>
@@ -133,6 +134,21 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
+        <configuration>
+          <archive>
+            <manifest>
+            </manifest>
+            <manifestEntries>
+              <Specification-Version>${project.version}</Specification-Version>
+              <Implementation-Version>${project.version}</Implementation-Version>
+            </manifestEntries>
+          </archive>
         </configuration>
       </plugin>
       <plugin>
