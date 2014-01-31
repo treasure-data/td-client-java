@@ -1,4 +1,4 @@
-Release 0.3.4 - 20XX/XX/XX
+Release 0.3.4 - 2014/01/31
   NEW FEATURES
     Adds BulkImportClient#showSession(String).
     Supports Presto query type
