@@ -88,8 +88,8 @@ public abstract class AbstractClientAdaptor {
         // explicit cast should not be used: object to string. because it's
         // deffensive programming here. By the change of API spec., there is
         // the possibility that the type of 'job_id' is changed.
-        Object job_id = map.get("job_id");
-        return job_id.toString();
+        Object jobID = map.get("job_id");
+        return jobID.toString();
     }
 
     public void setUserAgentHeader(Map<String, String> header) {
