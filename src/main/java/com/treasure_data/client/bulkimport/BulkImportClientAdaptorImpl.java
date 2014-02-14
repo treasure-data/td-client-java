@@ -172,7 +172,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
         String database = (String) sess.get("database");
         String table = (String) sess.get("table");
         String status = (String) sess.get("status");
-        boolean upload_frozen = (Boolean) sess.get("upload_frozen");
+        Boolean uf = (Boolean) sess.get("upload_frozen");
+        boolean upload_frozen = uf != null ? uf : false;
         String job_id = getJobID(sess);
         Long vr = (Long) sess.get("valid_records");
         long valid_records = vr != null ? vr : 0;
