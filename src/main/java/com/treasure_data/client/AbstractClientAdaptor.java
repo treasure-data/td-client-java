@@ -89,6 +89,9 @@ public abstract class AbstractClientAdaptor {
         // deffensive programming here. By the change of API spec., there is
         // the possibility that the type of 'job_id' is changed.
         Object jobID = map.get("job_id");
+        if (jobID == null) {
+            return null;
+        }
         return jobID.toString();
     }
 
