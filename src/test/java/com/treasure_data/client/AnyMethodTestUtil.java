@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Properties;
+import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,12 +29,16 @@ import com.treasure_data.model.Result;
 @Ignore
 public abstract class AnyMethodTestUtil<REQ extends Request<?>, RET extends Result<?>, CLIENT extends AbstractClientAdaptor> {
 
+    protected Random rand;
+
     protected CLIENT clientAdaptor;
     protected HttpConnectionImpl conn;
     protected boolean responsedBinary = false;
 
     @Before
     public void createResources() throws Exception {
+        rand = new Random();
+
         Properties props = new Properties();
         props.load(this.getClass().getClassLoader().getResourceAsStream("mock-treasure-data.properties"));
         Config conf = new Config(props);

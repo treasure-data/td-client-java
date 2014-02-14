@@ -91,12 +91,15 @@ public class TestShowSession
         ret.put("name", sessionName);
         ret.put("database", databaseName);
         ret.put("table", tableName);
-        ret.put("upload_frozen", false);
-        ret.put("job_id", "70220");
-        ret.put("valid_records", 100);
-        ret.put("error_records", 10);
-        ret.put("valid_parts", 2);
-        ret.put("error_parts", 1);
+        boolean afterPerforming = rand.nextBoolean();
+        if (afterPerforming) {
+            ret.put("upload_frozen", false);
+            ret.put("job_id", "70220");
+            ret.put("valid_records", 100);
+            ret.put("error_records", 10);
+            ret.put("valid_parts", 2);
+            ret.put("error_parts", 1);
+        }
         return JSONValue.toJSONString(ret);
     }
 
