@@ -1291,7 +1291,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
         Map<String, Object> map = (Map<String, Object>) JSONValue.parse(jsonData);
         validator.validateJavaObject(jsonData, map);
 
-        double elapsedTime = (Double) map.get("elapsed_time");
+        double elapsedTime = getTime(map, "elapsed_time");
 
         return new ImportResult(request.getTable(), elapsedTime);
     }

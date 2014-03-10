@@ -20,6 +20,7 @@ package com.treasure_data.client;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -93,6 +94,17 @@ public abstract class AbstractClientAdaptor {
             return null;
         }
         return jobID.toString();
+    }
+
+    protected static double getTime(Map<String, Object> map, String name) {
+        Object time = map.get(name);
+        if (time instanceof Number) {
+            return ((Number) time).doubleValue();
+        } else if (time instanceof String) {
+            return Double.parseDouble((String) time);
+        } else {
+            return -1;
+        }
     }
 
     public void setUserAgentHeader(Map<String, String> header) {
