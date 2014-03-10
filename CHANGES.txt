@@ -1,3 +1,7 @@
+Release 0.3.6 - 20XX/XX/XX
+  BUG FIXES
+    TDClient#importData should be able to accept both of double and long types of 'elapsed_time' value in http JSON response.
+
 Release 0.3.5 - 2014/02/14
   BUG FIXES
     Fixes bug: NPE occurs when BulkImportClient#showSession method is used for 'uploading' status sessions.
