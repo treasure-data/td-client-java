@@ -1,3 +1,5 @@
+Release 0.3.7 - 20XX/XX/XX
+
 Release 0.3.6 - 2014/03/11
   BUG FIXES
     TDClient#importData should be able to accept both of double and long types of 'elapsed_time' value in http JSON response.
