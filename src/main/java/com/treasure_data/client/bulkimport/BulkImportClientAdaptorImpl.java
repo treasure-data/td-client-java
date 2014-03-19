@@ -320,9 +320,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
                 String errMessage = conn.getErrorMessage();
-                LOG.severe(HttpClientException.toMessage(
-                        "Create session failed", message, code));
-                LOG.severe(errMessage);
                 throw new HttpClientException("Create session failed",
                         message + ", detail = " + errMessage, code);
             }
@@ -331,8 +328,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            LOG.throwing(getClass().getName(), "createSession", e);
-            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
             throw new HttpClientException("Create session failed", message, code, e);
         } finally {
             if (conn != null) {
@@ -630,9 +625,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
                 String errMessage = conn.getErrorMessage();
-                LOG.severe(HttpClientException.toMessage(
-                        "Delete session failed", message, code));
-                LOG.severe(errMessage);
                 throw new HttpClientException("Delete session failed",
                         message + ", detail = " + errMessage, code);
             }
@@ -641,8 +633,6 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            LOG.throwing(getClass().getName(), "deleteSession", e);
-            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
             throw new HttpClientException("Delete session failed", message, code, e);
         } finally {
             if (conn != null) {

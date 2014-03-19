@@ -475,9 +475,6 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             message = conn.getResponseMessage();
             if (code != HttpURLConnection.HTTP_OK) {
                 String errMessage = conn.getErrorMessage();
-                LOG.severe(HttpClientException.toMessage(
-                        "Create table failed", message, code));
-                LOG.severe(errMessage);
                 throw new HttpClientException("Create table failed",
                         message + ", detail = " + errMessage, code);
             }
@@ -486,8 +483,6 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            LOG.throwing(getClass().getName(), "createTable", e);
-            LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
             throw new HttpClientException("Create table failed", message, code, e);
         } finally {
             if (conn != null) {
