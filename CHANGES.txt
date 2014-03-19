@@ -1,3 +1,7 @@
+Release 0.2.14.2 - 2014/03/19
+  IMPROVEMENTS
+    Removes no user-friendly log messages from createTable and createSession, deleteSession methods.
+
 Release 0.2.14.1 - 2014/01/27
   NEW FEATURES
     Adds new API: showSession method in BulkImportClient class.
