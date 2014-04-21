@@ -28,11 +28,18 @@ public interface Constants {
 
     String TD_INTERNAL_KEY_ID = "td.api.internalkeyid";
 
+    String TD_API_SERVER_SCHEME = "td.api.server.scheme";
+    String TD_API_SERVER_SCHEME_HTTPS = "https://";
+    String TD_API_SERVER_SCHEME_HTTP = "http://";
+    String TD_API_SERVER_SCHEME_DEFAULTVALUE = TD_API_SERVER_SCHEME_HTTPS;
+
     String TD_API_SERVER_HOST = "td.api.server.host";
     String TD_API_SERVER_HOST_DEFAULTVALUE = "api.treasure-data.com";
 
     String TD_API_SERVER_PORT = "td.api.server.port";
-    String TD_API_SERVER_PORT_DEFAULTVALUE = "80";
+    String TD_API_SERVER_PORT_HTTPS = "443";
+    String TD_API_SERVER_PORT_HTTP = "80";
+    String TD_API_SERVER_PORT_DEFAULTVALUE = TD_API_SERVER_PORT_HTTPS;
 
     String TD_AUTO_CREATE_TABLE = "td.create.table.auto";
     String TD_AUTO_CREATE_TABLE_DEFAULTVALUE = "false";
