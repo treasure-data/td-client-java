@@ -129,7 +129,6 @@ public class HttpConnectionImpl {
             }
         }
 
-        System.out.println("#MN url: " + sbuf.toString());
         // create connection object with url
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
