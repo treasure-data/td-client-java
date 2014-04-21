@@ -113,7 +113,7 @@ public class HttpConnectionImpl {
     public void doGetRequest(Request<?> request, String path, Map<String, String> header,
             Map<String, String> params) throws IOException {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("http://").append(getApiServerPath()).append(path);
+        sbuf.append(getSchemeHostPort(System.getenv(Config.TD_ENV_API_SERVER))).append(path);
 
         // parameters
         if (params != null && !params.isEmpty()) {
@@ -129,6 +129,7 @@ public class HttpConnectionImpl {
             }
         }
 
+        System.out.println("#MN url: " + sbuf.toString());
         // create connection object with url
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
@@ -150,7 +151,7 @@ public class HttpConnectionImpl {
     public void doPostRequest(Request<?> request, String path, Map<String, String> header,
             Map<String, String> params) throws IOException {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("http://").append(getApiServerPath()).append(path);
+        sbuf.append(getSchemeHostPort(System.getenv(Config.TD_ENV_API_SERVER))).append(path);
 
         // parameters
         if (params != null && !params.isEmpty()) {
@@ -195,7 +196,7 @@ public class HttpConnectionImpl {
             byte[] bytes)
                     throws IOException {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("http://").append(getApiServerPath()).append(path);
+        sbuf.append(getSchemeHostPort(System.getenv(Config.TD_ENV_API_SERVER))).append(path);
 
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
@@ -229,7 +230,7 @@ public class HttpConnectionImpl {
             InputStream in,
             int size) throws IOException {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("http://").append(getApiServerPath()).append(path);
+        sbuf.append(getSchemeHostPort(System.getenv(Config.TD_ENV_API_SERVER))).append(path);
 
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
@@ -355,48 +356,63 @@ public class HttpConnectionImpl {
         return conn.getInputStream();
     }
 
-    private String getApiServerPath() {
-        String hostAndPort = "";
+    String getSchemeHostPort(String urlString) {
+        String scheme, host;
+        int port;
 
-        // environment variables
-        hostAndPort = System.getenv(Config.TD_ENV_API_SERVER);
-        if (hostAndPort != null && !hostAndPort.isEmpty()) {
-            String host;
-            int port;
-            try {
-                // parse "http://api.treasure-data.com:80/"
-                URL url = new URL(hostAndPort);
-                host = url.getHost();
-                if (url.getPort() == -1) {
-                    // parse "http://api.treasure-data.com/"
-                    port = Integer.parseInt(Config.TD_API_SERVER_PORT_DEFAULTVALUE);
-                } else {
-                    port = url.getPort();
-                }
-            } catch (MalformedURLException e) {
-                // no protocol
-                // parse "api.treasure-data.com:80"
-                String[] splited = hostAndPort.split(":");
-                if (splited.length == 2) {
-                    host = splited[0];
-                    port = Integer.parseInt(splited[1]);
-                } else {
-                    // parse "api.treasure-data.com"
-                    host = hostAndPort;
-                    port = Integer.parseInt(Config.TD_API_SERVER_PORT_DEFAULTVALUE);
-                }
-            }
-            return host + ":" + port;
+        if (urlString == null || urlString.isEmpty()) {
+            scheme = props.getProperty(
+                    Config.TD_API_SERVER_SCHEME, Config.TD_API_SERVER_SCHEME_DEFAULTVALUE);
+            host = props.getProperty(
+                    Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULTVALUE);
+            port = Integer.parseInt(props.getProperty(
+                    Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULTVALUE));
+            return scheme + host + ":" + port;
         }
 
-        // system properties
-        String host = props.getProperty(
-                Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULTVALUE);
-        int port = Integer.parseInt(props.getProperty(
-                Config.TD_API_SERVER_PORT, Config.TD_API_SERVER_PORT_DEFAULTVALUE));
-        hostAndPort = host + ":" + port;
+        try {
+            // parse "http://api.treasure-data.com:80/"
+            URL url = new URL(urlString);
+            scheme = url.getProtocol() + "://";
+            host = url.getHost();
+            if (url.getPort() == -1) {
+                // parse "http://api.treasure-data.com/"
+                String p;
+                if (scheme.equals(Config.TD_API_SERVER_SCHEME_HTTPS)) {
+                    p = Config.TD_API_SERVER_PORT_DEFAULTVALUE;
+                } else {
+                    p = Config.TD_API_SERVER_PORT_HTTP;
+                }
+                port = Integer.parseInt(p);
+            } else {
+                port = url.getPort();
+            }
+        } catch (MalformedURLException e) {
+            // no scheme
 
-        return hostAndPort;
+            if (urlString.lastIndexOf('/') == urlString.length() - 1) {
+                urlString = urlString.substring(0, urlString.length() - 1);
+            }
+
+            // parse "api.treasure-data.com:80"
+            String[] splited = urlString.split(":");
+            if (splited.length == 2) {
+                host = splited[0];
+                port = Integer.parseInt(splited[1]);
+                if (443 == port) {
+                    scheme = Config.TD_API_SERVER_SCHEME_DEFAULTVALUE;
+                } else {
+                    scheme = Config.TD_API_SERVER_SCHEME_HTTP;
+                }
+            } else {
+                // parse "api.treasure-data.com"
+                host = urlString;
+                scheme = Config.TD_API_SERVER_SCHEME_DEFAULTVALUE;
+                port = Integer.parseInt(Config.TD_API_SERVER_PORT_DEFAULTVALUE);
+            }
+        }
+
+        return scheme + host + ":" + port;
     }
 
     public static String e(String s) throws ClientException {
