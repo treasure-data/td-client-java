@@ -1,4 +1,4 @@
-Release 0.3.7 - 20XX/XX/XX
+Release 0.4.0 - 2014/04/23
   IMPROVEMENTS
     Changes http connection implementation and default protocol: 'http' to 'https'.
 
