@@ -98,6 +98,13 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                }
                 break;
             } catch (ClientException e) {
+                if (e instanceof HttpClientException) {
+                    HttpClientException hce = (HttpClientException) e;
+                    if (hce.getResponseCode() == 404) {
+                        // NotFound bulk import session
+                        throw e;
+                    }
+                }
                 // TODO FIXME
                 if (count >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
