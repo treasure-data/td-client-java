@@ -28,7 +28,7 @@ public interface Constants {
 
     String TD_INTERNAL_KEY_ID = "td.api.internalkeyid";
 
-    String TD_API_SERVER_SCHEME = "td.api.server.scheme";
+    String TD_CK_API_SERVER_SCHEME = "td.api.server.scheme";
     String TD_API_SERVER_SCHEME_HTTPS = "https://";
     String TD_API_SERVER_SCHEME_HTTP = "http://";
     String TD_API_SERVER_SCHEME_DEFAULTVALUE = TD_API_SERVER_SCHEME_HTTPS;

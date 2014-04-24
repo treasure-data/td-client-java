@@ -361,7 +361,7 @@ public class HttpConnectionImpl {
 
         if (urlString == null || urlString.isEmpty()) {
             scheme = props.getProperty(
-                    Config.TD_API_SERVER_SCHEME, Config.TD_API_SERVER_SCHEME_DEFAULTVALUE);
+                    Config.TD_CK_API_SERVER_SCHEME, Config.TD_API_SERVER_SCHEME_DEFAULTVALUE);
             host = props.getProperty(
                     Config.TD_API_SERVER_HOST, Config.TD_API_SERVER_HOST_DEFAULTVALUE);
             port = Integer.parseInt(props.getProperty(
