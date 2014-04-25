@@ -1,3 +1,7 @@
+Release 0.4.1 - 20XX/XX/XX
+  IMPROVEMENTS
+    Improves BulkImportClient#showSession method. It never retries showSession operations when the bulk import session is not found '404'.
+
 Release 0.4.0 - 2014/04/23
   IMPROVEMENTS
     Changes http connection implementation and default protocol: 'http' to 'https'.
