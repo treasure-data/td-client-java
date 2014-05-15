@@ -80,7 +80,7 @@ directory.  File name will be td-client-${client.version}-jar-with-dependencies.
 For more detail, see pom.xml.
 
 **Replace ${client.version} with the current version of Treasure Data Cloud for Java.**
-**The current version is 0.1.2.**
+**The current version is 0.4.1.**
 
 ## Quickstart
 
@@ -124,6 +124,10 @@ Below is an example of listing databases and tables.
     }
 
 Please configure your treasure-data.properties file using the commands shown below:
+
+    td.api.key=<your API key>
+
+To access Treasure Data's API endpoint, td-client-java, by default, uses https. If you want to use http instead of https, you can configure your properties file like following.
 
     td.api.key=<your API key>
     td.api.server.scheme=http://
