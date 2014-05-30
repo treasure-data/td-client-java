@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.MessageDigest;
@@ -146,7 +147,7 @@ public class HttpConnectionImpl {
 
     protected HttpURLConnection getRawConnection(String urlString) throws IOException {
         URL url = new URL(urlString.toString());
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        URLConnection conn = url.openConnection();
         if (conn instanceof HttpsURLConnection) {
             try {
                 OpenTrustManager.apply((HttpsURLConnection)conn);
@@ -156,7 +157,7 @@ public class HttpConnectionImpl {
                 throw new IOException(e);
             }
         }
-        return conn;
+        return (HttpURLConnection)conn;
     }
 
     public void doGetRequest(Request<?> request, String path, Map<String, String> header,
