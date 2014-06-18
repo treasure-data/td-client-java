@@ -202,13 +202,19 @@ Below is an example of issuing a query from a Java program. The query API is asy
             }
     
             JobResult jobResult = client.getJobResult(job);
-            Unpacker unpacker = jobResult.getResult();
+            Unpacker unpacker = jobResult.getResult(); // Unpacker class is MessagePack's deserializer
             UnpackerIterator iter = unpacker.iterator();
             while (iter.hasNext()) {
-                System.out.println(iter.next());
+                ArrayValue row = iter.next().asArrayValue();
+                for (Value elm : row) {
+                    System.out.print(elm + ",");
+                }
+                System.out.println();
             }
         }
     }
+
+JobResult is model class for query result. The object has Unpacker object. The Unpacker and the iterator, UnpackerIterator object, allow users to download query result via internet and use the raw data.
 
 ### List and Get the Status of Jobs
 
