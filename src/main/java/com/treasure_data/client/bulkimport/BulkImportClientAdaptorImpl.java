@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONValue;
@@ -405,7 +406,16 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                 }
                 break;
             } catch (ClientException e) {
-                // TODO FIXME
+                if (e instanceof HttpClientException) {
+                    HttpClientException ex = (HttpClientException) e;
+                    int statusCode = ex.getResponseCode();
+                    if (statusCode == 404) {
+                        // If database or table doesn't exist, createSession returns 404
+                        LOG.log(Level.WARNING, e.getMessage(), e);
+                        throw e;
+                    }
+                }
+
                 if (result.getRetryCount() >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
                     throw new ClientException("Retry error", e);
