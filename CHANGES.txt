@@ -1,3 +1,8 @@
+Release 0.4.3 - 2014/07/01
+  IMPROVEMENTS
+    changes DefaultClientAdaptorImpl#authenticate method. It should not retry to send request for authenticating user and the password if it failed once.
+    changes BulkImportClient#createSession method. It should not retry to send request for creating bulk_import session if the database or table doesn't exist.
+
 Release 0.4.2 - 2014/06/03
   IMPROVEMENTS
     Uses server certificates for accessing api.treasuredata.com via HTTPS
