@@ -1,3 +1,5 @@
+Release 0.4.4 - 2014/XX/XX
+
 Release 0.4.3 - 2014/07/01
   IMPROVEMENTS
     changes DefaultClientAdaptorImpl#authenticate method. It should not retry to send request for authenticating user and the password if it failed once.
