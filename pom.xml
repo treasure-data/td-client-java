@@ -5,7 +5,7 @@
   <artifactId>td-client</artifactId>
   <name>Treasure Data Client for Java</name>
   <description>Treasure Data Client for Java.</description>
-  <version>0.4.3</version>
+  <version>0.4.4-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-client-java</url>
 
@@ -21,7 +21,7 @@
     <connection>scm:git:git://github.com/treasure-data/td-client-java.git</connection>
     <developerConnection>scm:git:git@github.com:treasure-data/td-client-java.git</developerConnection>
     <url>scm:git:git://github.com/treasure-data/td-client-java.git</url>
-    <tag>td-client-0.4.3</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
