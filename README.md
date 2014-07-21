@@ -25,7 +25,7 @@ Java >= 1.6
 
 You can download all-in-one jar file for Treasure Data Logger.
 
-    $ wget http://maven.treasure-data.com/com/treasure_data/td-client/${client.version}/td-client-${client.version}-jar-with-dependencies.jar
+    $ wget http://central.maven.org/maven2/com/treasuredata/td-client/${client.version}/td-client-${client.version}-jar-with-dependencies.jar
 
 To use Treasure Data Cloud for Java, set the above jar file to your classpath.
 
@@ -37,20 +37,12 @@ You can configure your pom.xml as follows to use it:
     <dependencies>
       ...
       <dependency>
-        <groupId>com.treasure_data</groupId>
+        <groupId>com.treasuredata</groupId>
         <artifactId>td-client</artifactId>
         <version>${client.version}</version>
       </dependency>
       ...
     </dependencies>
-
-    <repositories>
-      <repository>
-        <id>treasure-data.com</id>
-        <name>Treasure Data's Maven Repository</name>
-        <url>http://maven.treasure-data.com/</url>
-      </repository>
-    </repositories>
 
 ### Install with SBT (Scala Build Tool)
 
@@ -59,12 +51,11 @@ To install td-client From SBT (a build tool for Scala), please add the following
     /* in build.sbt */
     // Repositories
     resolvers ++= Seq(
-      "td-client     Maven Repository" at "http://maven.treasure-data.com/",
       "fluent-logger Maven Repository" at "http://fluentd.org/maven2/"
     )
     // Dependencies
     libraryDependencies ++= Seq(
-      "com.treasure_data" % "td-client" % "${client.version}"
+      "com.treasuredata" % "td-client" % "${client.version}"
     )
 
 ### Install from GitHub repository
@@ -73,14 +64,14 @@ You can get latest source code using git.
 
     $ git clone https://github.com/treasure-data/td-client-java.git
     $ cd td-client-java
-    $ mvn package
+    $ mvn package -Dmaven.test.skip=true
 
 You will get the td-client jar file in td-client-java/target
 directory.  File name will be td-client-${client.version}-jar-with-dependencies.jar.
 For more detail, see pom.xml.
 
 **Replace ${client.version} with the current version of Treasure Data Cloud for Java.**
-**The current version is 0.4.1.**
+**The current version is 0.5.0.**
 
 ## Configuration
 
