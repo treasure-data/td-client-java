@@ -1,13 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.treasure_data</groupId>
+  <groupId>com.treasuredata</groupId>
   <artifactId>td-client</artifactId>
   <name>Treasure Data Client for Java</name>
   <description>Treasure Data Client for Java.</description>
   <version>0.4.4-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-client-java</url>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>9</version>
+  </parent>
 
   <licenses>
     <license>
@@ -20,7 +26,7 @@
   <scm>
     <connection>scm:git:git://github.com/treasure-data/td-client-java.git</connection>
     <developerConnection>scm:git:git@github.com:treasure-data/td-client-java.git</developerConnection>
-    <url>scm:git:git://github.com/treasure-data/td-client-java.git</url>
+    <url>https://github.com/treasure-data/td-client-java.git</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -36,21 +42,6 @@
     	<email>muga.nishizawa@gmail.com</email>
     </developer>
   </developers>
-
-  <distributionManagement>
-      <repository>
-          <uniqueVersion>false</uniqueVersion>
-          <id>maven.treasure-data.com</id>
-          <name>Repository at maven.treasure-data.com</name>
-          <url>dav:http://maven.treasure-data.com</url>
-      </repository>
-      <snapshotRepository>
-          <uniqueVersion>false</uniqueVersion>
-          <id>maven.treasure-data.com</id>
-          <name>Snapshot Repository at maven.treasure-data.com</name>
-          <url>dav:http://maven.treasure-data.com/snapshot</url>
-      </snapshotRepository>
-  </distributionManagement>
 
   <properties>
     <!--  version properties for dependencies -->
