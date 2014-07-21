@@ -1,6 +1,10 @@
-Release 0.4.4 - 2014/XX/XX
+Release 0.5.0 - 2014/XX/XX
   NEW FEATURES
     Addes model classes: ConflictException and NotFoundException. If HttpClient recieves 409 from API server as HTTP response, It throws ConflictException, which is extended to HttpClientException. If 404, NotFoundException is thrown.
+
+  IMPROVEMENTS
+    Changes groupID: com.treasure_data to com.treasuredata
+    Changes td-client-java's Maven repo: maven.treasure-data.com to Sonatype
 
 Release 0.4.3 - 2014/07/01
   IMPROVEMENTS
