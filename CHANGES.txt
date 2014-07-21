@@ -1,4 +1,6 @@
 Release 0.4.4 - 2014/XX/XX
+  NEW FEATURES
+    Addes model classes: ConflictException and NotFoundException. If HttpClient recieves 409 from API server as HTTP response, It throws ConflictException, which is extended to HttpClientException. If 404, NotFoundException is thrown.
 
 Release 0.4.3 - 2014/07/01
   IMPROVEMENTS
