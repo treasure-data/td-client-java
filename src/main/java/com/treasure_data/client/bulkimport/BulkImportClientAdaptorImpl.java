@@ -495,6 +495,15 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                 }
                 break;
             } catch (ClientException e) {
+                if (e instanceof HttpClientException) {
+                    HttpClientException ex = (HttpClientException) e;
+                    int statusCode = ex.getResponseCode();
+                    if (statusCode == 422) {
+                        // If database or table doesn't exist, createSession returns 404
+                        LOG.log(Level.WARNING, e.getMessage(), e);
+                        throw e;
+                    }
+                }
                 // TODO FIXME
                 if (result.getRetryCount() >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
