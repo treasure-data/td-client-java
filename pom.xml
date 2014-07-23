@@ -41,6 +41,11 @@
     	<name>Muga Nishizawa</name>
     	<email>muga.nishizawa@gmail.com</email>
     </developer>
+    <developer>
+      <id>mcaramello</id>
+      <name>Michele Caramello</name>
+      <email>michele.caramello@gmail.com</email>
+    </developer>
   </developers>
 
   <properties>
