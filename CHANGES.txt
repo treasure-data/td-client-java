@@ -1,3 +1,5 @@
+Release 0.5.2 - 20XX/XX/XX
+
 Release 0.5.1 - 2014/07/23
   IMPROVEMENTS
     changes BulkImportClient#uploadPart method. It should not retry to send same request if 422.
