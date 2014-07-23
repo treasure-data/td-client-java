@@ -1,4 +1,8 @@
-Release 0.5.0 - 2014/XX/XX
+Release 0.5.1 - 2014/07/22
+  IMPROVEMENTS
+    changes BulkImportClient#uploadPart method. It should not retry to send same request if 422.
+
+Release 0.5.0 - 2014/07/22
   NEW FEATURES
     Addes model classes: ConflictException and NotFoundException. If HttpClient recieves 409 from API server as HTTP response, It throws ConflictException, which is extended to HttpClientException. If 404, NotFoundException is thrown.
 
