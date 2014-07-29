@@ -1240,6 +1240,16 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 }
                 break;
             } catch (ClientException e) {
+                if (e instanceof HttpClientException) {
+                    HttpClientException ex = (HttpClientException) e;
+                    int statusCode = ex.getResponseCode();
+                    if (statusCode == 401) {
+                     // If authentication failed 401, it doesn't retry.
+                        LOG.log(Level.WARNING, e.getMessage(), e);
+                        throw e;
+                    }
+                }
+
                 // TODO FIXME
                 if (count >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
