@@ -33,6 +33,7 @@ import org.msgpack.unpacker.Unpacker;
 import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.AuthenticateRequest;
 import com.treasure_data.model.AuthenticateResult;
+import com.treasure_data.model.AuthenticationException;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateItemTableRequest;
@@ -1246,7 +1247,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                     if (statusCode == 401) {
                      // If authentication failed 401, it doesn't retry.
                         LOG.log(Level.WARNING, e.getMessage(), e);
-                        throw e;
+                        throw new AuthenticationException("Authentication failed", e.getMessage());
                     }
                 }
 
