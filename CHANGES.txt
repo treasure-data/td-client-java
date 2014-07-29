@@ -1,4 +1,6 @@
 Release 0.5.2 - 20XX/XX/XX
+  IMPROVEMENTS
+    Addes model classes: AuthenticationException. If HttpClient recieves 401 from API server as HTTP response, It throws AuthenticationException, which is extended to HttpClientException.
 
 Release 0.5.1 - 2014/07/23
   IMPROVEMENTS
