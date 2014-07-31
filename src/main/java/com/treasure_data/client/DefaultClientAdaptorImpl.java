@@ -70,6 +70,7 @@ import com.treasure_data.model.ListTablesResult;
 import com.treasure_data.model.GetJobResultRequest;
 import com.treasure_data.model.GetJobResultResult;
 import com.treasure_data.model.LogTable;
+import com.treasure_data.model.NotFoundException;
 import com.treasure_data.model.RenameTableRequest;
 import com.treasure_data.model.RenameTableResult;
 import com.treasure_data.model.ServerStatus;
@@ -639,12 +640,17 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 break;
             } catch (ClientException e) {
                 if (e instanceof HttpClientException) {
+                    LOG.log(Level.WARNING, e.getMessage(), e);
                     HttpClientException ex = (HttpClientException) e;
                     int statusCode = ex.getResponseCode();
                     if (statusCode == 401) {
-                     // If authentication failed 401, it doesn't retry.
-                        LOG.log(Level.WARNING, e.getMessage(), e);
+                        // If authentication failed 401, it doesn't retry.
                         throw new AuthenticationException("Authentication failed", e.getMessage());
+                    }
+                    if (statusCode == 409) {
+                        // If 409, it doesn't retry.
+                        String name = request.getTableName();
+                        throw new NotFoundException("Table not found: " + name, e.getMessage());
                     }
                 }
 
