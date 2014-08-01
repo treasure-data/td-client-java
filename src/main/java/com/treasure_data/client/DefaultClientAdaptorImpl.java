@@ -657,7 +657,6 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                     }
                 }
 
-                // TODO FIXME
                 if (count >= getRetryCount()) {
                     LOG.warning("Retry count exceeded limit: " + e.getMessage());
                     throw new ClientException("Retry error", e);
