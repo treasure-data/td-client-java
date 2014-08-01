@@ -34,6 +34,7 @@ import com.treasure_data.auth.TreasureDataCredentials;
 import com.treasure_data.model.AuthenticateRequest;
 import com.treasure_data.model.AuthenticateResult;
 import com.treasure_data.model.AuthenticationException;
+import com.treasure_data.model.ConflictException;
 import com.treasure_data.model.CreateDatabaseRequest;
 import com.treasure_data.model.CreateDatabaseResult;
 import com.treasure_data.model.CreateItemTableRequest;
@@ -644,13 +645,15 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                     HttpClientException ex = (HttpClientException) e;
                     int statusCode = ex.getResponseCode();
                     if (statusCode == 401) {
-                        // If authentication failed 401, it doesn't retry.
                         throw new AuthenticationException("Authentication failed", e.getMessage());
                     }
-                    if (statusCode == 409) {
-                        // If 409, it doesn't retry.
+                    if (statusCode == 404) {
                         String name = request.getTableName();
                         throw new NotFoundException("Table not found: " + name, e.getMessage());
+                    }
+                    if (statusCode == 409) {
+                        String name = request.getTableName();
+                        throw new ConflictException("Table alraedy exists: " + name, e.getMessage());
                     }
                 }
 
