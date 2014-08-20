@@ -17,10 +17,26 @@
 //
 package com.treasure_data.model.bulkimport;
 
+import com.treasure_data.model.Job;
+
 public class PerformSessionRequest extends BulkImportSpecifyRequest<Session> {
+    private Job.Priority priority;
 
     public PerformSessionRequest(Session sess) {
+        this(sess, Job.Priority.NORMAL);
+    }
+
+    public PerformSessionRequest(Session sess, Job.Priority priority) {
         super(sess);
+        this.priority = priority;
+    }
+
+    public void setPriority(Job.Priority priority) {
+        this.priority = priority;
+    }
+
+    public Job.Priority getPriority() {
+        return priority;
     }
 
 }

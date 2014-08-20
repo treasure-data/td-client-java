@@ -21,6 +21,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -463,7 +464,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
             String path = String.format(HttpURL.V3_PERFORM,
                     HttpConnectionImpl.e(request.getSessionName()));
             Map<String, String> header = null;
-            Map<String, String> params = null;
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("priority", Integer.toString(request.getPriority().getPriority()));
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
