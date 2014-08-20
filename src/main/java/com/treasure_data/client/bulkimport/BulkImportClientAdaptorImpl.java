@@ -705,7 +705,8 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                     HttpConnectionImpl.e(request.getSessionName()));
             Map<String, String> header = new HashMap<String, String>();
             setUserAgentHeader(header);
-            Map<String, String> params = null;
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("priority", Integer.toString(request.getPriority().getPriority()));
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
