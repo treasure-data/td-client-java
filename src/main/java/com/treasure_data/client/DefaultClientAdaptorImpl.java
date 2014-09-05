@@ -120,13 +120,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                 if (e instanceof HttpClientException) {
                     HttpClientException ex = (HttpClientException) e;
                     int statusCode = ex.getResponseCode();
-                    if (statusCode == 401) {
-                        // If authentication failed 401, it doesn't retry.
-                        throw new AuthenticationException("Authentication failed", e.getMessage());
-                    }
-                    if (statusCode == 404) {
-                        // If authentication failed 404, it doesn't retry.
-                        throw new AuthenticationException("Authentication failed", e.getMessage(), 404);
+                    if (statusCode == 401 || statusCode == 404) {
+                        // If authentication failed 401 or 404, it doesn't retry.
+                        throw new AuthenticationException("Authentication failed", e.getMessage(), statusCode);
                     }
                 }
 
@@ -179,9 +175,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             jsonData = conn.getResponseBody();
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
-            LOG.throwing(getClass().getName(), "authenticate", e);
-            LOG.severe(HttpClientException.toMessage(e.getMessage(), message,
-                    code));
+            LOG.log(Level.WARNING, "Authentication failed", e);
             throw new HttpClientException("Authentication failed", message, code, e);
         } finally {
             if (conn != null) {
