@@ -22,11 +22,19 @@ import com.treasure_data.client.HttpClientException;
 public class AuthenticationException extends HttpClientException {
 
     public AuthenticationException(String reason, String message) {
-        super(reason, message, 401);
+        this(reason, message, 401);
+    }
+
+    public AuthenticationException(String reason, String message, int code) {
+        super(reason, message, code);
     }
 
     public AuthenticationException(String reason, String message, Throwable cause) {
-        super(reason, message, 401, cause);
+        this(reason, message, 401, cause);
+    }
+
+    public AuthenticationException(String reason, String message, int code, Throwable cause) {
+        super(reason, message, code, cause);
     }
 
 }

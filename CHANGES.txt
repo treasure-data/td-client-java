@@ -1,9 +1,10 @@
-Release 0.5.2 - 20XX/XX/XX
+Release 0.5.2 - 2014/09/05
   IMPROVEMENTS
     Addes model classes: AuthenticationException. If HttpClient recieves 401 from API server as HTTP response, It throws AuthenticationException, which is extended to HttpClientException.
     Adds new priority field to PerformSessionRequest model class.
     Changes DefaultClientAdaptorImpl: fixed handling 409 error within createTable method with NotFouneException. If the method receives 409, it doesn't retry.
     Changes DefaultClientAdaptorImpl: fixed handling 401 error within createTable method with AuthenticationException. If the method receives 401, it doesn't retry.
+    changes DefaultClientAdaptorImpl#authenticate method. It should not retry to send request for authenticating user and the password if it failed once.
 
 Release 0.5.1 - 2014/07/23
   IMPROVEMENTS

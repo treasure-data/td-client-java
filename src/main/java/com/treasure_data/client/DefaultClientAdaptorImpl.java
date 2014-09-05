@@ -121,9 +121,12 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
                     HttpClientException ex = (HttpClientException) e;
                     int statusCode = ex.getResponseCode();
                     if (statusCode == 401) {
-                     // If authentication failed 401, it doesn't retry.
-                        LOG.log(Level.WARNING, e.getMessage(), e);
-                        throw e;
+                        // If authentication failed 401, it doesn't retry.
+                        throw new AuthenticationException("Authentication failed", e.getMessage());
+                    }
+                    if (statusCode == 404) {
+                        // If authentication failed 404, it doesn't retry.
+                        throw new AuthenticationException("Authentication failed", e.getMessage(), 404);
                     }
                 }
 
