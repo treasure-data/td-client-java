@@ -1,4 +1,6 @@
 Release 0.5.3 - 20XX/XX/XX
+  IMPROVEMENTS
+    Changes BulkImportClientAdaptorImpl: fixed handling 404 and 409 errors within createSession method with NotFouneException/ConflictException. If the method receives 404 and 409, it doesn't retry.
 
 Release 0.5.2 - 2014/09/05
   IMPROVEMENTS
