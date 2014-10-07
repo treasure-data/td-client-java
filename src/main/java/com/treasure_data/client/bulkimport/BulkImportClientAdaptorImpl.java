@@ -43,6 +43,8 @@ import com.treasure_data.client.HttpClientException;
 import com.treasure_data.client.HttpConnectionImpl;
 import com.treasure_data.client.TreasureDataClient;
 import com.treasure_data.client.Validator;
+import com.treasure_data.model.ConflictException;
+import com.treasure_data.model.NotFoundException;
 import com.treasure_data.model.bulkimport.CommitSessionRequest;
 import com.treasure_data.model.bulkimport.CommitSessionResult;
 import com.treasure_data.model.bulkimport.CreateSessionRequest;
@@ -410,9 +412,10 @@ public class BulkImportClientAdaptorImpl extends AbstractClientAdaptor
                     HttpClientException ex = (HttpClientException) e;
                     int statusCode = ex.getResponseCode();
                     if (statusCode == 404) {
-                        // If database or table doesn't exist, createSession returns 404
-                        LOG.log(Level.WARNING, e.getMessage(), e);
-                        throw e;
+                        throw new NotFoundException("Table or database not found", e.getMessage());
+                    } else if (statusCode == 409) {
+                        String name = request.getSessionName();
+                        throw new ConflictException("BulkImport session already exists: " + name, e.getMessage());
                     }
                 }
 
