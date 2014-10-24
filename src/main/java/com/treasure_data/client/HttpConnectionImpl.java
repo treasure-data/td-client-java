@@ -356,7 +356,9 @@ public class HttpConnectionImpl {
     }
 
     public void disconnect() {
-        conn.disconnect();
+        if (conn != null) {
+            conn.disconnect();
+        }
     }
 
     public int getContentLength() throws IOException {
