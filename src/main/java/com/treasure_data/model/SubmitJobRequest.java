@@ -22,4 +22,18 @@ public class SubmitJobRequest extends JobSpecifyRequest<Job> {
     public SubmitJobRequest(Job job) {
         super(job);
     }
+
+    public void validate() { // TODO the method should be moved to superclass.
+        if (getJob() == null)
+            throw new IllegalArgumentException("job is null.");
+
+        if (getJob().getType() == null)
+            throw new IllegalArgumentException("job type is null.");
+
+        if (getDatabase() == null)
+            throw new IllegalArgumentException("database is null.");
+
+        if (getJob().getQuery() == null)
+            throw new IllegalArgumentException("query string is null.");
+    }
 }

@@ -1474,6 +1474,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             throws ClientException {
         request.setCredentials(getConfig().getCredentials());
         validator.validateCredentials(this, request);
+        request.validate();
 
         String jsonData = null;
         int code = 0;
@@ -1488,12 +1489,7 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             Map<String, String> header = new HashMap<String, String>();
             setUserAgentHeader(header);
             Map<String, String> params = new HashMap<String, String>();
-            if (request.getJob().getQuery() != null) {
-                // query is required
-                params.put("query", HttpConnectionImpl.e(request.getJob().getQuery()));
-            } else {
-                throw new IllegalArgumentException("query is null");
-            }
+            params.put("query", HttpConnectionImpl.e(request.getJob().getQuery()));
             params.put("version", "0.7");
             if (request.getJob().getResultTable() != null) {
                 // result table is not required
