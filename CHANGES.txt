@@ -1,3 +1,5 @@
+Release 0.5.5 - 20XX/XX/XX
+
 Release 0.5.4 - 2014/10/28
   BUG FIXES
     Fixes NullPointerException. NPE occurs within submitJob method if user's query string is null (or not set).
