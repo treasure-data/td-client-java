@@ -29,11 +29,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.security.KeyManagementException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -43,11 +40,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.msgpack.MessagePack;
 import org.msgpack.unpacker.BufferUnpacker;
@@ -82,7 +74,6 @@ public class HttpConnectionImpl {
         postReadTimeout = Integer.parseInt(props.getProperty(
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT,
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT_DEFAULTVALUE));
-        props.setProperty("javax.net.ssl.trustStore", "ca-bundle.jks");
         this.props = props;
     }
 
@@ -119,47 +110,6 @@ public class HttpConnectionImpl {
         return result;
     }
 
-    public static class OpenTrustManager implements X509TrustManager {
-
-        @Override
-        public void checkClientTrusted(X509Certificate[] arg0, String arg1)
-                throws CertificateException {
-        }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] arg0, String arg1)
-                throws CertificateException {
-        }
-
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-
-        public static void apply(HttpsURLConnection conn)
-                throws NoSuchAlgorithmException, KeyManagementException {
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, new TrustManager[] { new OpenTrustManager() },
-                    new java.security.SecureRandom());
-            conn.setSSLSocketFactory(sc.getSocketFactory());
-        }
-    }
-
-    protected HttpURLConnection getRawConnection(String urlString) throws IOException {
-        URL url = new URL(urlString.toString());
-        URLConnection conn = url.openConnection();
-        if (conn instanceof HttpsURLConnection) {
-            try {
-                OpenTrustManager.apply((HttpsURLConnection)conn);
-            } catch (KeyManagementException e) {
-                throw new IOException(e);
-            } catch (NoSuchAlgorithmException e) {
-                throw new IOException(e);
-            }
-        }
-        return (HttpURLConnection)conn;
-    }
-
     public void doGetRequest(Request<?> request, String path, Map<String, String> header,
             Map<String, String> params) throws IOException {
         StringBuilder sbuf = new StringBuilder();
@@ -180,7 +130,8 @@ public class HttpConnectionImpl {
         }
 
         // create connection object with url
-        conn = getRawConnection(sbuf.toString());
+        URL url = new URL(sbuf.toString());
+        conn = (HttpURLConnection) url.openConnection();
         conn.setReadTimeout(getReadTimeout);
 
         // header
@@ -213,10 +164,11 @@ public class HttpConnectionImpl {
                     sbuf.append("&");
                 }
             }
-            conn = getRawConnection(sbuf.toString());
+            URL url = new URL(sbuf.toString());
+            conn = (HttpURLConnection) url.openConnection();
         } else {
             URL url = new URL(sbuf.toString());
-            conn = getRawConnection(sbuf.toString());
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Length", "0");
         }
         conn.setReadTimeout(postReadTimeout);
@@ -245,7 +197,8 @@ public class HttpConnectionImpl {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(getSchemeHostPort(System.getenv(Config.TD_ENV_API_SERVER))).append(path);
 
-        conn = getRawConnection(sbuf.toString());
+        URL url = new URL(sbuf.toString());
+        conn = (HttpURLConnection) url.openConnection();
         conn.setReadTimeout(putReadTimeout);
 
         conn.setRequestMethod("PUT");
@@ -278,7 +231,8 @@ public class HttpConnectionImpl {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(getSchemeHostPort(System.getenv(Config.TD_ENV_API_SERVER))).append(path);
 
-        conn = getRawConnection(sbuf.toString());
+        URL url = new URL(sbuf.toString());
+        conn = (HttpURLConnection) url.openConnection();
         conn.setReadTimeout(putReadTimeout);
         conn.setRequestMethod("PUT");
         // conn.setRequestProperty("Content-Type", "application/octet-stream");
