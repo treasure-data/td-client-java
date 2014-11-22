@@ -1,3 +1,7 @@
+Release 0.5.6 - 20XX/XX/XX
+  IMPROVEMENTS
+    Changes the default API endpoint: api.treasure-data.com to api.treasuredata.com
+
 Release 0.5.5 - 2014/11/11
   IMPROVEMENTS
     Removes ca-bundle.jks.
