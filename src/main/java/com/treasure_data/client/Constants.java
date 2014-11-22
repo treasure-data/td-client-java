@@ -31,7 +31,7 @@ public interface Constants {
     String TD_API_SERVER_SCHEME_DEFAULTVALUE = TD_API_SERVER_SCHEME_HTTPS;
 
     String TD_API_SERVER_HOST = "td.api.server.host";
-    String TD_API_SERVER_HOST_DEFAULTVALUE = "api.treasure-data.com";
+    String TD_API_SERVER_HOST_DEFAULTVALUE = "api.treasuredata.com";
 
     String TD_API_SERVER_PORT = "td.api.server.port";
     String TD_API_SERVER_PORT_HTTPS = "443";
