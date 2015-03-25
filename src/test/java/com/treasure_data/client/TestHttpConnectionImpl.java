@@ -1,5 +1,6 @@
 package com.treasure_data.client;
 
+import static com.treasure_data.client.HttpConnectionImpl.e;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Properties;
@@ -122,6 +123,11 @@ public class TestHttpConnectionImpl {
     public void urlWithoutHttpPort02() throws Exception {
         assertURL(props, "http://api.treasure-data.com/",
                 "http://api.treasure-data.com:80");
+    }
+
+    @Test
+    public void encode() throws Exception {
+        assertEquals(e(" foo bar "), "%20foo%20bar%20");
     }
 
     public static void assertURL(Properties props, String urlString, String expected) throws Exception {

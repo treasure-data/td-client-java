@@ -417,7 +417,7 @@ public class HttpConnectionImpl {
 
     public static String e(String s) throws ClientException {
         try {
-            return URLEncoder.encode(s, "UTF-8");
+            return URLEncoder.encode(s, "UTF-8").replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
             throw new ClientException(e);
         }
