@@ -19,7 +19,7 @@ public class TestHttpConnectionImpl {
     @Test
     public void defaultURL() throws Exception {
         assertURL(props, null,
-                "https://api.treasure-data.com:443");
+                "https://api.treasuredata.com:443");
     }
 
     @Test
