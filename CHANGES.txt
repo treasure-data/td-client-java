@@ -1,5 +1,6 @@
 Release 0.5.6 - 20XX/XX/XX
   IMPROVEMENTS
+    Escapes ' 's (spaces) included in URL path or the parameters to '%20'
     Changes the default API endpoint: api.treasure-data.com to api.treasuredata.com
 
 Release 0.5.5 - 2014/11/11
