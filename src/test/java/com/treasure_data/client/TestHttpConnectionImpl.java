@@ -2,6 +2,7 @@ package com.treasure_data.client;
 
 import static com.treasure_data.client.HttpConnectionImpl.e;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
@@ -128,6 +129,19 @@ public class TestHttpConnectionImpl {
     @Test
     public void encode() throws Exception {
         assertEquals(e(" foo bar "), "%20foo%20bar%20");
+    }
+
+    @Test
+    public void proxyUser() {
+        Properties props = new Properties();
+        props.setProperty("http.proxyHost", "proxy");
+        props.setProperty("http.proxyPort", "8080");
+        HttpConnectionImpl conn = new HttpConnectionImpl(props);
+        assertTrue(conn.getAuthenticator() == null);
+        props.setProperty("http.proxyUser", "username");
+        props.setProperty("http.proxyPassword", "password");
+        conn = new HttpConnectionImpl(props);
+        assertTrue(conn.getAuthenticator() != null);
     }
 
     public static void assertURL(Properties props, String urlString, String expected) throws Exception {

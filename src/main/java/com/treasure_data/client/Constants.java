@@ -21,6 +21,10 @@ public interface Constants {
     String TD_ENV_API_KEY = "TREASURE_DATA_API_KEY";
     String TD_ENV_API_SERVER = "TD_API_SERVER";
 
+    // There's no "https.proxyUser". These settings are used both for http and https.
+    String HTTP_PROXY_USER = "http.proxyUser";
+    String HTTP_PROXY_PASSWORD = "http.proxyPassword";
+
     String TD_API_KEY = "td.api.key";
     String TD_INTERNAL_KEY = "td.api.internalkey";
     String TD_INTERNAL_KEY_ID = "td.api.internalkeyid";

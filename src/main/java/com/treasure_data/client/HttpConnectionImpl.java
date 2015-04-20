@@ -24,8 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
@@ -58,12 +60,14 @@ public class HttpConnectionImpl {
     private int getReadTimeout;
     private int putReadTimeout;
     private int postReadTimeout;
+    private Authenticator authenticator;
 
     public HttpConnectionImpl() {
         this(System.getProperties());
     }
 
     public HttpConnectionImpl(Properties props) {
+        // If the given props is System.getProperties(), it changes JVM's behavior.
         getReadTimeout = Integer.parseInt(props.getProperty(
                 Config.TD_CLIENT_GETMETHOD_READ_TIMEOUT,
                 Config.TD_CLIENT_GETMETHOD_READ_TIMEOUT_DEFAULTVALUE));
@@ -73,7 +77,29 @@ public class HttpConnectionImpl {
         postReadTimeout = Integer.parseInt(props.getProperty(
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT,
                 Config.TD_CLIENT_POSTMETHOD_READ_TIMEOUT_DEFAULTVALUE));
+        String username = props.getProperty(Config.HTTP_PROXY_USER);
+        String password = props.getProperty(Config.HTTP_PROXY_PASSWORD);
+        if (username != null && password != null) {
+            setDefaultAuthenticator(username, password.toCharArray());
+        }
         this.props = props;
+    }
+
+    // Bear in mind that this method changes HttpURLConnection's WWW-Authorization / Proxy-Authorization behavior in a JVM process.
+    private void setDefaultAuthenticator(final String username, final char[] password) {
+        authenticator = new Authenticator() {
+            public PasswordAuthentication getPasswordAuthentication() {
+                return (new PasswordAuthentication(username, password));
+            }
+        };
+        Authenticator.setDefault(authenticator);
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.info("Set authentication username: " + username);
+        }
+    }
+
+    Authenticator getAuthenticator() {
+        return authenticator;
     }
 
     private void setRequestAuthHeader(Request<?> request, HttpURLConnection conn) throws IOException {
