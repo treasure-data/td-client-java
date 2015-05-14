@@ -315,13 +315,13 @@ public class TreasureDataClient {
         return clientAdaptor.deleteTable(request);
     }
 
-    public void deletePartiallTable(String databaseName, String tableName,
+    public void deletePartialTable(String databaseName, String tableName,
             long from, long to) throws ClientException {
         clientAdaptor.deletePartialTable(new DeletePartialTableRequest(
                 new Table(new Database(databaseName), tableName), from, to));
     }
 
-    public DeletePartialTableResult deletePartiallTable(
+    public DeletePartialTableResult deletePartialTable(
             DeletePartialTableRequest request) throws ClientException {
         return clientAdaptor.deletePartialTable(request);
     }
