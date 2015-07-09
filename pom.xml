@@ -60,7 +60,7 @@
     <maven-assembly-plugin.version>2.3</maven-assembly-plugin.version>
     <maven-eclipse-plugin.version>2.5.1</maven-eclipse-plugin.version>
     <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
-    <maven-javadoc-plugin.version>2.9</maven-javadoc-plugin.version>
+    <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
     <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
     <wagon-webdav-jackrabbit.version>1.0-beta-7</wagon-webdav-jackrabbit.version>
     <maven-scm-plugin.version>1.6</maven-scm-plugin.version>
@@ -190,6 +190,14 @@
           <pushChanges>false</pushChanges>
         </configuration>
       </plugin>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-javadoc-plugin</artifactId>
+	<version>${maven-javadoc-plugin.version}</version>
+	<configuration>
+          <additionalparam>${javadoc.opts}</additionalparam>
+	</configuration>
+      </plugin>
     </plugins>
     <extensions>
       <extension>
@@ -235,4 +243,15 @@
     </plugins>
   </reporting>
 
+  <profiles>
+    <profile>
+      <id>doclint-java8-disable</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <properties>
+        <javadoc.opts>-Xdoclint:none</javadoc.opts>
+      </properties>
+    </profile>
+  </profiles>
 </project>
