@@ -176,11 +176,13 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
             LOG.log(Level.WARNING, "Authentication failed", e);
-            try {
-                code = conn.getResponseCode();
-            }
-            catch(IOException ioe) {
-                LOG.log(Level.WARNING, "Failed to get response code", ioe);
+            if(conn != null) {
+                try {
+                    code = conn.getResponseCode();
+                }
+                catch (IOException ioe) {
+                    LOG.log(Level.WARNING, "Failed to get response code", ioe);
+                }
             }
             throw new HttpClientException("Authentication failed", message, code, e);
         } finally {
