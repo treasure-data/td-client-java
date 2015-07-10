@@ -5,3 +5,7 @@ machine:
 test:
   override:
     - mvn test
+
+notify:
+  webhooks:
+    - url: http://td-beda.herokuapp.com/circleci_callback
