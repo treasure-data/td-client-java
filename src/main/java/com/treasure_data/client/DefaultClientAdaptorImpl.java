@@ -1524,6 +1524,16 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             validator.validateJSONData(jsonData);
         } catch (IOException e) {
             LOG.throwing(getClass().getName(), "submitJob", e);
+            // Update responce code
+            if(conn != null) {
+                try {
+                    code = conn.getResponseCode();
+                    message = conn.getResponseMessage();
+                }
+                catch(IOException e2) {
+                    // failed to get responce code, etc.
+                }
+            }
             LOG.severe(HttpClientException.toMessage(e.getMessage(), message, code));
             throw new HttpClientException("Submit job failed", message, code, e);
         } finally {
