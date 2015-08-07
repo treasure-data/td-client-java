@@ -22,9 +22,18 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.google.common.base.Objects;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TDColumn
 {
+    private static Logger logger = LoggerFactory.getLogger(TDColumn.class);
     private String name;
     private TDColumnType type;
     private byte[] key;
@@ -51,25 +60,60 @@ public class TDColumn
         return key;
     }
 
-    @JsonCreator
-    public static TDColumn valueFromTuple(String[] tuple)
+    private static List<TDColumn> emptyList = new ArrayList<TDColumn>(0);
+
+    private static JSONArray castToArray(Object obj)
     {
-        // TODO encode key in some ways
-        if (tuple != null && tuple.length == 2) {
-            return new TDColumn(
-                    tuple[0],
-                    TDColumnTypeDeserializer.parseColumnType(tuple[1]),
-                    tuple[0].getBytes());
-        }
-        else if (tuple != null && tuple.length == 3) {
-            return new TDColumn(
-                    tuple[0],
-                    TDColumnTypeDeserializer.parseColumnType(tuple[1]),
-                    tuple[2].getBytes());
+        if (obj instanceof JSONArray) {
+            return (JSONArray) obj;
         }
         else {
-            throw new RuntimeJsonMappingException("Unexpected string tuple to deserialize TDColumn");
+            throw new RuntimeJsonMappingException("Not an json array: " + obj);
         }
+    }
+
+    public static List<TDColumn> parseTuple(String jsonStr)
+    {
+        // unescape json quotation
+        try {
+            String unescaped = jsonStr.replaceAll("\\\"", "\"");
+            JSONArray arr = castToArray(new JSONParser().parse(unescaped));
+            List<TDColumn> columnList = new ArrayList<TDColumn>(arr.size());
+            for (Object e : arr) {
+                JSONArray columnNameAndType = castToArray(e);
+                String[] s = new String[columnNameAndType.size()];
+                for (int i = 0; i < columnNameAndType.size(); ++i) {
+                    s[i] = columnNameAndType.get(i).toString();
+                }
+                columnList.add(parseTuple(s));
+            }
+            return columnList;
+        }
+        catch (ParseException e) {
+            logger.error("Failed to parse json string", e);
+            return emptyList;
+        }
+    }
+
+    @JsonCreator
+    public static TDColumn parseTuple(String[] tuple)
+    {
+        // TODO encode key in some ways
+        if (tuple != null) {
+            if (tuple.length == 2) {
+                return new TDColumn(
+                        tuple[0],
+                        TDColumnTypeDeserializer.parseColumnType(tuple[1]),
+                        tuple[0].getBytes());
+            }
+            else if (tuple.length == 3) {
+                return new TDColumn(
+                        tuple[0],
+                        TDColumnTypeDeserializer.parseColumnType(tuple[1]),
+                        tuple[2].getBytes());
+            }
+        }
+        throw new RuntimeJsonMappingException("Unexpected string tuple to deserialize TDColumn");
     }
 
     @JsonValue

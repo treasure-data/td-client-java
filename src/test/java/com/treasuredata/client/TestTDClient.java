@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -34,9 +33,9 @@ import static org.junit.Assert.*;
 /**
  *
  */
-public class TDClientTest
+public class TestTDClient
 {
-    private static final Logger logger = LoggerFactory.getLogger(TDClientTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestTDClient.class);
 
     private TDClient client;
 
@@ -72,7 +71,14 @@ public class TDClientTest
         List<TDTable> tableList = client.listTables("sample_datasets");
         assertTrue(tableList.size() >= 2);
         logger.debug(Joiner.on(", ").join(tableList));
+
+        for(TDTable t : tableList) {
+            if(t.getName().equals("nasdaq")) {
+                assertTrue(t.getColumns().size() == 6);
+            }
+            else if (t.getName().equals("www_access")) {
+                assertTrue(t.getColumns().size() == 8);
+            }
+        }
     }
-
-
 }
