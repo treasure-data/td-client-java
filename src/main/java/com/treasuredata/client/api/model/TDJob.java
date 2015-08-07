@@ -21,30 +21,31 @@ package com.treasuredata.client.api.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Optional;
-import org.json.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  *
  */
 public class TDJob
 {
-    public static enum Type {
+    public static enum Type
+    {
         HIVE("hive"), MAPRED("mapred"), PRESTO("presto"), UNKNOWN("none");
-
         private final String type;
 
-        private Type(String type) {
+        private Type(String type)
+        {
             this.type = type;
         }
 
-        public String getType() {
+        public String getType()
+        {
             return type;
         }
 
-        public static Type fromString(String typeName) {
-            for(Type t : values()) {
-                if(t.type.equals(typeName)) {
+        public static Type fromString(String typeName)
+        {
+            for (Type t : values()) {
+                if (t.type.equals(typeName)) {
                     return t;
                 }
             }
@@ -52,22 +53,25 @@ public class TDJob
         }
     }
 
-    public static enum Priority {
+    public static enum Priority
+    {
         VERYLOW(-2), LOW(-1), NORMAL(0), HIGH(1), VERYHIGH(2);
-
         private final int priority;
 
-        private Priority(int priority) {
+        private Priority(int priority)
+        {
             this.priority = priority;
         }
 
-        public int getPriority() {
+        public int getPriority()
+        {
             return priority;
         }
 
-        public static Priority fromInt(int priority) {
-            for(Priority p : values()) {
-                if(p.priority == priority) {
+        public static Priority fromInt(int priority)
+        {
+            for (Priority p : values()) {
+                if (p.priority == priority) {
                     return p;
                 }
             }
@@ -76,20 +80,24 @@ public class TDJob
         }
     }
 
-    public static enum Status {
+    public static enum Status
+    {
         QUEUED, BOOTING, RUNNING, SUCCESS, ERROR, KILLED, UNKNOWN;
 
         @JsonCreator
-        public static Status fromString(String s) {
+        public static Status fromString(String s)
+        {
             return valueOf(s.toUpperCase());
         }
     }
 
-    private static class Debug {
+    private static class Debug
+    {
         private final String cmdout;
         private final String stderr;
 
-        public Debug(String cmdout, String stderr) {
+        public Debug(String cmdout, String stderr)
+        {
             this.cmdout = cmdout;
             this.stderr = stderr;
         }
@@ -104,7 +112,6 @@ public class TDJob
             return stderr;
         }
     }
-
 
     private final String jobId;
     private final Status status;

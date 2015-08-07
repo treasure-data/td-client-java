@@ -263,9 +263,7 @@ public class TDClient
     public TDJobList listJobs(long from, long to)
             throws TDClientException
     {
-
-
-        return null;
+        return submit(prepareGet(String.format("/v3/job/list?from=%d&to=%d", from, to)), TDJobList.class);
     }
 
     @Override
