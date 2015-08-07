@@ -134,6 +134,7 @@ public class TDClient
     {
         try {
             ContentResponse response = submitRequest(request);
+            logger.debug("response json:\n" + response.getContentAsString());
             return objectMapper.readValue(response.getContent(), resultType);
         }
         catch (IOException e) {
@@ -157,6 +158,7 @@ public class TDClient
     public boolean createDatabase(String databaseName)
             throws TDClientException
     {
+
         return false;
     }
 
@@ -171,8 +173,8 @@ public class TDClient
     public List<TDTable> listTables(String databaseName)
             throws TDClientException
     {
-
-        return null;
+        TDTableList tableList = submit(prepareGet(TD_API_LIST_TABLES + "/" + databaseName), TDTableList.class);
+        return tableList.getTables();
     }
 
     @Override

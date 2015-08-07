@@ -19,6 +19,9 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
+import com.treasuredata.client.api.model.TDTable;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,15 +38,41 @@ public class TDClientTest
 {
     private static final Logger logger = LoggerFactory.getLogger(TDClientTest.class);
 
+    private TDClient client;
+
+    @Before
+    public void setUp()
+            throws Exception
+    {
+        client = new TDClient();
+    }
+
+    @After
+    public void tearDown()
+            throws Exception
+    {
+        client.close();
+    }
+
+
     @Test
     public void listDatabases()
             throws Exception
     {
-        TDClient client = new TDClient();
         List<String> dbList = client.listDatabases();
         assertTrue("should contain sample_datasets", dbList.contains("sample_datasets"));
 
         logger.debug(Joiner.on(", ").join(dbList));
+     }
+
+    @Test
+    public void listTables()
+            throws Exception
+    {
+        List<TDTable> tableList = client.listTables("sample_datasets");
+        assertTrue(tableList.size() >= 2);
+        logger.debug(Joiner.on(", ").join(tableList));
     }
+
 
 }

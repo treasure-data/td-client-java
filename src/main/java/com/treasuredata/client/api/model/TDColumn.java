@@ -98,4 +98,10 @@ public class TDColumn
     {
         return Objects.hashCode(name, type, key);
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format("%s:%s", name, type.toString());
+    }
 }

@@ -20,6 +20,7 @@ package com.treasuredata.client.api.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 
 import java.util.List;
@@ -78,5 +79,10 @@ public class TDTable
     public int hashCode()
     {
         return Objects.hashCode(name, type, columns);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)", name, Joiner.on(", ").join(columns));
     }
 }
