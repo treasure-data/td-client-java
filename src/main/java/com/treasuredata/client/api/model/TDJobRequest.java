@@ -16,44 +16,53 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api;
+package com.treasuredata.client.api.model;
 
-public class TDApiClientConfig
+/**
+ *
+ */
+public class TDJobRequest
 {
-    private final String endpoint;
-    private final String apiKey;
-    private final String internalKey;
-    private final String internalKeyVersion;
+    private final String database;
+    private final TDJob.Type type;
+    private final String query;
+    private final TDJob.Priority priority;
+    private final int retryLimit;
 
-    public TDApiClientConfig(String apiKey) {
-        this("api.treasuredata.com", null, null, null);
-    }
-
-    public TDApiClientConfig(String endpoint, String apiKey,  String internalKey, String internalKeyVersion)
+    public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, int retryLimit)
     {
-        this.endpoint = endpoint;
-        this.apiKey = apiKey;
-        this.internalKey = internalKey;
-        this.internalKeyVersion = internalKeyVersion;
+        this.database = database;
+        this.type = type;
+        this.query = query;
+        this.priority = priority;
+        this.retryLimit = retryLimit;
     }
 
-    public String getEndpoint()
+    public String getDatabase()
     {
-        return endpoint;
+        return database;
     }
 
-    public String getApiKey()
+    public TDJob.Type getType()
     {
-        return apiKey;
+        return type;
     }
 
-    public String getInternalKey()
+    public String getQuery()
     {
-        return internalKey;
+        return query;
     }
 
-    public String getInternalKeyVersion()
+    public TDJob.Priority getPriority()
     {
-        return internalKeyVersion;
+        return priority;
     }
+
+    public int getRetryLimit()
+    {
+        return retryLimit;
+    }
+
+
+
 }
