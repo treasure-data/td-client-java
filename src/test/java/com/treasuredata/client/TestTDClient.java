@@ -19,6 +19,8 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
+import com.treasuredata.client.api.model.TDJob;
+import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDTable;
 import org.junit.After;
 import org.junit.Before;
@@ -81,4 +83,13 @@ public class TestTDClient
             }
         }
     }
+
+    @Test
+    public void listJobs()
+            throws Exception
+    {
+        TDJobList jobs = client.listJobs();
+        logger.debug("job list: " + jobs);
+    }
+
 }

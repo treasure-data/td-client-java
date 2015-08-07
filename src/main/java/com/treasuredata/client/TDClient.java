@@ -19,7 +19,10 @@
 package com.treasuredata.client;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
@@ -27,6 +30,7 @@ import com.treasuredata.client.api.JettyHttpClient;
 import com.treasuredata.client.api.model.TDDatabase;
 import com.treasuredata.client.api.model.TDDatabaseList;
 import com.treasuredata.client.api.model.TDJob;
+import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobResult;
 import com.treasuredata.client.api.model.TDTable;
@@ -77,8 +81,10 @@ public class TDClient
     {
         this.config = config;
         this.httpClient = new JettyHttpClient();
-        this.objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.objectMapper = new ObjectMapper()
+                .registerModule(new JsonOrgModule()) // for mapping query json to JSONObject
+                .registerModule(new GuavaModule())   // for mapping to Guava Optional class
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public void close() {
@@ -134,8 +140,14 @@ public class TDClient
     {
         try {
             ContentResponse response = submitRequest(request);
-            logger.debug("response json:\n" + response.getContentAsString());
+            if(logger.isTraceEnabled()) {
+                logger.trace("response json:\n" + response.getContentAsString());
+            }
             return objectMapper.readValue(response.getContent(), resultType);
+        }
+        catch (JsonMappingException e) {
+            logger.error("Jackson mapping error", e);
+            throw new TDClientException(ErrorCode.API_INVALID_JSON_RESPONSE, e);
         }
         catch (IOException e) {
             throw new TDClientException(ErrorCode.API_INVALID_JSON_RESPONSE, e);
@@ -181,7 +193,7 @@ public class TDClient
     public List<TDTable> listTables(TDDatabase database)
             throws TDClientException
     {
-        return null;
+        return listTables(database.getName());
     }
 
     @Override
@@ -241,16 +253,18 @@ public class TDClient
     }
 
     @Override
-    public List<TDJob> listJobs()
+    public TDJobList listJobs()
             throws TDClientException
     {
-        return null;
+        return submit(prepareGet("/v3/job/list"), TDJobList.class);
     }
 
     @Override
-    public List<TDJob> listJobs(long from, long to)
+    public TDJobList listJobs(long from, long to)
             throws TDClientException
     {
+
+
         return null;
     }
 

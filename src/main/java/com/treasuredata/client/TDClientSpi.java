@@ -20,6 +20,7 @@ package com.treasuredata.client;
 
 import com.treasuredata.client.api.model.TDDatabase;
 import com.treasuredata.client.api.model.TDJob;
+import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobResult;
 import com.treasuredata.client.api.model.TDTable;
@@ -98,9 +99,9 @@ public interface TDClientSpi
 
     Future<TDJobResult> submit(TDJobRequest jobRequest) throws TDClientException;
 
-    List<TDJob> listJobs() throws TDClientException;
+    TDJobList listJobs() throws TDClientException;
 
-    List<TDJob> listJobs(long from, long to) throws TDClientException;
+    TDJobList listJobs(long from, long to) throws TDClientException;
 
     void killJob(String jobId) throws TDClientException;
 
