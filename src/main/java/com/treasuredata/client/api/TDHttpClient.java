@@ -21,6 +21,8 @@ package com.treasuredata.client.api;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.treasuredata.client.ErrorCode;
@@ -53,9 +55,6 @@ public class TDHttpClient
     public TDHttpClient(TDClientConfig config)
     {
         this.config = config;
-        this.objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
         this.httpClient = new HttpClient();
         httpClient.setConnectTimeout(3000);
         httpClient.setAddressResolutionTimeout(3000);
@@ -72,6 +71,11 @@ public class TDHttpClient
             logger.error("Failed to initialize Jetty client", e);
             throw Throwables.propagate(e);
         }
+
+        this.objectMapper = new ObjectMapper()
+                .registerModule(new JsonOrgModule()) // for mapping query json to JSONObject
+                .registerModule(new GuavaModule())   // for mapping to Guava Optional class
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public void close()

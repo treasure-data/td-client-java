@@ -18,10 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.treasuredata.client.api.ApiRequest;
 import com.treasuredata.client.api.TDHttpClient;
 import com.treasuredata.client.api.model.TDDatabase;
@@ -54,7 +50,6 @@ public class TDClient
     private static final Logger logger = LoggerFactory.getLogger(TDClient.class);
     private final TDClientConfig config;
     private final TDHttpClient httpClient;
-    private final ObjectMapper objectMapper;
 
     public TDClient()
             throws IOException, TDClientException
@@ -66,10 +61,6 @@ public class TDClient
     {
         this.config = config;
         this.httpClient = new TDHttpClient(config);
-        this.objectMapper = new ObjectMapper()
-                .registerModule(new JsonOrgModule()) // for mapping query json to JSONObject
-                .registerModule(new GuavaModule())   // for mapping to Guava Optional class
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public void close()
