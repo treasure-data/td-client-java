@@ -54,14 +54,14 @@ public class ApiRequest
         private static final Map<String, String> EMPTY_MAP = ImmutableMap.of();
 
         private HttpMethod method;
-        private String uri;
+        private String path;
         private Map<String, String> queryParams;
         private Map<String, String> headerParams;
 
-        Builder(HttpMethod method, String uri)
+        Builder(HttpMethod method, String path)
         {
             this.method = method;
-            this.uri = uri;
+            this.path = path;
         }
 
         public static Builder GET(String uri)
@@ -96,7 +96,7 @@ public class ApiRequest
         {
             return new ApiRequest(
                     method,
-                    uri,
+                    path,
                     queryParams != null ? queryParams : EMPTY_MAP,
                     headerParams != null ? headerParams : EMPTY_MAP);
         }
@@ -114,26 +114,27 @@ public class ApiRequest
 
 
     private final HttpMethod method;
-    private final String uri;
+    private final String path;
     private final Map<String, String> queryParams;
     private final Map<String, String> headerParams;
 
-    ApiRequest(HttpMethod method, String uri, Map<String, String> queryParams, Map<String, String> headerParams)
+    ApiRequest(HttpMethod method, String path, Map<String, String> queryParams, Map<String, String> headerParams)
     {
         this.method = checkNotNull(method, "method is null");
-        this.uri = checkNotNull(uri, "uri is null");
+        this.path = checkNotNull(path, "uri is null");
         this.queryParams = checkNotNull(queryParams, "queryParms is null");
         this.headerParams = checkNotNull(headerParams, "headerParams is null");
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return path;
     }
 
     public Request newJettyRequest(HttpClient client, TDClientConfig config)
     {
         String queryStr = "";
-        String requestUri = uri;
+        // TODO support SSL
+        String requestUri = String.format("http://%s%s", config.getEndpoint(), path);
         if (!queryParams.isEmpty()) {
             List<String> queryParamList = new ArrayList<String>(queryParams.size());
             for (Map.Entry<String, String> queryParam : queryParams.entrySet()) {

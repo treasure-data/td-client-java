@@ -122,17 +122,17 @@ public class TDHttpClient
                 }
                 catch (TimeoutException e) {
                     rootCause = Optional.<Exception>of(e);
-                    logger.warn(String.format("API request to %s timed out", apiRequest.getUri()), e);
+                    logger.warn(String.format("API request to %s timed out", apiRequest.getPath()), e);
                 }
                 int waitTimeMs = retry.nextWaitTimeMillis();
                 Thread.sleep(waitTimeMs);
-                logger.warn(String.format("Retrying request to %s (%d/%d) %,d", apiRequest.getUri(), retry.getRetryCount(), retry.getMaxRetryCount(), waitTimeMs));
+                logger.warn(String.format("Retrying request to %s (%d/%d) %,d", apiRequest.getPath(), retry.getRetryCount(), retry.getMaxRetryCount(), waitTimeMs));
             }
         }
         catch (InterruptedException e) {
             throw new TDClientException(ErrorCode.API_EXECUTION_INTERRUPTED, e);
         }
-        throw new TDClientException(ErrorCode.API_RETRY_LIMIT_EXCEEDED, String.format("Failed to process API request to %s", apiRequest.getUri()), rootCause);
+        throw new TDClientException(ErrorCode.API_RETRY_LIMIT_EXCEEDED, String.format("Failed to process API request to %s", apiRequest.getPath()), rootCause);
     }
 
     public <Result> Result submit(ApiRequest request, Class<Result> resultType)

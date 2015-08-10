@@ -68,10 +68,10 @@ public class TDClient
         httpClient.close();
     }
 
-    private <ResultType> ResultType GET(String urlPrefix, Class<ResultType> resultTypeClass)
+    private <ResultType> ResultType GET(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        ApiRequest request = ApiRequest.Builder.GET(String.format("http://%s%s", config.getEndpoint(), urlPrefix)).build();
+        ApiRequest request = ApiRequest.Builder.GET(path).build();
         return httpClient.submit(request, resultTypeClass);
     }
 
