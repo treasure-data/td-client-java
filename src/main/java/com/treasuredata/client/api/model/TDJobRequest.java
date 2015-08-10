@@ -18,6 +18,8 @@
  */
 package com.treasuredata.client.api.model;
 
+import com.google.common.base.Optional;
+
 /**
  *
  */
@@ -27,15 +29,22 @@ public class TDJobRequest
     private final TDJob.Type type;
     private final String query;
     private final TDJob.Priority priority;
+    private final Optional<String> resultOutput;
     private final int retryLimit;
 
-    public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, int retryLimit)
+    public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, Optional<String> resultOutput, int retryLimit)
     {
         this.database = database;
         this.type = type;
         this.query = query;
         this.priority = priority;
+        this.resultOutput = resultOutput;
         this.retryLimit = retryLimit;
+    }
+
+    public static TDJobRequest newPrestoQuery(String database, String query) {
+        // TODO use the default retry limit
+        return new TDJobRequest(database, TDJob.Type.PRESTO, query, TDJob.Priority.NORMAL, Optional.<String>absent(), 10);
     }
 
     public String getDatabase()
@@ -63,6 +72,8 @@ public class TDJobRequest
         return retryLimit;
     }
 
-
-
+    public Optional<String> getResultOutput()
+    {
+        return resultOutput;
+    }
 }

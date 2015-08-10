@@ -19,45 +19,31 @@
 package com.treasuredata.client;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
-import com.treasuredata.client.api.JettyHttpClient;
+import com.treasuredata.client.api.ApiRequest;
+import com.treasuredata.client.api.TDHttpClient;
 import com.treasuredata.client.api.model.TDDatabase;
 import com.treasuredata.client.api.model.TDDatabaseList;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobResult;
+import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDTable;
 import com.treasuredata.client.api.model.TDTableList;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.api.Response;
-import org.eclipse.jetty.client.util.StringContentProvider;
-import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
+import java.util.Properties;
+
+import static com.treasuredata.client.api.ApiRequest.urlEncode;
 
 /**
  *
@@ -66,9 +52,8 @@ public class TDClient
         implements TDClientSpi
 {
     private static final Logger logger = LoggerFactory.getLogger(TDClient.class);
-
     private final TDClientConfig config;
-    private final JettyHttpClient httpClient;
+    private final TDHttpClient httpClient;
     private final ObjectMapper objectMapper;
 
     public TDClient()
@@ -80,87 +65,32 @@ public class TDClient
     public TDClient(TDClientConfig config)
     {
         this.config = config;
-        this.httpClient = new JettyHttpClient();
+        this.httpClient = new TDHttpClient(config);
         this.objectMapper = new ObjectMapper()
                 .registerModule(new JsonOrgModule()) // for mapping query json to JSONObject
                 .registerModule(new GuavaModule())   // for mapping to Guava Optional class
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    public void close() {
+    public void close()
+    {
         httpClient.close();
     }
 
-    protected ContentResponse submitRequest(Request request)
+    private <ResultType> ResultType GET(String urlPrefix, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        ExponentialBackOffRetry retry = new ExponentialBackOffRetry(config.getRetryLimit(), config.getRetryInitialWaitMillis(), config.getRetryWaitMillis());
-        Optional<Exception> rootCause = Optional.absent();
-        try {
-            while (retry.isRunnable()) {
-                try {
-                    ContentResponse response = request.send();
-                    int code =response.getStatus();
-                    if(HttpStatus.isSuccess(code)) {
-                        // 2xx success
-                        return response;
-                    }
-                    else if(HttpStatus.isClientError(code)) {
-                        // 4xx errors
-                        throw new TDClientException(ErrorCode.API_CLIENT_ERROR, response.getReason());
-                    }
-                    else if(HttpStatus.isServerError(code)) {
-                        // 5xx errors
-                        logger.warn("API request to %s failed with %d: %s", request.getPath(), code, response.getReason());
-                    }
-                    else {
-                        logger.warn("API request to %s failed with code %d: %s", request.getPath(), code, response.getReason());
-                    }
-                }
-                catch(ExecutionException e) {
-                    rootCause = Optional.<Exception>of(e);
-                    logger.warn("API request failed", e);
-                }
-                catch(TimeoutException e) {
-                    rootCause = Optional.<Exception>of(e);
-                    logger.warn(String.format("API request to %s timed out", request.getPath()), e);
-                }
-                Thread.sleep(retry.nextWaitTimeMillis());
-                logger.warn(String.format("Retrying request to %s (%d/%d)", request.getPath(), retry.getRetryCount(), retry.getMaxRetryCount()));
-            }
-        }
-        catch(InterruptedException e) {
-            throw new TDClientException(ErrorCode.API_EXECUTION_INTERRUPTED, e);
-        }
-        throw new TDClientException(ErrorCode.API_RETRY_LIMIT_EXCEEDED, String.format("Failed to process API request to %s", request.getPath()), rootCause);
-    }
-
-    protected <Result> Result submit(Request request, Class<Result> resultType)
-            throws TDClientException
-    {
-        try {
-            ContentResponse response = submitRequest(request);
-            if(logger.isTraceEnabled()) {
-                logger.trace("response json:\n" + response.getContentAsString());
-            }
-            return objectMapper.readValue(response.getContent(), resultType);
-        }
-        catch (JsonMappingException e) {
-            logger.error("Jackson mapping error", e);
-            throw new TDClientException(ErrorCode.API_INVALID_JSON_RESPONSE, e);
-        }
-        catch (IOException e) {
-            throw new TDClientException(ErrorCode.API_INVALID_JSON_RESPONSE, e);
-        }
+        ApiRequest request = ApiRequest.Builder.GET(String.format("http://%s%s", config.getEndpoint(), urlPrefix)).build();
+        return httpClient.submit(request, resultTypeClass);
     }
 
     @Override
     public List<String> listDatabases()
             throws TDClientException
     {
-        TDDatabaseList result = submit(prepareGet(TD_API_LIST_DATABASES), TDDatabaseList.class);
+        TDDatabaseList result = GET("/v3/database/list", TDDatabaseList.class);
         List<String> tableList = new ArrayList<String>(result.getDatabases().size());
-        for(TDDatabase db : result.getDatabases()) {
+        for (TDDatabase db : result.getDatabases()) {
             tableList.add(db.getName());
         }
         return tableList;
@@ -185,7 +115,7 @@ public class TDClient
     public List<TDTable> listTables(String databaseName)
             throws TDClientException
     {
-        TDTableList tableList = submit(prepareGet(TD_API_LIST_TABLES + "/" + databaseName), TDTableList.class);
+        TDTableList tableList = GET("/v3/table/list/" + urlEncode(databaseName), TDTableList.class);
         return tableList.getTables();
     }
 
@@ -246,24 +176,37 @@ public class TDClient
     }
 
     @Override
-    public Future<TDJobResult> submit(TDJobRequest jobRequest)
+    public TDJobStatus submit(TDJobRequest jobRequest)
             throws TDClientException
     {
-        return null;
+        ApiRequest.Builder request = ApiRequest.Builder.POST(
+                String.format("/v3/job/issue/%s/%s",
+                        urlEncode(jobRequest.getType().getType()),
+                        urlEncode(jobRequest.getDatabase())));
+
+        request.addQueryParam("query", jobRequest.getQuery());
+        request.addQueryParam("version", getVersion());
+        if (jobRequest.getResultOutput().isPresent()) {
+            request.addQueryParam("result", jobRequest.getResultOutput().get());
+        }
+        request.addQueryParam("priority", Integer.toString(jobRequest.getPriority().toInt()));
+        request.addQueryParam("retry_limit", Integer.toString(jobRequest.getRetryLimit()));
+
+        return httpClient.submit(request.build(), TDJobStatus.class);
     }
 
     @Override
     public TDJobList listJobs()
             throws TDClientException
     {
-        return submit(prepareGet("/v3/job/list"), TDJobList.class);
+        return GET("/v3/job/list", TDJobList.class);
     }
 
     @Override
     public TDJobList listJobs(long from, long to)
             throws TDClientException
     {
-        return submit(prepareGet(String.format("/v3/job/list?from=%d&to=%d", from, to)), TDJobList.class);
+        return GET(String.format("/v3/job/list?from=%d&to=%d", from, to), TDJobList.class);
     }
 
     @Override
@@ -287,106 +230,35 @@ public class TDClient
         return null;
     }
 
-    protected Request prepareGet(String path)
+    private static final String version;
+
+    public static String getVersion()
     {
-        return prepareRequest(HttpMethod.GET, path, null, null);
+        return version;
     }
-
-    private static String urlEncode(String value) {
-        try {
-            return URLEncoder.encode(value, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
-            throw Throwables.propagate(e);
-        }
-    }
-
-    protected Request prepareRequest(HttpMethod method, String path, Map<String, String> headers, Map<String, String> query)
-    {
-        String queryString = null;
-        if (method == HttpMethod.GET && query != null && !query.isEmpty()) {
-            StringBuilder qs = new StringBuilder();
-            for (Map.Entry<String, String> entry : query.entrySet()) {
-                qs.append(urlEncode(entry.getKey()));
-                qs.append("=");
-                qs.append(urlEncode(entry.getValue()));
-            }
-            queryString = qs.toString();
-            path = String.format("%s?%s", path, qs);
-        }
-
-        Request request = httpClient.newRequest("http://" + config.getEndpoint() + path);
-        request.method(method);
-        request.agent("TDClient 0.6");
-        request.header("Authorization", "TD1 " + config.getApiKey());
-        if (headers != null) {
-            for (Map.Entry<String, String> entry : headers.entrySet()) {
-                request.header(entry.getKey(), entry.getValue());
-            }
-        }
-        String dateHeader = setDateHeader(request);
-        if (method != HttpMethod.GET && queryString != null) {
-            request.content(new StringContentProvider(queryString), "application/x-www-form-urlencoded");
-        }
-        return request;
-    }
-
-    private static final ThreadLocal<SimpleDateFormat> RFC2822_FORMAT =
-            new ThreadLocal<SimpleDateFormat>()
-            {
-                @Override
-                protected SimpleDateFormat initialValue()
-                {
-                    return new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-                }
-            };
-
-    static String setDateHeader(Request request)
-    {
-        Date currentDate = new Date();
-        String dateHeader = RFC2822_FORMAT.get().format(currentDate);
-        request.header("Date", dateHeader);
-        return dateHeader;
-    }
-
-    private static final ThreadLocal<MessageDigest> SHA1 =
-            new ThreadLocal<MessageDigest>()
-            {
-                @Override
-                protected MessageDigest initialValue()
-                {
-                    try {
-                        return MessageDigest.getInstance("SHA-1");
-                    }
-                    catch (NoSuchAlgorithmException e) {
-                        throw new RuntimeException("SHA-1 digest algorithm must be available but not found", e);
-                    }
-                }
-            };
-    private static final char[] hexChars = new char[16];
 
     static {
-        for (int i = 0; i < 16; i++) {
-            hexChars[i] = Integer.toHexString(i).charAt(0);
+        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client.td-client/pom.properties");
+        String v = "unknown";
+        if (mavenProperties != null) {
+            InputStream in = null;
+            try {
+                try {
+                    in = mavenProperties.openStream();
+                    Properties p = new Properties();
+                    p.load(in);
+                    v = p.getProperty("version", "unknown");
+                }
+                finally {
+                    if (in != null) {
+                        in.close();
+                    }
+                }
+            }
+            catch (Throwable e) {
+                logger.warn("Error in reading pom.properties file", e);
+            }
         }
+        version = v;
     }
-
-    @VisibleForTesting
-    static String sha1HexFromString(String string)
-    {
-        MessageDigest sha1 = SHA1.get();
-        sha1.reset();
-        sha1.update(string.getBytes());
-        byte[] bytes = sha1.digest();
-
-        // convert binary to hex string
-        char[] array = new char[bytes.length * 2];
-        for (int i = 0; i < bytes.length; i++) {
-            int b = (int) bytes[i];
-            array[i * 2] = hexChars[(b & 0xf0) >> 4];
-            array[i * 2 + 1] = hexChars[b & 0x0f];
-        }
-        return new String(array);
-    }
-
 }

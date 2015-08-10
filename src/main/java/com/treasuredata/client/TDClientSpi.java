@@ -23,6 +23,7 @@ import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobResult;
+import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDTable;
 
 import java.util.List;
@@ -33,8 +34,6 @@ import java.util.concurrent.Future;
  */
 public interface TDClientSpi
 {
-    final String TD_API_LIST_DATABASES = "/v3/database/list";
-    final String TD_API_LIST_TABLES = "/v3/table/list";
 
 
     /**
@@ -97,7 +96,7 @@ public interface TDClientSpi
 
     void partialDelete(TDTable table, long from, long to) throws TDClientException;
 
-    Future<TDJobResult> submit(TDJobRequest jobRequest) throws TDClientException;
+    TDJobStatus submit(TDJobRequest jobRequest) throws TDClientException;
 
     TDJobList listJobs() throws TDClientException;
 

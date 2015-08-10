@@ -18,34 +18,22 @@
  */
 package com.treasuredata.client.api.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *
  */
-public class TDQuery
+public class TDJobStatus
 {
-    private final String query;
+    private final String jobId;
 
-    public TDQuery(String query)
+    public TDJobStatus(@JsonProperty("job_id") String jobId) {
+        this.jobId = jobId;
+    }
+
+    public String getJobId()
     {
-        this.query = query;
-    }
-
-    @JsonCreator
-    public static TDQuery fromString(String s) {
-        return new TDQuery(s);
-    }
-
-    @JsonCreator
-    public static TDQuery fromObject(Object value) {
-        // embulk job have nested json object
-        return new TDQuery(value.toString());
-    }
-
-    @Override
-    public String toString()
-    {
-        return query;
+        return jobId;
     }
 }
+

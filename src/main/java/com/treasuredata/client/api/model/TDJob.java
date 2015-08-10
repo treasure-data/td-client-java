@@ -42,6 +42,12 @@ public class TDJob
             return type;
         }
 
+        @Override
+        public String toString()
+        {
+            return type;
+        }
+
         public static Type fromString(String typeName)
         {
             for (Type t : values()) {
@@ -63,7 +69,7 @@ public class TDJob
             this.priority = priority;
         }
 
-        public int getPriority()
+        public int toInt()
         {
             return priority;
         }

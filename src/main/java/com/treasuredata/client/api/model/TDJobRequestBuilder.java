@@ -18,12 +18,20 @@
  */
 package com.treasuredata.client.api.model;
 
+import com.google.common.base.Optional;
+
 public class TDJobRequestBuilder {
     private String database;
     private TDJob.Type type;
     private String query;
     private TDJob.Priority priority;
+    private String result;
     private int retryLimit;
+
+    public void setResult(String result)
+    {
+        this.result = result;
+    }
 
     public TDJobRequestBuilder setDatabase(String database)
     {
@@ -69,6 +77,6 @@ public class TDJobRequestBuilder {
 
     public TDJobRequest createTDJobRequest()
     {
-        return new TDJobRequest(database, type, query, priority, retryLimit);
+        return new TDJobRequest(database, type, query, priority, Optional.fromNullable(result), retryLimit);
     }
 }

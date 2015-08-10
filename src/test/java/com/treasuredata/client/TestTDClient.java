@@ -21,6 +21,9 @@ package com.treasuredata.client;
 import com.google.common.base.Joiner;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
+import com.treasuredata.client.api.model.TDJobRequest;
+import com.treasuredata.client.api.model.TDJobResult;
+import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDTable;
 import org.junit.After;
 import org.junit.Before;
@@ -29,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
 
@@ -90,6 +94,13 @@ public class TestTDClient
     {
         TDJobList jobs = client.listJobs();
         logger.debug("job list: " + jobs);
+    }
+
+    @Test
+    public void submitJob()
+            throws Exception
+    {
+        TDJobStatus jobResult = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(*) from nasdaq"));
     }
 
 }
