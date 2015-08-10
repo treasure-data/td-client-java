@@ -106,11 +106,17 @@ public class TDHttpClient
                 }
 
                 try {
+                    if(logger.isDebugEnabled()) {
+                        logger.debug(String.format("Sending API request to %s", apiRequest.getPath()));
+                    }
                     Request request = apiRequest.newJettyRequest(httpClient, config);
                     ContentResponse response = request.send();
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
+                        if(logger.isDebugEnabled()) {
+                            logger.debug(String.format("API request to %s succeeded with code %d", request.getPath(), code));
+                        }
                         return response;
                     }
                     else if (HttpStatus.isClientError(code)) {
@@ -119,7 +125,7 @@ public class TDHttpClient
                     }
                     else if (HttpStatus.isServerError(code)) {
                         // 5xx errors
-                        logger.warn("API request to %s failed with %d: %s", request.getPath(), code, response.getReason());
+                        logger.warn("API request to %s failed with internal error code %d: %s", request.getPath(), code, response.getReason());
                     }
                     else {
                         logger.warn("API request to %s failed with code %d: %s", request.getPath(), code, response.getReason());
