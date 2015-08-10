@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 /**
@@ -29,46 +30,45 @@ public class ExponentialBackOffRetry
     private final int intervalWaitMillis;
     private final int maxRetryCount;
     private int executionCount;
-    private int currentInterval;
+    private int nextInterval;
 
-    public ExponentialBackOffRetry(int maxRetryCount, int initialWaitMillis, int intervalWaitMillis) {
+    public ExponentialBackOffRetry(int maxRetryCount, int initialWaitMillis, int intervalWaitMillis)
+    {
         this.initialWaitMills = initialWaitMillis;
         this.intervalWaitMillis = intervalWaitMillis;
         this.maxRetryCount = maxRetryCount;
         this.executionCount = 0;
-        this.currentInterval = 0;
+        this.nextInterval = intervalWaitMillis;
 
         Preconditions.checkArgument(maxRetryCount >= 0, "maxRetryCount must be >= 0");
         Preconditions.checkArgument(initialWaitMillis >= 0, "initialWaitMillis must be >= 0");
         Preconditions.checkArgument(intervalWaitMillis >= 0, "intervalWaitMillios must be >= 0");
     }
 
-    public boolean isRunnable() {
-        return executionCount <= maxRetryCount;
-    }
-
-    public int getRetryCount() {
+    public int getExecutionCount()
+    {
         return executionCount;
     }
 
-    public int getMaxRetryCount() {
+    public int getMaxRetryCount()
+    {
         return maxRetryCount;
     }
-
-    public int nextWaitTimeMillis() {
-        if(executionCount == 0) {
+    
+    public Optional<Integer> nextWaitTimeMillis()
+    {
+        if(executionCount >= maxRetryCount) {
+            return Optional.absent();
+        }
+        else if (executionCount == 0) {
             executionCount++;
-            currentInterval = initialWaitMills;
-            return initialWaitMills;
+            return Optional.of(initialWaitMills);
         }
         else {
             executionCount++;
-            int current = currentInterval;
-            currentInterval *= 2;
-            return current;
+            int current = nextInterval;
+            nextInterval *= 2;
+            return Optional.of(current);
         }
     }
-
-
-
 }

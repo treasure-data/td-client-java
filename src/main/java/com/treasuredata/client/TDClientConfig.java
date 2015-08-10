@@ -40,8 +40,8 @@ public class TDClientConfig
     private final String internalKey;
     private final String internalKeyVersion;
     private final int retryLimit = 5;
-    private final int retryInitialWaitMillis = 150;
-    private final int retryWaitMillis = 1000;
+    private final int retryInitialWaitMillis = 1000;
+    private final int retryWaitMillis = 2000;
 
     public static <V> V checkNotNull(V v, String message)
             throws TDClientException

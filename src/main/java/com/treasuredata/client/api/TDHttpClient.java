@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -95,7 +96,15 @@ public class TDHttpClient
         ExponentialBackOffRetry retry = new ExponentialBackOffRetry(config.getRetryLimit(), config.getRetryInitialWaitMillis(), config.getRetryWaitMillis());
         Optional<Exception> rootCause = Optional.absent();
         try {
-            while (retry.isRunnable()) {
+
+            Optional<Integer> nextInterval = Optional.absent();
+            do {
+                if(retry.getExecutionCount() > 0) {
+                    int waitTimeMillis = nextInterval.get();
+                    logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", apiRequest.getPath(), retry.getExecutionCount(), retry.getMaxRetryCount(), waitTimeMillis / 1000.0));
+                    Thread.sleep(waitTimeMillis);
+                }
+
                 try {
                     Request request = apiRequest.newJettyRequest(httpClient, config);
                     ContentResponse response = request.send();
@@ -124,15 +133,13 @@ public class TDHttpClient
                     rootCause = Optional.<Exception>of(e);
                     logger.warn(String.format("API request to %s timed out", apiRequest.getPath()), e);
                 }
-                int waitTimeMs = retry.nextWaitTimeMillis();
-                Thread.sleep(waitTimeMs);
-                logger.warn(String.format("Retrying request to %s (%d/%d) %,d", apiRequest.getPath(), retry.getRetryCount(), retry.getMaxRetryCount(), waitTimeMs));
             }
+            while((nextInterval = retry.nextWaitTimeMillis()).isPresent());
         }
         catch (InterruptedException e) {
             throw new TDClientException(ErrorCode.API_EXECUTION_INTERRUPTED, e);
         }
-        throw new TDClientException(ErrorCode.API_RETRY_LIMIT_EXCEEDED, String.format("Failed to process API request to %s", apiRequest.getPath()), rootCause);
+        throw new TDClientException(ErrorCode.API_RETRY_LIMIT_EXCEEDED, String.format("Failed to process the API request to %s", apiRequest.getPath()), rootCause);
     }
 
     public <Result> Result submit(ApiRequest request, Class<Result> resultType)
