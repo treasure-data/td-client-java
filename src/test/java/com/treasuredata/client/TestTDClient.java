@@ -103,4 +103,12 @@ public class TestTDClient
         TDJobStatus jobResult = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(*) from nasdaq"));
     }
 
+    @Test
+    public void createAndDeleteDatabse()
+            throws Exception
+    {
+        client.createDatabase("_tdclient_test");
+        client.deleteDatabase("_tdclient_test");
+    }
+
 }

@@ -20,7 +20,6 @@ package com.treasuredata.client.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.treasuredata.client.TDClient;
@@ -42,6 +41,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * An abstraction of TD API request, which will be translated to Jetty's http client request.
  * We need this abstraction to create multiple http request objects upon API call retry since
@@ -52,7 +53,6 @@ public class ApiRequest
     public static class Builder
     {
         private static final Map<String, String> EMPTY_MAP = ImmutableMap.of();
-
         private HttpMethod method;
         private String path;
         private Map<String, String> queryParams;
@@ -76,7 +76,7 @@ public class ApiRequest
 
         public Builder addHeader(String key, String value)
         {
-            if(headerParams == null) {
+            if (headerParams == null) {
                 headerParams = new HashMap<>();
             }
             headerParams.put(urlEncode(key), urlEncode(value));
@@ -85,7 +85,7 @@ public class ApiRequest
 
         public Builder addQueryParam(String key, String value)
         {
-            if(queryParams == null) {
+            if (queryParams == null) {
                 queryParams = new HashMap<>();
             }
             queryParams.put(key, value);
@@ -112,7 +112,6 @@ public class ApiRequest
         }
     }
 
-
     private final HttpMethod method;
     private final String path;
     private final Map<String, String> queryParams;
@@ -126,7 +125,8 @@ public class ApiRequest
         this.headerParams = checkNotNull(headerParams, "headerParams is null");
     }
 
-    public String getPath() {
+    public String getPath()
+    {
         return path;
     }
 

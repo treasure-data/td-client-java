@@ -29,6 +29,10 @@ import com.treasuredata.client.api.model.TDJobResult;
 import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDTable;
 import com.treasuredata.client.api.model.TDTableList;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,18 +72,34 @@ public class TDClient
         httpClient.close();
     }
 
-    private <ResultType> ResultType GET(String path, Class<ResultType> resultTypeClass)
+    private <ResultType> ResultType doGet(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
         ApiRequest request = ApiRequest.Builder.GET(path).build();
         return httpClient.submit(request, resultTypeClass);
     }
 
+    private <ResultType> ResultType doPost(String path, Class<ResultType> resultTypeClass)
+            throws TDClientException
+    {
+        ApiRequest request = ApiRequest.Builder.GET(path).build();
+        return httpClient.submit(request, resultTypeClass);
+    }
+
+    private ContentResponse doPost(String path)
+            throws TDClientException
+    {
+        ApiRequest request = ApiRequest.Builder.GET(path).build();
+        return httpClient.submit(request);
+    }
+
+
+
     @Override
     public List<String> listDatabases()
             throws TDClientException
     {
-        TDDatabaseList result = GET("/v3/database/list", TDDatabaseList.class);
+        TDDatabaseList result = doGet("/v3/database/list", TDDatabaseList.class);
         List<String> tableList = new ArrayList<String>(result.getDatabases().size());
         for (TDDatabase db : result.getDatabases()) {
             tableList.add(db.getName());
@@ -91,22 +111,22 @@ public class TDClient
     public boolean createDatabase(String databaseName)
             throws TDClientException
     {
-
-        return false;
+        doPost(String.format("/v3/database/create/%s", urlEncode(databaseName)));
+        return true;
     }
 
     @Override
     public void deleteDatabase(String databaseName)
             throws TDClientException
     {
-
+        doPost(String.format("/v3/database/delete/%s", urlEncode(databaseName)));
     }
 
     @Override
     public List<TDTable> listTables(String databaseName)
             throws TDClientException
     {
-        TDTableList tableList = GET("/v3/table/list/" + urlEncode(databaseName), TDTableList.class);
+        TDTableList tableList = doGet("/v3/table/list/" + urlEncode(databaseName), TDTableList.class);
         return tableList.getTables();
     }
 
@@ -190,14 +210,14 @@ public class TDClient
     public TDJobList listJobs()
             throws TDClientException
     {
-        return GET("/v3/job/list", TDJobList.class);
+        return doGet("/v3/job/list", TDJobList.class);
     }
 
     @Override
     public TDJobList listJobs(long from, long to)
             throws TDClientException
     {
-        return GET(String.format("/v3/job/list?from=%d&to=%d", from, to), TDJobList.class);
+        return doGet(String.format("/v3/job/list?from=%d&to=%d", from, to), TDJobList.class);
     }
 
     @Override
