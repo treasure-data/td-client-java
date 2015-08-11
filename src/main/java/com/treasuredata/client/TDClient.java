@@ -29,10 +29,8 @@ import com.treasuredata.client.api.model.TDJobResult;
 import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDTable;
 import com.treasuredata.client.api.model.TDTableList;
+import com.treasuredata.client.api.model.TDTableType;
 import org.eclipse.jetty.client.api.ContentResponse;
-import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,11 +106,10 @@ public class TDClient
     }
 
     @Override
-    public boolean createDatabase(String databaseName)
+    public void createDatabase(String databaseName)
             throws TDClientException
     {
         doPost(String.format("/v3/database/create/%s", urlEncode(databaseName)));
-        return true;
     }
 
     @Override
@@ -141,6 +138,13 @@ public class TDClient
     public TDTable createTable(String databaseName, String tableName)
             throws TDClientException
     {
+        doPost(String.format(
+                "/v3/table/create/%s/%s/%s",
+                urlEncode(databaseName),
+                urlEncode(tableName),
+                urlEncode(TDTableType.LOG.getTypeName())));
+
+        // TODO
         return null;
     }
 
@@ -150,6 +154,7 @@ public class TDClient
     {
         return null;
     }
+
 
     @Override
     public void renameTable(String databaseName, String tableName, String newTableName)
@@ -166,17 +171,19 @@ public class TDClient
     }
 
     @Override
-    public void deleteTable(String databasename, String tableName)
+    public void deleteTable(String databaseName, String tableName)
             throws TDClientException
     {
-
+        doPost(String.format(
+                "/v3/table/delete/%s/%s",
+                urlEncode(databaseName),
+                urlEncode(tableName)));
     }
 
     @Override
     public void deleteTable(TDTable table)
             throws TDClientException
     {
-
     }
 
     @Override

@@ -46,15 +46,13 @@ public interface TDClientSpi
     /**
      * Create a new database
      * @param databaseName
-     * @return
      * @throws TDClientException if the specified database already exists
      */
-    boolean createDatabase(String databaseName) throws TDClientException;
+    void createDatabase(String databaseName) throws TDClientException;
 
     /**
      * Delete a specified database. Deleting a database deletes all of its belonging tables.
      * @param databaseName
-     * @return success or not
      * @throws TDClientException
      */
     void deleteDatabase(String databaseName) throws TDClientException;

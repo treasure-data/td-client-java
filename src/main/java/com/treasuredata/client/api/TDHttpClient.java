@@ -105,11 +105,14 @@ public class TDHttpClient
                 }
 
                 try {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(String.format("Sending API request to %s", apiRequest.getPath()));
-                    }
                     Request request = apiRequest.newJettyRequest(httpClient, config);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(String.format("Sending API request to %s", request.getURI()));
+                    }
                     ContentResponse response = request.send();
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("response json:\n" + response.getContentAsString());
+                    }
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
@@ -152,9 +155,6 @@ public class TDHttpClient
     {
         try {
             ContentResponse response = submit(request);
-            if (logger.isTraceEnabled()) {
-                logger.trace("response json:\n" + response.getContentAsString());
-            }
             return objectMapper.readValue(response.getContent(), resultType);
         }
         catch (JsonMappingException e) {

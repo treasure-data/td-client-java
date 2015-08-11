@@ -35,5 +35,13 @@ public class TDJobStatus
     {
         return jobId;
     }
+
+    @Override
+    public String toString()
+    {
+        return "TDJobStatus{" +
+                "jobId='" + jobId + '\'' +
+                '}';
+    }
 }
 

@@ -19,10 +19,8 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
-import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
-import com.treasuredata.client.api.model.TDJobResult;
 import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDTable;
 import org.junit.After;
@@ -32,9 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.Future;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -42,7 +39,6 @@ import static org.junit.Assert.*;
 public class TestTDClient
 {
     private static final Logger logger = LoggerFactory.getLogger(TestTDClient.class);
-
     private TDClient client;
 
     @Before
@@ -59,7 +55,6 @@ public class TestTDClient
         client.close();
     }
 
-
     @Test
     public void listDatabases()
             throws Exception
@@ -68,7 +63,7 @@ public class TestTDClient
         assertTrue("should contain sample_datasets", dbList.contains("sample_datasets"));
 
         logger.debug(Joiner.on(", ").join(dbList));
-     }
+    }
 
     @Test
     public void listTables()
@@ -78,8 +73,8 @@ public class TestTDClient
         assertTrue(tableList.size() >= 2);
         logger.debug(Joiner.on(", ").join(tableList));
 
-        for(TDTable t : tableList) {
-            if(t.getName().equals("nasdaq")) {
+        for (TDTable t : tableList) {
+            if (t.getName().equals("nasdaq")) {
                 assertTrue(t.getColumns().size() == 6);
             }
             else if (t.getName().equals("www_access")) {
@@ -101,14 +96,31 @@ public class TestTDClient
             throws Exception
     {
         TDJobStatus jobResult = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(*) from nasdaq"));
+        logger.debug("job: " + jobResult);
+
+
+
+    }
+
+
+
+    private static String SAMPLE_DB = "_tdclient_test";
+    private static String SAMPLE_TABLE = "sample";
+
+    @Test
+    public void createAndDeleteDatabase()
+            throws Exception
+    {
+        client.createDatabase(SAMPLE_DB);
+        client.deleteDatabase(SAMPLE_DB);
     }
 
     @Test
-    public void createAndDeleteDatabse()
+    public void createTable()
             throws Exception
     {
-        client.createDatabase("_tdclient_test");
-        client.deleteDatabase("_tdclient_test");
+        client.createDatabase(SAMPLE_DB);
+        client.createTable(SAMPLE_DB, SAMPLE_TABLE);
+        client.deleteTable(SAMPLE_DB, SAMPLE_TABLE);
     }
-
 }

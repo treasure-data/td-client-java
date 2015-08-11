@@ -45,6 +45,11 @@ public enum TDTableType
         throw new RuntimeJsonMappingException("Unexpected string tuple to deserialize TDTableType");
     }
 
+    public String getTypeName() {
+        return name;
+    }
+
+
     @JsonValue
     @Override
     public String toString()
