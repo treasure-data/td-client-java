@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -74,7 +73,7 @@ public class TDHttpClient
         }
 
         this.objectMapper = new ObjectMapper()
-                .registerModule(new JsonOrgModule()) // for mapping query json to JSONObject
+                .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
                 .registerModule(new GuavaModule())   // for mapping to Guava Optional class
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -99,14 +98,14 @@ public class TDHttpClient
 
             Optional<Integer> nextInterval = Optional.absent();
             do {
-                if(retry.getExecutionCount() > 0) {
+                if (retry.getExecutionCount() > 0) {
                     int waitTimeMillis = nextInterval.get();
                     logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", apiRequest.getPath(), retry.getExecutionCount(), retry.getMaxRetryCount(), waitTimeMillis / 1000.0));
                     Thread.sleep(waitTimeMillis);
                 }
 
                 try {
-                    if(logger.isDebugEnabled()) {
+                    if (logger.isDebugEnabled()) {
                         logger.debug(String.format("Sending API request to %s", apiRequest.getPath()));
                     }
                     Request request = apiRequest.newJettyRequest(httpClient, config);
@@ -114,7 +113,7 @@ public class TDHttpClient
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
-                        if(logger.isDebugEnabled()) {
+                        if (logger.isDebugEnabled()) {
                             logger.debug(String.format("API request to %s succeeded with code %d", request.getPath(), code));
                         }
                         return response;
@@ -140,7 +139,7 @@ public class TDHttpClient
                     logger.warn(String.format("API request to %s timed out", apiRequest.getPath()), e);
                 }
             }
-            while((nextInterval = retry.nextWaitTimeMillis()).isPresent());
+            while ((nextInterval = retry.nextWaitTimeMillis()).isPresent());
         }
         catch (InterruptedException e) {
             throw new TDClientException(ErrorCode.API_EXECUTION_INTERRUPTED, e);
