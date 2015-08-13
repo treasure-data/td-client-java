@@ -197,7 +197,7 @@ public class TDClient
             throws TDClientException
     {
         for(TDTable table : listTables(databaseName)) {
-            if(table.getName().equals(table)) {
+            if(table.getName().equals(tableName)) {
                 return true;
             }
         }

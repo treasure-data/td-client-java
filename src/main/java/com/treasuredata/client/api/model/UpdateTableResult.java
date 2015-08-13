@@ -29,13 +29,13 @@ public class UpdateTableResult
 {
     private final String database;
     private final String table;
-    private final Table.Type type;
+    private final TDTableType type;
 
     @JsonCreator
     public UpdateTableResult(
             @JsonProperty("database") String database,
             @JsonProperty("table") String table,
-            @JsonProperty("type") Table.Type type)
+            @JsonProperty("type") TDTableType type)
     {
         this.database = database;
         this.table = table;
@@ -52,7 +52,7 @@ public class UpdateTableResult
         return table;
     }
 
-    public Table.Type getType()
+    public TDTableType getType()
     {
         return type;
     }

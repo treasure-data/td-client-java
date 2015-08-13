@@ -17,6 +17,8 @@
 //
 package com.treasure_data.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

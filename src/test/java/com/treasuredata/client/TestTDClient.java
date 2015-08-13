@@ -130,13 +130,24 @@ public class TestTDClient
     }
 
     @Test
-    public void createTable()
+    public void tableOperation()
             throws Exception
     {
+        client.deleteDatabaseIfExists(SAMPLE_DB);
         client.createDatabaseIfNotExists(SAMPLE_DB);
+
         client.deleteTableIfExists(SAMPLE_DB, SAMPLE_TABLE);
 
         client.createTable(SAMPLE_DB, SAMPLE_TABLE);
         client.deleteTable(SAMPLE_DB, SAMPLE_TABLE);
+
+        client.createTableIfNotExists(SAMPLE_DB, SAMPLE_TABLE);
+
+        // rename
+        String newTableName = SAMPLE_TABLE + "_renamed";
+        client.deleteTableIfExists(SAMPLE_DB, newTableName);
+        client.renameTable(SAMPLE_DB, SAMPLE_TABLE, newTableName);
+        assertTrue(client.existsTable(SAMPLE_DB, newTableName));
+        assertFalse(client.existsTable(SAMPLE_DB, SAMPLE_TABLE));
     }
 }
