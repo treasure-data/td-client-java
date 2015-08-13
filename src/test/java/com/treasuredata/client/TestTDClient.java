@@ -19,6 +19,7 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
+import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobStatus;
@@ -31,7 +32,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -98,11 +101,22 @@ public class TestTDClient
         TDJobStatus jobResult = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(*) from nasdaq"));
         logger.debug("job: " + jobResult);
 
-
-
+        TDJob tdJob = client.jobStatus(jobResult.getJobId());
+        logger.debug("job status: " + tdJob);
     }
 
+    @Test
+    public void invalidJobStatus() {
+        try {
+            TDJob invalidJob = client.jobStatus("xxxxxx");
+            logger.debug("invalid job: " + invalidJob);
 
+            fail("should not reach here");
+        }
+        catch(TDClientException e) {
+
+        }
+    }
 
     private static String SAMPLE_DB = "_tdclient_test";
     private static String SAMPLE_TABLE = "sample";
@@ -111,7 +125,9 @@ public class TestTDClient
     public void createAndDeleteDatabase()
             throws Exception
     {
-        client.createDatabase(SAMPLE_DB);
+        if(client.existsDatabase(SAMPLE_DB)) {
+            client.createDatabase(SAMPLE_DB);
+        }
         client.deleteDatabase(SAMPLE_DB);
     }
 

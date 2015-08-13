@@ -32,10 +32,8 @@ import java.util.concurrent.Future;
 /**
  * Treasure Data Client
  */
-public interface TDClientSpi
+public interface TDClientApi
 {
-
-
     /**
      * Get the list of databases
      * @return list of databases
@@ -65,13 +63,9 @@ public interface TDClientSpi
      */
     List<TDTable> listTables(String databaseName) throws TDClientException;
 
-    /**
-     * Get the list of tables in the specified database
-     * @param database
-     * @return
-     * @throws TDClientException
-     */
-    List<TDTable> listTables(TDDatabase database) throws TDClientException;
+    boolean existsDatabase(String databaseName) throws TDClientException;
+
+    boolean existsTable(String databaseName, String table) throws TDClientException;
 
     /**
      * Create a new table
@@ -82,17 +76,13 @@ public interface TDClientSpi
      */
     TDTable createTable(String databaseName, String tableName) throws TDClientException;
 
-    TDTable createTable(String databaseName, TDTable table) throws TDClientException;
-
     void renameTable(String databaseName, String tableName, String newTableName) throws TDClientException;
 
-    void renameTable(TDTable table, String newTableName) throws TDClientException;
+    void renameTable(String databaseName, String tableName, String newTableName, boolean overwrite) throws TDClientException;
 
-    void deleteTable(String databasename, String tableName) throws TDClientException;
+    void deleteTable(String databaseName, String tableName) throws TDClientException;
 
-    void deleteTable(TDTable table) throws TDClientException;
-
-    void partialDelete(TDTable table, long from, long to) throws TDClientException;
+    void partialDelete(String databaseName, String tableName, long from, long to) throws TDClientException;
 
     TDJobStatus submit(TDJobRequest jobRequest) throws TDClientException;
 

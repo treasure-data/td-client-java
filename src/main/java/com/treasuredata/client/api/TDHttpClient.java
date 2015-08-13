@@ -29,6 +29,7 @@ import com.treasuredata.client.ErrorCode;
 import com.treasuredata.client.ExponentialBackOffRetry;
 import com.treasuredata.client.TDClientConfig;
 import com.treasuredata.client.TDClientException;
+import com.treasuredata.client.api.model.TDApiError;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
@@ -89,13 +90,22 @@ public class TDHttpClient
         }
     }
 
-    public ContentResponse submit(ApiRequest apiRequest)
+    protected Optional<TDApiError> parseErrorResponse(ContentResponse response) {
+        try {
+            return Optional.of(objectMapper.readValue(response.getContent(), TDApiError.class));
+        }
+        catch (IOException e) {
+            logger.warn(String.format("Failed to parse error response: %s", response.getContentAsString()), e);
+            return Optional.absent();
+        }
+    }
+
+    public ContentResponse submit(TDApiRequest apiRequest)
             throws TDClientException
     {
         ExponentialBackOffRetry retry = new ExponentialBackOffRetry(config.getRetryLimit(), config.getRetryInitialWaitMillis(), config.getRetryWaitMillis());
         Optional<Exception> rootCause = Optional.absent();
         try {
-
             Optional<Integer> nextInterval = Optional.absent();
             do {
                 if (retry.getExecutionCount() > 0) {
@@ -111,26 +121,28 @@ public class TDHttpClient
                     }
                     ContentResponse response = request.send();
                     if (logger.isTraceEnabled()) {
-                        logger.trace("response json:\n" + response.getContentAsString());
+                        logger.trace("response:\n" + response.getContentAsString());
                     }
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
                         if (logger.isDebugEnabled()) {
-                            logger.debug(String.format("API request to %s succeeded with code %d", request.getPath(), code));
+                            logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, response.getReason(), request.getPath()));
                         }
                         return response;
                     }
                     else if (HttpStatus.isClientError(code)) {
                         // 4xx errors
-                        throw new TDClientException(ErrorCode.API_CLIENT_ERROR, response.getReason());
+                        logger.warn(String.format("[%d] API request to %s has failed: %s", code, request.getPath(), response.getContentAsString()));
+                        Optional<TDApiError> errorResponse = parseErrorResponse(response);
+                        throw new TDClientException(ErrorCode.API_CLIENT_ERROR, errorResponse.isPresent() ? errorResponse.get().toString() : response.getReason());
                     }
                     else if (HttpStatus.isServerError(code)) {
                         // 5xx errors
-                        logger.warn("API request to %s failed with internal error code %d: %s", request.getPath(), code, response.getReason());
+                        logger.warn("[%d:%s] API request to %s has failed", code, response.getReason(), request.getPath());
                     }
                     else {
-                        logger.warn("API request to %s failed with code %d: %s", request.getPath(), code, response.getReason());
+                        logger.warn("[%d:%s] API request to %s has failed: %s", code, response.getReason(), request.getPath());
                     }
                 }
                 catch (ExecutionException e) {
@@ -139,7 +151,7 @@ public class TDHttpClient
                 }
                 catch (TimeoutException e) {
                     rootCause = Optional.<Exception>of(e);
-                    logger.warn(String.format("API request to %s timed out", apiRequest.getPath()), e);
+                    logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
                 }
             }
             while ((nextInterval = retry.nextWaitTimeMillis()).isPresent());
@@ -150,7 +162,7 @@ public class TDHttpClient
         throw new TDClientException(ErrorCode.API_RETRY_LIMIT_EXCEEDED, String.format("Failed to process the API request to %s", apiRequest.getPath()), rootCause);
     }
 
-    public <Result> Result submit(ApiRequest request, Class<Result> resultType)
+    public <Result> Result submit(TDApiRequest request, Class<Result> resultType)
             throws TDClientException
     {
         try {

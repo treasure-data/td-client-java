@@ -18,7 +18,8 @@
  */
 package com.treasuredata.client;
 
-import com.treasuredata.client.api.ApiRequest;
+import com.google.common.collect.ImmutableMap;
+import com.treasuredata.client.api.TDApiRequest;
 import com.treasuredata.client.api.TDHttpClient;
 import com.treasuredata.client.api.model.TDDatabase;
 import com.treasuredata.client.api.model.TDDatabaseList;
@@ -30,6 +31,7 @@ import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDTable;
 import com.treasuredata.client.api.model.TDTableList;
 import com.treasuredata.client.api.model.TDTableType;
+import com.treasuredata.client.api.model.UpdateTableResult;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,16 +40,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
-import static com.treasuredata.client.api.ApiRequest.urlEncode;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.treasuredata.client.api.TDApiRequest.urlEncode;
 
 /**
  *
  */
 public class TDClient
-        implements TDClientSpi
+        implements TDClientApi
 {
     private static final Logger logger = LoggerFactory.getLogger(TDClient.class);
     private final TDClientConfig config;
@@ -70,28 +75,63 @@ public class TDClient
         httpClient.close();
     }
 
+    private static String buildUrl(String urlTemplate, String... args)
+    {
+        String[] urlEncoded = new String[args.length];
+        int index = 0;
+        for(String a : args) {
+            urlEncoded[index++] = urlEncode(a);
+        }
+        return String.format(urlTemplate, urlEncoded);
+    }
+
     private <ResultType> ResultType doGet(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        ApiRequest request = ApiRequest.Builder.GET(path).build();
+        TDApiRequest request = TDApiRequest.Builder.GET(path).build();
         return httpClient.submit(request, resultTypeClass);
     }
 
     private <ResultType> ResultType doPost(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        ApiRequest request = ApiRequest.Builder.GET(path).build();
-        return httpClient.submit(request, resultTypeClass);
+        return doPost(path, ImmutableMap.<String, String>of(), resultTypeClass);
     }
+
+    private <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
+            throws TDClientException
+    {
+        checkNotNull(path, "pash is null");
+        checkNotNull(queryParam, "param is null");
+        checkNotNull(resultTypeClass, "resultTypeClass is null");
+
+        TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
+        for (Map.Entry<String, String> e : queryParam.entrySet()) {
+            request.addQueryParam(e.getKey(), e.getValue());
+        }
+        return httpClient.submit(request.build(), resultTypeClass);
+    }
+
+    private ContentResponse doPost(String path, Map<String, String> queryParam)
+            throws TDClientException
+    {
+        checkNotNull(path, "pash is null");
+        checkNotNull(queryParam, "param is null");
+
+        TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
+        for (Map.Entry<String, String> e : queryParam.entrySet()) {
+            request.addQueryParam(e.getKey(), e.getValue());
+        }
+        return httpClient.submit(request.build());
+    }
+
 
     private ContentResponse doPost(String path)
             throws TDClientException
     {
-        ApiRequest request = ApiRequest.Builder.GET(path).build();
+        TDApiRequest request = TDApiRequest.Builder.POST(path).build();
         return httpClient.submit(request);
     }
-
-
 
     @Override
     public List<String> listDatabases()
@@ -109,108 +149,102 @@ public class TDClient
     public void createDatabase(String databaseName)
             throws TDClientException
     {
-        doPost(String.format("/v3/database/create/%s", urlEncode(databaseName)));
+        doPost(buildUrl("/v3/database/create/%s", databaseName));
     }
 
     @Override
     public void deleteDatabase(String databaseName)
             throws TDClientException
     {
-        doPost(String.format("/v3/database/delete/%s", urlEncode(databaseName)));
+        doPost(buildUrl("/v3/database/delete/%s", databaseName));
     }
 
     @Override
     public List<TDTable> listTables(String databaseName)
             throws TDClientException
     {
-        TDTableList tableList = doGet("/v3/table/list/" + urlEncode(databaseName), TDTableList.class);
+        TDTableList tableList = doGet(buildUrl("/v3/table/list/%s", databaseName), TDTableList.class);
         return tableList.getTables();
     }
 
     @Override
-    public List<TDTable> listTables(TDDatabase database)
+    public boolean existsDatabase(String databaseName)
             throws TDClientException
     {
-        return listTables(database.getName());
+        return listDatabases().contains(databaseName);
+    }
+
+    @Override
+    public boolean existsTable(String databaseName, String tableName)
+            throws TDClientException
+    {
+        for(TDTable table : listTables(databaseName)) {
+            if(table.getName().equals(table)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public TDTable createTable(String databaseName, String tableName)
             throws TDClientException
     {
-        doPost(String.format(
-                "/v3/table/create/%s/%s/%s",
-                urlEncode(databaseName),
-                urlEncode(tableName),
-                urlEncode(TDTableType.LOG.getTypeName())));
+        doPost(buildUrl("/v3/table/create/%s/%s/%s", databaseName, tableName, TDTableType.LOG.getTypeName()));
 
         // TODO
         return null;
     }
 
     @Override
-    public TDTable createTable(String databaseName, TDTable table)
-            throws TDClientException
-    {
-        return null;
-    }
-
-
-    @Override
     public void renameTable(String databaseName, String tableName, String newTableName)
             throws TDClientException
     {
-
+        renameTable(databaseName, tableName, newTableName, false);
     }
 
     @Override
-    public void renameTable(TDTable table, String newTableName)
+    public void renameTable(String databaseName, String tableName, String newTableName, boolean overwrite)
             throws TDClientException
     {
-
+        doPost(buildUrl("/v3/table/rename/%s/%s/%s", databaseName, tableName, newTableName),
+                ImmutableMap.of("overwrite", Boolean.toString(overwrite)),
+                UpdateTableResult.class
+        );
     }
 
     @Override
     public void deleteTable(String databaseName, String tableName)
             throws TDClientException
     {
-        doPost(String.format(
-                "/v3/table/delete/%s/%s",
-                urlEncode(databaseName),
-                urlEncode(tableName)));
+        doPost(buildUrl("/v3/table/delete/%s/%s", databaseName, tableName));
     }
 
     @Override
-    public void deleteTable(TDTable table)
+    public void partialDelete(String databaseName, String tableName, long from, long to)
             throws TDClientException
     {
-    }
-
-    @Override
-    public void partialDelete(TDTable table, long from, long to)
-            throws TDClientException
-    {
-
+        Map<String, String> queryParams = ImmutableMap.of(
+                "from", Long.toString(from),
+                "to", Long.toString(to));
+        doPost(buildUrl("/v3/table/partialdelete/%s/%s", databaseName, tableName), queryParams);
     }
 
     @Override
     public TDJobStatus submit(TDJobRequest jobRequest)
             throws TDClientException
     {
-        ApiRequest.Builder request = ApiRequest.Builder.POST(
-                String.format("/v3/job/issue/%s/%s",
-                        urlEncode(jobRequest.getType().getType()),
-                        urlEncode(jobRequest.getDatabase())));
-
-        request.addQueryParam("query", jobRequest.getQuery());
-        request.addQueryParam("version", getVersion());
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("version", getVersion());
         if (jobRequest.getResultOutput().isPresent()) {
-            request.addQueryParam("result", jobRequest.getResultOutput().get());
+            queryParam.put("result", jobRequest.getResultOutput().get());
         }
-        request.addQueryParam("priority", Integer.toString(jobRequest.getPriority().toInt()));
-        request.addQueryParam("retry_limit", Integer.toString(jobRequest.getRetryLimit()));
-
-        return httpClient.submit(request.build(), TDJobStatus.class);
+        queryParam.put("priority", Integer.toString(jobRequest.getPriority().toInt()));
+        queryParam.put("retry_limit", Integer.toString(jobRequest.getRetryLimit()));
+        return doPost(
+                buildUrl("/v3/job/issue/%s/%s", jobRequest.getType().getType(), jobRequest.getDatabase()),
+                queryParam,
+                TDJobStatus.class);
     }
 
     @Override
@@ -231,14 +265,14 @@ public class TDClient
     public void killJob(String jobId)
             throws TDClientException
     {
-
+        doPost(buildUrl("/v3/job/kill/%s", jobId));
     }
 
     @Override
     public TDJob jobStatus(String jobId)
             throws TDClientException
     {
-        return null;
+        return doGet(buildUrl("/v3/job/status/%s", jobId), TDJob.class);
     }
 
     @Override
@@ -256,22 +290,13 @@ public class TDClient
     }
 
     static {
-        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client.td-client/pom.properties");
+        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.td-client/pom.properties");
         String v = "unknown";
         if (mavenProperties != null) {
-            InputStream in = null;
-            try {
-                try {
-                    in = mavenProperties.openStream();
-                    Properties p = new Properties();
-                    p.load(in);
-                    v = p.getProperty("version", "unknown");
-                }
-                finally {
-                    if (in != null) {
-                        in.close();
-                    }
-                }
+            try(InputStream in = mavenProperties.openStream()) {
+                Properties p = new Properties();
+                p.load(in);
+                v = p.getProperty("version", "unknown");
             }
             catch (Throwable e) {
                 logger.warn("Error in reading pom.properties file", e);

@@ -48,7 +48,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * We need this abstraction to create multiple http request objects upon API call retry since
  * Jetty's Request instances are not reusable.
  */
-public class ApiRequest
+public class TDApiRequest
 {
     public static class Builder
     {
@@ -88,13 +88,13 @@ public class ApiRequest
             if (queryParams == null) {
                 queryParams = new HashMap<>();
             }
-            queryParams.put(key, value);
+            queryParams.put(urlEncode(key), urlEncode(value));
             return this;
         }
 
-        public ApiRequest build()
+        public TDApiRequest build()
         {
-            return new ApiRequest(
+            return new TDApiRequest(
                     method,
                     path,
                     queryParams != null ? queryParams : EMPTY_MAP,
@@ -117,7 +117,7 @@ public class ApiRequest
     private final Map<String, String> queryParams;
     private final Map<String, String> headerParams;
 
-    ApiRequest(HttpMethod method, String path, Map<String, String> queryParams, Map<String, String> headerParams)
+    TDApiRequest(HttpMethod method, String path, Map<String, String> queryParams, Map<String, String> headerParams)
     {
         this.method = checkNotNull(method, "method is null");
         this.path = checkNotNull(path, "uri is null");

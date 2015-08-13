@@ -34,6 +34,7 @@ import java.util.Properties;
 public class TDClientConfig
 {
     private static Logger logger = LoggerFactory.getLogger(TDClientConfig.class);
+
     public static final String TD_CLIENT_APIKEY = "TD_API_KEY";
     private final String endpoint;
     private final String apiKey;
@@ -132,6 +133,7 @@ public class TDClientConfig
             throws IOException
     {
         Properties p = new Properties();
+        logger.debug(String.format("Reading configuration file: %s", file));
         BufferedReader reader = new BufferedReader(new FileReader(file));
         StringBuilder extracted = new StringBuilder();
         String line = null;
