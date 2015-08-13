@@ -153,10 +153,28 @@ public class TDClient
     }
 
     @Override
+    public void createDatabaseIfNotExists(String databaseName)
+            throws TDClientException
+    {
+        if(!existsDatabase(databaseName)) {
+            createDatabase(databaseName);
+        }
+    }
+
+    @Override
     public void deleteDatabase(String databaseName)
             throws TDClientException
     {
         doPost(buildUrl("/v3/database/delete/%s", databaseName));
+    }
+
+    @Override
+    public void deleteDatabaseIfExists(String databaseName)
+            throws TDClientException
+    {
+        if(existsDatabase(databaseName)) {
+            deleteDatabase(databaseName);
+        }
     }
 
     @Override
@@ -187,13 +205,19 @@ public class TDClient
     }
 
     @Override
-    public TDTable createTable(String databaseName, String tableName)
+    public void createTable(String databaseName, String tableName)
             throws TDClientException
     {
         doPost(buildUrl("/v3/table/create/%s/%s/%s", databaseName, tableName, TDTableType.LOG.getTypeName()));
+    }
 
-        // TODO
-        return null;
+    @Override
+    public void createTableIfNotExists(String databaseName, String tableName)
+            throws TDClientException
+    {
+        if(!existsTable(databaseName, tableName)) {
+            createTable(databaseName, tableName);
+        }
     }
 
     @Override
@@ -218,6 +242,15 @@ public class TDClient
             throws TDClientException
     {
         doPost(buildUrl("/v3/table/delete/%s/%s", databaseName, tableName));
+    }
+
+    @Override
+    public void deleteTableIfExists(String databaseName, String tableName)
+            throws TDClientException
+    {
+        if(existsTable(databaseName, tableName)) {
+            deleteTable(databaseName, tableName);
+        }
     }
 
     @Override

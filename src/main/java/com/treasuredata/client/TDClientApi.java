@@ -48,12 +48,16 @@ public interface TDClientApi
      */
     void createDatabase(String databaseName) throws TDClientException;
 
+    void createDatabaseIfNotExists(String databaseName) throws TDClientException;
+
     /**
      * Delete a specified database. Deleting a database deletes all of its belonging tables.
      * @param databaseName
-     * @throws TDClientException
+     * @throws TDClientException if no such a database exists
      */
     void deleteDatabase(String databaseName) throws TDClientException;
+
+    void deleteDatabaseIfExists(String databaseName) throws TDClientException;
 
     /**
      * Get the list of the tables in the specified database
@@ -74,13 +78,17 @@ public interface TDClientApi
      * @return
      * @throws TDClientException
      */
-    TDTable createTable(String databaseName, String tableName) throws TDClientException;
+    void createTable(String databaseName, String tableName) throws TDClientException;
+
+    void createTableIfNotExists(String databaseName, String tableName) throws TDClientException;
 
     void renameTable(String databaseName, String tableName, String newTableName) throws TDClientException;
 
     void renameTable(String databaseName, String tableName, String newTableName, boolean overwrite) throws TDClientException;
 
     void deleteTable(String databaseName, String tableName) throws TDClientException;
+
+    void deleteTableIfExists(String databaseName, String tableName) throws TDClientException;
 
     void partialDelete(String databaseName, String tableName, long from, long to) throws TDClientException;
 

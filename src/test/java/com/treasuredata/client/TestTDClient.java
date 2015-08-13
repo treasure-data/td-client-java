@@ -125,9 +125,7 @@ public class TestTDClient
     public void createAndDeleteDatabase()
             throws Exception
     {
-        if(client.existsDatabase(SAMPLE_DB)) {
-            client.createDatabase(SAMPLE_DB);
-        }
+        client.createDatabaseIfNotExists(SAMPLE_DB);
         client.deleteDatabase(SAMPLE_DB);
     }
 
@@ -135,7 +133,9 @@ public class TestTDClient
     public void createTable()
             throws Exception
     {
-        client.createDatabase(SAMPLE_DB);
+        client.createDatabaseIfNotExists(SAMPLE_DB);
+        client.deleteTableIfExists(SAMPLE_DB, SAMPLE_TABLE);
+
         client.createTable(SAMPLE_DB, SAMPLE_TABLE);
         client.deleteTable(SAMPLE_DB, SAMPLE_TABLE);
     }
