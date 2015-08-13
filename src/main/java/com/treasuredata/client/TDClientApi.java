@@ -18,16 +18,14 @@
  */
 package com.treasuredata.client;
 
-import com.treasuredata.client.api.model.TDDatabase;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobResult;
-import com.treasuredata.client.api.model.TDJobStatus;
+import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 
 import java.util.List;
-import java.util.concurrent.Future;
 
 /**
  * Treasure Data Client
@@ -92,7 +90,13 @@ public interface TDClientApi
 
     void partialDelete(String databaseName, String tableName, long from, long to) throws TDClientException;
 
-    TDJobStatus submit(TDJobRequest jobRequest) throws TDClientException;
+    /**
+     * Submit a new job request
+     * @param jobRequest
+     * @return job_id
+     * @throws TDClientException
+     */
+    String submit(TDJobRequest jobRequest) throws TDClientException;
 
     TDJobList listJobs() throws TDClientException;
 
@@ -101,6 +105,8 @@ public interface TDClientApi
     void killJob(String jobId) throws TDClientException;
 
     TDJob jobStatus(String jobId) throws TDClientException;
+
+    TDJob jobInfo(String jobId) throws TDClientException;
 
     TDJobResult jobResult(String jobId) throws TDClientException;
 

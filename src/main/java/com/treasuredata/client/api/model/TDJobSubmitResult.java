@@ -23,11 +23,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  *
  */
-public class TDJobStatus
+public class TDJobSubmitResult
 {
     private final String jobId;
 
-    public TDJobStatus(@JsonProperty("job_id") String jobId) {
+    public TDJobSubmitResult(@JsonProperty("job_id") String jobId) {
         this.jobId = jobId;
     }
 

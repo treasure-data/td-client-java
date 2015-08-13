@@ -108,7 +108,8 @@ public class TDJob
         private final String cmdout;
         private final String stderr;
 
-        public Debug(String cmdout, String stderr)
+        @JsonCreator
+        public Debug(@JsonProperty("cmdout") String cmdout, @JsonProperty("stderr") String stderr)
         {
             this.cmdout = cmdout;
             this.stderr = stderr;
@@ -123,6 +124,15 @@ public class TDJob
         {
             return stderr;
         }
+
+        @Override
+        public String toString()
+        {
+            return "Debug{" +
+                    "cmdout='" + cmdout + '\'' +
+                    ", stderr='" + stderr + '\'' +
+                    '}';
+        }
     }
 
     private final String jobId;
@@ -130,7 +140,8 @@ public class TDJob
     private final TDQuery query;
     private final String createdAt;
     private final String startAt;
-    private final Optional<String> endAt;
+    private final String updatedAt;
+    private final String endAt;
     private final Optional<String> resultSchema;  // only for Hive
     private final String database;
     private final String result;
@@ -138,6 +149,7 @@ public class TDJob
     private final String userName;
     private final long duration;
     private final long resultSize;
+    private final Optional<Debug> debug;
 
     public TDJob(
             @JsonProperty("job_id") String jobId,
@@ -145,20 +157,24 @@ public class TDJob
             @JsonProperty("query") TDQuery query,
             @JsonProperty("created_at") String createdAt,
             @JsonProperty("start_at") String startAt,
-            @JsonProperty("end_at") Optional<String> endAt,
+            @JsonProperty("updated_at") String updatedAt,
+            @JsonProperty("end_at") String endAt,
             @JsonProperty("result_schema") Optional<String> resultSchema,
             @JsonProperty("database") String database,
             @JsonProperty("result") String result,
             @JsonProperty("url") String url,
             @JsonProperty("user_name") String userName,
             @JsonProperty("duration") long duration,
-            @JsonProperty("result_size") long resultSize)
+            @JsonProperty("result_size") long resultSize,
+            @JsonProperty("debug") Optional<Debug> debug
+            )
     {
         this.jobId = jobId;
         this.status = status;
         this.query = query;
         this.createdAt = createdAt;
         this.startAt = startAt;
+        this.updatedAt = updatedAt;
         this.endAt = endAt;
         this.resultSchema = resultSchema;
         this.database = database;
@@ -167,6 +183,7 @@ public class TDJob
         this.userName = userName;
         this.duration = duration;
         this.resultSize = resultSize;
+        this.debug = debug;
     }
 
     public String getJobId()
@@ -194,7 +211,7 @@ public class TDJob
         return startAt;
     }
 
-    public Optional<String> getEndAt()
+    public String getEndAt()
     {
         return endAt;
     }
@@ -234,23 +251,30 @@ public class TDJob
         return resultSize;
     }
 
+    public Optional<Debug> getDebug()
+    {
+        return debug;
+    }
+
     @Override
     public String toString()
     {
         return "TDJob{" +
                 "jobId='" + jobId + '\'' +
-                ", query='" + query + '\'' +
                 ", status=" + status +
+                ", query=" + query +
                 ", createdAt='" + createdAt + '\'' +
                 ", startAt='" + startAt + '\'' +
-                ", endAt=" + endAt +
-                ", database='" + database + '\'' +
-                ", duration=" + duration +
-                ", userName='" + userName + '\'' +
-                ", url='" + url + '\'' +
-                ", result='" + result + '\'' +
+                ", updatedAt='" + updatedAt + '\'' +
+                ", endAt='" + endAt + '\'' +
                 ", resultSchema=" + resultSchema +
+                ", database='" + database + '\'' +
+                ", result='" + result + '\'' +
+                ", url='" + url + '\'' +
+                ", userName='" + userName + '\'' +
+                ", duration=" + duration +
                 ", resultSize=" + resultSize +
+                ", debug=" + debug +
                 '}';
     }
 }

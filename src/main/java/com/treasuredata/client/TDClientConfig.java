@@ -133,7 +133,7 @@ public class TDClientConfig
             throws IOException
     {
         Properties p = new Properties();
-        logger.debug(String.format("Reading configuration file: %s", file));
+        logger.info(String.format("Reading configuration file: %s", file));
         BufferedReader reader = new BufferedReader(new FileReader(file));
         StringBuilder extracted = new StringBuilder();
         String line = null;

@@ -27,7 +27,7 @@ import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobResult;
-import com.treasuredata.client.api.model.TDJobStatus;
+import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 import com.treasuredata.client.api.model.TDTableList;
 import com.treasuredata.client.api.model.TDTableType;
@@ -77,7 +77,7 @@ public class TDClient
 
     private static String buildUrl(String urlTemplate, String... args)
     {
-        String[] urlEncoded = new String[args.length];
+        Object[] urlEncoded = new String[args.length];
         int index = 0;
         for(String a : args) {
             urlEncoded[index++] = urlEncode(a);
@@ -264,7 +264,7 @@ public class TDClient
     }
 
     @Override
-    public TDJobStatus submit(TDJobRequest jobRequest)
+    public String submit(TDJobRequest jobRequest)
             throws TDClientException
     {
         Map<String, String> queryParam = new HashMap<>();
@@ -280,10 +280,12 @@ public class TDClient
             logger.debug("submit job: " + jobRequest);
         }
 
-        return doPost(
-                buildUrl("/v3/job/issue/%s/%s", jobRequest.getType().getType(), jobRequest.getDatabase()),
-                queryParam,
-                TDJobStatus.class);
+        TDJobSubmitResult result =
+                doPost(
+                        buildUrl("/v3/job/issue/%s/%s", jobRequest.getType().getType(), jobRequest.getDatabase()),
+                        queryParam,
+                        TDJobSubmitResult.class);
+        return result.getJobId();
     }
 
     @Override
@@ -315,9 +317,19 @@ public class TDClient
     }
 
     @Override
+    public TDJob jobInfo(String jobId)
+            throws TDClientException
+    {
+        return doGet(buildUrl("/v3/job/show/%s", jobId), TDJob.class);
+    }
+
+
+    @Override
     public TDJobResult jobResult(String jobId)
             throws TDClientException
     {
+
+
         return null;
     }
 
@@ -342,6 +354,6 @@ public class TDClient
             }
         }
         version = v;
-        logger.debug("td-client version: " + version);
+        logger.info("td-client version: " + version);
     }
 }

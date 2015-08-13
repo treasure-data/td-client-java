@@ -22,7 +22,7 @@ import com.google.common.base.Joiner;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
-import com.treasuredata.client.api.model.TDJobStatus;
+import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 import org.junit.After;
 import org.junit.Before;
@@ -98,19 +98,22 @@ public class TestTDClient
     public void submitJob()
             throws Exception
     {
-        TDJobStatus jobResult = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(*) from nasdaq"));
-        logger.debug("job: " + jobResult);
+        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(*) from nasdaq"));
+        logger.debug("job id: " + jobId);
 
         int retryCount = 0;
 
         TDJob tdJob = null;
         do {
             Thread.sleep(1000);
-            tdJob = client.jobStatus(jobResult.getJobId());
+            tdJob = client.jobStatus(jobId);
             logger.debug("job status: " + tdJob);
             retryCount++;
         }
         while(retryCount < 10 && !tdJob.getStatus().isFinished());
+
+        tdJob = client.jobInfo(jobId);
+        logger.debug("job show result: " + tdJob);
     }
 
     @Test
