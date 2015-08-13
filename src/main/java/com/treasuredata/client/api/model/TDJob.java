@@ -95,6 +95,12 @@ public class TDJob
         {
             return valueOf(s.toUpperCase());
         }
+
+        public boolean isFinished() {
+            return this == SUCCESS ||
+                    this == ERROR ||
+                    this == KILLED;
+        }
     }
 
     private static class Debug

@@ -76,4 +76,17 @@ public class TDJobRequest
     {
         return resultOutput;
     }
+
+    @Override
+    public String toString()
+    {
+        return "TDJobRequest{" +
+                "database='" + database + '\'' +
+                ", type=" + type +
+                ", query='" + query + '\'' +
+                ", priority=" + priority +
+                ", resultOutput=" + resultOutput +
+                ", retryLimit=" + retryLimit +
+                '}';
+    }
 }

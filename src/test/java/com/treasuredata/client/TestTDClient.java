@@ -101,8 +101,16 @@ public class TestTDClient
         TDJobStatus jobResult = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(*) from nasdaq"));
         logger.debug("job: " + jobResult);
 
-        TDJob tdJob = client.jobStatus(jobResult.getJobId());
-        logger.debug("job status: " + tdJob);
+        int retryCount = 0;
+
+        TDJob tdJob = null;
+        do {
+            Thread.sleep(1000);
+            tdJob = client.jobStatus(jobResult.getJobId());
+            logger.debug("job status: " + tdJob);
+            retryCount++;
+        }
+        while(retryCount < 10 && !tdJob.getStatus().isFinished());
     }
 
     @Test

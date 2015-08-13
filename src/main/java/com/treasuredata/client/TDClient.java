@@ -268,12 +268,18 @@ public class TDClient
             throws TDClientException
     {
         Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("query", jobRequest.getQuery());
         queryParam.put("version", getVersion());
         if (jobRequest.getResultOutput().isPresent()) {
             queryParam.put("result", jobRequest.getResultOutput().get());
         }
         queryParam.put("priority", Integer.toString(jobRequest.getPriority().toInt()));
         queryParam.put("retry_limit", Integer.toString(jobRequest.getRetryLimit()));
+
+        if(logger.isDebugEnabled()) {
+            logger.debug("submit job: " + jobRequest);
+        }
+
         return doPost(
                 buildUrl("/v3/job/issue/%s/%s", jobRequest.getType().getType(), jobRequest.getDatabase()),
                 queryParam,
@@ -336,5 +342,6 @@ public class TDClient
             }
         }
         version = v;
+        logger.debug("td-client version: " + version);
     }
 }

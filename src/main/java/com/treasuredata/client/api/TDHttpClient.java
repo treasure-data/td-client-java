@@ -133,7 +133,7 @@ public class TDHttpClient
                     }
                     else if (HttpStatus.isClientError(code)) {
                         // 4xx errors
-                        logger.warn(String.format("[%d] API request to %s has failed: %s", code, request.getPath(), response.getContentAsString()));
+                        logger.warn(String.format("[%d:%s] API request to %s has failed: %s", code, response.getReason(), request.getPath(), response.getContentAsString()));
                         Optional<TDApiError> errorResponse = parseErrorResponse(response);
                         throw new TDClientException(ErrorCode.API_CLIENT_ERROR, errorResponse.isPresent() ? errorResponse.get().toString() : response.getReason());
                     }
