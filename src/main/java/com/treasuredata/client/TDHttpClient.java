@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api;
+package com.treasuredata.client;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -25,16 +25,7 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import com.treasuredata.client.ExponentialBackOffRetry;
-import com.treasuredata.client.TDClientConfig;
-import com.treasuredata.client.TDClientException;
-import com.treasuredata.client.TDClientExecutionException;
-import com.treasuredata.client.TDClientHttpConflictException;
-import com.treasuredata.client.TDClientHttpException;
-import com.treasuredata.client.TDClientHttpNotFoundException;
-import com.treasuredata.client.TDClientHttpUnauthorizedException;
-import com.treasuredata.client.TDClientInterruptedException;
-import com.treasuredata.client.TDClientTimeoutException;
+import com.treasuredata.client.api.TDApiRequest;
 import com.treasuredata.client.api.model.TDApiError;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;

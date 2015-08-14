@@ -20,7 +20,6 @@ package com.treasuredata.client;
 
 import com.google.common.collect.ImmutableMap;
 import com.treasuredata.client.api.TDApiRequest;
-import com.treasuredata.client.api.TDHttpClient;
 import com.treasuredata.client.api.model.TDDatabase;
 import com.treasuredata.client.api.model.TDDatabaseList;
 import com.treasuredata.client.api.model.TDJob;
