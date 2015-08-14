@@ -29,16 +29,20 @@ public class TDClientException extends RuntimeException
 {
     public static enum ErrorType
     {
+        // Coinfiguration error
         INVALID_CONFIGURATION,
+
+        // HTTP error
         AUTHENTICATION_FAILURE,
-        DATABASE_OR_TABLE_NOT_FOUND,
-        DATABASE_OR_TABLE_ALREADY_EXISTS,
-        INTERRUPTED,
+        TARGET_NOT_FOUND,
+        TARGET_ALREADY_EXISTS,
         SERVER_ERROR,
         CLIENT_ERROR,
+
+        // Request handling error
+        INTERRUPTED,
         REQUEST_TIMEOUT,
         EXECUTION_FAILURE,
-        RETRY_LIMIT_EXCEEDED,
         UNEXPECTED_RESPONSE_CODE,
         INVALID_JSON_RESPONSE,
         RESPONSE_READ_FAILURE,

@@ -25,14 +25,16 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import static com.treasuredata.client.TDClientException.ErrorType.*;
 import com.treasuredata.client.ExponentialBackOffRetry;
 import com.treasuredata.client.TDClientConfig;
 import com.treasuredata.client.TDClientException;
 import com.treasuredata.client.TDClientExecutionException;
-import com.treasuredata.client.TDClientTimeoutException;
+import com.treasuredata.client.TDClientHttpConflictException;
 import com.treasuredata.client.TDClientHttpException;
+import com.treasuredata.client.TDClientHttpNotFoundException;
+import com.treasuredata.client.TDClientHttpUnauthorizedException;
 import com.treasuredata.client.TDClientInterruptedException;
+import com.treasuredata.client.TDClientTimeoutException;
 import com.treasuredata.client.api.model.TDApiError;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
@@ -46,6 +48,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+
+import static com.google.common.base.Preconditions.checkState;
+import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
+import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
+import static com.treasuredata.client.TDClientException.ErrorType.RESPONSE_READ_FAILURE;
+import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
+import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
 
 /**
  * An extension of Jetty HttpClient with request retry handler
@@ -94,7 +103,8 @@ public class TDHttpClient
         }
     }
 
-    protected Optional<TDApiError> parseErrorResponse(ContentResponse response) {
+    protected Optional<TDApiError> parseErrorResponse(ContentResponse response)
+    {
         try {
             return Optional.of(objectMapper.readValue(response.getContent(), TDApiError.class));
         }
@@ -131,34 +141,32 @@ public class TDHttpClient
                         logger.debug("[{}:{}] API request to %s has succeeded", code, response.getReason(), request.getPath());
                         return response;
                     }
-                    else if (HttpStatus.isClientError(code)) {
-                        // 4xx errors
-                        logger.warn(String.format("[%d:%s] API request to %s has failed: %s", code, response.getReason(), request.getPath(), response.getContentAsString()));
-                        TDClientException.ErrorType errorType = CLIENT_ERROR;
-                        switch(code) {
-                            case HttpStatus.UNAUTHORIZED_401:
-                                errorType = AUTHENTICATION_FAILURE;
-                                break;
-                            case HttpStatus.NOT_FOUND_404:
-                                errorType = DATABASE_OR_TABLE_NOT_FOUND;
-                                break;
-                            case HttpStatus.CONFLICT_409:
-                                errorType = DATABASE_OR_TABLE_ALREADY_EXISTS;
-                                break;
-                        }
-                        Optional<TDApiError> errorResponse = parseErrorResponse(response);
-                        throw new TDClientHttpException(errorType, errorResponse.isPresent() ? errorResponse.get().toString() : response.getReason(), code);
-                    }
-                    else if (HttpStatus.isServerError(code)) {
-                        // 5xx errors
-                        String errorMessage = String.format("[%d:%s] API request to %s has failed", code, response.getReason(), request.getPath());
-                        logger.warn(errorMessage);
-                        rootCause = Optional.<TDClientException>of(new TDClientHttpException(SERVER_ERROR, errorMessage, code));
-                    }
                     else {
-                        String errorMessage = String.format("[%d:%s] API request to %s has failed", code, response.getReason(), request.getPath());
+                        Optional<TDApiError> errorResponse = parseErrorResponse(response);
+                        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
+                        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, response.getReason(), request.getPath(), responseErrorText);
                         logger.warn(errorMessage);
-                        rootCause = Optional.<TDClientException>of(new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code));
+
+                        if (HttpStatus.isClientError(code)) {
+                            // 4xx error. We do not retry the execution on this type of error
+                            switch (code) {
+                                case HttpStatus.UNAUTHORIZED_401:
+                                    throw new TDClientHttpUnauthorizedException(errorMessage);
+                                case HttpStatus.NOT_FOUND_404:
+                                    throw new TDClientHttpNotFoundException(errorMessage);
+                                case HttpStatus.CONFLICT_409:
+                                    throw new TDClientHttpConflictException(errorMessage);
+                                default:
+                                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code);
+                            }
+                        }
+                        else if (HttpStatus.isServerError(code)) {
+                            // 5xx errors
+                            rootCause = Optional.<TDClientException>of(new TDClientHttpException(SERVER_ERROR, errorMessage, code));
+                        }
+                        else {
+                            rootCause = Optional.<TDClientException>of(new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code));
+                        }
                     }
                 }
                 catch (ExecutionException e) {
@@ -176,13 +184,11 @@ public class TDHttpClient
             throw new TDClientInterruptedException(e);
         }
 
-        if(rootCause.isPresent()) {
-            // Throw the last seen error
-            throw rootCause.get();
-        }
-        else {
-            throw new TDClientException(RETRY_LIMIT_EXCEEDED, String.format("Failed to process the API request to %s", apiRequest.getPath()));
-        }
+        logger.warn("API request retry limit exceeded: ({}/{})", config.getRetryLimit(), config.getRetryLimit());
+
+        checkState(rootCause.isPresent(), "rootCause must be present here");
+        // Throw the last seen error
+        throw rootCause.get();
     }
 
     public <Result> Result submit(TDApiRequest request, Class<Result> resultType)
