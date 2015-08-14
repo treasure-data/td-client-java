@@ -313,6 +313,7 @@ public class TDClient
     public TDJob jobStatus(String jobId)
             throws TDClientException
     {
+        // TODO use smaller object (e.g., TDJobStatus)
         return doGet(buildUrl("/v3/job/status/%s", jobId), TDJob.class);
     }
 
@@ -323,11 +324,12 @@ public class TDClient
         return doGet(buildUrl("/v3/job/show/%s", jobId), TDJob.class);
     }
 
-
     @Override
     public TDJobResult jobResult(String jobId)
             throws TDClientException
     {
+        //doGet(buildUrl("/v3/jog/result/%s", jobId), );
+
 
 
         return null;
@@ -341,7 +343,7 @@ public class TDClient
     }
 
     static {
-        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.td-client/pom.properties");
+        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client.td-client/pom.properties");
         String v = "unknown";
         if (mavenProperties != null) {
             try(InputStream in = mavenProperties.openStream()) {

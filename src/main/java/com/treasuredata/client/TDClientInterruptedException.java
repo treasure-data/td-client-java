@@ -19,32 +19,12 @@
 package com.treasuredata.client;
 
 /**
- * td-client error codes
+ *
  */
-public enum ErrorCode
+public class TDClientInterruptedException extends TDClientException
 {
-    AUTHENTICATION_FAILURE(0x001_0001),
-    DATABASE_NOT_FOUND(0x001_0002),
-    DATABASE_ALREADY_EXISTS(0x0001_0003),
-    TABLE_NOT_FOUND(0x001_0004),
-    INVALID_CONFIGURATION(0x001_0005),
-
-    API_REQUEST_TIMEOUT(0x0002_0001),
-    API_CLIENT_ERROR(0x0002_0002),
-    API_EXECUTION_INTERRUPTED(0x0002_0003),
-    API_RETRY_LIMIT_EXCEEDED(0x0002_0004),
-    API_INVALID_JSON_RESPONSE(0x002_0005),
-    API_INVALID_URL(0x0002_0006)
-
-    ;
-
-    private final int code;
-
-    private ErrorCode(int code) {
-        this.code = code;
-    }
-
-    public int getCode() {
-        return code;
+    public TDClientInterruptedException(Exception cause)
+    {
+        super(ErrorType.INTERRUPTED, cause);
     }
 }

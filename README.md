@@ -17,7 +17,7 @@ footprint, plugins reliable buffering, log forwarding, the log analyzing, etc.
 
 ## Requirements
 
-Java >= 1.6
+Java >= 1.7
 
 ## Install
 
@@ -37,7 +37,7 @@ You can configure your pom.xml as follows to use it:
     <dependencies>
       ...
       <dependency>
-        <groupId>com.treasuredata</groupId>
+        <groupId>com.treasuredata.client</groupId>
         <artifactId>td-client</artifactId>
         <version>${client.version}</version>
       </dependency>

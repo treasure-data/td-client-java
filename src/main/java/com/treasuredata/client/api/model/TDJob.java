@@ -96,7 +96,8 @@ public class TDJob
             return valueOf(s.toUpperCase());
         }
 
-        public boolean isFinished() {
+        public boolean isFinished()
+        {
             return this == SUCCESS ||
                     this == ERROR ||
                     this == KILLED;
@@ -137,7 +138,7 @@ public class TDJob
 
     private final String jobId;
     private final Status status;
-    private final TDQuery query;
+    private final String query;
     private final String createdAt;
     private final String startAt;
     private final String updatedAt;
@@ -151,7 +152,8 @@ public class TDJob
     private final long resultSize;
     private final Optional<Debug> debug;
 
-    public TDJob(
+    @JsonCreator
+    static TDJob createTDJobV3(
             @JsonProperty("job_id") String jobId,
             @JsonProperty("status") Status status,
             @JsonProperty("query") TDQuery query,
@@ -166,8 +168,27 @@ public class TDJob
             @JsonProperty("user_name") String userName,
             @JsonProperty("duration") long duration,
             @JsonProperty("result_size") long resultSize,
-            @JsonProperty("debug") Optional<Debug> debug
-            )
+            @JsonProperty("debug") Optional<Debug> debug)
+    {
+        return new TDJob(jobId, status, query.getQuery(), createdAt, startAt, updatedAt, endAt, resultSchema, database, result, url, userName, duration, resultSize, debug);
+    }
+
+    public TDJob(String jobId,
+            Status status,
+            String query,
+            String createdAt,
+            String startAt,
+            String updatedAt,
+            String endAt,
+            Optional<String> resultSchema,
+            String database,
+            String result,
+            String url,
+            String userName,
+            long duration,
+            long resultSize,
+            Optional<Debug> debug
+    )
     {
         this.jobId = jobId;
         this.status = status;
@@ -196,7 +217,7 @@ public class TDJob
         return status;
     }
 
-    public TDQuery getQuery()
+    public String getQuery()
     {
         return query;
     }

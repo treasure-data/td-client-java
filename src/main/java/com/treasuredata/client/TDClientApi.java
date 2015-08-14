@@ -37,25 +37,25 @@ public interface TDClientApi
      * @return list of databases
      * @throws TDClientException if failed to retrieve the database list
      */
-    List<String> listDatabases() throws TDClientException;
+    List<String> listDatabases();
 
     /**
      * Create a new database
      * @param databaseName
      * @throws TDClientException if the specified database already exists
      */
-    void createDatabase(String databaseName) throws TDClientException;
+    void createDatabase(String databaseName);
 
-    void createDatabaseIfNotExists(String databaseName) throws TDClientException;
+    void createDatabaseIfNotExists(String databaseName);
 
     /**
      * Delete a specified database. Deleting a database deletes all of its belonging tables.
      * @param databaseName
      * @throws TDClientException if no such a database exists
      */
-    void deleteDatabase(String databaseName) throws TDClientException;
+    void deleteDatabase(String databaseName);
 
-    void deleteDatabaseIfExists(String databaseName) throws TDClientException;
+    void deleteDatabaseIfExists(String databaseName);
 
     /**
      * Get the list of the tables in the specified database
@@ -63,11 +63,11 @@ public interface TDClientApi
      * @return
      * @throws TDClientException
      */
-    List<TDTable> listTables(String databaseName) throws TDClientException;
+    List<TDTable> listTables(String databaseName);
 
-    boolean existsDatabase(String databaseName) throws TDClientException;
+    boolean existsDatabase(String databaseName);
 
-    boolean existsTable(String databaseName, String table) throws TDClientException;
+    boolean existsTable(String databaseName, String table);
 
     /**
      * Create a new table
@@ -76,19 +76,19 @@ public interface TDClientApi
      * @return
      * @throws TDClientException
      */
-    void createTable(String databaseName, String tableName) throws TDClientException;
+    void createTable(String databaseName, String tableName);
 
-    void createTableIfNotExists(String databaseName, String tableName) throws TDClientException;
+    void createTableIfNotExists(String databaseName, String tableName);
 
-    void renameTable(String databaseName, String tableName, String newTableName) throws TDClientException;
+    void renameTable(String databaseName, String tableName, String newTableName);
 
-    void renameTable(String databaseName, String tableName, String newTableName, boolean overwrite) throws TDClientException;
+    void renameTable(String databaseName, String tableName, String newTableName, boolean overwrite);
 
-    void deleteTable(String databaseName, String tableName) throws TDClientException;
+    void deleteTable(String databaseName, String tableName);
 
-    void deleteTableIfExists(String databaseName, String tableName) throws TDClientException;
+    void deleteTableIfExists(String databaseName, String tableName);
 
-    void partialDelete(String databaseName, String tableName, long from, long to) throws TDClientException;
+    void partialDelete(String databaseName, String tableName, long from, long to);
 
     /**
      * Submit a new job request
@@ -96,20 +96,21 @@ public interface TDClientApi
      * @return job_id
      * @throws TDClientException
      */
-    String submit(TDJobRequest jobRequest) throws TDClientException;
+    String submit(TDJobRequest jobRequest);
 
-    TDJobList listJobs() throws TDClientException;
+    TDJobList listJobs();
 
-    TDJobList listJobs(long from, long to) throws TDClientException;
+    TDJobList listJobs(long from, long to);
 
-    void killJob(String jobId) throws TDClientException;
+    void killJob(String jobId);
 
-    TDJob jobStatus(String jobId) throws TDClientException;
+    TDJob jobStatus(String jobId);
 
-    TDJob jobInfo(String jobId) throws TDClientException;
+    TDJob jobInfo(String jobId);
 
-    TDJobResult jobResult(String jobId) throws TDClientException;
+    TDJobResult jobResult(String jobId);
 
-    //
+    // bulk import API
+
 
 }

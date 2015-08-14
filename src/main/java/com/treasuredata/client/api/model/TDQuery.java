@@ -19,11 +19,15 @@
 package com.treasuredata.client.api.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Throwables;
 
 /**
  *
  */
-public class TDQuery
+class TDQuery
 {
     private final String query;
 
@@ -38,9 +42,19 @@ public class TDQuery
     }
 
     @JsonCreator
-    public static TDQuery fromObject(Object value) {
+    public static TDQuery fromObject(JsonNode value) {
         // embulk job have nested json object
-        return new TDQuery(value.toString());
+        try {
+            return new TDQuery(new ObjectMapper().writeValueAsString(value));
+        }
+        catch (JsonProcessingException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    public String getQuery()
+    {
+        return query;
     }
 
     @Override

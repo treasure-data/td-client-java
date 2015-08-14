@@ -48,7 +48,7 @@ public class TDClientConfig
             throws TDClientException
     {
         if (v == null) {
-            throw new TDClientException(ErrorCode.INVALID_CONFIGURATION, message);
+            throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, message);
         }
         return v;
     }
@@ -63,7 +63,7 @@ public class TDClientConfig
             throws TDClientException
     {
         this.endpoint = checkNotNull(endpoint, "API endpoint is null");
-        this.apiKey = checkNotNull(apiKey, "apikey is null. Check you $HOME/.td/td.conf file");
+        this.apiKey = checkNotNull(apiKey, "apikey is null. Check your $HOME/.td/td.conf file");
         this.internalKey = internalKey;
         this.internalKeyVersion = internalKeyVersion;
     }
