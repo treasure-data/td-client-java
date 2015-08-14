@@ -18,11 +18,10 @@
  */
 package com.treasuredata.client;
 
-import com.treasuredata.client.TDClientHttpException;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
- *
+ * On 409 conflict error (e.g., database already exists)
  */
 public class TDClientHttpConflictException
         extends TDClientHttpException

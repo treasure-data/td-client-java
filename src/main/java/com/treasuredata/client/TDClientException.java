@@ -27,9 +27,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class TDClientException extends RuntimeException
 {
+    /**
+     * Used for showing detailed error message
+     */
     public static enum ErrorType
     {
-        // Coinfiguration error
+        // Configuration error
         INVALID_CONFIGURATION,
 
         // HTTP error

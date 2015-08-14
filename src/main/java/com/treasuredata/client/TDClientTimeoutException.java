@@ -18,10 +18,8 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
-
 /**
- *
+ * Thrown when API request has timed out
  */
 public class TDClientTimeoutException
         extends TDClientException
