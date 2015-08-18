@@ -143,7 +143,9 @@ public class TDHttpClient
         {
             listener = new InputStreamResponseListener();
             request.send(listener);
-            return listener.get(request.getTimeout(), TimeUnit.MILLISECONDS);
+            long timeout = httpClient.getIdleTimeout();
+            logger.debug("timeout: {}", timeout);
+            return listener.get(timeout, TimeUnit.MILLISECONDS);
         }
 
         @Override
@@ -235,9 +237,8 @@ public class TDHttpClient
                     }
                     else {
                         String errorMessage = requestHandler.onError(response);
-                        logger.warn(errorMessage);
-
                         if (HttpStatus.isClientError(code)) {
+                            logger.error(errorMessage);
                             // 4xx error. We do not retry the execution on this type of error
                             switch (code) {
                                 case HttpStatus.UNAUTHORIZED_401:
@@ -250,7 +251,8 @@ public class TDHttpClient
                                     throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code);
                             }
                         }
-                        else if (HttpStatus.isServerError(code)) {
+                        logger.warn(errorMessage);
+                        if (HttpStatus.isServerError(code)) {
                             // 5xx errors
                             rootCause = Optional.<TDClientException>of(new TDClientHttpException(SERVER_ERROR, errorMessage, code));
                         }
@@ -260,12 +262,12 @@ public class TDHttpClient
                     }
                 }
                 catch (ExecutionException e) {
-                    rootCause = Optional.<TDClientException>of(new TDClientExecutionException(e));
                     logger.warn("API request failed", e);
+                    rootCause = Optional.<TDClientException>of(new TDClientExecutionException(e));
                 }
                 catch (TimeoutException e) {
-                    rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
                     logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
+                    rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
                     request.abort(e);
                 }
             }

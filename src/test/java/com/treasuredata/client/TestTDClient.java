@@ -23,6 +23,7 @@ import com.google.common.io.ByteStreams;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
+import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 import org.junit.After;
@@ -105,7 +106,7 @@ public class TestTDClient
 
         int retryCount = 0;
 
-        TDJob tdJob = null;
+        TDJobStatus tdJob = null;
         do {
             Thread.sleep(1000);
             tdJob = client.jobStatus(jobId);
@@ -114,7 +115,7 @@ public class TestTDClient
         }
         while(retryCount < 10 && !tdJob.getStatus().isFinished());
 
-        tdJob = client.jobInfo(jobId);
+        TDJob jobInfo = client.jobInfo(jobId);
         logger.debug("job show result: " + tdJob);
 
         try(InputStream in = client.jobResult(jobId)) {
@@ -126,7 +127,7 @@ public class TestTDClient
     @Test
     public void invalidJobStatus() {
         try {
-            TDJob invalidJob = client.jobStatus("xxxxxx");
+            TDJobStatus invalidJob = client.jobStatus("xxxxxx");
             logger.debug("invalid job: " + invalidJob);
 
             fail("should not reach here");

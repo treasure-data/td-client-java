@@ -57,14 +57,13 @@ public class TDClientException extends RuntimeException
 
     private static final String formatErrorMessage(ErrorType errorType, String message, Optional<Exception> cause) {
         String rootCauseErrorMessage = cause.isPresent()?  " The root cause: " + cause.get().getMessage() : "";
-        return String.format("[%s] %s%s", errorType.name(), message, rootCauseErrorMessage);
+        return String.format("[%s] %s%s", errorType.name(), message != null ? message : "", rootCauseErrorMessage);
     }
 
     public TDClientException(ErrorType errorType, String message, Optional<Exception> cause)
     {
         super(formatErrorMessage(errorType, message, cause));
         checkNotNull(errorType, "errorType is null");
-        checkNotNull(message, "message is null");
         checkNotNull(cause, "cause is null");
         this.errorType = errorType;;
         this.rootCause = cause;

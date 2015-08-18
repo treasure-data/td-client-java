@@ -22,6 +22,7 @@ import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobResult;
+import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 
@@ -105,7 +106,7 @@ public interface TDClientApi
 
     void killJob(String jobId);
 
-    TDJob jobStatus(String jobId);
+    TDJobStatus jobStatus(String jobId);
 
     TDJob jobInfo(String jobId);
 

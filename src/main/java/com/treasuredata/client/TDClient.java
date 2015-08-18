@@ -25,6 +25,7 @@ import com.treasuredata.client.api.model.TDDatabaseList;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
+import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 import com.treasuredata.client.api.model.TDTableList;
@@ -308,11 +309,11 @@ public class TDClient
     }
 
     @Override
-    public TDJob jobStatus(String jobId)
+    public TDJobStatus jobStatus(String jobId)
             throws TDClientException
     {
         // TODO use smaller object (e.g., TDJobStatus)
-        return doGet(buildUrl("/v3/job/status/%s", jobId), TDJob.class);
+        return doGet(buildUrl("/v3/job/status/%s", jobId), TDJobStatus.class);
     }
 
     @Override
