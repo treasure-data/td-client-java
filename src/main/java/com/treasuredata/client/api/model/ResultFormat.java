@@ -21,6 +21,23 @@ package com.treasuredata.client.api.model;
 /**
  *
  */
-public class TDJobResult
+public enum ResultFormat
 {
+    JSON("json"),
+    TSV("tsv"),
+    CSV("csv"),
+    MESSAGE_PACK("msgpack"),
+    MESSAGE_PACK_GZ("msgpack.gz")
+    ;
+
+    private final String name;
+
+    private ResultFormat(String name)  {
+        this.name = name;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
 }

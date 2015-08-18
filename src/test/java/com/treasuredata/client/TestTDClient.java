@@ -20,12 +20,15 @@ package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.ByteStreams;
+import com.treasuredata.client.api.model.ResultFormat;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
+import org.json.JSONArray;
+import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -118,9 +122,12 @@ public class TestTDClient
         TDJob jobInfo = client.jobInfo(jobId);
         logger.debug("job show result: " + tdJob);
 
-        try(InputStream in = client.jobResult(jobId)) {
+        try(InputStream in = client.jobResult(jobId, ResultFormat.JSON)) {
             String result = new String(ByteStreams.toByteArray(in));
             logger.info("result:\n" + result);
+            JSONArray array = new JSONArray(result);
+            assertEquals(1, array.length());
+            assertEquals(8807278, array.getLong(0));
         }
     }
 

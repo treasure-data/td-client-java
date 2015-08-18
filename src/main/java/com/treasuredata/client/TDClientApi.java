@@ -18,12 +18,11 @@
  */
 package com.treasuredata.client;
 
+import com.treasuredata.client.api.model.ResultFormat;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
-import com.treasuredata.client.api.model.TDJobResult;
 import com.treasuredata.client.api.model.TDJobStatus;
-import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 
 import java.io.InputStream;
@@ -36,6 +35,7 @@ public interface TDClientApi
 {
     /**
      * Get the list of databases
+     *
      * @return list of databases
      * @throws TDClientException if failed to retrieve the database list
      */
@@ -43,6 +43,7 @@ public interface TDClientApi
 
     /**
      * Create a new database
+     *
      * @param databaseName
      * @throws TDClientException if the specified database already exists
      */
@@ -52,6 +53,7 @@ public interface TDClientApi
 
     /**
      * Delete a specified database. Deleting a database deletes all of its belonging tables.
+     *
      * @param databaseName
      * @throws TDClientException if no such a database exists
      */
@@ -61,6 +63,7 @@ public interface TDClientApi
 
     /**
      * Get the list of the tables in the specified database
+     *
      * @param databaseName
      * @return
      * @throws TDClientException
@@ -73,6 +76,7 @@ public interface TDClientApi
 
     /**
      * Create a new table
+     *
      * @param databaseName
      * @param tableName
      * @return
@@ -94,6 +98,7 @@ public interface TDClientApi
 
     /**
      * Submit a new job request
+     *
      * @param jobRequest
      * @return job_id
      * @throws TDClientException
@@ -110,9 +115,7 @@ public interface TDClientApi
 
     TDJob jobInfo(String jobId);
 
-    InputStream jobResult(String jobId);
+    InputStream jobResult(String jobId, ResultFormat format);
 
     // bulk import API
-
-
 }

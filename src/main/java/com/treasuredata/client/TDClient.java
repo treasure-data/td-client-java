@@ -20,6 +20,7 @@ package com.treasuredata.client;
 
 import com.google.common.collect.ImmutableMap;
 import com.treasuredata.client.api.TDApiRequest;
+import com.treasuredata.client.api.model.ResultFormat;
 import com.treasuredata.client.api.model.TDDatabase;
 import com.treasuredata.client.api.model.TDDatabaseList;
 import com.treasuredata.client.api.model.TDJob;
@@ -324,10 +325,13 @@ public class TDClient
     }
 
     @Override
-    public InputStream jobResult(String jobId)
+    public InputStream jobResult(String jobId, ResultFormat format)
             throws TDClientException
     {
-        TDApiRequest request = TDApiRequest.Builder.GET(buildUrl("/v3/job/result/%s", jobId)).build();
+        TDApiRequest request = TDApiRequest.Builder
+                .GET(buildUrl("/v3/job/result/%s", jobId))
+                .addQueryParam("format", format.getName())
+                .build();
         return httpClient.openStream(request);
     }
 
