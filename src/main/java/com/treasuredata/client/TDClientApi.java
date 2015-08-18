@@ -115,6 +115,13 @@ public interface TDClientApi
 
     TDJob jobInfo(String jobId);
 
+    /**
+     * Open an input stream to retrieve the job result.
+     * This method does not close the returned InputStream.
+     * @param jobId
+     * @param format
+     * @return
+     */
     InputStream jobResult(String jobId, ResultFormat format);
 
     // bulk import API

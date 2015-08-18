@@ -95,4 +95,19 @@ public class TDJobStatus
     {
         return endAt;
     }
+
+    @Override
+    public String toString()
+    {
+        return "TDJobStatus{" +
+                "status=" + status +
+                ", resultSize=" + resultSize +
+                ", duration=" + duration +
+                ", jobId='" + jobId + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                ", updatedAt='" + updatedAt + '\'' +
+                ", startedAt='" + startedAt + '\'' +
+                ", endAt='" + endAt + '\'' +
+                '}';
+    }
 }

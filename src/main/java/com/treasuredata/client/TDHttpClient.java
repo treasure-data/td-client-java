@@ -144,7 +144,6 @@ public class TDHttpClient
             listener = new InputStreamResponseListener();
             request.send(listener);
             long timeout = httpClient.getIdleTimeout();
-            logger.debug("timeout: {}", timeout);
             return listener.get(timeout, TimeUnit.MILLISECONDS);
         }
 
@@ -232,7 +231,7 @@ public class TDHttpClient
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
-                        logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, response.getReason(), request.getPath()));
+                        logger.info(String.format("[%d:%s] API request to %s has succeeded", code, response.getReason(), request.getPath()));
                         return requestHandler.onSuccess(response);
                     }
                     else {
