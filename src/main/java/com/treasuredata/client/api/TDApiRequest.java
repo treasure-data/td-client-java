@@ -62,7 +62,7 @@ public class TDApiRequest
         private String path;
         private Map<String, String> queryParams;
         private Map<String, String> headerParams;
-        private Optional<File> file;
+        private Optional<File> file = Optional.absent();
 
         Builder(HttpMethod method, String path)
         {

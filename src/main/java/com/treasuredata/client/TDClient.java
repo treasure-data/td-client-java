@@ -102,14 +102,15 @@ public class TDClient
         httpClient.close();
     }
 
-    private static String buildUrl(String urlTemplate, String... args)
+    private static String buildUrl(String urlPrefix, String... args)
     {
-        Object[] urlEncoded = new String[args.length];
-        int index = 0;
+        StringBuilder s = new StringBuilder();
+        s.append(urlPrefix);
         for(String a : args) {
-            urlEncoded[index++] = urlEncode(a);
+            s.append("/");
+            s.append(urlEncode(a));
         }
-        return String.format(urlTemplate, urlEncoded);
+        return s.toString();
     }
 
     private <ResultType> ResultType doGet(String path, Class<ResultType> resultTypeClass)
@@ -184,7 +185,7 @@ public class TDClient
     public void createDatabase(String databaseName)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/database/create/%s", databaseName));
+        doPost(buildUrl("/v3/database/create", databaseName));
     }
 
     @Override
@@ -200,7 +201,7 @@ public class TDClient
     public void deleteDatabase(String databaseName)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/database/delete/%s", databaseName));
+        doPost(buildUrl("/v3/database/delete", databaseName));
     }
 
     @Override
@@ -216,7 +217,7 @@ public class TDClient
     public List<TDTable> listTables(String databaseName)
             throws TDClientException
     {
-        TDTableList tableList = doGet(buildUrl("/v3/table/list/%s", databaseName), TDTableList.class);
+        TDTableList tableList = doGet(buildUrl("/v3/table/list", databaseName), TDTableList.class);
         return tableList.getTables();
     }
 
@@ -243,7 +244,7 @@ public class TDClient
     public void createTable(String databaseName, String tableName)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/table/create/%s/%s/%s", databaseName, tableName, TDTableType.LOG.getTypeName()));
+        doPost(buildUrl("/v3/table/create", databaseName, tableName, TDTableType.LOG.getTypeName()));
     }
 
     @Override
@@ -266,7 +267,7 @@ public class TDClient
     public void renameTable(String databaseName, String tableName, String newTableName, boolean overwrite)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/table/rename/%s/%s/%s", databaseName, tableName, newTableName),
+        doPost(buildUrl("/v3/table/rename", databaseName, tableName, newTableName),
                 ImmutableMap.of("overwrite", Boolean.toString(overwrite)),
                 UpdateTableResult.class
         );
@@ -276,7 +277,7 @@ public class TDClient
     public void deleteTable(String databaseName, String tableName)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/table/delete/%s/%s", databaseName, tableName));
+        doPost(buildUrl("/v3/table/delete", databaseName, tableName));
     }
 
     @Override
@@ -295,7 +296,7 @@ public class TDClient
         Map<String, String> queryParams = ImmutableMap.of(
                 "from", Long.toString(from),
                 "to", Long.toString(to));
-        doPost(buildUrl("/v3/table/partialdelete/%s/%s", databaseName, tableName), queryParams);
+        doPost(buildUrl("/v3/table/partialdelete", databaseName, tableName), queryParams);
     }
 
     @Override
@@ -317,7 +318,7 @@ public class TDClient
 
         TDJobSubmitResult result =
                 doPost(
-                        buildUrl("/v3/job/issue/%s/%s", jobRequest.getType().getType(), jobRequest.getDatabase()),
+                        buildUrl("/v3/job/issue", jobRequest.getType().getType(), jobRequest.getDatabase()),
                         queryParam,
                         TDJobSubmitResult.class);
         return result.getJobId();
@@ -341,21 +342,21 @@ public class TDClient
     public void killJob(String jobId)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/job/kill/%s", jobId));
+        doPost(buildUrl("/v3/job/kill", jobId));
     }
 
     @Override
     public TDJobStatus jobStatus(String jobId)
             throws TDClientException
     {
-        return doGet(buildUrl("/v3/job/status/%s", jobId), TDJobStatus.class);
+        return doGet(buildUrl("/v3/job/status", jobId), TDJobStatus.class);
     }
 
     @Override
     public TDJob jobInfo(String jobId)
             throws TDClientException
     {
-        return doGet(buildUrl("/v3/job/show/%s", jobId), TDJob.class);
+        return doGet(buildUrl("/v3/job/show", jobId), TDJob.class);
     }
 
     @Override
@@ -363,7 +364,7 @@ public class TDClient
             throws TDClientException
     {
         TDApiRequest request = TDApiRequest.Builder
-                .GET(buildUrl("/v3/job/result/%s", jobId))
+                .GET(buildUrl("/v3/job/result", jobId))
                 .addQueryParam("format", format.getName())
                 .build();
         return httpClient.openStream(request);
@@ -372,42 +373,42 @@ public class TDClient
     @Override
     public void createBulkImportSession(String sessionName, String databaseName, String tableName)
     {
-        doPost(buildUrl("/v3/bulk_import/create/%s/%s/%s", sessionName, databaseName, tableName));
+        doPost(buildUrl("/v3/bulk_import/create", sessionName, databaseName, tableName));
     }
 
     @Override
     public TDBulkImportSession getBulkImportSession(String sessionName)
     {
-        return doGet(buildUrl("/v3/bulk_import/show/%s", sessionName), TDBulkImportSession.class);
+        return doGet(buildUrl("/v3/bulk_import/show", sessionName), TDBulkImportSession.class);
     }
 
     @Override
     public void uploadBulkImportPart(String sessionName, String uniquePartName, File path)
     {
-        doPut(buildUrl("/v3/bulk_import/upload_port/%s/%s", sessionName, uniquePartName), path);
+        doPut(buildUrl("/v3/bulk_import/upload_port", sessionName, uniquePartName), path);
     }
 
     @Override
     public void freezeBulkImportSession(String sessionName)
     {
-        doPost(buildUrl("/v3/bulk_import/freeze/%s", sessionName));
+        doPost(buildUrl("/v3/bulk_import/freeze", sessionName));
     }
 
     @Override
     public void performBulkImportSession(String sessionName, int priority)
     {
-        doPost(buildUrl("/v3/bulk_import/perform/%s", sessionName));
+        doPost(buildUrl("/v3/bulk_import/perform", sessionName));
     }
 
     @Override
     public void commitBulkImportSession(String sessionName)
     {
-        doPost(buildUrl("/v3/builk_import/commit/%s", sessionName));
+        doPost(buildUrl("/v3/builk_import/commit", sessionName));
     }
 
     @Override
     public void deleteBulkImportSession(String sessionName) {
-        doPost(buildUrl("/v3/bulk_import/delete/%s", sessionName));
+        doPost(buildUrl("/v3/bulk_import/delete", sessionName));
     }
 
 
