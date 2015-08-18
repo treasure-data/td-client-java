@@ -23,21 +23,34 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 import com.treasuredata.client.api.TDApiRequest;
 import com.treasuredata.client.api.model.TDApiError;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.api.Response;
+import org.eclipse.jetty.client.util.FutureResponseListener;
+import org.eclipse.jetty.client.util.InputStreamResponseListener;
+import org.eclipse.jetty.http.HttpParser;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.HttpCookieStore;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.text.AbstractDocument;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -46,6 +59,7 @@ import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_R
 import static com.treasuredata.client.TDClientException.ErrorType.RESPONSE_READ_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
+import static org.msgpack.core.Preconditions.checkNotNull;
 
 /**
  * An extension of Jetty HttpClient with request retry handler
@@ -94,22 +108,112 @@ public class TDHttpClient
         }
     }
 
-    protected Optional<TDApiError> parseErrorResponse(ContentResponse response)
+    protected Optional<TDApiError> parseErrorResponse(byte[] content)
     {
         try {
-            return Optional.of(objectMapper.readValue(response.getContent(), TDApiError.class));
+            return Optional.of(objectMapper.readValue(content, TDApiError.class));
         }
         catch (IOException e) {
-            logger.warn(String.format("Failed to parse error response: %s", response.getContentAsString()), e);
+            logger.warn(String.format("Failed to parse error response: %s", new String(content)), e);
             return Optional.absent();
         }
     }
 
-    public ContentResponse submit(TDApiRequest apiRequest)
+    public static interface Handler<ResponseType extends Response, Result> {
+        ResponseType submit(Request requset)
+                throws InterruptedException, ExecutionException, TimeoutException;
+
+        Result onSuccess(ResponseType response);
+
+        /**
+         *
+         * @param response
+         * @return error message
+         */
+        String onError(ResponseType response);
+    }
+
+
+    public class ContentStreamHandler implements Handler<Response, InputStream> {
+        private InputStreamResponseListener listener = null;
+
+        @Override
+        public Response submit(Request request)
+                throws InterruptedException, ExecutionException, TimeoutException
+        {
+            listener = new InputStreamResponseListener();
+            request.send(listener);
+            return listener.get(request.getTimeout(), TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public InputStream onSuccess(Response response)
+        {
+            checkNotNull(listener, "listener is null");
+            return listener.getInputStream();
+        }
+
+        @Override
+        public String onError(Response response)
+        {
+            int code = response.getStatus();
+            InputStream in = null;
+            try {
+                try {
+                    in = listener.getInputStream();
+                    byte[] content = ByteStreams.toByteArray(in);
+                    return reportErrorMessage(response, content);
+                }
+                finally {
+                    if(in != null)  {
+                        in.close();
+                    }
+                }
+            }
+            catch (IOException e) {
+                throw Throwables.propagate(e);
+            }
+        }
+    }
+
+    public class ContentHandler implements Handler<ContentResponse, ContentResponse> {
+        @Override
+        public ContentResponse submit(Request request)
+                throws InterruptedException, ExecutionException, TimeoutException
+        {
+            return request.send();
+        }
+
+        @Override
+        public ContentResponse onSuccess(ContentResponse response)
+        {
+            if (logger.isTraceEnabled()) {
+                logger.trace("response:\n" + response.getContentAsString());
+            }
+            return response;
+        }
+
+        @Override
+        public String onError(ContentResponse response)
+        {
+            return reportErrorMessage(response, response.getContent());
+        }
+    }
+
+    protected String reportErrorMessage(Response response, byte[] responseContentOnError) {
+        int code = response.getStatus();
+        Optional<TDApiError> errorResponse = parseErrorResponse(responseContentOnError);
+        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
+        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, response.getReason(), response.getRequest().getPath(), responseErrorText);
+        return errorMessage;
+    }
+
+    public <ResponseType extends Response, Result> Result submit(TDApiRequest apiRequest, Handler<ResponseType, Result> requestHandler)
             throws TDClientException
     {
         ExponentialBackOffRetry retry = new ExponentialBackOffRetry(config.getRetryLimit(), config.getRetryInitialWaitMillis(), config.getRetryWaitMillis());
         Optional<TDClientException> rootCause = Optional.absent();
+        Request request = null;
         try {
             Optional<Integer> nextInterval = Optional.absent();
             do {
@@ -119,23 +223,18 @@ public class TDHttpClient
                     Thread.sleep(waitTimeMillis);
                 }
 
+                request = apiRequest.newJettyRequest(httpClient, config);
                 try {
-                    Request request = apiRequest.newJettyRequest(httpClient, config);
                     logger.debug("Sending API request to {}", request.getURI());
-                    ContentResponse response = request.send();
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("response:\n" + response.getContentAsString());
-                    }
+                    ResponseType response = requestHandler.submit(request);
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
-                        logger.debug("[{}:{}] API request to %s has succeeded", code, response.getReason(), request.getPath());
-                        return response;
+                        logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, response.getReason(), request.getPath()));
+                        return requestHandler.onSuccess(response);
                     }
                     else {
-                        Optional<TDApiError> errorResponse = parseErrorResponse(response);
-                        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
-                        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, response.getReason(), request.getPath(), responseErrorText);
+                        String errorMessage = requestHandler.onError(response);
                         logger.warn(errorMessage);
 
                         if (HttpStatus.isClientError(code)) {
@@ -167,14 +266,18 @@ public class TDHttpClient
                 catch (TimeoutException e) {
                     rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
                     logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
+                    request.abort(e);
                 }
             }
             while ((nextInterval = retry.nextWaitTimeMillis()).isPresent());
         }
         catch (InterruptedException e) {
+            logger.warn("API request interrupted", e);
+            if(request != null) {
+                request.abort(e);
+            }
             throw new TDClientInterruptedException(e);
         }
-
         logger.warn("API request retry limit exceeded: ({}/{})", config.getRetryLimit(), config.getRetryLimit());
 
         checkState(rootCause.isPresent(), "rootCause must be present here");
@@ -182,11 +285,19 @@ public class TDHttpClient
         throw rootCause.get();
     }
 
-    public <Result> Result submit(TDApiRequest request, Class<Result> resultType)
+    public ContentResponse submit(TDApiRequest apiRequest) {
+        return submit(apiRequest, new ContentHandler());
+    }
+
+    public InputStream openStream(TDApiRequest apiRequest) {
+        return submit(apiRequest, new ContentStreamHandler());
+    }
+
+    public <Result> Result submit(TDApiRequest apiRequest, Class<Result> resultType)
             throws TDClientException
     {
         try {
-            ContentResponse response = submit(request);
+            ContentResponse response = submit(apiRequest);
             return objectMapper.readValue(response.getContent(), resultType);
         }
         catch (JsonMappingException e) {
@@ -197,4 +308,6 @@ public class TDHttpClient
             throw new TDClientException(RESPONSE_READ_FAILURE, e);
         }
     }
+
+
 }

@@ -19,6 +19,7 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
+import com.google.common.io.ByteStreams;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
@@ -30,6 +31,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
@@ -114,6 +116,11 @@ public class TestTDClient
 
         tdJob = client.jobInfo(jobId);
         logger.debug("job show result: " + tdJob);
+
+        try(InputStream in = client.jobResult(jobId)) {
+            String result = new String(ByteStreams.toByteArray(in));
+            logger.info("result:\n" + result);
+        }
     }
 
     @Test
@@ -161,4 +168,5 @@ public class TestTDClient
         assertTrue(client.existsTable(SAMPLE_DB, newTableName));
         assertFalse(client.existsTable(SAMPLE_DB, SAMPLE_TABLE));
     }
+
 }

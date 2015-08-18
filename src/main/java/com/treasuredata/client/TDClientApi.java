@@ -25,6 +25,7 @@ import com.treasuredata.client.api.model.TDJobResult;
 import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -108,7 +109,7 @@ public interface TDClientApi
 
     TDJob jobInfo(String jobId);
 
-    TDJobResult jobResult(String jobId);
+    InputStream jobResult(String jobId);
 
     // bulk import API
 

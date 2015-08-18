@@ -25,7 +25,6 @@ import com.treasuredata.client.api.model.TDDatabaseList;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
-import com.treasuredata.client.api.model.TDJobResult;
 import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 import com.treasuredata.client.api.model.TDTableList;
@@ -324,14 +323,11 @@ public class TDClient
     }
 
     @Override
-    public TDJobResult jobResult(String jobId)
+    public InputStream jobResult(String jobId)
             throws TDClientException
     {
-        //doGet(buildUrl("/v3/jog/result/%s", jobId), );
-
-
-
-        return null;
+        TDApiRequest request = TDApiRequest.Builder.GET(buildUrl("/v3/job/result/%s", jobId)).build();
+        return httpClient.openStream(request);
     }
 
     private static final String version;
