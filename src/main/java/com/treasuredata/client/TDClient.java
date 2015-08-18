@@ -21,6 +21,7 @@ package com.treasuredata.client;
 import com.google.common.collect.ImmutableMap;
 import com.treasuredata.client.api.TDApiRequest;
 import com.treasuredata.client.api.model.ResultFormat;
+import com.treasuredata.client.api.model.TDBulkImportSession;
 import com.treasuredata.client.api.model.TDDatabase;
 import com.treasuredata.client.api.model.TDDatabaseList;
 import com.treasuredata.client.api.model.TDJob;
@@ -36,6 +37,7 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -55,6 +57,31 @@ public class TDClient
         implements TDClientApi
 {
     private static final Logger logger = LoggerFactory.getLogger(TDClient.class);
+    private static final String version;
+
+    public static String getVersion()
+    {
+        return version;
+    }
+
+    static {
+        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client.td-client/pom.properties");
+        String v = "unknown";
+        if (mavenProperties != null) {
+            try(InputStream in = mavenProperties.openStream()) {
+                Properties p = new Properties();
+                p.load(in);
+                v = p.getProperty("version", "unknown");
+            }
+            catch (Throwable e) {
+                logger.warn("Error in reading pom.properties file", e);
+            }
+        }
+        version = v;
+        logger.info("td-client version: " + version);
+    }
+
+
     private final TDClientConfig config;
     private final TDHttpClient httpClient;
 
@@ -115,7 +142,7 @@ public class TDClient
     private ContentResponse doPost(String path, Map<String, String> queryParam)
             throws TDClientException
     {
-        checkNotNull(path, "pash is null");
+        checkNotNull(path, "path is null");
         checkNotNull(queryParam, "param is null");
 
         TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
@@ -132,6 +159,14 @@ public class TDClient
         TDApiRequest request = TDApiRequest.Builder.POST(path).build();
         return httpClient.submit(request);
     }
+
+    private ContentResponse doPut(String path, File filePath)
+            throws TDClientException
+    {
+        TDApiRequest request = TDApiRequest.Builder.PUT(path).setFile(filePath).build();
+        return httpClient.submit(request);
+    }
+
 
     @Override
     public List<String> listDatabases()
@@ -334,27 +369,46 @@ public class TDClient
         return httpClient.openStream(request);
     }
 
-    private static final String version;
-
-    public static String getVersion()
+    @Override
+    public void createBulkImportSession(String sessionName, String databaseName, String tableName)
     {
-        return version;
+        doPost(buildUrl("/v3/bulk_import/create/%s/%s/%s", sessionName, databaseName, tableName));
     }
 
-    static {
-        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client.td-client/pom.properties");
-        String v = "unknown";
-        if (mavenProperties != null) {
-            try(InputStream in = mavenProperties.openStream()) {
-                Properties p = new Properties();
-                p.load(in);
-                v = p.getProperty("version", "unknown");
-            }
-            catch (Throwable e) {
-                logger.warn("Error in reading pom.properties file", e);
-            }
-        }
-        version = v;
-        logger.info("td-client version: " + version);
+    @Override
+    public TDBulkImportSession getBulkImportSession(String sessionName)
+    {
+        return doGet(buildUrl("/v3/bulk_import/show/%s", sessionName), TDBulkImportSession.class);
     }
+
+    @Override
+    public void uploadBulkImportPart(String sessionName, String uniquePartName, File path)
+    {
+        doPut(buildUrl("/v3/bulk_import/upload_port/%s/%s", sessionName, uniquePartName), path);
+    }
+
+    @Override
+    public void freezeBulkImportSession(String sessionName)
+    {
+        doPost(buildUrl("/v3/bulk_import/freeze/%s", sessionName));
+    }
+
+    @Override
+    public void performBulkImportSession(String sessionName, int priority)
+    {
+        doPost(buildUrl("/v3/bulk_import/perform/%s", sessionName));
+    }
+
+    @Override
+    public void commitBulkImportSession(String sessionName)
+    {
+        doPost(buildUrl("/v3/builk_import/commit/%s", sessionName));
+    }
+
+    @Override
+    public void deleteBulkImportSession(String sessionName) {
+        doPost(buildUrl("/v3/bulk_import/delete/%s", sessionName));
+    }
+
+
 }

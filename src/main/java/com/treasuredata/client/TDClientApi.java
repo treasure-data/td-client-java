@@ -19,12 +19,14 @@
 package com.treasuredata.client;
 
 import com.treasuredata.client.api.model.ResultFormat;
+import com.treasuredata.client.api.model.TDBulkImportSession;
 import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobStatus;
 import com.treasuredata.client.api.model.TDTable;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
@@ -127,4 +129,11 @@ public interface TDClientApi
     InputStream jobResult(String jobId, ResultFormat format);
 
     // bulk import API
+    void createBulkImportSession(String sessionName, String databaseName, String tableName);
+    TDBulkImportSession getBulkImportSession(String sessionName);
+    void uploadBulkImportPart(String sessionName, String uniquePartName, File path);
+    void freezeBulkImportSession(String sessionName);
+    void performBulkImportSession(String sessionName, int priority);
+    void commitBulkImportSession(String sessionName);
+    void deleteBulkImportSession(String sessionName);
 }

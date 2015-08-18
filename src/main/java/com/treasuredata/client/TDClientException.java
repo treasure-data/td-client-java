@@ -34,6 +34,7 @@ public class TDClientException extends RuntimeException
     {
         // Configuration error
         INVALID_CONFIGURATION,
+        FAILED_TO_READ_INPUT_FILE,
 
         // HTTP error
         AUTHENTICATION_FAILURE,
