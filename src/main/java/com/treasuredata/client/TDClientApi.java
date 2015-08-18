@@ -118,6 +118,8 @@ public interface TDClientApi
     /**
      * Open an input stream to retrieve the job result.
      * This method does not close the returned InputStream.
+     *
+     * You will receive an empty stream if the query has not finished yet.
      * @param jobId
      * @param format
      * @return

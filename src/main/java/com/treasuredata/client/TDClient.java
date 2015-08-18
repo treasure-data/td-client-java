@@ -313,7 +313,6 @@ public class TDClient
     public TDJobStatus jobStatus(String jobId)
             throws TDClientException
     {
-        // TODO use smaller object (e.g., TDJobStatus)
         return doGet(buildUrl("/v3/job/status/%s", jobId), TDJobStatus.class);
     }
 
