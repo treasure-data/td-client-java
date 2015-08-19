@@ -18,7 +18,7 @@
  */
 package com.treasuredata.client;
 
-import com.treasuredata.client.model.ResultFormat;
+import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
@@ -129,7 +129,7 @@ public interface TDClientApi
      * @param format
      * @return
      */
-    InputStream jobResult(String jobId, ResultFormat format);
+    InputStream jobResult(String jobId, TDResultFormat format);
 
     // bulk import API
     void createBulkImportSession(String sessionName, String databaseName, String tableName);

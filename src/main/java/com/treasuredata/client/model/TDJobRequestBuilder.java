@@ -22,11 +22,11 @@ import com.google.common.base.Optional;
 
 public class TDJobRequestBuilder {
     private String database;
-    private TDJob.Type type;
+    private TDJob.Type type = TDJob.Type.PRESTO;
     private String query;
-    private TDJob.Priority priority;
+    private TDJob.Priority priority = TDJob.Priority.NORMAL;
     private String result;
-    private int retryLimit;
+    private int retryLimit = 10;
 
     public void setResult(String result)
     {

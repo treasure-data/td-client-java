@@ -20,7 +20,7 @@ package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.ByteStreams;
-import com.treasuredata.client.model.ResultFormat;
+import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -128,7 +128,7 @@ public class TestTDClient
         TDJob jobInfo = client.jobInfo(jobId);
         logger.debug("job show result: " + tdJob);
 
-        try (InputStream in = client.jobResult(jobId, ResultFormat.JSON)) {
+        try (InputStream in = client.jobResult(jobId, TDResultFormat.JSON)) {
             String result = new String(ByteStreams.toByteArray(in));
             logger.info("result:\n" + result);
             JSONArray array = new JSONArray(result);

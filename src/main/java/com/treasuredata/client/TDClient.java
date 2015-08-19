@@ -19,7 +19,7 @@
 package com.treasuredata.client;
 
 import com.google.common.collect.ImmutableMap;
-import com.treasuredata.client.model.ResultFormat;
+import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDDatabaseList;
@@ -31,7 +31,7 @@ import com.treasuredata.client.model.TDJobSubmitResult;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
-import com.treasuredata.client.model.UpdateTableResult;
+import com.treasuredata.client.model.TDUpdateTableResult;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -274,7 +274,7 @@ public class TDClient
     {
         doPost(buildUrl("/v3/table/rename", databaseName, tableName, newTableName),
                 ImmutableMap.of("overwrite", Boolean.toString(overwrite)),
-                UpdateTableResult.class
+                TDUpdateTableResult.class
         );
     }
 
@@ -365,7 +365,7 @@ public class TDClient
     }
 
     @Override
-    public InputStream jobResult(String jobId, ResultFormat format)
+    public InputStream jobResult(String jobId, TDResultFormat format)
             throws TDClientException
     {
         TDApiRequest request = TDApiRequest.Builder
@@ -415,6 +415,4 @@ public class TDClient
     public void deleteBulkImportSession(String sessionName) {
         doPost(buildUrl("/v3/bulk_import/delete", sessionName));
     }
-
-
 }

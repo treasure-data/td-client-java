@@ -18,26 +18,41 @@
  */
 package com.treasuredata.client.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  *
  */
-public enum ResultFormat
+public class TDUpdateTableResult
 {
-    JSON("json"),
-    TSV("tsv"),
-    CSV("csv"),
-    MESSAGE_PACK("msgpack"),
-    MESSAGE_PACK_GZ("msgpack.gz")
-    ;
+    private final String database;
+    private final String table;
+    private final TDTableType type;
 
-    private final String name;
-
-    private ResultFormat(String name)  {
-        this.name = name;
+    @JsonCreator
+    public TDUpdateTableResult(
+            @JsonProperty("database") String database,
+            @JsonProperty("table") String table,
+            @JsonProperty("type") TDTableType type)
+    {
+        this.database = database;
+        this.table = table;
+        this.type = type;
     }
 
-    public String getName()
+    public String getDatabase()
     {
-        return name;
+        return database;
+    }
+
+    public String getTable()
+    {
+        return table;
+    }
+
+    public TDTableType getType()
+    {
+        return type;
     }
 }

@@ -43,8 +43,18 @@ public class TDJobRequest
     }
 
     public static TDJobRequest newPrestoQuery(String database, String query) {
-        // TODO use the default retry limit
-        return new TDJobRequest(database, TDJob.Type.PRESTO, query, TDJob.Priority.NORMAL, Optional.<String>absent(), 10);
+        return new TDJobRequestBuilder()
+                .setType(TDJob.Type.PRESTO)
+                .setDatabase(database)
+                .setQuery(query)
+                .createTDJobRequest();
+    }
+
+    public static TDJobRequest newHiveQuery(String database, String query) {
+        return new TDJobRequestBuilder().setType(TDJob.Type.HIVE)
+                .setDatabase(database)
+                .setQuery(query)
+                .createTDJobRequest();
     }
 
     public String getDatabase()
