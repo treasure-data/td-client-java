@@ -35,6 +35,9 @@ import java.util.List;
  */
 public interface TDClientApi
 {
+    String serverStatus();
+
+
     /**
      * Get the list of databases
      *

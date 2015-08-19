@@ -65,6 +65,13 @@ public class TestTDClient
     }
 
     @Test
+    public void serverStatus() {
+        String status = client.serverStatus();
+        logger.info(status);
+    }
+
+
+    @Test
     public void listDatabases()
             throws Exception
     {

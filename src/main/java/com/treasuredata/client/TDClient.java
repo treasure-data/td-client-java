@@ -168,6 +168,12 @@ public class TDClient
         return httpClient.submit(request);
     }
 
+    @Override
+    public String serverStatus()
+    {
+        TDApiRequest request = TDApiRequest.Builder.GET("/v3/system/server_status").build();
+        return httpClient.submit(request).getContentAsString();
+    }
 
     @Override
     public List<String> listDatabases()
