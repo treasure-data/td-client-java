@@ -25,12 +25,11 @@ import com.treasuredata.client.api.model.TDJob;
 import com.treasuredata.client.api.model.TDJobList;
 import com.treasuredata.client.api.model.TDJobRequest;
 import com.treasuredata.client.api.model.TDJobStatus;
-import com.treasuredata.client.api.model.TDJobSubmitResult;
 import com.treasuredata.client.api.model.TDTable;
 import org.json.JSONArray;
-import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,12 +116,12 @@ public class TestTDClient
             logger.debug("job status: " + tdJob);
             retryCount++;
         }
-        while(retryCount < 10 && !tdJob.getStatus().isFinished());
+        while (retryCount < 10 && !tdJob.getStatus().isFinished());
 
         TDJob jobInfo = client.jobInfo(jobId);
         logger.debug("job show result: " + tdJob);
 
-        try(InputStream in = client.jobResult(jobId, ResultFormat.JSON)) {
+        try (InputStream in = client.jobResult(jobId, ResultFormat.JSON)) {
             String result = new String(ByteStreams.toByteArray(in));
             logger.info("result:\n" + result);
             JSONArray array = new JSONArray(result);
@@ -132,14 +131,15 @@ public class TestTDClient
     }
 
     @Test
-    public void invalidJobStatus() {
+    public void invalidJobStatus()
+    {
         try {
             TDJobStatus invalidJob = client.jobStatus("xxxxxx");
             logger.debug("invalid job: " + invalidJob);
 
             fail("should not reach here");
         }
-        catch(TDClientException e) {
+        catch (TDClientException e) {
 
         }
     }
@@ -177,4 +177,10 @@ public class TestTDClient
         assertFalse(client.existsTable(SAMPLE_DB, SAMPLE_TABLE));
     }
 
+    @Ignore
+    @Test
+    public void testBuilkImport()
+    {
+        // TODO
+    }
 }
