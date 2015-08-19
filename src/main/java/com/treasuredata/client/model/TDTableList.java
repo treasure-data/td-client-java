@@ -16,23 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api;
+package com.treasuredata.client.model;
 
-public class TDApiException
-        extends RuntimeException
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
+
+public class TDTableList
 {
-    public TDApiException(String message)
+    private String name;
+    private List<TDTable> tables;
+
+    @JsonCreator
+    public TDTableList(
+            @JsonProperty("name") String name,
+            @JsonProperty("tables") List<TDTable> tables)
     {
-        super(message);
+        this.name = name;
+        this.tables = tables;
     }
 
-    public TDApiException(Throwable cause)
+    @JsonProperty
+    public String getName()
     {
-        super(cause);
+        return name;
     }
 
-    public TDApiException(String message, Throwable cause)
+    @JsonProperty
+    public List<TDTable> getTables()
     {
-        super(message, cause);
+        return tables;
     }
 }

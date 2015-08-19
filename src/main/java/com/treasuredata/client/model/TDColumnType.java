@@ -16,28 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api.model;
+package com.treasuredata.client.model;
 
-/**
- *
- */
-public enum ResultFormat
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(using = TDColumnTypeDeserializer.class)
+public interface TDColumnType
 {
-    JSON("json"),
-    TSV("tsv"),
-    CSV("csv"),
-    MESSAGE_PACK("msgpack"),
-    MESSAGE_PACK_GZ("msgpack.gz")
-    ;
+    public boolean isPrimitive();
 
-    private final String name;
+    public boolean isArrayType();
 
-    private ResultFormat(String name)  {
-        this.name = name;
-    }
+    public boolean isMapType();
 
-    public String getName()
-    {
-        return name;
-    }
+    public TDPrimitiveColumnType asPrimitiveType();
+
+    public TDArrayColumnType asArrayType();
+
+    public TDMapColumnType asMapType();
+
+    @JsonValue
+    public String toString();
 }

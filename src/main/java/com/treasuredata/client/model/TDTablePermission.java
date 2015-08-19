@@ -16,65 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api.model;
+package com.treasuredata.client.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
-public class TDArrayColumnType
-        implements TDColumnType
+public class TDTablePermission
 {
-    private final TDColumnType elementType;
+    private boolean importable;
+    private boolean queryable;
 
-    public TDArrayColumnType(TDColumnType elementType)
+    public TDTablePermission(
+            @JsonProperty("importable") boolean importable,
+            @JsonProperty("queryable") boolean queryable)
     {
-        this.elementType = elementType;
+        this.importable = importable;
+        this.queryable = queryable;
     }
 
-    public TDColumnType getElementType()
+    @JsonProperty("importable")
+    public boolean isImportable()
     {
-        return elementType;
+        return importable;
     }
 
-    @Override
-    public String toString()
+    @JsonProperty("queryable")
+    public boolean isQueryable()
     {
-        return "array<" + elementType + ">";
-    }
-
-    @Override
-    public boolean isPrimitive()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isArrayType()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isMapType()
-    {
-        return false;
-    }
-
-    @Override
-    public TDPrimitiveColumnType asPrimitiveType()
-    {
-        return null;
-    }
-
-    @Override
-    public TDArrayColumnType asArrayType()
-    {
-        return this;
-    }
-
-    @Override
-    public TDMapColumnType asMapType()
-    {
-        return null;
+        return queryable;
     }
 
     @Override
@@ -86,13 +55,14 @@ public class TDArrayColumnType
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        TDArrayColumnType other = (TDArrayColumnType) obj;
-        return Objects.equal(this.elementType, other.elementType);
+        TDTablePermission other = (TDTablePermission) obj;
+        return Objects.equal(this.importable, other.importable) &&
+                Objects.equal(this.queryable, other.queryable);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hashCode(elementType);
+        return Objects.hashCode(importable, queryable);
     }
 }

@@ -16,19 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api;
+package com.treasuredata.client.model;
 
-public class TDApiExecutionInterruptedException
-        extends TDApiExecutionException
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+/**
+ *
+ */
+public class UpdateTableResult
 {
-    public TDApiExecutionInterruptedException(InterruptedException cause)
+    private final String database;
+    private final String table;
+    private final TDTableType type;
+
+    @JsonCreator
+    public UpdateTableResult(
+            @JsonProperty("database") String database,
+            @JsonProperty("table") String table,
+            @JsonProperty("type") TDTableType type)
     {
-        super(cause);
+        this.database = database;
+        this.table = table;
+        this.type = type;
     }
 
-    @Override
-    public InterruptedException getCause()
+    public String getDatabase()
     {
-        return (InterruptedException) super.getCause();
+        return database;
+    }
+
+    public String getTable()
+    {
+        return table;
+    }
+
+    public TDTableType getType()
+    {
+        return type;
     }
 }

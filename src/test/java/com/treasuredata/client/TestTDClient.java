@@ -20,12 +20,12 @@ package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.ByteStreams;
-import com.treasuredata.client.api.model.ResultFormat;
-import com.treasuredata.client.api.model.TDJob;
-import com.treasuredata.client.api.model.TDJobList;
-import com.treasuredata.client.api.model.TDJobRequest;
-import com.treasuredata.client.api.model.TDJobStatus;
-import com.treasuredata.client.api.model.TDTable;
+import com.treasuredata.client.model.ResultFormat;
+import com.treasuredata.client.model.TDJob;
+import com.treasuredata.client.model.TDJobList;
+import com.treasuredata.client.model.TDJobRequest;
+import com.treasuredata.client.model.TDJobStatus;
+import com.treasuredata.client.model.TDTable;
 import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;

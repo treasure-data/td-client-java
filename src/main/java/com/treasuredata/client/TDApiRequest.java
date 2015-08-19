@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api;
+package com.treasuredata.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.treasuredata.client.TDClient;
-import com.treasuredata.client.TDClientConfig;
-import com.treasuredata.client.TDClientException;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.StringContentProvider;

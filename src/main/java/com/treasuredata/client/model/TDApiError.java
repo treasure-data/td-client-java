@@ -16,63 +16,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api.model;
+package com.treasuredata.client.model;
 
-public enum TDPrimitiveColumnType
-        implements TDColumnType
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+/**
+ *
+ */
+public class TDApiError
 {
-    INT("int"),
-    LONG("long"),
-    FLOAT("float"),
-    DOUBLE("double"),
-    BOOLEAN("boolean"),
-    STRING("string");
-    private String name;
+    private final String error;
+    private final String text;
+    private final String severity;
 
-    private TDPrimitiveColumnType(String name)
+    @JsonCreator
+    public TDApiError(
+            @JsonProperty("error") String error,
+            @JsonProperty("text") String text,
+            @JsonProperty("severity") String severity)
     {
-        this.name = name;
+        this.error = error;
+        this.text = text;
+        this.severity = severity;
+    }
+
+    public String getError()
+    {
+        return error;
+    }
+
+    public String getText()
+    {
+        return text;
+    }
+
+    public String getSeverity()
+    {
+        return severity;
     }
 
     @Override
-    public String toString()
-    {
-        return name;
+    public String toString() {
+        return String.format("[%s] %s", severity, text);
     }
 
-    @Override
-    public boolean isPrimitive()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isArrayType()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isMapType()
-    {
-        return false;
-    }
-
-    @Override
-    public TDPrimitiveColumnType asPrimitiveType()
-    {
-        return this;
-    }
-
-    @Override
-    public TDArrayColumnType asArrayType()
-    {
-        return null;
-    }
-
-    @Override
-    public TDMapColumnType asMapType()
-    {
-        return null;
-    }
 }
+

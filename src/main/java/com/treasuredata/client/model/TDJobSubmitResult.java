@@ -16,21 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api;
+package com.treasuredata.client.model;
 
-import java.util.concurrent.TimeoutException;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TDApiExecutionTimeoutException
-        extends TDApiExecutionException
+/**
+ *
+ */
+public class TDJobSubmitResult
 {
-    public TDApiExecutionTimeoutException(TimeoutException cause)
+    private final String jobId;
+
+    public TDJobSubmitResult(@JsonProperty("job_id") String jobId) {
+        this.jobId = jobId;
+    }
+
+    public String getJobId()
     {
-        super(cause);
+        return jobId;
     }
 
     @Override
-    public TimeoutException getCause()
+    public String toString()
     {
-        return (TimeoutException) super.getCause();
+        return "TDJobStatus{" +
+                "jobId='" + jobId + '\'' +
+                '}';
     }
 }
+

@@ -16,44 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api.model;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.treasure_data.model.Table;
+package com.treasuredata.client.model;
 
 /**
  *
  */
-public class UpdateTableResult
+public enum ResultFormat
 {
-    private final String database;
-    private final String table;
-    private final TDTableType type;
+    JSON("json"),
+    TSV("tsv"),
+    CSV("csv"),
+    MESSAGE_PACK("msgpack"),
+    MESSAGE_PACK_GZ("msgpack.gz")
+    ;
 
-    @JsonCreator
-    public UpdateTableResult(
-            @JsonProperty("database") String database,
-            @JsonProperty("table") String table,
-            @JsonProperty("type") TDTableType type)
-    {
-        this.database = database;
-        this.table = table;
-        this.type = type;
+    private final String name;
+
+    private ResultFormat(String name)  {
+        this.name = name;
     }
 
-    public String getDatabase()
+    public String getName()
     {
-        return database;
-    }
-
-    public String getTable()
-    {
-        return table;
-    }
-
-    public TDTableType getType()
-    {
-        return type;
+        return name;
     }
 }

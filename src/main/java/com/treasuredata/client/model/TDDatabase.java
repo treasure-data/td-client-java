@@ -16,29 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api.model;
+package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
-import java.util.List;
-
-public class TDTableSchema
+public class TDDatabase
 {
-    private List<TDColumn> columns;
+    private String name;
+    // "permission" field is also available but not necessary yet
 
     @JsonCreator
-    public TDTableSchema(
-            @JsonProperty("columns") List<TDColumn> columns)
+    public TDDatabase(
+            @JsonProperty("name") String name)
     {
-        this.columns = columns;
+        this.name = name;
     }
 
     @JsonProperty
-    public List<TDColumn> getColumns()
+    public String getName()
     {
-        return columns;
+        return name;
+    }
+
+    public boolean isWritable()
+    {
+        // TODO not implemented yet
+        return true;
     }
 
     @Override
@@ -50,13 +55,13 @@ public class TDTableSchema
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        TDTableSchema other = (TDTableSchema) obj;
-        return Objects.equal(this.columns, other.columns);
+        TDDatabase other = (TDDatabase) obj;
+        return Objects.equal(this.name, other.name);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hashCode(columns);
+        return Objects.hashCode(name);
     }
 }

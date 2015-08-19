@@ -19,20 +19,19 @@
 package com.treasuredata.client;
 
 import com.google.common.collect.ImmutableMap;
-import com.treasuredata.client.api.TDApiRequest;
-import com.treasuredata.client.api.model.ResultFormat;
-import com.treasuredata.client.api.model.TDBulkImportSession;
-import com.treasuredata.client.api.model.TDDatabase;
-import com.treasuredata.client.api.model.TDDatabaseList;
-import com.treasuredata.client.api.model.TDJob;
-import com.treasuredata.client.api.model.TDJobList;
-import com.treasuredata.client.api.model.TDJobRequest;
-import com.treasuredata.client.api.model.TDJobStatus;
-import com.treasuredata.client.api.model.TDJobSubmitResult;
-import com.treasuredata.client.api.model.TDTable;
-import com.treasuredata.client.api.model.TDTableList;
-import com.treasuredata.client.api.model.TDTableType;
-import com.treasuredata.client.api.model.UpdateTableResult;
+import com.treasuredata.client.model.ResultFormat;
+import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDDatabase;
+import com.treasuredata.client.model.TDDatabaseList;
+import com.treasuredata.client.model.TDJob;
+import com.treasuredata.client.model.TDJobList;
+import com.treasuredata.client.model.TDJobRequest;
+import com.treasuredata.client.model.TDJobStatus;
+import com.treasuredata.client.model.TDJobSubmitResult;
+import com.treasuredata.client.model.TDTable;
+import com.treasuredata.client.model.TDTableList;
+import com.treasuredata.client.model.TDTableType;
+import com.treasuredata.client.model.UpdateTableResult;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.treasuredata.client.api.TDApiRequest.urlEncode;
+import static com.treasuredata.client.TDApiRequest.urlEncode;
 
 /**
  *

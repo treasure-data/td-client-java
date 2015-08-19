@@ -16,13 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api;
+package com.treasuredata.client.model;
 
-public class TDApiNotFoundException
-        extends TDApiResponseException
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
+
+public class TDDatabaseList
 {
-    public TDApiNotFoundException(int status, byte[] body)
+    private List<TDDatabase> databases;
+
+    @JsonCreator
+    public TDDatabaseList(
+            @JsonProperty("databases") List<TDDatabase> databases)
     {
-        super(status, body);
+        this.databases = databases;
+    }
+
+    @JsonProperty
+    public List<TDDatabase> getDatabases()
+    {
+        return databases;
     }
 }

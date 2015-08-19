@@ -16,52 +16,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api.model;
+package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Throwables;
 
-public class TDDatabase
+/**
+ *
+ */
+class TDQuery
 {
-    private String name;
-    // "permission" field is also available but not necessary yet
+    private final String query;
+
+    public TDQuery(String query)
+    {
+        this.query = query;
+    }
 
     @JsonCreator
-    public TDDatabase(
-            @JsonProperty("name") String name)
-    {
-        this.name = name;
+    public static TDQuery fromString(String s) {
+        return new TDQuery(s);
     }
 
-    @JsonProperty
-    public String getName()
-    {
-        return name;
+    @JsonCreator
+    public static TDQuery fromObject(JsonNode value) {
+        // embulk job have nested json object
+        try {
+            return new TDQuery(new ObjectMapper().writeValueAsString(value));
+        }
+        catch (JsonProcessingException e) {
+            throw Throwables.propagate(e);
+        }
     }
 
-    public boolean isWritable()
+    public String getQuery()
     {
-        // TODO not implemented yet
-        return true;
+        return query;
     }
 
     @Override
-    public boolean equals(Object obj)
+    public String toString()
     {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        TDDatabase other = (TDDatabase) obj;
-        return Objects.equal(this.name, other.name);
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return Objects.hashCode(name);
+        return query;
     }
 }

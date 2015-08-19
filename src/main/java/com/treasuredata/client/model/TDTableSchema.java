@@ -16,44 +16,47 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.api.model;
+package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 
-public enum TDTableType
+import java.util.List;
+
+public class TDTableSchema
 {
-    LOG("log"),
-    ITEM("item");
-    private String name;
-
-    private TDTableType(String name)
-    {
-        this.name = name;
-    }
+    private List<TDColumn> columns;
 
     @JsonCreator
-    public static TDTableType fromName(String name)
+    public TDTableSchema(
+            @JsonProperty("columns") List<TDColumn> columns)
     {
-        if ("log".equals(name)) {
-            return LOG;
-        }
-        else if ("item".equals(name)) {
-            return ITEM;
-        }
-        throw new RuntimeJsonMappingException("Unexpected string tuple to deserialize TDTableType");
+        this.columns = columns;
     }
 
-    public String getTypeName() {
-        return name;
+    @JsonProperty
+    public List<TDColumn> getColumns()
+    {
+        return columns;
     }
 
-
-    @JsonValue
     @Override
-    public String toString()
+    public boolean equals(Object obj)
     {
-        return name;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        TDTableSchema other = (TDTableSchema) obj;
+        return Objects.equal(this.columns, other.columns);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hashCode(columns);
     }
 }
