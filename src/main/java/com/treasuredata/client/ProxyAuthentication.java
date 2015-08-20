@@ -40,10 +40,10 @@ public class ProxyAuthentication
     private final String user;
     private final String password;
 
-    public ProxyAuthentication(String password, String user)
+    public ProxyAuthentication(String user, String password)
     {
-        this.password = password;
         this.user = user;
+        this.password = password;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ProxyAuthentication
     public Result authenticate(Request request, ContentResponse response, HeaderInfo headerInfo, Attributes context)
     {
         String value = "Basic " + B64Code.encode(user + ":" + password, StandardCharsets.ISO_8859_1);
-        logger.debug("paroxy auth request: " + value);
+        logger.debug("proxy auth request: " + value);
         return new ProxyAuthResult(headerInfo.getHeader(), request.getURI(), value);
     }
 

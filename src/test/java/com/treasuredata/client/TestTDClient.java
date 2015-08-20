@@ -205,11 +205,4 @@ public class TestTDClient
         TDAuthenticationResult result = client.authenticate(user, password);
     }
 
-    @Test
-    public void proxyAccess() {
-
-
-
-    }
-
 }

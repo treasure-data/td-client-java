@@ -43,6 +43,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -81,14 +83,15 @@ public class TDHttpClient
 
         if (config.getProxy().isPresent()) {
             logger.debug("Apply proxy configuration: {}", config.getProxy().get());
-            ProxyConfig proxyConfig = config.getProxy().get();
+            final ProxyConfig proxyConfig = config.getProxy().get();
 
             // Let HttpClient access through this http proxy
             HttpProxy httpProxy = new HttpProxy(proxyConfig.getHost(), proxyConfig.getPort());
             httpClient.getProxyConfiguration().getProxies().add(httpProxy);
 
             // Add proxy authentication
-            httpClient.getAuthenticationStore().addAuthentication(new ProxyAuthentication(proxyConfig.getUser(), proxyConfig.getHost()));
+            httpClient.getAuthenticationStore()
+                    .addAuthentication(new ProxyAuthentication(proxyConfig.getUser(), proxyConfig.getPassword()));
         }
 
         try {
@@ -118,7 +121,6 @@ public class TDHttpClient
 
     protected Optional<TDApiError> parseErrorResponse(byte[] content)
     {
-
         try {
             if(content.length > 0 && content[0] == '{') {
                 // Error message from TD API
@@ -217,6 +219,9 @@ public class TDHttpClient
         @Override
         public String onError(ContentResponse response)
         {
+            if (logger.isTraceEnabled()) {
+                logger.trace("response:\n" + response.getContentAsString());
+            }
             return reportErrorMessage(response, response.getContent());
         }
     }

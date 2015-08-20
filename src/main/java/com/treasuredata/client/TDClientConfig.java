@@ -92,7 +92,7 @@ public class TDClientConfig
             throws TDClientException
     {
         Properties p = readTDConf();
-        String apiKey = MoreObjects.firstNonNull(p.getProperty("apikey"), System.getenv().get(TD_CLIENT_APIKEY));
+        String apiKey = MoreObjects.firstNonNull(System.getenv().get(TD_CLIENT_APIKEY), p.getProperty("apikey"));
         if(apiKey == null) {
             return new Builder().result();
         }

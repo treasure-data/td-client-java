@@ -72,7 +72,8 @@ public class TestProxyAccess
             @Override
             public boolean authenticate(String user, String pass)
             {
-                return user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
+                boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
+                return isValid;
             }
         }).withFiltersSource(new HttpFiltersSourceAdapter()
         {
@@ -83,14 +84,6 @@ public class TestProxyAccess
                 return super.filterRequest(httpRequest, channelHandlerContext);
             }
         }).start();
-
-        // Unset proxy configuration
-        System.clearProperty("http.proxyHost");
-        System.clearProperty("https.proxyHost");
-        System.clearProperty("http.proxyPort");
-        System.clearProperty("https.proxyPort");
-        System.clearProperty("http.proxyUser");
-        System.clearProperty("http.proxyPassword");
     }
 
     @After
@@ -110,9 +103,14 @@ public class TestProxyAccess
         proxy.setPort(proxyPort);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS);
-        TDClient client =new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
-        TDJobList jobList = client.listJobs();
-        logger.debug(jobList.toString());
-        assertEquals(1, proxyAccessCount.get());
+        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
+        try {
+            TDJobList jobList = client.listJobs();
+            logger.debug(jobList.toString());
+            assertEquals(1, proxyAccessCount.get());
+        }
+        finally {
+            logger.debug("proxy access count: {}", proxyAccessCount);
+        }
     }
 }
