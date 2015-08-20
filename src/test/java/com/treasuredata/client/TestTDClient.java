@@ -19,7 +19,9 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
+import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
@@ -34,8 +36,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -147,7 +151,7 @@ public class TestTDClient
             fail("should not reach here");
         }
         catch (TDClientException e) {
-
+            assertEquals(TDClientException.ErrorType.TARGET_NOT_FOUND, e.getErrorType());
         }
     }
 
@@ -189,5 +193,19 @@ public class TestTDClient
     public void testBuilkImport()
     {
         // TODO
+    }
+
+
+    @Test
+    public void authenticate()
+            throws Exception
+    {
+        Properties p = TDClientConfig.readTDConf();
+
+        TDClient client = new TDClient(new TDClientConfig.Builder().result()); // Set no API key
+        String user = MoreObjects.firstNonNull(p.getProperty("user"), System.getenv().get(TDClientConfig.TD_CLIENT_USER));
+        String password = MoreObjects.firstNonNull(p.getProperty("password"), System.getenv().get(TDClientConfig.TD_CLIENT_PASSOWRD));
+        TDAuthenticationResult result = client.authenticate(user, password);
+        logger.debug(result.toString());
     }
 }

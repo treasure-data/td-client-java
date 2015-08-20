@@ -61,6 +61,7 @@ public class TDHttpClient
     private final TDClientConfig config;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
+    private Optional<String> credentialCache = Optional.absent();
 
     public TDHttpClient(TDClientConfig config)
     {
@@ -215,7 +216,7 @@ public class TDHttpClient
                     Thread.sleep(waitTimeMillis);
                 }
 
-                request = apiRequest.newJettyRequest(httpClient, config);
+                request = apiRequest.newJettyRequest(httpClient, config, credentialCache);
                 try {
                     logger.debug("Sending API request to {}", request.getURI());
                     ResponseType response = requestHandler.submit(request);
@@ -301,5 +302,9 @@ public class TDHttpClient
         }
     }
 
+
+    public void setCredentialCache(String apikey) {
+        this.credentialCache = Optional.of(apikey);
+    }
 
 }

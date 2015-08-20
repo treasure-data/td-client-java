@@ -19,6 +19,7 @@
 package com.treasuredata.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,8 +92,13 @@ public class TDClientConfig
             throws IOException, TDClientException
     {
         Properties p = readTDConf();
-        String apiKey = firstNonNull(p.getProperty("apikey"), System.getenv().get(TD_CLIENT_APIKEY));
-        return new Builder().setApiKey(apiKey).result();
+        String apiKey = MoreObjects.firstNonNull(p.getProperty("apikey"), System.getenv().get(TD_CLIENT_APIKEY));
+        if(apiKey == null) {
+            return new Builder().result();
+        }
+        else {
+            return new Builder().setApiKey(apiKey).result();
+        }
     }
 
     /**
@@ -217,18 +223,6 @@ public class TDClientConfig
         String props = extracted.toString();
         p.load(new StringReader(props));
         return p;
-    }
-
-    private static String firstNonNull(Object... keys)
-    {
-        if (keys != null) {
-            for (Object k : keys) {
-                if (k != null) {
-                    return k.toString();
-                }
-            }
-        }
-        return "";
     }
 
 //    public Properties toProperties() {

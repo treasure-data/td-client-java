@@ -19,6 +19,7 @@
 package com.treasuredata.client;
 
 import com.google.common.collect.ImmutableMap;
+import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDDatabase;
@@ -408,11 +409,20 @@ public class TDClient
     @Override
     public void commitBulkImportSession(String sessionName)
     {
-        doPost(buildUrl("/v3/builk_import/commit", sessionName));
+        doPost(buildUrl("/v3/bulk_import/commit", sessionName));
     }
 
     @Override
     public void deleteBulkImportSession(String sessionName) {
         doPost(buildUrl("/v3/bulk_import/delete", sessionName));
     }
+
+    @Override
+    public TDAuthenticationResult authenticate(String email, String password)
+    {
+        TDAuthenticationResult authResult = doPost("/v3/user/authenticate", ImmutableMap.of("user", email, "password", password), TDAuthenticationResult.class);
+        httpClient.setCredentialCache(authResult.getApikey());
+        return authResult;
+    }
+
 }

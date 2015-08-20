@@ -27,6 +27,8 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpMethod;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +54,8 @@ import static com.treasuredata.client.TDClientException.ErrorType.FAILED_TO_READ
  */
 public class TDApiRequest
 {
+    private static Logger logger = LoggerFactory.getLogger(TDApiRequest.class);
+
     public static class Builder
     {
         private static final Map<String, String> EMPTY_MAP = ImmutableMap.of();
@@ -159,7 +163,7 @@ public class TDApiRequest
         return path;
     }
 
-    public Request newJettyRequest(HttpClient client, TDClientConfig config)
+    public Request newJettyRequest(HttpClient client, TDClientConfig config, Optional<String> apiKeyOverwrite)
     {
         String queryStr = "";
         // TODO support SSL
@@ -177,7 +181,11 @@ public class TDApiRequest
         Request request = client.newRequest(requestUri);
         request.method(method);
         request.agent("TDClient " + TDClient.getVersion());
-        request.header("Authorization", "TD1 " + config.getApiKey());
+        Optional<String> apiKey = apiKeyOverwrite.or(config.getApiKey());
+        if(apiKey.isPresent()) {
+            logger.trace("Set API KEY: {}", apiKey.get());
+            request.header("Authorization", "TD1 " + apiKey.get());
+        }
         for (Map.Entry<String, String> entry : headerParams.entrySet()) {
             request.header(entry.getKey(), entry.getValue());
         }

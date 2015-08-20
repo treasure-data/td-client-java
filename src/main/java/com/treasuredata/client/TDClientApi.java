@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDJob;
@@ -33,7 +34,7 @@ import java.util.List;
 /**
  * Treasure Data Client
  */
-public interface TDClientApi
+public interface TDClientApi<TDClientImpl>
 {
     String serverStatus();
 
@@ -139,4 +140,12 @@ public interface TDClientApi
     void performBulkImportSession(String sessionName, int priority);
     void commitBulkImportSession(String sessionName);
     void deleteBulkImportSession(String sessionName);
+
+    /**
+     * Perform user email and passsword based authentication.
+     * @param email
+     * @param password
+     * @return
+     */
+    TDAuthenticationResult authenticate(String email, String password);
 }
