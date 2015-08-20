@@ -163,7 +163,7 @@ public class TDApiRequest
     {
         String queryStr = "";
         // TODO support SSL
-        String requestUri = String.format("http://%s%s", config.getEndpoint(), path);
+        String requestUri = String.format("%s%s%s", config.getHttpScheme(), config.getEndpoint(), path);
         if (!queryParams.isEmpty()) {
             List<String> queryParamList = new ArrayList<String>(queryParams.size());
             for (Map.Entry<String, String> queryParam : queryParams.entrySet()) {

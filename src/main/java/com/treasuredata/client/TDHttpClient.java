@@ -203,7 +203,7 @@ public class TDHttpClient
     public <ResponseType extends Response, Result> Result submit(TDApiRequest apiRequest, Handler<ResponseType, Result> requestHandler)
             throws TDClientException
     {
-        ExponentialBackOffRetry retry = new ExponentialBackOffRetry(config.getRetryLimit(), config.getRetryInitialWaitMillis(), config.getRetryWaitMillis());
+        ExponentialBackOffRetry retry = new ExponentialBackOffRetry(config.getRetryLimit(), config.getRetryInitialWaitMillis(), config.getRetryIntervalMillis());
         Optional<TDClientException> rootCause = Optional.absent();
         Request request = null;
         try {
