@@ -43,6 +43,9 @@ public class TDClientException extends RuntimeException
         SERVER_ERROR,
         CLIENT_ERROR,
 
+        // Proxy error
+        PROXY_AUTHENTICATION_REQUIRED,
+
         // Request handling error
         INTERRUPTED,
         REQUEST_TIMEOUT,
@@ -68,6 +71,10 @@ public class TDClientException extends RuntimeException
         checkNotNull(cause, "cause is null");
         this.errorType = errorType;;
         this.rootCause = cause;
+    }
+
+    public TDClientException(ErrorType errorType, String message, Exception cause) {
+        this(errorType, message, Optional.of(cause));
     }
 
     public TDClientException(ErrorType errorType, Exception cause) {

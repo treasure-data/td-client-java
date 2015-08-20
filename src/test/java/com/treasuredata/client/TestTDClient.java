@@ -19,14 +19,13 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDAuthenticationResult;
-import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobStatus;
+import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 import org.json.JSONArray;
 import org.junit.After;
@@ -36,11 +35,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -69,11 +68,11 @@ public class TestTDClient
     }
 
     @Test
-    public void serverStatus() {
+    public void serverStatus()
+    {
         String status = client.serverStatus();
         logger.info(status);
     }
-
 
     @Test
     public void listDatabases()
@@ -195,17 +194,22 @@ public class TestTDClient
         // TODO
     }
 
-
     @Test
     public void authenticate()
             throws Exception
     {
         Properties p = TDClientConfig.readTDConf();
-
         TDClient client = new TDClient(new TDClientConfig.Builder().result()); // Set no API key
-        String user = MoreObjects.firstNonNull(p.getProperty("user"), System.getenv().get(TDClientConfig.TD_CLIENT_USER));
-        String password = MoreObjects.firstNonNull(p.getProperty("password"), System.getenv().get(TDClientConfig.TD_CLIENT_PASSOWRD));
+        String user = firstNonNull(p.getProperty("user"), System.getenv().get(TDClientConfig.TD_CLIENT_USER));
+        String password = firstNonNull(p.getProperty("password"), System.getenv().get(TDClientConfig.TD_CLIENT_PASSOWRD));
         TDAuthenticationResult result = client.authenticate(user, password);
-        logger.debug(result.toString());
     }
+
+    @Test
+    public void proxyAccess() {
+
+
+
+    }
+
 }

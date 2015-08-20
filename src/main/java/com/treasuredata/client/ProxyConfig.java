@@ -64,10 +64,40 @@ public class ProxyConfig
         return prop;
     }
 
+    public String getHost()
+    {
+        return host;
+    }
+
+    public int getPort()
+    {
+        return port;
+    }
+
+    public String getUser()
+    {
+        return user;
+    }
+
+    public String getPassword()
+    {
+        return password;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ProxyConfig{" +
+                "host='" + host + '\'' +
+                ", port=" + port +
+                ", user='" + user + '\'' +
+                '}';
+    }
+
     public static class ProxyConfigBuilder
     {
         private String host;
-        private int port;
+        private int port = 8080;
         private String user;
         private String password;
 

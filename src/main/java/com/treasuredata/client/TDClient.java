@@ -86,7 +86,7 @@ public class TDClient
     private final TDHttpClient httpClient;
 
     public TDClient()
-            throws IOException, TDClientException
+            throws TDClientException
     {
         this(TDClientConfig.currentConfig());
     }

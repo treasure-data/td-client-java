@@ -89,7 +89,7 @@ public class TDClientConfig
      * @throws TDClientException
      */
     public static TDClientConfig currentConfig()
-            throws IOException, TDClientException
+            throws TDClientException
     {
         Properties p = readTDConf();
         String apiKey = MoreObjects.firstNonNull(p.getProperty("apikey"), System.getenv().get(TD_CLIENT_APIKEY));
@@ -113,6 +113,18 @@ public class TDClientConfig
                 useSSL,
                 Optional.of(apiKey),
                 proxy,
+                retryLimit,
+                retryInitialWaitMillis,
+                retryInitialWaitMillis);
+    }
+
+    public TDClientConfig withProxy(ProxyConfig proxy) {
+        return new TDClientConfig(
+                Optional.of(endpoint),
+                Optional.of(port),
+                useSSL,
+                apiKey,
+                Optional.of(proxy),
                 retryLimit,
                 retryInitialWaitMillis,
                 retryInitialWaitMillis);
@@ -193,7 +205,6 @@ public class TDClientConfig
      * @throws IOException
      */
     public static Properties readTDConf()
-            throws IOException
     {
         Properties p = new Properties();
         File file = new File(System.getProperty("user.home", "./"), String.format(".td/td.conf"));
@@ -205,24 +216,28 @@ public class TDClientConfig
     }
 
     public static Properties readTDConf(File file)
-            throws IOException
     {
         Properties p = new Properties();
         logger.info(String.format("Reading configuration file: %s", file));
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        StringBuilder extracted = new StringBuilder();
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            String trimmed = line.trim();
-            if (trimmed.startsWith("[") || trimmed.startsWith("#")) {
-                continue; // skip [... ] line or comment line
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            StringBuilder extracted = new StringBuilder();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.startsWith("[") || trimmed.startsWith("#")) {
+                    continue; // skip [... ] line or comment line
+                }
+                extracted.append(line.trim());
+                extracted.append("\n");
             }
-            extracted.append(line.trim());
-            extracted.append("\n");
+            String props = extracted.toString();
+            p.load(new StringReader(props));
+            return p;
         }
-        String props = extracted.toString();
-        p.load(new StringReader(props));
-        return p;
+        catch(IOException e) {
+            throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, String.format("Failed to read config file: %s", file), e);
+        }
     }
 
 //    public Properties toProperties() {

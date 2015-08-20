@@ -28,9 +28,12 @@ import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDApiError;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.HttpProxy;
+import org.eclipse.jetty.client.ProxyConfiguration;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
+import org.eclipse.jetty.client.util.BasicAuthentication;
 import org.eclipse.jetty.client.util.InputStreamResponseListener;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.HttpCookieStore;
@@ -47,6 +50,7 @@ import java.util.concurrent.TimeoutException;
 import static com.google.common.base.Preconditions.checkState;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
+import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_REQUIRED;
 import static com.treasuredata.client.TDClientException.ErrorType.RESPONSE_READ_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
@@ -75,6 +79,18 @@ public class TDHttpClient
         httpClient.setMaxConnectionsPerDestination(64);
         httpClient.setCookieStore(new HttpCookieStore.Empty());
 
+        if (config.getProxy().isPresent()) {
+            logger.debug("Apply proxy configuration: {}", config.getProxy().get());
+            ProxyConfig proxyConfig = config.getProxy().get();
+
+            // Let HttpClient access through this http proxy
+            HttpProxy httpProxy = new HttpProxy(proxyConfig.getHost(), proxyConfig.getPort());
+            httpClient.getProxyConfiguration().getProxies().add(httpProxy);
+
+            // Add proxy authentication
+            httpClient.getAuthenticationStore().addAuthentication(new ProxyAuthentication(proxyConfig.getUser(), proxyConfig.getHost()));
+        }
+
         try {
             httpClient.start();
         }
@@ -102,8 +118,17 @@ public class TDHttpClient
 
     protected Optional<TDApiError> parseErrorResponse(byte[] content)
     {
+
         try {
-            return Optional.of(objectMapper.readValue(content, TDApiError.class));
+            if(content.length > 0 && content[0] == '{') {
+                // Error message from TD API
+                return Optional.of(objectMapper.readValue(content, TDApiError.class));
+            }
+            else {
+                // Error message from Proxy server etc.
+                String contentStr = new String(content);
+                return Optional.of(new TDApiError("error", contentStr, "error"));
+            }
         }
         catch (IOException e) {
             logger.warn(String.format("Failed to parse error response: %s", new String(content)), e);
@@ -111,22 +136,23 @@ public class TDHttpClient
         }
     }
 
-    public static interface Handler<ResponseType extends Response, Result> {
+    public static interface Handler<ResponseType extends Response, Result>
+    {
         ResponseType submit(Request requset)
                 throws InterruptedException, ExecutionException, TimeoutException;
 
         Result onSuccess(ResponseType response);
 
         /**
-         *
          * @param response
          * @return error message
          */
         String onError(ResponseType response);
     }
 
-
-    public class ContentStreamHandler implements Handler<Response, InputStream> {
+    public class ContentStreamHandler
+            implements Handler<Response, InputStream>
+    {
         private InputStreamResponseListener listener = null;
 
         @Override
@@ -158,7 +184,7 @@ public class TDHttpClient
                     return reportErrorMessage(response, content);
                 }
                 finally {
-                    if(in != null)  {
+                    if (in != null) {
                         in.close();
                     }
                 }
@@ -169,7 +195,9 @@ public class TDHttpClient
         }
     }
 
-    public class ContentHandler implements Handler<ContentResponse, ContentResponse> {
+    public class ContentHandler
+            implements Handler<ContentResponse, ContentResponse>
+    {
         @Override
         public ContentResponse submit(Request request)
                 throws InterruptedException, ExecutionException, TimeoutException
@@ -193,7 +221,8 @@ public class TDHttpClient
         }
     }
 
-    protected String reportErrorMessage(Response response, byte[] responseContentOnError) {
+    protected String reportErrorMessage(Response response, byte[] responseContentOnError)
+    {
         int code = response.getStatus();
         Optional<TDApiError> errorResponse = parseErrorResponse(responseContentOnError);
         String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
@@ -238,6 +267,8 @@ public class TDHttpClient
                                     throw new TDClientHttpNotFoundException(errorMessage);
                                 case HttpStatus.CONFLICT_409:
                                     throw new TDClientHttpConflictException(errorMessage);
+                                case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
+                                    throw new TDClientHttpException(PROXY_AUTHENTICATION_REQUIRED, errorMessage, code);
                                 default:
                                     throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code);
                             }
@@ -266,7 +297,7 @@ public class TDHttpClient
         }
         catch (InterruptedException e) {
             logger.warn("API request interrupted", e);
-            if(request != null) {
+            if (request != null) {
                 request.abort(e);
             }
             throw new TDClientInterruptedException(e);
@@ -278,11 +309,13 @@ public class TDHttpClient
         throw rootCause.get();
     }
 
-    public ContentResponse submit(TDApiRequest apiRequest) {
+    public ContentResponse submit(TDApiRequest apiRequest)
+    {
         return submit(apiRequest, new ContentHandler());
     }
 
-    public InputStream openStream(TDApiRequest apiRequest) {
+    public InputStream openStream(TDApiRequest apiRequest)
+    {
         return submit(apiRequest, new ContentStreamHandler());
     }
 
@@ -302,9 +335,8 @@ public class TDHttpClient
         }
     }
 
-
-    public void setCredentialCache(String apikey) {
+    public void setCredentialCache(String apikey)
+    {
         this.credentialCache = Optional.of(apikey);
     }
-
 }
