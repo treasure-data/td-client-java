@@ -23,27 +23,39 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDApiError;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.HttpProxy;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.api.Response;
-import org.eclipse.jetty.client.util.InputStreamResponseListener;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.util.HttpCookieStore;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.jetty.connector.JettyConnectorProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
@@ -52,7 +64,6 @@ import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTI
 import static com.treasuredata.client.TDClientException.ErrorType.RESPONSE_READ_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
-import static org.msgpack.core.Preconditions.checkNotNull;
 
 /**
  * An extension of Jetty HttpClient with request retry handler
@@ -61,41 +72,33 @@ public class TDHttpClient
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
     private final TDClientConfig config;
-    private final HttpClient httpClient;
+    private final Client httpClient;
     private final ObjectMapper objectMapper;
     private Optional<String> credentialCache = Optional.absent();
 
     public TDHttpClient(TDClientConfig config)
     {
         this.config = config;
-        this.httpClient = new HttpClient();
-        httpClient.setConnectTimeout(config.getConnectTimeoutMillis());
-        httpClient.setIdleTimeout(config.getIdleTimeoutMillis());
-        httpClient.setMaxConnectionsPerDestination(config.getMaxConnectionsPerDestination());
-        httpClient.setTCPNoDelay(true);
-        httpClient.setExecutor(new QueuedThreadPool());
-        httpClient.setCookieStore(new HttpCookieStore.Empty());
 
+        ClientConfig httpConfig = new ClientConfig();
+
+        // We need to use Jetty connector to support proxy requests
+        httpConfig.connectorProvider(new JettyConnectorProvider());
+
+        // Basic http client configurations
+        httpConfig
+                .property(ClientProperties.CONNECT_TIMEOUT, config.getConnectTimeoutMillis())
+                .property(ClientProperties.READ_TIMEOUT, config.getConnectTimeoutMillis());
+
+        // Configure proxy server
         if (config.getProxy().isPresent()) {
-            logger.debug("Apply proxy configuration: {}", config.getProxy().get());
-            final ProxyConfig proxyConfig = config.getProxy().get();
-
-            // Let HttpClient access through this http proxy
-            HttpProxy httpProxy = new HttpProxy(proxyConfig.getHost(), proxyConfig.getPort());
-            httpClient.getProxyConfiguration().getProxies().add(httpProxy);
-
-            // Add proxy authentication. The will be used if the first access returns 407 (PROXY_AUTHORIZATION_REQUIRED)
-            httpClient.getAuthenticationStore()
-                    .addAuthentication(new ProxyAuthentication(proxyConfig.getUser(), proxyConfig.getPassword()));
+            ProxyConfig proxyConfig = config.getProxy().get();
+            httpConfig
+                    .property(ClientProperties.PROXY_URI, proxyConfig.getUri())
+                    .property(ClientProperties.PROXY_USERNAME, proxyConfig.getUri())
+                    .property(ClientProperties.PROXY_PASSWORD, proxyConfig.getPassword());
         }
-
-        try {
-            httpClient.start();
-        }
-        catch (Exception e) {
-            logger.error("Failed to initialize Jetty client", e);
-            throw Throwables.propagate(e);
-        }
+        httpClient = ClientBuilder.newClient(httpConfig);
 
         this.objectMapper = new ObjectMapper()
                 .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
@@ -106,7 +109,7 @@ public class TDHttpClient
     public void close()
     {
         try {
-            httpClient.stop();
+            httpClient.close();
         }
         catch (Exception e) {
             logger.error("Failed to terminate Jetty client", e);
@@ -133,109 +136,199 @@ public class TDHttpClient
         }
     }
 
-    public static interface Handler<ResponseType extends Response, Result>
-    {
-        ResponseType submit(Request requset)
-                throws InterruptedException, ExecutionException, TimeoutException;
-
-        Result onSuccess(ResponseType response);
-
-        /**
-         * @param response
-         * @return error message
-         */
-        String onError(ResponseType response);
-    }
-
-    public class ContentStreamHandler
-            implements Handler<Response, InputStream>
-    {
-        private InputStreamResponseListener listener = null;
-
-        @Override
-        public Response submit(Request request)
-                throws InterruptedException, ExecutionException, TimeoutException
-        {
-            listener = new InputStreamResponseListener();
-            request.send(listener);
-            long timeout = httpClient.getIdleTimeout();
-            return listener.get(timeout, TimeUnit.MILLISECONDS);
-        }
-
-        @Override
-        public InputStream onSuccess(Response response)
-        {
-            checkNotNull(listener, "listener is null");
-            return listener.getInputStream();
-        }
-
-        @Override
-        public String onError(Response response)
-        {
-            int code = response.getStatus();
-            InputStream in = null;
-            try {
-                try {
-                    in = listener.getInputStream();
-                    byte[] content = ByteStreams.toByteArray(in);
-                    return reportErrorMessage(response, content);
+//    public static interface Handler<ResponseType extends Response, Result>
+//    {
+//        ResponseType submit(Request requset)
+//                throws InterruptedException, ExecutionException, TimeoutException;
+//
+//        Result onSuccess(ResponseType response);
+//
+//        /**
+//         * @param response
+//         * @return error message
+//         */
+//        String onError(ResponseType response);
+//    }
+//
+//    public class ContentStreamHandler
+//            implements Handler<Response, InputStream>
+//    {
+//        private InputStreamResponseListener listener = null;
+//
+//        @Override
+//        public Response submit(Request request)
+//                throws InterruptedException, ExecutionException, TimeoutException
+//        {
+//            listener = new InputStreamResponseListener();
+//            request.send(listener);
+//            return listener.get(config.getIdleTimeoutMillis(), TimeUnit.MILLISECONDS);
+//        }
+//
+//        @Override
+//        public InputStream onSuccess(Response response)
+//        {
+//            checkNotNull(listener, "listener is null");
+//            return listener.getInputStream();
+//        }
+//
+//        @Override
+//        public String onError(Response response)
+//        {
+//            int code = response.getStatus();
+//            InputStream in = null;
+//            try {
+//                try {
+//                    in = listener.getInputStream();
+//                    byte[] content = ByteStreams.toByteArray(in);
+//                    return reportErrorMessage(response, content);
+//                }
+//                finally {
+//                    if (in != null) {
+//                        in.close();
+//                    }
+//                }
+//            }
+//            catch (IOException e) {
+//                throw Throwables.propagate(e);
+//            }
+//        }
+//    }
+//
+//    public class ContentHandler
+//            implements Handler<ContentResponse, ContentResponse>
+//    {
+//        @Override
+//        public ContentResponse submit(Request request)
+//                throws InterruptedException, ExecutionException, TimeoutException
+//        {
+//            return request.send();
+//        }
+//
+//        @Override
+//        public ContentResponse onSuccess(ContentResponse response)
+//        {
+//            if (logger.isTraceEnabled()) {
+//                logger.trace("response:\n" + response.getContentAsString());
+//            }
+//            return response;
+//        }
+//
+//        @Override
+//        public String onError(ContentResponse response)
+//        {
+//            if (logger.isTraceEnabled()) {
+//                logger.trace("response:\n" + response.getContentAsString());
+//            }
+//            return reportErrorMessage(response, response.getContent());
+//        }
+//    }
+    private static final ThreadLocal<SimpleDateFormat> RFC2822_FORMAT =
+            new ThreadLocal<SimpleDateFormat>()
+            {
+                @Override
+                protected SimpleDateFormat initialValue()
+                {
+                    return new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
                 }
-                finally {
-                    if (in != null) {
-                        in.close();
+            };
+    private static final ThreadLocal<MessageDigest> SHA1 =
+            new ThreadLocal<MessageDigest>()
+            {
+                @Override
+                protected MessageDigest initialValue()
+                {
+                    try {
+                        return MessageDigest.getInstance("SHA-1");
+                    }
+                    catch (NoSuchAlgorithmException e) {
+                        throw new RuntimeException("SHA-1 digest algorithm must be available but not found", e);
                     }
                 }
-            }
-            catch (IOException e) {
-                throw Throwables.propagate(e);
-            }
+            };
+    private static final char[] hexChars = new char[16];
+
+    static {
+        for (int i = 0; i < 16; i++) {
+            hexChars[i] = Integer.toHexString(i).charAt(0);
         }
     }
 
-    public class ContentHandler
-            implements Handler<ContentResponse, ContentResponse>
+    @VisibleForTesting
+    static String sha1HexFromString(String string)
     {
-        @Override
-        public ContentResponse submit(Request request)
-                throws InterruptedException, ExecutionException, TimeoutException
-        {
-            return request.send();
-        }
+        MessageDigest sha1 = SHA1.get();
+        sha1.reset();
+        sha1.update(string.getBytes());
+        byte[] bytes = sha1.digest();
 
-        @Override
-        public ContentResponse onSuccess(ContentResponse response)
-        {
-            if (logger.isTraceEnabled()) {
-                logger.trace("response:\n" + response.getContentAsString());
-            }
-            return response;
+        // convert binary to hex string
+        char[] array = new char[bytes.length * 2];
+        for (int i = 0; i < bytes.length; i++) {
+            int b = (int) bytes[i];
+            array[i * 2] = hexChars[(b & 0xf0) >> 4];
+            array[i * 2 + 1] = hexChars[b & 0x0f];
         }
-
-        @Override
-        public String onError(ContentResponse response)
-        {
-            if (logger.isTraceEnabled()) {
-                logger.trace("response:\n" + response.getContentAsString());
-            }
-            return reportErrorMessage(response, response.getContent());
-        }
+        return new String(array);
     }
 
-    protected String reportErrorMessage(Response response, byte[] responseContentOnError)
+    public Response submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyOverwrite)
     {
-        int code = response.getStatus();
-        Optional<TDApiError> errorResponse = parseErrorResponse(responseContentOnError);
-        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
-        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, response.getReason(), response.getRequest().getPath(), responseErrorText);
-        return errorMessage;
+        String queryStr = "";
+        String requestUri = String.format("%s%s%s", config.getHttpScheme(), config.getEndpoint(), apiRequest.getPath());
+        WebTarget target = httpClient.target(requestUri);
+        if (!apiRequest.getQueryParams().isEmpty()) {
+            List<String> queryParamList = new ArrayList<String>(apiRequest.getQueryParams().size());
+            for (Map.Entry<String, String> queryParam : apiRequest.getQueryParams().entrySet()) {
+                target.queryParam(queryParam.getKey(), queryParam.getValue());
+                queryParamList.add(String.format("%s=%s", queryParam.getKey(), queryParam.getValue()));
+            }
+            queryStr = Joiner.on("&").join(queryParamList);
+        }
+        Invocation.Builder request = target.request();
+        request.header(HttpHeaders.USER_AGENT, "TDClient " + TDClient.getVersion());
+        request.header(HttpHeaders.DATE, RFC2822_FORMAT.get().format(new Date()));
+        // Set API Key
+        Optional<String> apiKey = apiKeyOverwrite.or(config.getApiKey());
+        if (apiKey.isPresent()) {
+            logger.trace("Set API KEY: {}", apiKey.get());
+            request.header(HttpHeaders.AUTHORIZATION, "TD1 " + apiKey.get());
+        }
+        else {
+            logger.warn("no API key is found");
+        }
+
+        // Set other headers
+        for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entrySet()) {
+            request.header(entry.getKey(), entry.getValue());
+        }
+
+        // Submit the request
+        switch (apiRequest.getMethod()) {
+            case GET:
+                return request.get();
+            case POST:
+                if (queryStr != null && queryStr.length() != 0) {
+                    return request.post(Entity.entity(queryStr, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+                }
+                else {
+                    // We should set content-length explicitely for an empty post
+                    request.header("Content-Length", "0");
+                    return request.post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+                }
+            case PUT:
+                if (apiRequest.getPutFile().isPresent()) {
+                    return request.put(Entity.entity(apiRequest.getPutFile().get(), MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                }
+                break;
+        }
+        return request.build(apiRequest.getMethod().asString()).invoke();
     }
 
-    public <ResponseType extends Response, Result> Result submit(TDApiRequest apiRequest, Handler<ResponseType, Result> requestHandler)
+    public <Result> Result submitRequest(TDApiRequest apiRequest, Function<Response, Result> handler)
             throws TDClientException
     {
         ExponentialBackOffRetry retry = new ExponentialBackOffRetry(config.getRetryLimit(), config.getRetryInitialWaitMillis(), config.getRetryIntervalMillis());
         Optional<TDClientException> rootCause = Optional.absent();
-        Request request = null;
         try {
             Optional<Integer> nextInterval = Optional.absent();
             do {
@@ -245,18 +338,21 @@ public class TDHttpClient
                     Thread.sleep(waitTimeMillis);
                 }
 
-                request = apiRequest.newJettyRequest(httpClient, config, credentialCache);
+                Response response = null;
                 try {
-                    logger.debug("Sending API request to {}", request.getURI());
-                    ResponseType response = requestHandler.submit(request);
+                    logger.debug("Sending API request to {}", apiRequest.getPath());
+                    response = submitRequest(apiRequest, credentialCache);
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
-                        logger.info(String.format("[%d:%s] API request to %s has succeeded", code, response.getReason(), request.getPath()));
-                        return requestHandler.onSuccess(response);
+                        logger.info(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), apiRequest.getPath()));
+                        return handler.apply(response);
                     }
                     else {
-                        String errorMessage = requestHandler.onError(response);
+                        byte[] returnedContent = response.readEntity(byte[].class);
+                        Optional<TDApiError> errorResponse = parseErrorResponse(returnedContent);
+                        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
+                        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequest.getPath(), responseErrorText);
                         if (HttpStatus.isClientError(code)) {
                             logger.error(errorMessage);
                             // 4xx error. We do not retry the execution on this type of error
@@ -283,23 +379,24 @@ public class TDHttpClient
                         }
                     }
                 }
-                catch (ExecutionException e) {
+                catch (ProcessingException e) {
                     logger.warn("API request failed", e);
-                    rootCause = Optional.<TDClientException>of(new TDClientExecutionException(e));
+                    rootCause = Optional.<TDClientException>of(new TDClientProcessingException(e));
                 }
-                catch (TimeoutException e) {
-                    logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
-                    rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
-                    request.abort(e);
+//                catch (TimeoutException e) {
+//                    logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
+//                    rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
+//                }
+                finally {
+                    if (response != null) {
+                        response.close();
+                    }
                 }
             }
             while ((nextInterval = retry.nextWaitTimeMillis()).isPresent());
         }
         catch (InterruptedException e) {
             logger.warn("API request interrupted", e);
-            if (request != null) {
-                request.abort(e);
-            }
             throw new TDClientInterruptedException(e);
         }
         logger.warn("API request retry limit exceeded: ({}/{})", config.getRetryLimit(), config.getRetryLimit());
@@ -309,30 +406,51 @@ public class TDHttpClient
         throw rootCause.get();
     }
 
-    public ContentResponse submit(TDApiRequest apiRequest)
+    public String call(TDApiRequest apiRequest)
     {
-        return submit(apiRequest, new ContentHandler());
+        return submitRequest(apiRequest, new Function<Response, String>()
+        {
+            @Override
+            public String apply(Response input)
+            {
+                return input.readEntity(String.class);
+            }
+        });
     }
 
-    public InputStream openStream(TDApiRequest apiRequest)
+    public <Result> Result call(TDApiRequest apiRequest, final Function<InputStream, Result> contentStreamHandler)
     {
-        return submit(apiRequest, new ContentStreamHandler());
+        return submitRequest(apiRequest, new Function<Response, Result>()
+        {
+            @Override
+            public Result apply(Response input)
+            {
+                return contentStreamHandler.apply(input.readEntity(InputStream.class));
+            }
+        });
     }
 
-    public <Result> Result submit(TDApiRequest apiRequest, Class<Result> resultType)
+    public <Result> Result call(TDApiRequest apiRequest, final Class<Result> resultType)
             throws TDClientException
     {
-        try {
-            ContentResponse response = submit(apiRequest);
-            return objectMapper.readValue(response.getContent(), resultType);
-        }
-        catch (JsonMappingException e) {
-            logger.error("Jackson mapping error", e);
-            throw new TDClientException(INVALID_JSON_RESPONSE, e);
-        }
-        catch (IOException e) {
-            throw new TDClientException(RESPONSE_READ_FAILURE, e);
-        }
+        return submitRequest(apiRequest, new Function<Response, Result>()
+        {
+            @Override
+            public Result apply(Response input)
+            {
+                try {
+                    InputStream stream = input.readEntity(InputStream.class);
+                    return objectMapper.readValue(stream, resultType);
+                }
+                catch (JsonMappingException e) {
+                    logger.error("Jackson mapping error", e);
+                    throw new TDClientException(INVALID_JSON_RESPONSE, e);
+                }
+                catch (IOException e) {
+                    throw new TDClientException(RESPONSE_READ_FAILURE, e);
+                }
+            }
+        });
     }
 
     public void setCredentialCache(String apikey)

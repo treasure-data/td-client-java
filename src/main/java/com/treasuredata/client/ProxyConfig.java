@@ -38,6 +38,10 @@ public class ProxyConfig
         this.password = password;
     }
 
+    public String getUri() {
+        return host + ":" + port;
+    }
+
     public String getHost()
     {
         return host;

@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportSession;
@@ -33,7 +34,6 @@ import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
-import org.eclipse.jetty.client.api.ContentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +115,7 @@ public class TDClient
             throws TDClientException
     {
         TDApiRequest request = TDApiRequest.Builder.GET(path).build();
-        return httpClient.submit(request, resultTypeClass);
+        return httpClient.call(request, resultTypeClass);
     }
 
     private <ResultType> ResultType doPost(String path, Class<ResultType> resultTypeClass)
@@ -135,10 +135,10 @@ public class TDClient
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
             request.addQueryParam(e.getKey(), e.getValue());
         }
-        return httpClient.submit(request.build(), resultTypeClass);
+        return httpClient.call(request.build(), resultTypeClass);
     }
 
-    private ContentResponse doPost(String path, Map<String, String> queryParam)
+    private String doPost(String path, Map<String, String> queryParam)
             throws TDClientException
     {
         checkNotNull(path, "path is null");
@@ -148,28 +148,28 @@ public class TDClient
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
             request.addQueryParam(e.getKey(), e.getValue());
         }
-        return httpClient.submit(request.build());
+        return httpClient.call(request.build());
     }
 
-    private ContentResponse doPost(String path)
+    private String doPost(String path)
             throws TDClientException
     {
         TDApiRequest request = TDApiRequest.Builder.POST(path).build();
-        return httpClient.submit(request);
+        return httpClient.call(request);
     }
 
-    private ContentResponse doPut(String path, File filePath)
+    private String doPut(String path, File filePath)
             throws TDClientException
     {
         TDApiRequest request = TDApiRequest.Builder.PUT(path).setFile(filePath).build();
-        return httpClient.submit(request);
+        return httpClient.call(request);
     }
 
     @Override
     public String serverStatus()
     {
         TDApiRequest request = TDApiRequest.Builder.GET("/v3/system/server_status").build();
-        return httpClient.submit(request).getContentAsString();
+        return httpClient.call(request);
     }
 
     @Override
@@ -369,14 +369,14 @@ public class TDClient
     }
 
     @Override
-    public InputStream jobResult(String jobId, TDResultFormat format)
+    public <Result> Result jobResult(String jobId, TDResultFormat format, Function<InputStream, Result> resultStreamHandler)
             throws TDClientException
     {
         TDApiRequest request = TDApiRequest.Builder
                 .GET(buildUrl("/v3/job/result", jobId))
                 .addQueryParam("format", format.getName())
                 .build();
-        return httpClient.openStream(request);
+        return httpClient.<Result>call(request, resultStreamHandler);
     }
 
     @Override

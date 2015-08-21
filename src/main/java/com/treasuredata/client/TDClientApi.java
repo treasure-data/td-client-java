@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.base.Function;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDJob;
@@ -34,7 +35,7 @@ import java.util.List;
 /**
  * Treasure Data Client
  */
-public interface TDClientApi<TDClientImpl>
+public interface TDClientApi
 {
     String serverStatus();
 
@@ -124,15 +125,16 @@ public interface TDClientApi<TDClientImpl>
 
     /**
      * Open an input stream to retrieve the job result.
-     * This method does not close the returned InputStream.
+     * The input stream will be closed after this method
      * <p/>
      * You will receive an empty stream if the query has not finished yet.
      *
      * @param jobId
      * @param format
+     * @param resultStreamHandler
      * @return
      */
-    InputStream jobResult(String jobId, TDResultFormat format);
+    <Result> Result jobResult(String jobId, TDResultFormat format, Function<InputStream, Result> resultStreamHandler);
 
     // bulk import API
     void createBulkImportSession(String sessionName, String databaseName, String tableName);

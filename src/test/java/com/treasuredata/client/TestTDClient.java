@@ -18,7 +18,9 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDDatabase;
@@ -36,6 +38,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
@@ -132,13 +135,22 @@ public class TestTDClient
         TDJob jobInfo = client.jobInfo(jobId);
         logger.debug("job show result: " + tdJob);
 
-        try (InputStream in = client.jobResult(jobId, TDResultFormat.JSON)) {
-            String result = new String(ByteStreams.toByteArray(in));
-            logger.info("result:\n" + result);
-            JSONArray array = new JSONArray(result);
-            assertEquals(1, array.length());
-            assertEquals(8807278, array.getLong(0));
-        }
+        JSONArray array = client.jobResult(jobId, TDResultFormat.JSON, new Function<InputStream, JSONArray>() {
+            @Override
+            public JSONArray apply(InputStream input)
+            {
+                try {
+                    String result = new String(ByteStreams.toByteArray(input));
+                    logger.info("result:\n" + result);
+                    return new JSONArray(result);
+                }
+                catch(Exception e) {
+                    throw Throwables.propagate(e);
+                }
+            }
+        });
+        assertEquals(1, array.length());
+        assertEquals(8807278, array.getLong(0));
     }
 
     @Test

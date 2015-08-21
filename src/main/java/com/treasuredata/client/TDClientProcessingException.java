@@ -18,15 +18,15 @@
  */
 package com.treasuredata.client;
 
-import java.util.concurrent.ExecutionException;
+import javax.ws.rs.ProcessingException;
 
 /**
- * Thrown when submitting request to API server has faild
+ * Thrown when processing API request has failed
  */
-public class TDClientExecutionException
+public class TDClientProcessingException
         extends TDClientException
 {
-    public TDClientExecutionException(ExecutionException cause)
+    public TDClientProcessingException(ProcessingException cause)
     {
         super(ErrorType.EXECUTION_FAILURE, cause);
     }
