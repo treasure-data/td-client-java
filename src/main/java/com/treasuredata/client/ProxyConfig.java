@@ -38,32 +38,6 @@ public class ProxyConfig
         this.password = password;
     }
 
-    public void apply()
-    {
-        System.setProperty("http.proxyHost", host);
-        System.setProperty("https.proxyHost", host);
-        String portStr = Integer.toString(port);
-        System.setProperty("http.proxyPort", portStr);
-        System.setProperty("https.proxyPort", portStr);
-        System.setProperty("http.proxyUser", user);
-        System.setProperty("http.proxyPassword", password);
-    }
-
-    public Properties toProperties()
-    {
-        Properties prop = new Properties();
-        prop.setProperty("http.proxyHost", host);
-        prop.setProperty("https.proxyHost", host);
-
-        String portStr = Integer.toString(port);
-        prop.setProperty("http.proxyPort", portStr);
-        prop.setProperty("https.proxyPort", portStr);
-
-        prop.setProperty("http.proxyUser", user);
-        prop.setProperty("http.proxyPassword", password);
-        return prop;
-    }
-
     public String getHost()
     {
         return host;
