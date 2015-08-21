@@ -57,9 +57,9 @@ public class TDApiError
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return String.format("[%s] %s", severity, text);
     }
-
 }
 

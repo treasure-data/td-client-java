@@ -20,7 +20,6 @@ package com.treasuredata.client;
 
 import com.google.common.collect.ImmutableMap;
 import com.treasuredata.client.model.TDAuthenticationResult;
-import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDDatabaseList;
@@ -29,6 +28,7 @@ import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobStatus;
 import com.treasuredata.client.model.TDJobSubmitResult;
+import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -68,7 +67,7 @@ public class TDClient
         URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client.td-client/pom.properties");
         String v = "unknown";
         if (mavenProperties != null) {
-            try(InputStream in = mavenProperties.openStream()) {
+            try (InputStream in = mavenProperties.openStream()) {
                 Properties p = new Properties();
                 p.load(in);
                 v = p.getProperty("version", "unknown");
@@ -80,7 +79,6 @@ public class TDClient
         version = v;
         logger.info("td-client version: " + version);
     }
-
 
     private final TDClientConfig config;
     private final TDHttpClient httpClient;
@@ -106,7 +104,7 @@ public class TDClient
     {
         StringBuilder s = new StringBuilder();
         s.append(urlPrefix);
-        for(String a : args) {
+        for (String a : args) {
             s.append("/");
             s.append(urlEncode(a));
         }
@@ -153,7 +151,6 @@ public class TDClient
         return httpClient.submit(request.build());
     }
 
-
     private ContentResponse doPost(String path)
             throws TDClientException
     {
@@ -198,7 +195,7 @@ public class TDClient
     public void createDatabaseIfNotExists(String databaseName)
             throws TDClientException
     {
-        if(!existsDatabase(databaseName)) {
+        if (!existsDatabase(databaseName)) {
             createDatabase(databaseName);
         }
     }
@@ -214,7 +211,7 @@ public class TDClient
     public void deleteDatabaseIfExists(String databaseName)
             throws TDClientException
     {
-        if(existsDatabase(databaseName)) {
+        if (existsDatabase(databaseName)) {
             deleteDatabase(databaseName);
         }
     }
@@ -238,8 +235,8 @@ public class TDClient
     public boolean existsTable(String databaseName, String tableName)
             throws TDClientException
     {
-        for(TDTable table : listTables(databaseName)) {
-            if(table.getName().equals(tableName)) {
+        for (TDTable table : listTables(databaseName)) {
+            if (table.getName().equals(tableName)) {
                 return true;
             }
         }
@@ -257,7 +254,7 @@ public class TDClient
     public void createTableIfNotExists(String databaseName, String tableName)
             throws TDClientException
     {
-        if(!existsTable(databaseName, tableName)) {
+        if (!existsTable(databaseName, tableName)) {
             createTable(databaseName, tableName);
         }
     }
@@ -290,7 +287,7 @@ public class TDClient
     public void deleteTableIfExists(String databaseName, String tableName)
             throws TDClientException
     {
-        if(existsTable(databaseName, tableName)) {
+        if (existsTable(databaseName, tableName)) {
             deleteTable(databaseName, tableName);
         }
     }
@@ -318,7 +315,7 @@ public class TDClient
         queryParam.put("priority", Integer.toString(jobRequest.getPriority().toInt()));
         queryParam.put("retry_limit", Integer.toString(jobRequest.getRetryLimit()));
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("submit job: " + jobRequest);
         }
 
@@ -413,7 +410,8 @@ public class TDClient
     }
 
     @Override
-    public void deleteBulkImportSession(String sessionName) {
+    public void deleteBulkImportSession(String sessionName)
+    {
         doPost(buildUrl("/v3/bulk_import/delete", sessionName));
     }
 
@@ -424,5 +422,4 @@ public class TDClient
         httpClient.setCredentialCache(authResult.getApikey());
         return authResult;
     }
-
 }

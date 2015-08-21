@@ -55,7 +55,6 @@ import static com.treasuredata.client.TDClientException.ErrorType.FAILED_TO_READ
 public class TDApiRequest
 {
     private static Logger logger = LoggerFactory.getLogger(TDApiRequest.class);
-
     private final HttpMethod method;
     private final String path;
     private final Map<String, String> queryParams;
@@ -101,7 +100,7 @@ public class TDApiRequest
         request.method(method);
         request.agent("TDClient " + TDClient.getVersion());
         Optional<String> apiKey = apiKeyOverwrite.or(config.getApiKey());
-        if(apiKey.isPresent()) {
+        if (apiKey.isPresent()) {
             logger.trace("Set API KEY: {}", apiKey.get());
             request.header("Authorization", "TD1 " + apiKey.get());
         }

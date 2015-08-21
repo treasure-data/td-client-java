@@ -54,10 +54,10 @@ public class ExponentialBackOffRetry
     {
         return maxRetryCount;
     }
-    
+
     public Optional<Integer> nextWaitTimeMillis()
     {
-        if(executionCount >= maxRetryCount) {
+        if (executionCount >= maxRetryCount) {
             return Optional.absent();
         }
         else if (executionCount == 0) {

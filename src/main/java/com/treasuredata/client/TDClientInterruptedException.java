@@ -21,7 +21,8 @@ package com.treasuredata.client;
 /**
  * Thrown when API access is interrupted
  */
-public class TDClientInterruptedException extends TDClientException
+public class TDClientInterruptedException
+        extends TDClientException
 {
     public TDClientInterruptedException(Exception cause)
     {

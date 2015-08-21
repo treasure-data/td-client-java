@@ -29,11 +29,9 @@ import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDApiError;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
-import org.eclipse.jetty.client.ProxyConfiguration;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
-import org.eclipse.jetty.client.util.BasicAuthentication;
 import org.eclipse.jetty.client.util.InputStreamResponseListener;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.HttpCookieStore;
@@ -43,8 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Authenticator;
-import java.net.PasswordAuthentication;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -121,7 +117,7 @@ public class TDHttpClient
     protected Optional<TDApiError> parseErrorResponse(byte[] content)
     {
         try {
-            if(content.length > 0 && content[0] == '{') {
+            if (content.length > 0 && content[0] == '{') {
                 // Error message from TD API
                 return Optional.of(objectMapper.readValue(content, TDApiError.class));
             }

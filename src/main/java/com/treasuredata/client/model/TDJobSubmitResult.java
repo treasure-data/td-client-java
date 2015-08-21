@@ -27,7 +27,8 @@ public class TDJobSubmitResult
 {
     private final String jobId;
 
-    public TDJobSubmitResult(@JsonProperty("job_id") String jobId) {
+    public TDJobSubmitResult(@JsonProperty("job_id") String jobId)
+    {
         this.jobId = jobId;
     }
 

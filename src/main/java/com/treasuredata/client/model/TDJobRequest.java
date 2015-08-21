@@ -42,7 +42,8 @@ public class TDJobRequest
         this.retryLimit = retryLimit;
     }
 
-    public static TDJobRequest newPrestoQuery(String database, String query) {
+    public static TDJobRequest newPrestoQuery(String database, String query)
+    {
         return new TDJobRequestBuilder()
                 .setType(TDJob.Type.PRESTO)
                 .setDatabase(database)
@@ -50,7 +51,8 @@ public class TDJobRequest
                 .createTDJobRequest();
     }
 
-    public static TDJobRequest newHiveQuery(String database, String query) {
+    public static TDJobRequest newHiveQuery(String database, String query)
+    {
         return new TDJobRequestBuilder().setType(TDJob.Type.HIVE)
                 .setDatabase(database)
                 .setQuery(query)

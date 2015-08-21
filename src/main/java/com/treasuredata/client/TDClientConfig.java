@@ -57,7 +57,6 @@ public class TDClientConfig
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
     public static final String TD_CLIENT_PROXY_PASSWORD = "td.client.proxy.password";
     private static Logger logger = LoggerFactory.getLogger(TDClientConfig.class);
-
     /**
      * endpoint URL (e.g., api.treasuredata.com, api-staging.treasuredata.com)
      */

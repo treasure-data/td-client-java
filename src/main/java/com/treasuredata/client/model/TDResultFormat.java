@@ -27,12 +27,11 @@ public enum TDResultFormat
     TSV("tsv"),
     CSV("csv"),
     MESSAGE_PACK("msgpack"),
-    MESSAGE_PACK_GZ("msgpack.gz")
-    ;
-
+    MESSAGE_PACK_GZ("msgpack.gz");
     private final String name;
 
-    private TDResultFormat(String name)  {
+    private TDResultFormat(String name)
+    {
         this.name = name;
     }
 

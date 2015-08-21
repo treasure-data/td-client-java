@@ -18,8 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.treasuredata.client.TDClientHttpException;
-
 /**
  * On 401 unauthorized error
  */

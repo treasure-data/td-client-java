@@ -23,7 +23,8 @@ import org.eclipse.jetty.http.HttpStatus;
 /**
  * On 404 NOT_FOUND error when target query, job_id, database, etc. is not found
  */
-public class TDClientHttpNotFoundException extends TDClientHttpException
+public class TDClientHttpNotFoundException
+        extends TDClientHttpException
 {
     public TDClientHttpNotFoundException(String message)
     {

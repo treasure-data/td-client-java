@@ -37,12 +37,14 @@ class TDQuery
     }
 
     @JsonCreator
-    public static TDQuery fromString(String s) {
+    public static TDQuery fromString(String s)
+    {
         return new TDQuery(s);
     }
 
     @JsonCreator
-    public static TDQuery fromObject(JsonNode value) {
+    public static TDQuery fromObject(JsonNode value)
+    {
         // embulk job have nested json object
         try {
             return new TDQuery(new ObjectMapper().writeValueAsString(value));

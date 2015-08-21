@@ -21,7 +21,8 @@ package com.treasuredata.client;
 /**
  * Exception class for reporting http server status code
  */
-public class TDClientHttpException extends TDClientException
+public class TDClientHttpException
+        extends TDClientException
 {
     private final int statusCode;
 

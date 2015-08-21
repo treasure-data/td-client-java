@@ -20,7 +20,8 @@ package com.treasuredata.client.model;
 
 import com.google.common.base.Optional;
 
-public class TDJobRequestBuilder {
+public class TDJobRequestBuilder
+{
     private String database;
     private TDJob.Type type = TDJob.Type.PRESTO;
     private String query;

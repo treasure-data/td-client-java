@@ -25,7 +25,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Exception class for reporting td-client errors
  */
-public class TDClientException extends RuntimeException
+public class TDClientException
+        extends RuntimeException
 {
     /**
      * Used for showing detailed error message
@@ -35,32 +36,29 @@ public class TDClientException extends RuntimeException
         // Configuration error
         INVALID_CONFIGURATION,
         FAILED_TO_READ_INPUT_FILE,
-
         // HTTP error
         AUTHENTICATION_FAILURE,
         TARGET_NOT_FOUND,
         TARGET_ALREADY_EXISTS,
         SERVER_ERROR,
         CLIENT_ERROR,
-
         // Proxy error
         PROXY_AUTHENTICATION_REQUIRED,
-
         // Request handling error
         INTERRUPTED,
         REQUEST_TIMEOUT,
         EXECUTION_FAILURE,
         UNEXPECTED_RESPONSE_CODE,
         INVALID_JSON_RESPONSE,
-        RESPONSE_READ_FAILURE,
-        ;
+        RESPONSE_READ_FAILURE,;
     }
 
     private final ErrorType errorType;
     private final Optional<Exception> rootCause;
 
-    private static final String formatErrorMessage(ErrorType errorType, String message, Optional<Exception> cause) {
-        String rootCauseErrorMessage = cause.isPresent()?  " The root cause: " + cause.get().getMessage() : "";
+    private static final String formatErrorMessage(ErrorType errorType, String message, Optional<Exception> cause)
+    {
+        String rootCauseErrorMessage = cause.isPresent() ? " The root cause: " + cause.get().getMessage() : "";
         return String.format("[%s] %s%s", errorType.name(), message != null ? message : "", rootCauseErrorMessage);
     }
 
@@ -69,27 +67,33 @@ public class TDClientException extends RuntimeException
         super(formatErrorMessage(errorType, message, cause));
         checkNotNull(errorType, "errorType is null");
         checkNotNull(cause, "cause is null");
-        this.errorType = errorType;;
+        this.errorType = errorType;
+        ;
         this.rootCause = cause;
     }
 
-    public TDClientException(ErrorType errorType, String message, Exception cause) {
+    public TDClientException(ErrorType errorType, String message, Exception cause)
+    {
         this(errorType, message, Optional.of(cause));
     }
 
-    public TDClientException(ErrorType errorType, Exception cause) {
+    public TDClientException(ErrorType errorType, Exception cause)
+    {
         this(errorType, cause.getMessage(), Optional.of(cause));
     }
 
-    public TDClientException(ErrorType errorType, String message) {
+    public TDClientException(ErrorType errorType, String message)
+    {
         this(errorType, message, Optional.<Exception>absent());
     }
 
-    public ErrorType getErrorType() {
+    public ErrorType getErrorType()
+    {
         return this.errorType;
     }
 
-    public Optional<Exception> getRootCause() {
+    public Optional<Exception> getRootCause()
+    {
         return rootCause;
     }
 }

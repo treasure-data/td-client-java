@@ -19,12 +19,12 @@
 package com.treasuredata.client;
 
 import com.treasuredata.client.model.TDAuthenticationResult;
-import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobStatus;
+import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 
 import java.io.File;
@@ -37,7 +37,6 @@ import java.util.List;
 public interface TDClientApi<TDClientImpl>
 {
     String serverStatus();
-
 
     /**
      * Get the list of databases
@@ -124,8 +123,9 @@ public interface TDClientApi<TDClientImpl>
     /**
      * Open an input stream to retrieve the job result.
      * This method does not close the returned InputStream.
-     *
+     * <p/>
      * You will receive an empty stream if the query has not finished yet.
+     *
      * @param jobId
      * @param format
      * @return
@@ -134,15 +134,22 @@ public interface TDClientApi<TDClientImpl>
 
     // bulk import API
     void createBulkImportSession(String sessionName, String databaseName, String tableName);
+
     TDBulkImportSession getBulkImportSession(String sessionName);
+
     void uploadBulkImportPart(String sessionName, String uniquePartName, File path);
+
     void freezeBulkImportSession(String sessionName);
+
     void performBulkImportSession(String sessionName, int priority);
+
     void commitBulkImportSession(String sessionName);
+
     void deleteBulkImportSession(String sessionName);
 
     /**
      * Perform user email and passsword based authentication.
+     *
      * @param email
      * @param password
      * @return
