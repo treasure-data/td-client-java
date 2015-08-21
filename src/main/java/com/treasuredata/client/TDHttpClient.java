@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -102,12 +104,17 @@ public class TDHttpClient
                     .property(ClientProperties.PROXY_USERNAME, proxyConfig.getUri())
                     .property(ClientProperties.PROXY_PASSWORD, proxyConfig.getPassword());
         }
-        httpClient = ClientBuilder.newClient(httpConfig);
 
+        // Prepare jackson json-object mapper
         this.objectMapper = new ObjectMapper()
                 .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
                 .registerModule(new GuavaModule())   // for mapping to Guava Optional class
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        JacksonJsonProvider jacksonJsonProvider = new JacksonJsonProvider(objectMapper);
+        httpConfig.register(jacksonJsonProvider);
+
+        this.httpClient = ClientBuilder.newClient(httpConfig);
     }
 
     public void close()
@@ -347,6 +354,15 @@ public class TDHttpClient
         });
     }
 
+    /**
+     * Submit an API request, and bind the returned JSON data into an object of the given result type.
+     * For mapping it uses Jackson object mapper.
+     * @param apiRequest
+     * @param resultType
+     * @param <Result>
+     * @return
+     * @throws TDClientException
+     */
     public <Result> Result call(TDApiRequest apiRequest, final Class<Result> resultType)
             throws TDClientException
     {
