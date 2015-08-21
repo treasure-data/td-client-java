@@ -136,92 +136,6 @@ public class TDHttpClient
         }
     }
 
-//    public static interface Handler<ResponseType extends Response, Result>
-//    {
-//        ResponseType submit(Request requset)
-//                throws InterruptedException, ExecutionException, TimeoutException;
-//
-//        Result onSuccess(ResponseType response);
-//
-//        /**
-//         * @param response
-//         * @return error message
-//         */
-//        String onError(ResponseType response);
-//    }
-//
-//    public class ContentStreamHandler
-//            implements Handler<Response, InputStream>
-//    {
-//        private InputStreamResponseListener listener = null;
-//
-//        @Override
-//        public Response submit(Request request)
-//                throws InterruptedException, ExecutionException, TimeoutException
-//        {
-//            listener = new InputStreamResponseListener();
-//            request.send(listener);
-//            return listener.get(config.getIdleTimeoutMillis(), TimeUnit.MILLISECONDS);
-//        }
-//
-//        @Override
-//        public InputStream onSuccess(Response response)
-//        {
-//            checkNotNull(listener, "listener is null");
-//            return listener.getInputStream();
-//        }
-//
-//        @Override
-//        public String onError(Response response)
-//        {
-//            int code = response.getStatus();
-//            InputStream in = null;
-//            try {
-//                try {
-//                    in = listener.getInputStream();
-//                    byte[] content = ByteStreams.toByteArray(in);
-//                    return reportErrorMessage(response, content);
-//                }
-//                finally {
-//                    if (in != null) {
-//                        in.close();
-//                    }
-//                }
-//            }
-//            catch (IOException e) {
-//                throw Throwables.propagate(e);
-//            }
-//        }
-//    }
-//
-//    public class ContentHandler
-//            implements Handler<ContentResponse, ContentResponse>
-//    {
-//        @Override
-//        public ContentResponse submit(Request request)
-//                throws InterruptedException, ExecutionException, TimeoutException
-//        {
-//            return request.send();
-//        }
-//
-//        @Override
-//        public ContentResponse onSuccess(ContentResponse response)
-//        {
-//            if (logger.isTraceEnabled()) {
-//                logger.trace("response:\n" + response.getContentAsString());
-//            }
-//            return response;
-//        }
-//
-//        @Override
-//        public String onError(ContentResponse response)
-//        {
-//            if (logger.isTraceEnabled()) {
-//                logger.trace("response:\n" + response.getContentAsString());
-//            }
-//            return reportErrorMessage(response, response.getContent());
-//        }
-//    }
     private static final ThreadLocal<SimpleDateFormat> RFC2822_FORMAT =
             new ThreadLocal<SimpleDateFormat>()
             {
@@ -290,7 +204,6 @@ public class TDHttpClient
         // Set API Key
         Optional<String> apiKey = apiKeyOverwrite.or(config.getApiKey());
         if (apiKey.isPresent()) {
-            logger.trace("Set API KEY: {}", apiKey.get());
             request.header(HttpHeaders.AUTHORIZATION, "TD1 " + apiKey.get());
         }
         else {
@@ -307,7 +220,7 @@ public class TDHttpClient
             case GET:
                 return request.get();
             case POST:
-                if (queryStr != null && queryStr.length() != 0) {
+                if (queryStr != null && queryStr.length() > 0) {
                     return request.post(Entity.entity(queryStr, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
                 }
                 else {
@@ -383,10 +296,6 @@ public class TDHttpClient
                     logger.warn("API request failed", e);
                     rootCause = Optional.<TDClientException>of(new TDClientProcessingException(e));
                 }
-//                catch (TimeoutException e) {
-//                    logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
-//                    rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
-//                }
                 finally {
                     if (response != null) {
                         response.close();
@@ -413,7 +322,11 @@ public class TDHttpClient
             @Override
             public String apply(Response input)
             {
-                return input.readEntity(String.class);
+                String response =input.readEntity(String.class);
+                if(logger.isTraceEnabled()) {
+                    logger.trace("response:\n{}", response);
+                }
+                return response;
             }
         });
     }
@@ -439,8 +352,11 @@ public class TDHttpClient
             public Result apply(Response input)
             {
                 try {
-                    InputStream stream = input.readEntity(InputStream.class);
-                    return objectMapper.readValue(stream, resultType);
+                    byte[] response = input.readEntity(byte[].class);
+                    if(logger.isTraceEnabled()) {
+                        logger.trace("response:\n{}", new String(response));
+                    }
+                    return objectMapper.readValue(response, resultType);
                 }
                 catch (JsonMappingException e) {
                     logger.error("Jackson mapping error", e);
