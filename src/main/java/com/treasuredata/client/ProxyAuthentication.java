@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.net.HttpHeaders;
 import org.eclipse.jetty.client.api.Authentication;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
@@ -38,7 +37,6 @@ import java.nio.charset.StandardCharsets;
 public class ProxyAuthentication
         implements Authentication
 {
-    private static final Logger logger = LoggerFactory.getLogger(ProxyAuthentication.class);
     private final String user;
     private final String password;
 
@@ -90,7 +88,7 @@ public class ProxyAuthentication
         public void apply(Request request)
         {
             request.header(header, value);
-            for(HttpField header : originalRequest.getHeaders()) {
+            for (HttpField header : originalRequest.getHeaders()) {
                 request.header(header.getName(), header.getValue());
             }
         }

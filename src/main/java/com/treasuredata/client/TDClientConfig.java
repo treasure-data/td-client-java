@@ -37,9 +37,8 @@ import java.util.Properties;
 public class TDClientConfig
 {
     public static final String ENV_TD_CLIENT_APIKEY = "TD_API_KEY";
-
     /**
-     * Keys for configuring TDClient with a properties file (of System properties)
+     * Keys for configuring TDClient with a properties file (or System properties)
      */
     public static final String TD_CLIENT_APIKEY = "td.client.apikey";
     public static final String TD_CLIENT_USER = "td.client.user";
@@ -47,18 +46,18 @@ public class TDClientConfig
     public static final String TD_CLIENT_USESSL = "td.client.usessl";
     public static final String TD_CLIENT_API_ENDPOINT = "td.client.endpoint";
     public static final String TD_CLIENT_API_PORT = "td.client.port";
-    public static final String TD_CLIENT_API_READ_TIMEOUT = "td.client.read-timeout";
-    public static final String TD_CLIENT_API_IDLE_TIMEOUT = "td.client.idle-timeout";
     public static final String TD_CLIENT_RETRY_LIMIT = "td.client.retry.limit";
     public static final String TD_CLIENT_RETRY_INITIAL_WAIT_MILLIS = "td.client.retry.initial-wait";
     public static final String TD_CLIENT_RETRY_INTERVAL_MILLIS = "td.client.retry.interval";
-
+    public static final String TD_CLIENT_CONNECT_TIMEOUT_MILLIS = "td.client.connect-timeout";
+    public static final String TD_CLIENT_IDLE_TIMEOUT_MILLIS = "td.client.idle-timeout";
+    public static final String TD_CLIENT_MAX_CONNECTIONS_PER_DESTINATION = "td.client.max-connections-per-destination";
     public static final String TD_CLIENT_PROXY_HOST = "td.client.proxy.host";
     public static final String TD_CLIENT_PROXY_PORT = "td.client.proxy.port";
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
     public static final String TD_CLIENT_PROXY_PASSWORD = "td.client.proxy.password";
-
     private static Logger logger = LoggerFactory.getLogger(TDClientConfig.class);
+
     /**
      * endpoint URL (e.g., api.treasuredata.com, api-staging.treasuredata.com)
      */
@@ -68,10 +67,12 @@ public class TDClientConfig
     private final Optional<ProxyConfig> proxy;
     private final String httpScheme;
     private final boolean useSSL;
-
     private final int retryLimit;
     private final int retryInitialWaitMillis;
     private final int retryIntervalMillis;
+    private final int connectTimeoutMillis;
+    private final int idleTimeoutMillis;
+    private final int maxConnectionsPerDestination;
 
     public static <V> V checkNotNull(V v, String message)
             throws TDClientException
@@ -84,6 +85,7 @@ public class TDClientConfig
 
     /**
      * Get the default TDClientConfig by reading $HOME/.td/td.conf file.
+     *
      * @return
      * @throws IOException
      * @throws TDClientException
@@ -93,7 +95,7 @@ public class TDClientConfig
     {
         Properties p = readTDConf();
         String apiKey = MoreObjects.firstNonNull(System.getenv().get(TD_CLIENT_APIKEY), p.getProperty("apikey"));
-        if(apiKey == null) {
+        if (apiKey == null) {
             return new Builder().result();
         }
         else {
@@ -103,31 +105,18 @@ public class TDClientConfig
 
     /**
      * Return a new configuration with a given TD API key
+     *
      * @param apiKey
      * @return
      */
-    public TDClientConfig withApiKey(String apiKey) {
-        return new TDClientConfig(
-                Optional.of(endpoint),
-                Optional.of(port),
-                useSSL,
-                Optional.of(apiKey),
-                proxy,
-                retryLimit,
-                retryInitialWaitMillis,
-                retryInitialWaitMillis);
+    public TDClientConfig withApiKey(String apiKey)
+    {
+        return new Builder(this).setApiKey(apiKey).result();
     }
 
-    public TDClientConfig withProxy(ProxyConfig proxy) {
-        return new TDClientConfig(
-                Optional.of(endpoint),
-                Optional.of(port),
-                useSSL,
-                apiKey,
-                Optional.of(proxy),
-                retryLimit,
-                retryInitialWaitMillis,
-                retryInitialWaitMillis);
+    public TDClientConfig withProxy(ProxyConfig proxy)
+    {
+        return new Builder(this).setProxyConfig(proxy).result();
     }
 
     @JsonCreator
@@ -139,7 +128,10 @@ public class TDClientConfig
             Optional<ProxyConfig> proxy,
             int retryLimit,
             int retryInitialWaitMillis,
-            int retryIntervalMillis
+            int retryIntervalMillis,
+            int connectTimeoutMillis,
+            int idleTimeoutMillis,
+            int maxConnectionsPerDestination
     )
     {
         this.httpScheme = useSSL ? "https://" : "http://";
@@ -151,6 +143,9 @@ public class TDClientConfig
         this.retryLimit = retryLimit;
         this.retryInitialWaitMillis = retryInitialWaitMillis;
         this.retryIntervalMillis = retryIntervalMillis;
+        this.connectTimeoutMillis = connectTimeoutMillis;
+        this.idleTimeoutMillis = idleTimeoutMillis;
+        this.maxConnectionsPerDestination = maxConnectionsPerDestination;
     }
 
     public String getEndpoint()
@@ -176,6 +171,21 @@ public class TDClientConfig
     public int getRetryIntervalMillis()
     {
         return retryIntervalMillis;
+    }
+
+    public int getConnectTimeoutMillis()
+    {
+        return connectTimeoutMillis;
+    }
+
+    public int getIdleTimeoutMillis()
+    {
+        return idleTimeoutMillis;
+    }
+
+    public int getMaxConnectionsPerDestination()
+    {
+        return maxConnectionsPerDestination;
     }
 
     public int getPort()
@@ -235,80 +245,82 @@ public class TDClientConfig
             p.load(new StringReader(props));
             return p;
         }
-        catch(IOException e) {
+        catch (IOException e) {
             throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, String.format("Failed to read config file: %s", file), e);
         }
     }
 
-//    public Properties toProperties() {
-//        Properties prop = new Properties();
-//        prop.setProperty(Config.TD_CK_API_SERVER_SCHEME, scheme);
-//        prop.setProperty(Config.TD_JDBC_USESSL, Boolean.toString(useSSL));
-//        prop.setProperty(Config.TD_API_SERVER_HOST, endpoint);
-//        prop.setProperty(Config.TD_API_SERVER_PORT, Integer.toString(port));
-//
-//        if(apiKey.isDefined()) {
-//            prop.setProperty(Config.TD_API_KEY, apiKey.get());
-//        }
-//
-//        if(proxy.isDefined()) {
-//            Properties proxyProp = proxy.get().toProperties();
-//            prop.putAll(proxyProp);
-//        }
-//        return prop;
-//    }
-
-    public static class Builder {
+    public static class Builder
+    {
         private Optional<String> endpoint = Optional.absent();
         private Optional<Integer> port = Optional.absent();
         private boolean useSSL = false;
         private Optional<String> apiKey = Optional.absent();
         private Optional<ProxyConfig> proxy = Optional.absent();
-
         private int retryLimit = 7;
         private int retryInitialWaitMillis = 1000;
-        private final int retryIntervalMillis = 2000;
+        private int retryIntervalMillis = 2000;
+        private int connectTimeoutMillis = 15000;
+        private int idleTimeoutMillis = 60000;
+        private int maxConnectionsPerDestination = 64;
 
-        public Builder() {}
+        public Builder()
+        {
+        }
 
-        public Builder(TDClientConfig config) {
+        public Builder(TDClientConfig config)
+        {
             this.endpoint = Optional.of(config.endpoint);
             this.port = Optional.of(config.port);
             this.useSSL = config.useSSL;
+            this.apiKey = config.apiKey;
             this.proxy = config.proxy;
+            this.retryLimit = config.retryLimit;
+            this.retryInitialWaitMillis = config.retryInitialWaitMillis;
+            this.retryIntervalMillis = config.retryIntervalMillis;
+            this.connectTimeoutMillis = config.connectTimeoutMillis;
+            this.idleTimeoutMillis = config.idleTimeoutMillis;
+            this.maxConnectionsPerDestination = config.maxConnectionsPerDestination;
         }
 
-        public Builder setEndpoint(String endpoint) {
+        public Builder setEndpoint(String endpoint)
+        {
             this.endpoint = Optional.of(endpoint);
             return this;
         }
 
-        public Builder setPort(int port) {
+        public Builder setPort(int port)
+        {
             this.port = Optional.of(port);
             return this;
         }
 
-        public Builder setUseSSL(boolean useSSL) {
+        public Builder setUseSSL(boolean useSSL)
+        {
             this.useSSL = useSSL;
             return this;
         }
 
-        public Builder setApiKey(String apiKey) {
+        public Builder setApiKey(String apiKey)
+        {
             this.apiKey = Optional.of(apiKey);
             return this;
         }
 
-        public Builder unsetApiKey() {
+        public Builder unsetApiKey()
+        {
             this.apiKey = Optional.absent();
             return this;
         }
 
-        public Builder setProxyConfig(ProxyConfig proxyConfig) {
+        public Builder setProxyConfig(ProxyConfig proxyConfig)
+        {
             this.proxy = Optional.of(proxyConfig);
             return this;
         }
 
-        public TDClientConfig result() {
+        public TDClientConfig result()
+        {
             return new TDClientConfig(
                     endpoint,
                     port,
@@ -317,9 +329,11 @@ public class TDClientConfig
                     proxy,
                     retryLimit,
                     retryInitialWaitMillis,
-                    retryIntervalMillis
+                    retryIntervalMillis,
+                    connectTimeoutMillis,
+                    idleTimeoutMillis,
+                    maxConnectionsPerDestination
             );
         }
     }
-
 }

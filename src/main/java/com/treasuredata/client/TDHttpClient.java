@@ -73,25 +73,24 @@ public class TDHttpClient
     {
         this.config = config;
         this.httpClient = new HttpClient();
-        httpClient.setConnectTimeout(3000);
-        httpClient.setAddressResolutionTimeout(3000);
-        httpClient.setIdleTimeout(10000);
+        httpClient.setConnectTimeout(config.getConnectTimeoutMillis());
+        httpClient.setIdleTimeout(config.getIdleTimeoutMillis());
+        httpClient.setMaxConnectionsPerDestination(config.getMaxConnectionsPerDestination());
         httpClient.setTCPNoDelay(true);
         httpClient.setExecutor(new QueuedThreadPool());
-        httpClient.setMaxConnectionsPerDestination(64);
         httpClient.setCookieStore(new HttpCookieStore.Empty());
 
         if (config.getProxy().isPresent()) {
             logger.debug("Apply proxy configuration: {}", config.getProxy().get());
             final ProxyConfig proxyConfig = config.getProxy().get();
 
-            // Add proxy authentication
-            httpClient.getAuthenticationStore()
-                    .addAuthentication(new ProxyAuthentication(proxyConfig.getUser(), proxyConfig.getPassword()));
-
             // Let HttpClient access through this http proxy
             HttpProxy httpProxy = new HttpProxy(proxyConfig.getHost(), proxyConfig.getPort());
             httpClient.getProxyConfiguration().getProxies().add(httpProxy);
+
+            // Add proxy authentication. The will be used if the first access returns 407 (PROXY_AUTHORIZATION_REQUIRED)
+            httpClient.getAuthenticationStore()
+                    .addAuthentication(new ProxyAuthentication(proxyConfig.getUser(), proxyConfig.getPassword()));
         }
 
         try {
