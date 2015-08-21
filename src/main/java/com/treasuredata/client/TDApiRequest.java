@@ -127,7 +127,7 @@ public class TDApiRequest
             if (headerParams == null) {
                 headerParams = new HashMap<>();
             }
-            headerParams.put(urlEncode(key), urlEncode(value));
+            headerParams.put(key, value);
             return this;
         }
 
@@ -136,7 +136,7 @@ public class TDApiRequest
             if (queryParams == null) {
                 queryParams = new HashMap<>();
             }
-            queryParams.put(urlEncode(key), urlEncode(value));
+            queryParams.put(key, value);
             return this;
         }
 

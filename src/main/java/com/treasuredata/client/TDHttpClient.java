@@ -32,6 +32,7 @@ import com.treasuredata.client.model.TDApiError;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.jetty.connector.JettyClientProperties;
 import org.glassfish.jersey.jetty.connector.JettyConnectorProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +90,9 @@ public class TDHttpClient
         httpConfig
                 .property(ClientProperties.CONNECT_TIMEOUT, config.getConnectTimeoutMillis())
                 .property(ClientProperties.READ_TIMEOUT, config.getConnectTimeoutMillis());
+
+        // Jetty specific configuration. Disable cookie
+        httpConfig.property(JettyClientProperties.DISABLE_COOKIES, true);
 
         // Configure proxy server
         if (config.getProxy().isPresent()) {
@@ -193,14 +197,14 @@ public class TDHttpClient
         if (!apiRequest.getQueryParams().isEmpty()) {
             List<String> queryParamList = new ArrayList<String>(apiRequest.getQueryParams().size());
             for (Map.Entry<String, String> queryParam : apiRequest.getQueryParams().entrySet()) {
-                target.queryParam(queryParam.getKey(), queryParam.getValue());
+                target = target.queryParam(queryParam.getKey(), queryParam.getValue());
                 queryParamList.add(String.format("%s=%s", queryParam.getKey(), queryParam.getValue()));
             }
             queryStr = Joiner.on("&").join(queryParamList);
         }
-        Invocation.Builder request = target.request();
-        request.header(HttpHeaders.USER_AGENT, "TDClient " + TDClient.getVersion());
-        request.header(HttpHeaders.DATE, RFC2822_FORMAT.get().format(new Date()));
+        Invocation.Builder request = target.request()
+                .header(HttpHeaders.USER_AGENT, "TDClient " + TDClient.getVersion())
+                .header(HttpHeaders.DATE, RFC2822_FORMAT.get().format(new Date()));
         // Set API Key
         Optional<String> apiKey = apiKeyOverwrite.or(config.getApiKey());
         if (apiKey.isPresent()) {
