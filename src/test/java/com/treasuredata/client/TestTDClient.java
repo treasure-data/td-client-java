@@ -21,6 +21,7 @@ package com.treasuredata.client;
 import com.google.common.base.Joiner;
 import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDAuthenticationResult;
+import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -203,6 +204,8 @@ public class TestTDClient
         String user = firstNonNull(p.getProperty("user"), System.getenv().get(TDClientConfig.TD_CLIENT_USER));
         String password = firstNonNull(p.getProperty("password"), System.getenv().get(TDClientConfig.TD_CLIENT_PASSOWRD));
         TDAuthenticationResult result = client.authenticate(user, password);
+        List<TDTable> tableList = client.listTables("sample_datasets");
+        assertTrue(tableList.size() >= 2);
     }
 
 }
