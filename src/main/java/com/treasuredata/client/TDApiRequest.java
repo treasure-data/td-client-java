@@ -56,87 +56,6 @@ public class TDApiRequest
 {
     private static Logger logger = LoggerFactory.getLogger(TDApiRequest.class);
 
-    public static class Builder
-    {
-        private static final Map<String, String> EMPTY_MAP = ImmutableMap.of();
-        private HttpMethod method;
-        private String path;
-        private Map<String, String> queryParams;
-        private Map<String, String> headerParams;
-        private Optional<File> file = Optional.absent();
-
-        Builder(HttpMethod method, String path)
-        {
-            this.method = method;
-            this.path = path;
-        }
-
-        public static Builder GET(String uri)
-        {
-            return new Builder(HttpMethod.GET, uri);
-        }
-
-        public static Builder POST(String uri)
-        {
-            return new Builder(HttpMethod.POST, uri);
-        }
-
-        public static Builder PUT(String uri)
-        {
-            return new Builder(HttpMethod.PUT, uri);
-        }
-
-        public static Builder DELETE(String uri)
-        {
-            return new Builder(HttpMethod.DELETE, uri);
-        }
-
-        public Builder addHeader(String key, String value)
-        {
-            if (headerParams == null) {
-                headerParams = new HashMap<>();
-            }
-            headerParams.put(urlEncode(key), urlEncode(value));
-            return this;
-        }
-
-        public Builder addQueryParam(String key, String value)
-        {
-            if (queryParams == null) {
-                queryParams = new HashMap<>();
-            }
-            queryParams.put(urlEncode(key), urlEncode(value));
-            return this;
-        }
-
-        public Builder setFile(File file)
-        {
-            this.file = Optional.of(file);
-            return this;
-        }
-
-        public TDApiRequest build()
-        {
-            return new TDApiRequest(
-                    method,
-                    path,
-                    queryParams != null ? queryParams : EMPTY_MAP,
-                    headerParams != null ? headerParams : EMPTY_MAP,
-                    file
-            );
-        }
-    }
-
-    public static String urlEncode(String value)
-    {
-        try {
-            return URLEncoder.encode(value, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e) {
-            throw Throwables.propagate(e);
-        }
-    }
-
     private final HttpMethod method;
     private final String path;
     private final Map<String, String> queryParams;
@@ -185,6 +104,9 @@ public class TDApiRequest
         if(apiKey.isPresent()) {
             logger.trace("Set API KEY: {}", apiKey.get());
             request.header("Authorization", "TD1 " + apiKey.get());
+        }
+        else {
+            logger.warn("no API key is found");
         }
         for (Map.Entry<String, String> entry : headerParams.entrySet()) {
             request.header(entry.getKey(), entry.getValue());
@@ -265,5 +187,86 @@ public class TDApiRequest
             array[i * 2 + 1] = hexChars[b & 0x0f];
         }
         return new String(array);
+    }
+
+    public static class Builder
+    {
+        private static final Map<String, String> EMPTY_MAP = ImmutableMap.of();
+        private HttpMethod method;
+        private String path;
+        private Map<String, String> queryParams;
+        private Map<String, String> headerParams;
+        private Optional<File> file = Optional.absent();
+
+        Builder(HttpMethod method, String path)
+        {
+            this.method = method;
+            this.path = path;
+        }
+
+        public static Builder GET(String uri)
+        {
+            return new Builder(HttpMethod.GET, uri);
+        }
+
+        public static Builder POST(String uri)
+        {
+            return new Builder(HttpMethod.POST, uri);
+        }
+
+        public static Builder PUT(String uri)
+        {
+            return new Builder(HttpMethod.PUT, uri);
+        }
+
+        public static Builder DELETE(String uri)
+        {
+            return new Builder(HttpMethod.DELETE, uri);
+        }
+
+        public Builder addHeader(String key, String value)
+        {
+            if (headerParams == null) {
+                headerParams = new HashMap<>();
+            }
+            headerParams.put(urlEncode(key), urlEncode(value));
+            return this;
+        }
+
+        public Builder addQueryParam(String key, String value)
+        {
+            if (queryParams == null) {
+                queryParams = new HashMap<>();
+            }
+            queryParams.put(urlEncode(key), urlEncode(value));
+            return this;
+        }
+
+        public Builder setFile(File file)
+        {
+            this.file = Optional.of(file);
+            return this;
+        }
+
+        public TDApiRequest build()
+        {
+            return new TDApiRequest(
+                    method,
+                    path,
+                    queryParams != null ? queryParams : EMPTY_MAP,
+                    headerParams != null ? headerParams : EMPTY_MAP,
+                    file
+            );
+        }
+    }
+
+    public static String urlEncode(String value)
+    {
+        try {
+            return URLEncoder.encode(value, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            throw Throwables.propagate(e);
+        }
     }
 }

@@ -18,7 +18,10 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.base.Joiner;
 import com.treasuredata.client.model.TDJobList;
+import com.treasuredata.client.model.TDJobRequest;
+import com.treasuredata.client.model.TDTable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import org.junit.After;
@@ -34,9 +37,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestProxyAccess
 {
@@ -67,23 +72,26 @@ public class TestProxyAccess
     {
         proxyAccessCount.set(0);
         this.proxyPort = findAvailablePort();
-        this.proxyServer = DefaultHttpProxyServer.bootstrap().withPort(proxyPort).withProxyAuthenticator(new ProxyAuthenticator()
-        {
-            @Override
-            public boolean authenticate(String user, String pass)
-            {
-                boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
-                return isValid;
-            }
-        }).withFiltersSource(new HttpFiltersSourceAdapter()
-        {
-            @Override
-            public HttpFilters filterRequest(HttpRequest httpRequest, ChannelHandlerContext channelHandlerContext)
-            {
-                proxyAccessCount.incrementAndGet();
-                return super.filterRequest(httpRequest, channelHandlerContext);
-            }
-        }).start();
+        this.proxyServer = DefaultHttpProxyServer.bootstrap().withPort(proxyPort)
+                .withProxyAuthenticator(new ProxyAuthenticator()
+                {
+                    @Override
+                    public boolean authenticate(String user, String pass)
+                    {
+                        boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
+                        logger.debug("Proxy Authentication: " + (isValid ? "success" : "failure"));
+                        return isValid;
+                    }
+                })
+                .withFiltersSource(new HttpFiltersSourceAdapter()
+                {
+                    @Override
+                    public HttpFilters filterRequest(HttpRequest httpRequest, ChannelHandlerContext channelHandlerContext)
+                    {
+                        proxyAccessCount.incrementAndGet();
+                        return super.filterRequest(httpRequest, channelHandlerContext);
+                    }
+                }).start();
     }
 
     @After
@@ -105,9 +113,13 @@ public class TestProxyAccess
         proxy.setPassword(PROXY_PASS);
         TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
         try {
-            TDJobList jobList = client.listJobs();
-            logger.debug(jobList.toString());
+            List<TDTable> tableList = client.listTables("sample_datasets");
+            assertTrue(tableList.size() >= 2);
             assertEquals(1, proxyAccessCount.get());
+
+            TDJobList jobList = client.listJobs();
+            assertTrue(jobList.getJobs().size() > 0);
+            assertEquals(2, proxyAccessCount.get());
         }
         finally {
             logger.debug("proxy access count: {}", proxyAccessCount);

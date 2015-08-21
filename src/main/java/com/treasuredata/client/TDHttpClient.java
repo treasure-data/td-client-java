@@ -85,13 +85,13 @@ public class TDHttpClient
             logger.debug("Apply proxy configuration: {}", config.getProxy().get());
             final ProxyConfig proxyConfig = config.getProxy().get();
 
-            // Let HttpClient access through this http proxy
-            HttpProxy httpProxy = new HttpProxy(proxyConfig.getHost(), proxyConfig.getPort());
-            httpClient.getProxyConfiguration().getProxies().add(httpProxy);
-
             // Add proxy authentication
             httpClient.getAuthenticationStore()
                     .addAuthentication(new ProxyAuthentication(proxyConfig.getUser(), proxyConfig.getPassword()));
+
+            // Let HttpClient access through this http proxy
+            HttpProxy httpProxy = new HttpProxy(proxyConfig.getHost(), proxyConfig.getPort());
+            httpClient.getProxyConfiguration().getProxies().add(httpProxy);
         }
 
         try {

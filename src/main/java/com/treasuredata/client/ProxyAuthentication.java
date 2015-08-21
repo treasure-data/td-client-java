@@ -18,9 +18,11 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.net.HttpHeaders;
 import org.eclipse.jetty.client.api.Authentication;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.Attributes;
 import org.eclipse.jetty.util.B64Code;
@@ -59,19 +61,20 @@ public class ProxyAuthentication
     public Result authenticate(Request request, ContentResponse response, HeaderInfo headerInfo, Attributes context)
     {
         String value = "Basic " + B64Code.encode(user + ":" + password, StandardCharsets.ISO_8859_1);
-        logger.debug("proxy auth request: " + value);
-        return new ProxyAuthResult(headerInfo.getHeader(), request.getURI(), value);
+        return new ProxyAuthResult(request, headerInfo.getHeader(), request.getURI(), value);
     }
 
     private static class ProxyAuthResult
             implements Result
     {
+        private final Request originalRequest;
         private final HttpHeader header;
         private final URI uri;
         private final String value;
 
-        public ProxyAuthResult(HttpHeader header, URI uri, String value)
+        public ProxyAuthResult(Request originalRequest, HttpHeader header, URI uri, String value)
         {
+            this.originalRequest = originalRequest;
             this.header = header;
             this.uri = uri;
             this.value = value;
@@ -87,6 +90,9 @@ public class ProxyAuthentication
         public void apply(Request request)
         {
             request.header(header, value);
+            for(HttpField header : originalRequest.getHeaders()) {
+                request.header(header.getName(), header.getValue());
+            }
         }
 
         @Override
