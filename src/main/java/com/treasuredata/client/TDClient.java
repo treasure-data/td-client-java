@@ -303,6 +303,12 @@ public class TDClient
     }
 
     @Override
+    public void swapTables(String databaseName, String tableName1, String tableName2)
+    {
+        doPost(buildUrl("/v3/table/swap", databaseName, tableName1, tableName2));
+    }
+
+    @Override
     public String submit(TDJobRequest jobRequest)
             throws TDClientException
     {
