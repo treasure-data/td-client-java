@@ -94,6 +94,8 @@ public class TDClientConfig
         return null;
     }
 
+    private static TDClientConfig currentConfig;
+
     /**
      * Get the default TDClientConfig by reading $HOME/.td/td.conf file.
      *
@@ -104,14 +106,17 @@ public class TDClientConfig
     public static TDClientConfig currentConfig()
             throws TDClientException
     {
-        Properties p = readTDConf();
-        String apiKey = findNonNull(System.getenv().get(ENV_TD_CLIENT_APIKEY), System.getProperty(TD_CLIENT_APIKEY), p.getProperty(TD_CLIENT_APIKEY));
-        if (apiKey == null) {
-            return new Builder().result();
+        if(currentConfig == null) {
+            Properties p = readTDConf();
+            String apiKey = findNonNull(System.getenv().get(ENV_TD_CLIENT_APIKEY), System.getProperty(TD_CLIENT_APIKEY), p.getProperty(TD_CLIENT_APIKEY));
+            if (apiKey == null) {
+                currentConfig = new Builder().result();
+            }
+            else {
+                currentConfig = new Builder().setApiKey(apiKey).result();
+            }
         }
-        else {
-            return new Builder().setApiKey(apiKey).result();
-        }
+        return currentConfig;
     }
 
     /**
