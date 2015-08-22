@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -34,7 +33,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.B64Code;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.jetty.connector.JettyClientProperties;
 import org.glassfish.jersey.jetty.connector.JettyConnectorProvider;
 import org.slf4j.Logger;
@@ -110,8 +108,6 @@ public class TDHttpClient
                 .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
                 .registerModule(new GuavaModule())   // for mapping to Guava Optional class
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JacksonJsonProvider jacksonJsonProvider = new JacksonJsonProvider(objectMapper);
-        httpConfig.register(jacksonJsonProvider);
 
         this.httpClient = ClientBuilder.newClient(httpConfig);
     }
@@ -222,7 +218,7 @@ public class TDHttpClient
         }
 
         // Set proxy
-        if(config.getProxy().isPresent()) {
+        if (config.getProxy().isPresent()) {
             ProxyConfig proxy = config.getProxy().get();
             request.header("Proxy-Authorization", "Basic " + B64Code.encode(proxy.getUser() + ":" + proxy.getPassword(), StandardCharsets.ISO_8859_1));
         }
