@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -32,8 +31,10 @@ import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.treasuredata.client.model.TDApiError;
 import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.util.B64Code;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.jetty.connector.JettyClientProperties;
 import org.glassfish.jersey.jetty.connector.JettyConnectorProvider;
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -99,10 +101,8 @@ public class TDHttpClient
         // Configure proxy server
         if (config.getProxy().isPresent()) {
             ProxyConfig proxyConfig = config.getProxy().get();
-            httpConfig
-                    .property(ClientProperties.PROXY_URI, proxyConfig.getUri())
-                    .property(ClientProperties.PROXY_USERNAME, proxyConfig.getUri())
-                    .property(ClientProperties.PROXY_PASSWORD, proxyConfig.getPassword());
+            logger.info("proxy configuration: " + proxyConfig);
+            httpConfig.property(ClientProperties.PROXY_URI, proxyConfig.getUri());
         }
 
         // Prepare jackson json-object mapper
@@ -110,7 +110,6 @@ public class TDHttpClient
                 .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
                 .registerModule(new GuavaModule())   // for mapping to Guava Optional class
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
         JacksonJsonProvider jacksonJsonProvider = new JacksonJsonProvider(objectMapper);
         httpConfig.register(jacksonJsonProvider);
 
@@ -212,6 +211,7 @@ public class TDHttpClient
         Invocation.Builder request = target.request()
                 .header(HttpHeaders.USER_AGENT, "TDClient " + TDClient.getVersion())
                 .header(HttpHeaders.DATE, RFC2822_FORMAT.get().format(new Date()));
+
         // Set API Key
         Optional<String> apiKey = apiKeyOverwrite.or(config.getApiKey());
         if (apiKey.isPresent()) {
@@ -219,6 +219,12 @@ public class TDHttpClient
         }
         else {
             logger.warn("no API key is found");
+        }
+
+        // Set proxy
+        if(config.getProxy().isPresent()) {
+            ProxyConfig proxy = config.getProxy().get();
+            request.header("Proxy-Authorization", "Basic " + B64Code.encode(proxy.getUser() + ":" + proxy.getPassword(), StandardCharsets.ISO_8859_1));
         }
 
         // Set other headers
@@ -333,8 +339,8 @@ public class TDHttpClient
             @Override
             public String apply(Response input)
             {
-                String response =input.readEntity(String.class);
-                if(logger.isTraceEnabled()) {
+                String response = input.readEntity(String.class);
+                if (logger.isTraceEnabled()) {
                     logger.trace("response:\n{}", response);
                 }
                 return response;
@@ -357,6 +363,7 @@ public class TDHttpClient
     /**
      * Submit an API request, and bind the returned JSON data into an object of the given result type.
      * For mapping it uses Jackson object mapper.
+     *
      * @param apiRequest
      * @param resultType
      * @param <Result>
@@ -373,7 +380,7 @@ public class TDHttpClient
             {
                 try {
                     byte[] response = input.readEntity(byte[].class);
-                    if(logger.isTraceEnabled()) {
+                    if (logger.isTraceEnabled()) {
                         logger.trace("response:\n{}", new String(response));
                     }
                     return objectMapper.readValue(response, resultType);

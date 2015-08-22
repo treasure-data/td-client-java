@@ -39,7 +39,7 @@ public class ProxyConfig
     }
 
     public String getUri() {
-        return host + ":" + port;
+        return String.format("http://%s:%s", host, port);
     }
 
     public String getHost()
