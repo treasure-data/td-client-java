@@ -96,6 +96,9 @@ public class TDHttpClient
         // Jetty specific configuration. Disable cookie
         httpConfig.property(JettyClientProperties.DISABLE_COOKIES, true);
 
+        // Connection pool size
+        httpConfig.property(ClientProperties.ASYNC_THREADPOOL_SIZE, config.getConnectionPoolSize());
+
         // Configure proxy server
         if (config.getProxy().isPresent()) {
             ProxyConfig proxyConfig = config.getProxy().get();
@@ -212,9 +215,6 @@ public class TDHttpClient
         Optional<String> apiKey = apiKeyOverwrite.or(config.getApiKey());
         if (apiKey.isPresent()) {
             request.header(HttpHeaders.AUTHORIZATION, "TD1 " + apiKey.get());
-        }
-        else {
-            logger.warn("no API key is found");
         }
 
         // Set proxy

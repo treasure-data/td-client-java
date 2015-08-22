@@ -50,7 +50,8 @@ public class TDClientConfig
     public static final String TD_CLIENT_RETRY_INTERVAL_MILLIS = "td.client.retry.interval";
     public static final String TD_CLIENT_CONNECT_TIMEOUT_MILLIS = "td.client.connect-timeout";
     public static final String TD_CLIENT_IDLE_TIMEOUT_MILLIS = "td.client.idle-timeout";
-    public static final String TD_CLIENT_MAX_CONNECTIONS_PER_DESTINATION = "td.client.max-connections-per-destination";
+    public static final String TD_CLIENT_CONNECTION_POOL_SIZE = "td.client.connection-pool-size";
+
     public static final String TD_CLIENT_PROXY_HOST = "td.client.proxy.host";
     public static final String TD_CLIENT_PROXY_PORT = "td.client.proxy.port";
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
@@ -70,7 +71,7 @@ public class TDClientConfig
     private final int retryIntervalMillis;
     private final int connectTimeoutMillis;
     private final int idleTimeoutMillis;
-    private final int maxConnectionsPerDestination;
+    private final int connectionPoolSize;
 
     public static <V> V checkNotNull(V v, String message)
             throws TDClientException
@@ -146,7 +147,7 @@ public class TDClientConfig
             int retryIntervalMillis,
             int connectTimeoutMillis,
             int idleTimeoutMillis,
-            int maxConnectionsPerDestination
+            int connectionPoolSize
     )
     {
         this.httpScheme = useSSL ? "https://" : "http://";
@@ -160,7 +161,7 @@ public class TDClientConfig
         this.retryIntervalMillis = retryIntervalMillis;
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.idleTimeoutMillis = idleTimeoutMillis;
-        this.maxConnectionsPerDestination = maxConnectionsPerDestination;
+        this.connectionPoolSize = connectionPoolSize;
     }
 
     public String getEndpoint()
@@ -197,10 +198,9 @@ public class TDClientConfig
     {
         return idleTimeoutMillis;
     }
-
-    public int getMaxConnectionsPerDestination()
+    public int getConnectionPoolSize()
     {
-        return maxConnectionsPerDestination;
+        return connectionPoolSize;
     }
 
     public int getPort()
@@ -277,7 +277,7 @@ public class TDClientConfig
         private int retryIntervalMillis = 2000;
         private int connectTimeoutMillis = 15000;
         private int idleTimeoutMillis = 60000;
-        private int maxConnectionsPerDestination = 64;
+        private int connectionPoolSize = 64;
 
         public Builder()
         {
@@ -295,7 +295,7 @@ public class TDClientConfig
             this.retryIntervalMillis = config.retryIntervalMillis;
             this.connectTimeoutMillis = config.connectTimeoutMillis;
             this.idleTimeoutMillis = config.idleTimeoutMillis;
-            this.maxConnectionsPerDestination = config.maxConnectionsPerDestination;
+            this.connectionPoolSize = config.connectionPoolSize;
         }
 
         public Builder setEndpoint(String endpoint)
@@ -334,6 +334,42 @@ public class TDClientConfig
             return this;
         }
 
+        public Builder setRetryLimit(int retryLimit)
+        {
+            this.retryLimit = retryLimit;
+            return this;
+        }
+
+        public Builder setRetryInitialWaitMillis(int retryInitialWaitMillis)
+        {
+            this.retryInitialWaitMillis = retryInitialWaitMillis;
+            return this;
+        }
+
+        public Builder setRetryIntervalMillis(int retryIntervalMillis)
+        {
+            this.retryIntervalMillis = retryIntervalMillis;
+            return this;
+        }
+
+        public Builder setConnectTimeoutMillis(int connectTimeoutMillis)
+        {
+            this.connectTimeoutMillis = connectTimeoutMillis;
+            return this;
+        }
+
+        public Builder setIdleTimeoutMillis(int idleTimeoutMillis)
+        {
+            this.idleTimeoutMillis = idleTimeoutMillis;
+            return this;
+        }
+
+        public Builder setConnectionPoolSize(int connectionPoolSize)
+        {
+            this.connectionPoolSize = connectionPoolSize;
+            return this;
+        }
+
         public TDClientConfig result()
         {
             return new TDClientConfig(
@@ -347,7 +383,7 @@ public class TDClientConfig
                     retryIntervalMillis,
                     connectTimeoutMillis,
                     idleTimeoutMillis,
-                    maxConnectionsPerDestination
+                    connectionPoolSize
             );
         }
     }
