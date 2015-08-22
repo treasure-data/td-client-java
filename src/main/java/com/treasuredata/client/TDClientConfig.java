@@ -82,6 +82,18 @@ public class TDClientConfig
         return v;
     }
 
+    private static String findNonNull(Object... keys)
+    {
+        if (keys != null) {
+            for (Object k : keys) {
+                if (k != null) {
+                    return k.toString();
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Get the default TDClientConfig by reading $HOME/.td/td.conf file.
      *
@@ -93,7 +105,7 @@ public class TDClientConfig
             throws TDClientException
     {
         Properties p = readTDConf();
-        String apiKey = MoreObjects.firstNonNull(System.getenv().get(TD_CLIENT_APIKEY), p.getProperty("apikey"));
+        String apiKey = findNonNull(System.getenv().get(ENV_TD_CLIENT_APIKEY), System.getProperty(TD_CLIENT_APIKEY), p.getProperty(TD_CLIENT_APIKEY));
         if (apiKey == null) {
             return new Builder().result();
         }
