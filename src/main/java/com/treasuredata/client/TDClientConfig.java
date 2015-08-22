@@ -19,7 +19,6 @@
 package com.treasuredata.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,10 +105,10 @@ public class TDClientConfig
     public static TDClientConfig currentConfig()
             throws TDClientException
     {
-        if(currentConfig == null) {
+        if (currentConfig == null) {
             Properties p = readTDConf();
-            String apiKey = findNonNull(System.getenv().get(ENV_TD_CLIENT_APIKEY), System.getProperty(TD_CLIENT_APIKEY), p.getProperty(TD_CLIENT_APIKEY));
-            if (apiKey == null) {
+            String apiKey = findNonNull(System.getenv().get(ENV_TD_CLIENT_APIKEY), System.getProperty(TD_CLIENT_APIKEY), p.getProperty("apikey"));
+            if (apiKey == null || apiKey.isEmpty()) {
                 currentConfig = new Builder().result();
             }
             else {
