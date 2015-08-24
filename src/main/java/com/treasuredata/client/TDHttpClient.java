@@ -78,6 +78,7 @@ public class TDHttpClient
     private final Client httpClient;
     private final ObjectMapper objectMapper;
     private Optional<String> credentialCache = Optional.absent();
+    private Optional<String> proxyAuthenticationCache = Optional.absent();
 
     public TDHttpClient(TDClientConfig config)
     {
@@ -102,7 +103,7 @@ public class TDHttpClient
         // Configure proxy server
         if (config.getProxy().isPresent()) {
             ProxyConfig proxyConfig = config.getProxy().get();
-            logger.info("proxy configuration: " + proxyConfig);
+            logger.trace("proxy configuration: " + proxyConfig);
             httpConfig.property(ClientProperties.PROXY_URI, proxyConfig.getUri());
         }
 
@@ -217,11 +218,15 @@ public class TDHttpClient
             request.header(HttpHeaders.AUTHORIZATION, "TD1 " + apiKey.get());
         }
 
-        // Set Proxy-Authorization header
+        // Set Proxy-Authorization header.
+        // JAX-RS Jetty binder in Jersey2 does not support proxy authentication, so we need to add Proxy-Authorization header here
         if (config.getProxy().isPresent()) {
             ProxyConfig proxy = config.getProxy().get();
-            if(proxy.getUser().isPresent() && proxy.getPassword().isPresent()) {
-                request.header("Proxy-Authorization", "Basic " + B64Code.encode(proxy.getUser().get() + ":" + proxy.getPassword().get(), StandardCharsets.ISO_8859_1));
+            if(proxy.requireAuthentication()) {
+                if(!proxyAuthenticationCache.isPresent()) {
+                    proxyAuthenticationCache = Optional.of("Basic " + B64Code.encode(proxy.getUser().get() + ":" + proxy.getPassword().get(), StandardCharsets.ISO_8859_1));
+                }
+                request.header("Proxy-Authorization", proxyAuthenticationCache.get());
             }
         }
 
