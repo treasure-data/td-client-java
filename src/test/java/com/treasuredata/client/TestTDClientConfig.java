@@ -46,7 +46,7 @@ import static org.junit.Assert.assertFalse;
 /**
  *
  */
-public class TDClientConfigTest
+public class TestTDClientConfig
 {
     @Test
     public void testConfigParam()
