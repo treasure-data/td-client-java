@@ -18,6 +18,8 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.base.Optional;
+
 import java.util.Properties;
 
 /**
@@ -27,10 +29,10 @@ public class ProxyConfig
 {
     private final String host;
     private final int port;
-    private final String user;
-    private final String password;
+    private final Optional<String> user;
+    private final Optional<String> password;
 
-    public ProxyConfig(String host, int port, String user, String password)
+    public ProxyConfig(String host, int port, Optional<String> user, Optional<String> password)
     {
         this.host = host;
         this.port = port;
@@ -52,12 +54,12 @@ public class ProxyConfig
         return port;
     }
 
-    public String getUser()
+    public Optional<String> getUser()
     {
         return user;
     }
 
-    public String getPassword()
+    public Optional<String> getPassword()
     {
         return password;
     }
@@ -74,10 +76,10 @@ public class ProxyConfig
 
     public static class ProxyConfigBuilder
     {
-        private String host;
+        private String host = "localhost";
         private int port = 8080;
-        private String user;
-        private String password;
+        private Optional<String> user;
+        private Optional<String> password;
 
         public ProxyConfigBuilder()
         {
@@ -105,13 +107,13 @@ public class ProxyConfig
 
         public ProxyConfigBuilder setUser(String user)
         {
-            this.user = user;
+            this.user = Optional.of(user);
             return this;
         }
 
         public ProxyConfigBuilder setPassword(String password)
         {
-            this.password = password;
+            this.password = Optional.of(password);
             return this;
         }
 

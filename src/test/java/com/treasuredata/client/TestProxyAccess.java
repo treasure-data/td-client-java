@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TestProxyAccess
 {
@@ -125,4 +126,24 @@ public class TestProxyAccess
             logger.debug("proxy access count: {}", proxyAccessCount);
         }
     }
+
+    @Test
+    public void wrongPassword() {
+
+        ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
+        proxy.setHost("localhost");
+        proxy.setPort(proxyPort);
+        proxy.setUser(PROXY_USER);
+        proxy.setPassword(PROXY_PASS + "---"); // Use an wrong password
+        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
+        try {
+            client.listTables("sample_datasets");
+            fail("should not reach here");
+        }
+        catch(TDClientException e)  {
+            logger.debug(e.getMessage());
+            assertEquals(TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE, e.getErrorType());
+        }
+    }
+
 }

@@ -42,8 +42,10 @@ public class TDClientException
         TARGET_ALREADY_EXISTS,
         SERVER_ERROR,
         CLIENT_ERROR,
+
         // Proxy error
-        PROXY_AUTHENTICATION_REQUIRED,
+        PROXY_AUTHENTICATION_FAILURE,
+
         // Request handling error
         INTERRUPTED,
         REQUEST_TIMEOUT,

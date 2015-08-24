@@ -63,7 +63,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkState;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
-import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_REQUIRED;
+import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.RESPONSE_READ_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
@@ -217,10 +217,12 @@ public class TDHttpClient
             request.header(HttpHeaders.AUTHORIZATION, "TD1 " + apiKey.get());
         }
 
-        // Set proxy
+        // Set Proxy-Authorization header
         if (config.getProxy().isPresent()) {
             ProxyConfig proxy = config.getProxy().get();
-            request.header("Proxy-Authorization", "Basic " + B64Code.encode(proxy.getUser() + ":" + proxy.getPassword(), StandardCharsets.ISO_8859_1));
+            if(proxy.getUser().isPresent() && proxy.getPassword().isPresent()) {
+                request.header("Proxy-Authorization", "Basic " + B64Code.encode(proxy.getUser().get() + ":" + proxy.getPassword().get(), StandardCharsets.ISO_8859_1));
+            }
         }
 
         // Set other headers
@@ -290,7 +292,7 @@ public class TDHttpClient
                                 case HttpStatus.CONFLICT_409:
                                     throw new TDClientHttpConflictException(errorMessage);
                                 case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
-                                    throw new TDClientHttpException(PROXY_AUTHENTICATION_REQUIRED, errorMessage, code);
+                                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code);
                                 default:
                                     throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code);
                             }
