@@ -173,8 +173,11 @@ public class TestTDClient
     public void tableOperation()
             throws Exception
     {
-        if(System.getenv().containsKey("CIRCLE_SHA1")) {
+        if(System.getenv("CIRCLE_SHA1") != null) {
             // Skip modifying DB at CircleCI since the test user has no authority to modify databases
+            logger.info("Skip create/delete database test at CircleCI");
+        }
+        else {
             client.deleteDatabaseIfExists(SAMPLE_DB);
             client.createDatabaseIfNotExists(SAMPLE_DB);
         }
@@ -207,8 +210,8 @@ public class TestTDClient
     {
         Properties p = TDClientConfig.readTDConf();
         TDClient client = new TDClient(new TDClientConfig.Builder().result()); // Set no API key
-        String user = firstNonNull(p.getProperty("user"), System.getenv().get("TD_USER"));
-        String password = firstNonNull(p.getProperty("password"), System.getenv().get("TD_PASS"));
+        String user = firstNonNull(p.getProperty("user"), System.getenv("TD_USER"));
+        String password = firstNonNull(p.getProperty("password"), System.getenv("TD_PASS"));
         TDAuthenticationResult result = client.authenticate(user, password);
         List<TDTable> tableList = client.listTables("sample_datasets");
         assertTrue(tableList.size() >= 2);

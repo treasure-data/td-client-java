@@ -349,7 +349,7 @@ public class TDClientConfig
 
             // For APIKEY we read the environment variable.
             // We also read apikey, user and password specified in td.conf file
-            this.apiKey = Optional.fromNullable(System.getenv().get(ENV_TD_CLIENT_APIKEY))
+            this.apiKey = Optional.fromNullable(System.getenv(ENV_TD_CLIENT_APIKEY))
                     .or(getConfigProperty(TD_CLIENT_APIKEY, defaultValues))
                     .or(Optional.fromNullable(defaultValues.getProperty("apikey")));
             this.user = getConfigProperty(TD_CLIENT_USER, defaultValues)
