@@ -35,6 +35,8 @@ import java.util.Properties;
  */
 public class TDClientConfig
 {
+    private static Logger logger = LoggerFactory.getLogger(TDClientConfig.class);
+
     public static final String ENV_TD_CLIENT_APIKEY = "TD_API_KEY";
     /**
      * Keys for configuring TDClient with a properties file (or System properties)
@@ -55,7 +57,7 @@ public class TDClientConfig
     public static final String TD_CLIENT_PROXY_PORT = "td.client.proxy.port";
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
     public static final String TD_CLIENT_PROXY_PASSWORD = "td.client.proxy.password";
-    private static Logger logger = LoggerFactory.getLogger(TDClientConfig.class);
+
     /**
      * endpoint URL (e.g., api.treasuredata.com, api-staging.treasuredata.com)
      */
@@ -73,27 +75,6 @@ public class TDClientConfig
     private final int connectTimeoutMillis;
     private final int idleTimeoutMillis;
     private final int connectionPoolSize;
-
-    public static <V> V checkNotNull(V v, String message)
-            throws TDClientException
-    {
-        if (v == null) {
-            throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, message);
-        }
-        return v;
-    }
-
-    private static String findNonNull(Object... keys)
-    {
-        if (keys != null) {
-            for (Object k : keys) {
-                if (k != null) {
-                    return k.toString();
-                }
-            }
-        }
-        return null;
-    }
 
     private static TDClientConfig currentConfig;
 
