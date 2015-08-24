@@ -173,8 +173,11 @@ public class TestTDClient
     public void tableOperation()
             throws Exception
     {
-        client.deleteDatabaseIfExists(SAMPLE_DB);
-        client.createDatabaseIfNotExists(SAMPLE_DB);
+        if(System.getenv().containsKey("CIRCLE_SHA1")) {
+            // Skip modifying DB at CircleCI since the test user has no authority to modify databases
+            client.deleteDatabaseIfExists(SAMPLE_DB);
+            client.createDatabaseIfNotExists(SAMPLE_DB);
+        }
 
         client.deleteTableIfExists(SAMPLE_DB, SAMPLE_TABLE);
 
