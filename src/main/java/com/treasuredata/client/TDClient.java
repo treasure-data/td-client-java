@@ -36,6 +36,7 @@ import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
+import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -257,19 +258,39 @@ public class TDClient
     public boolean existsDatabase(String databaseName)
             throws TDClientException
     {
-        return listDatabases().contains(databaseName);
+        try {
+            return listDatabases().contains(databaseName);
+        }
+        catch(TDClientHttpException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND_404) {
+                return false;
+            }
+            else {
+                throw e;
+            }
+        }
     }
 
     @Override
     public boolean existsTable(String databaseName, String tableName)
             throws TDClientException
     {
-        for (TDTable table : listTables(databaseName)) {
-            if (table.getName().equals(tableName)) {
-                return true;
+        try {
+            for (TDTable table : listTables(databaseName)) {
+                if (table.getName().equals(tableName)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        catch(TDClientHttpException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND_404) {
+                return false;
+            }
+            else {
+                throw e;
             }
         }
-        return false;
     }
 
     @Override
