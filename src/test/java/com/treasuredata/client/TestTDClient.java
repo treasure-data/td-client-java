@@ -23,7 +23,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDAuthenticationResult;
-import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -38,7 +37,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
@@ -135,7 +133,8 @@ public class TestTDClient
         TDJob jobInfo = client.jobInfo(jobId);
         logger.debug("job show result: " + tdJob);
 
-        JSONArray array = client.jobResult(jobId, TDResultFormat.JSON, new Function<InputStream, JSONArray>() {
+        JSONArray array = client.jobResult(jobId, TDResultFormat.JSON, new Function<InputStream, JSONArray>()
+        {
             @Override
             public JSONArray apply(InputStream input)
             {
@@ -144,7 +143,7 @@ public class TestTDClient
                     logger.info("result:\n" + result);
                     return new JSONArray(result);
                 }
-                catch(Exception e) {
+                catch (Exception e) {
                     throw Throwables.propagate(e);
                 }
             }
@@ -219,5 +218,4 @@ public class TestTDClient
         List<TDTable> tableList = client.listTables("sample_datasets");
         assertTrue(tableList.size() >= 2);
     }
-
 }

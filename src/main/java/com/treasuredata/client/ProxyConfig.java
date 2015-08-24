@@ -20,6 +20,8 @@ package com.treasuredata.client;
 
 import com.google.common.base.Optional;
 
+import java.util.Properties;
+
 /**
  * Proxy configuration to access TD API
  */

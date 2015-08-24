@@ -35,7 +35,7 @@ public class TDClientException
     {
         // Configuration error
         INVALID_CONFIGURATION,
-        FAILED_TO_READ_INPUT_FILE,
+
         // HTTP error
         AUTHENTICATION_FAILURE,
         TARGET_NOT_FOUND,
@@ -52,7 +52,7 @@ public class TDClientException
         EXECUTION_FAILURE,
         UNEXPECTED_RESPONSE_CODE,
         INVALID_JSON_RESPONSE,
-        RESPONSE_READ_FAILURE,;
+        RESPONSE_READ_FAILURE;
     }
 
     private final ErrorType errorType;

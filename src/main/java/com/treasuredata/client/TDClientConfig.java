@@ -51,7 +51,6 @@ public class TDClientConfig
     public static final String TD_CLIENT_CONNECT_TIMEOUT_MILLIS = "td.client.connect-timeout";
     public static final String TD_CLIENT_IDLE_TIMEOUT_MILLIS = "td.client.idle-timeout";
     public static final String TD_CLIENT_CONNECTION_POOL_SIZE = "td.client.connection-pool-size";
-
     public static final String TD_CLIENT_PROXY_HOST = "td.client.proxy.host";
     public static final String TD_CLIENT_PROXY_PORT = "td.client.proxy.port";
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
@@ -63,6 +62,8 @@ public class TDClientConfig
     private final String endpoint;
     private final int port;
     private final Optional<String> apiKey;
+    private final Optional<String> user;
+    private final Optional<String> password;
     private final Optional<ProxyConfig> proxy;
     private final String httpScheme;
     private final boolean useSSL;
@@ -108,13 +109,7 @@ public class TDClientConfig
     {
         if (currentConfig == null) {
             Properties p = readTDConf();
-            String apiKey = findNonNull(System.getenv().get(ENV_TD_CLIENT_APIKEY), System.getProperty(TD_CLIENT_APIKEY), p.getProperty("apikey"));
-            if (apiKey == null || apiKey.isEmpty()) {
-                currentConfig = new Builder().result();
-            }
-            else {
-                currentConfig = new Builder().setApiKey(apiKey).result();
-            }
+            currentConfig = new Builder(p).result();
         }
         return currentConfig;
     }
@@ -135,12 +130,31 @@ public class TDClientConfig
         return new Builder(this).setProxyConfig(proxy).result();
     }
 
+    /**
+     * Create a new td-client configuration initialized with System Properties and the given properties for the default values.
+     * Precedence of properties is the following order:
+     * <ol>
+     * <li>System Properties</li>
+     * <li>Given Properties Object</li>
+     * </ol>
+     *
+     * @param p the default values
+     * @return
+     */
+    public static TDClientConfig newTDClientConfig(Properties p)
+    {
+        Builder b = new Builder(p);
+        return b.result();
+    }
+
     @JsonCreator
     public TDClientConfig(
             Optional<String> endpoint,
             Optional<Integer> port,
             boolean useSSL,
             Optional<String> apiKey,
+            Optional<String> user,
+            Optional<String> password,
             Optional<ProxyConfig> proxy,
             int retryLimit,
             int retryInitialWaitMillis,
@@ -155,6 +169,8 @@ public class TDClientConfig
         this.port = port.or(useSSL ? 443 : 80);
         this.useSSL = useSSL;
         this.apiKey = apiKey;
+        this.user = user;
+        this.password = password;
         this.proxy = proxy;
         this.retryLimit = retryLimit;
         this.retryInitialWaitMillis = retryInitialWaitMillis;
@@ -172,6 +188,16 @@ public class TDClientConfig
     public Optional<String> getApiKey()
     {
         return apiKey;
+    }
+
+    public Optional<String> getUser()
+    {
+        return user;
+    }
+
+    public Optional<String> getPassword()
+    {
+        return password;
     }
 
     public int getRetryLimit()
@@ -198,6 +224,7 @@ public class TDClientConfig
     {
         return idleTimeoutMillis;
     }
+
     public int getConnectionPoolSize()
     {
         return connectionPoolSize;
@@ -224,7 +251,7 @@ public class TDClientConfig
     }
 
     /**
-     * Read user user (e-mail address and password properties from $HOME/.td/td.conf
+     * Read apikey, user (e-mail address) and password from $HOME/.td/td.conf
      *
      * @return
      * @throws IOException
@@ -271,16 +298,40 @@ public class TDClientConfig
         private Optional<Integer> port = Optional.absent();
         private boolean useSSL = false;
         private Optional<String> apiKey = Optional.absent();
+        private Optional<String> user = Optional.absent();
+        private Optional<String> password = Optional.absent();
         private Optional<ProxyConfig> proxy = Optional.absent();
-        private int retryLimit = 7;
-        private int retryInitialWaitMillis = 1000;
-        private int retryIntervalMillis = 2000;
-        private int connectTimeoutMillis = 15000;
-        private int idleTimeoutMillis = 60000;
-        private int connectionPoolSize = 64;
+        private int retryLimit;
+        private int retryInitialWaitMillis;
+        private int retryIntervalMillis;
+        private int connectTimeoutMillis;
+        private int idleTimeoutMillis;
+        private int connectionPoolSize;
+
+        private static Optional<String> getConfigProperty(String key, Properties defaultProperty)
+        {
+            return Optional.fromNullable(System.getProperty(key, defaultProperty.getProperty(key)));
+        }
+
+        private static Optional<Integer> getConfigPropertyInt(String key, Properties defaultProperty)
+        {
+            String v = System.getProperty(key, defaultProperty.getProperty(key));
+            if (v != null) {
+                try {
+                    return Optional.of(Integer.parseInt(v));
+                }
+                catch (NumberFormatException e) {
+                    throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, String.format("[%s] cannot cast %s to integer", key, v));
+                }
+            }
+            else {
+                return Optional.absent();
+            }
+        }
 
         public Builder()
         {
+            this(new Properties());
         }
 
         public Builder(TDClientConfig config)
@@ -289,6 +340,8 @@ public class TDClientConfig
             this.port = Optional.of(config.port);
             this.useSSL = config.useSSL;
             this.apiKey = config.apiKey;
+            this.user = config.user;
+            this.password = config.password;
             this.proxy = config.proxy;
             this.retryLimit = config.retryLimit;
             this.retryInitialWaitMillis = config.retryInitialWaitMillis;
@@ -296,6 +349,56 @@ public class TDClientConfig
             this.connectTimeoutMillis = config.connectTimeoutMillis;
             this.idleTimeoutMillis = config.idleTimeoutMillis;
             this.connectionPoolSize = config.connectionPoolSize;
+        }
+
+        public Builder(Properties defaultValues)
+        {
+            this.endpoint = getConfigProperty(TD_CLIENT_API_ENDPOINT, defaultValues);
+            this.port = getConfigPropertyInt(TD_CLIENT_API_PORT, defaultValues);
+            this.useSSL = Boolean.parseBoolean(getConfigProperty(TD_CLIENT_USESSL, defaultValues).or("false"));
+
+            // For APIKEY we read the environment variable.
+            // We also read apikey, user and password specified in td.conf file
+            this.apiKey = Optional.fromNullable(System.getenv().get(ENV_TD_CLIENT_APIKEY))
+                    .or(getConfigProperty(TD_CLIENT_APIKEY, defaultValues))
+                    .or(Optional.fromNullable(defaultValues.getProperty("apikey")));
+            this.user = getConfigProperty(TD_CLIENT_USER, defaultValues)
+                    .or(Optional.fromNullable(defaultValues.getProperty("user")));
+            this.password = getConfigProperty(TD_CLIENT_PASSOWRD, defaultValues)
+                    .or(Optional.fromNullable(defaultValues.getProperty("password")));
+
+            // proxy
+            Optional<String> proxyHost = getConfigProperty(TD_CLIENT_PROXY_HOST, defaultValues);
+            Optional<Integer> proxyPort = getConfigPropertyInt(TD_CLIENT_PROXY_PORT, defaultValues);
+            Optional<String> proxyUser = getConfigProperty(TD_CLIENT_PROXY_USER, defaultValues);
+            Optional<String> proxyPassword = getConfigProperty(TD_CLIENT_PROXY_PASSWORD, defaultValues);
+            boolean hasProxy = false;
+            ProxyConfig.ProxyConfigBuilder proxyConfig = new ProxyConfig.ProxyConfigBuilder();
+            if (proxyHost.isPresent()) {
+                hasProxy = true;
+                proxyConfig.setHost(proxyHost.get());
+            }
+            if (proxyPort.isPresent()) {
+                hasProxy = true;
+                proxyConfig.setPort(proxyPort.get());
+            }
+            if (proxyUser.isPresent()) {
+                hasProxy = true;
+                proxyConfig.setUser(proxyUser.get());
+            }
+            if (proxyPassword.isPresent()) {
+                hasProxy = true;
+                proxyConfig.setPassword(proxyPassword.get());
+            }
+            this.proxy = Optional.fromNullable(hasProxy ? proxyConfig.createProxyConfig() : null);
+
+            // http client parameter
+            this.retryLimit = getConfigPropertyInt(TD_CLIENT_RETRY_LIMIT, defaultValues).or(7);
+            this.retryInitialWaitMillis = getConfigPropertyInt(TD_CLIENT_RETRY_INITIAL_WAIT_MILLIS, defaultValues).or(1000);
+            this.retryIntervalMillis = getConfigPropertyInt(TD_CLIENT_RETRY_INTERVAL_MILLIS, defaultValues).or(2000);
+            this.connectTimeoutMillis = getConfigPropertyInt(TD_CLIENT_CONNECT_TIMEOUT_MILLIS, defaultValues).or(15000);
+            this.idleTimeoutMillis = getConfigPropertyInt(TD_CLIENT_IDLE_TIMEOUT_MILLIS, defaultValues).or(60000);
+            this.connectionPoolSize = getConfigPropertyInt(TD_CLIENT_CONNECTION_POOL_SIZE, defaultValues).or(64);
         }
 
         public Builder setEndpoint(String endpoint)
@@ -325,6 +428,18 @@ public class TDClientConfig
         public Builder unsetApiKey()
         {
             this.apiKey = Optional.absent();
+            return this;
+        }
+
+        public Builder setUser(String user)
+        {
+            this.user = Optional.of(user);
+            return this;
+        }
+
+        public Builder setPassword(String password)
+        {
+            this.password = Optional.of(password);
             return this;
         }
 
@@ -377,6 +492,8 @@ public class TDClientConfig
                     port,
                     useSSL,
                     apiKey,
+                    user,
+                    password,
                     proxy,
                     retryLimit,
                     retryInitialWaitMillis,
