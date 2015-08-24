@@ -136,7 +136,12 @@ public interface TDClientApi
      */
     <Result> Result jobResult(String jobId, TDResultFormat format, Function<InputStream, Result> resultStreamHandler);
 
+
     // bulk import API
+    List<TDBulkImportSession> listBulkImportSessions();
+
+    List<String> listBulkImportParts(String sessionName);
+
     void createBulkImportSession(String sessionName, String databaseName, String tableName);
 
     TDBulkImportSession getBulkImportSession(String sessionName);
@@ -145,11 +150,15 @@ public interface TDClientApi
 
     void freezeBulkImportSession(String sessionName);
 
+    void unfreezeBulkImportSession(String sessionName);
+
     void performBulkImportSession(String sessionName, int priority);
 
     void commitBulkImportSession(String sessionName);
 
     void deleteBulkImportSession(String sessionName);
+
+    void getBulkImportErrorRecords(String sessionName);
 
     /**
      * Perform user email and passsword based authentication.

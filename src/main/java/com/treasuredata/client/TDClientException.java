@@ -35,6 +35,7 @@ public class TDClientException
     {
         // Configuration error
         INVALID_CONFIGURATION,
+        INVALID_INPUT,
 
         // HTTP error
         AUTHENTICATION_FAILURE,

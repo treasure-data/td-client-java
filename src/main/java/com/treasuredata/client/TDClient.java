@@ -21,7 +21,9 @@ package com.treasuredata.client;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.treasuredata.client.model.TDAuthenticationResult;
+import com.treasuredata.client.model.TDBulkImportParts;
 import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDBulkImportSessionList;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDDatabaseList;
 import com.treasuredata.client.model.TDJob;
@@ -45,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.treasuredata.client.TDApiRequest.urlEncode;
@@ -184,11 +187,37 @@ public class TDClient
         return tableList;
     }
 
+    private static Pattern databaseNamePattern = Pattern.compile("^([a-z0-9_]+)$");
+
+    public static String validateDatabaseName(String databaseName)
+    {
+        return validateName(databaseName, "Database");
+    }
+
+    private static String validateTableName(String tableName) {
+        return validateName(tableName, "Table");
+    }
+
+    private static String validateName(String name, String type) {
+        // Validate database name
+        if (name.length() < 3 || name.length() > 256) {
+            throw new TDClientException(
+                    TDClientException.ErrorType.INVALID_INPUT, String.format(
+                    "%s name must be 3 to 256 characters but got %d characters: %s", type, name.length(), name));
+        }
+
+        if(!databaseNamePattern.matcher(name).matches()) {
+            throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT,
+                    String.format("%s name must follow this pattern %s: %s", type, databaseNamePattern.pattern(), name));
+        }
+        return name;
+    }
+
     @Override
     public void createDatabase(String databaseName)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/database/create", databaseName));
+        doPost(buildUrl("/v3/database/create", validateDatabaseName(databaseName)));
     }
 
     @Override
@@ -204,7 +233,7 @@ public class TDClient
     public void deleteDatabase(String databaseName)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/database/delete", databaseName));
+        doPost(buildUrl("/v3/database/delete", validateDatabaseName(databaseName)));
     }
 
     @Override
@@ -247,7 +276,7 @@ public class TDClient
     public void createTable(String databaseName, String tableName)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/table/create", databaseName, tableName, TDTableType.LOG.getTypeName()));
+        doPost(buildUrl("/v3/table/create", databaseName, validateTableName(tableName), TDTableType.LOG.getTypeName()));
     }
 
     @Override
@@ -270,7 +299,7 @@ public class TDClient
     public void renameTable(String databaseName, String tableName, String newTableName, boolean overwrite)
             throws TDClientException
     {
-        doPost(buildUrl("/v3/table/rename", databaseName, tableName, newTableName),
+        doPost(buildUrl("/v3/table/rename", databaseName, tableName, validateTableName(newTableName)),
                 ImmutableMap.of("overwrite", Boolean.toString(overwrite)),
                 TDUpdateTableResult.class
         );
@@ -380,6 +409,16 @@ public class TDClient
     }
 
     @Override
+    public List<TDBulkImportSession> listBulkImportSessions() {
+        return doGet(buildUrl("/v3/bulk_import/list"), TDBulkImportSessionList.class).getSessions();
+    }
+
+    @Override
+    public List<String> listBulkImportParts(String sessionName) {
+        return doGet(buildUrl("/v3/bulk_import/list_parts", sessionName), TDBulkImportParts.class).getParts();
+    }
+
+    @Override
     public void createBulkImportSession(String sessionName, String databaseName, String tableName)
     {
         doPost(buildUrl("/v3/bulk_import/create", sessionName, databaseName, tableName));
@@ -397,10 +436,20 @@ public class TDClient
         doPut(buildUrl("/v3/bulk_import/upload_port", sessionName, uniquePartName), path);
     }
 
+    public void deleteBulkImportPart(String sessionName, String uniquePartName) {
+        doPost(buildUrl("/v3/bulk_import/delete_part", sessionName, uniquePartName));
+    }
+
     @Override
     public void freezeBulkImportSession(String sessionName)
     {
         doPost(buildUrl("/v3/bulk_import/freeze", sessionName));
+    }
+
+    @Override
+    public void unfreezeBulkImportSession(String sessionName)
+    {
+        doPost(buildUrl("/v3/bulk_import/unfreeze", sessionName));
     }
 
     @Override
@@ -420,6 +469,13 @@ public class TDClient
     {
         doPost(buildUrl("/v3/bulk_import/delete", sessionName));
     }
+
+    @Override
+    public void getBulkImportErrorRecords(String sessionName) {
+        // MessagePack Stream
+        // doGet(buildUrl("/v3/bulk_import/error_records", sessionName));
+    }
+
 
     @Override
     public TDAuthenticationResult authenticate(String email, String password)
