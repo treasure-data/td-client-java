@@ -76,12 +76,6 @@
   <dependencies>
     <dependency>
       <groupId>org.msgpack</groupId>
-      <artifactId>msgpack</artifactId>
-      <version>0.6.12</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.msgpack</groupId>
       <artifactId>msgpack-core</artifactId>
       <version>0.7.0-M6</version>
     </dependency>
