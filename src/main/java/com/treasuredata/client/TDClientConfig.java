@@ -308,14 +308,24 @@ public class TDClientConfig
         private int idleTimeoutMillis;
         private int connectionPoolSize;
 
+        private static String firstNonNull(String... values) {
+            for(String v : values) {
+                if(v != null) {
+                    return v;
+                }
+            }
+            return null;
+        }
+
+
         private static Optional<String> getConfigProperty(String key, Properties defaultProperty)
         {
-            return Optional.fromNullable(System.getProperty(key, defaultProperty.getProperty(key)));
+            return Optional.fromNullable(firstNonNull(System.getProperty(key), defaultProperty.getProperty(key)));
         }
 
         private static Optional<Integer> getConfigPropertyInt(String key, Properties defaultProperty)
         {
-            String v = System.getProperty(key, defaultProperty.getProperty(key));
+            String v = firstNonNull(System.getProperty(key), defaultProperty.getProperty(key));
             if (v != null) {
                 try {
                     return Optional.of(Integer.parseInt(v));
