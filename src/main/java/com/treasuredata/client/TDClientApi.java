@@ -39,6 +39,8 @@ public interface TDClientApi
 {
     String serverStatus();
 
+    // Database operations
+
     /**
      * Get the list of databases
      *
@@ -66,6 +68,8 @@ public interface TDClientApi
     void deleteDatabase(String databaseName);
 
     void deleteDatabaseIfExists(String databaseName);
+
+    // Table operations
 
     /**
      * Get the list of the tables in the specified database
@@ -104,6 +108,15 @@ public interface TDClientApi
 
     void swapTables(String databaseName, String tableName1, String tableName2);
 
+    // schema API
+    //TDTableSchema showTableSchema(String databaseName, String tableName);
+
+    //void setTableSchema(String databaseName, String tableName, TDTableSchema newSchema);
+
+    //TDTableSchema addColumns(String databaseName, String tableName, List<TDColumn> newColumns);
+
+    //TDTableSchema removeColumns(String databaseName, String tableName, List<TDColumn> deleteTargetColumns);
+
     /**
      * Submit a new job request
      *
@@ -135,7 +148,6 @@ public interface TDClientApi
      * @return
      */
     <Result> Result jobResult(String jobId, TDResultFormat format, Function<InputStream, Result> resultStreamHandler);
-
 
     // bulk import API
     List<TDBulkImportSession> listBulkImportSessions();

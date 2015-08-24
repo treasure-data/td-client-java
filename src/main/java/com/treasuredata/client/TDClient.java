@@ -472,10 +472,9 @@ public class TDClient
 
     @Override
     public void getBulkImportErrorRecords(String sessionName) {
-        // MessagePack Stream
+        // TODO: MessagePack Stream
         // doGet(buildUrl("/v3/bulk_import/error_records", sessionName));
     }
-
 
     @Override
     public TDAuthenticationResult authenticate(String email, String password)
