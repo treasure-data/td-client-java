@@ -170,14 +170,6 @@ public class TestTDClient
     private static String SAMPLE_TABLE = "sample";
 
     @Test
-    public void createAndDeleteDatabase()
-            throws Exception
-    {
-        client.createDatabaseIfNotExists(SAMPLE_DB);
-        client.deleteDatabase(SAMPLE_DB);
-    }
-
-    @Test
     public void tableOperation()
             throws Exception
     {
