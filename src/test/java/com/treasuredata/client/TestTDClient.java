@@ -41,7 +41,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.treasuredata.client.TDClientConfig.firstNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -212,8 +212,8 @@ public class TestTDClient
     {
         Properties p = TDClientConfig.readTDConf();
         TDClient client = new TDClient(new TDClientConfig.Builder().result()); // Set no API key
-        String user = firstNonNull(p.getProperty("user"), System.getenv().get(TDClientConfig.TD_CLIENT_USER));
-        String password = firstNonNull(p.getProperty("password"), System.getenv().get(TDClientConfig.TD_CLIENT_PASSOWRD));
+        String user = firstNonNull(p.getProperty("user"), System.getenv().get("TD_USER"));
+        String password = firstNonNull(p.getProperty("password"), System.getenv().get("TD_PASS"));
         TDAuthenticationResult result = client.authenticate(user, password);
         List<TDTable> tableList = client.listTables("sample_datasets");
         assertTrue(tableList.size() >= 2);

@@ -273,6 +273,15 @@ public class TDClientConfig
         }
     }
 
+    public static String firstNonNull(String... values) {
+        for(String v : values) {
+            if(v != null) {
+                return v;
+            }
+        }
+        return null;
+    }
+
     public static class Builder
     {
         private Optional<String> endpoint = Optional.absent();
@@ -288,16 +297,6 @@ public class TDClientConfig
         private int connectTimeoutMillis;
         private int idleTimeoutMillis;
         private int connectionPoolSize;
-
-        private static String firstNonNull(String... values) {
-            for(String v : values) {
-                if(v != null) {
-                    return v;
-                }
-            }
-            return null;
-        }
-
 
         private static Optional<String> getConfigProperty(String key, Properties defaultProperty)
         {
