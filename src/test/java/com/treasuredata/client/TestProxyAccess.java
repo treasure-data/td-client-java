@@ -18,9 +18,7 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Joiner;
 import com.treasuredata.client.model.TDJobList;
-import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDTable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
@@ -128,8 +126,8 @@ public class TestProxyAccess
     }
 
     @Test
-    public void wrongPassword() {
-
+    public void wrongPassword()
+    {
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
         proxy.setHost("localhost");
         proxy.setPort(proxyPort);
@@ -140,10 +138,9 @@ public class TestProxyAccess
             client.listTables("sample_datasets");
             fail("should not reach here");
         }
-        catch(TDClientException e)  {
+        catch (TDClientException e) {
             logger.debug(e.getMessage());
             assertEquals(TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE, e.getErrorType());
         }
     }
-
 }

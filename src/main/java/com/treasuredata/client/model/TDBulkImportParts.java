@@ -31,7 +31,8 @@ public class TDBulkImportParts
     private final List<String> parts;
 
     @JsonCreator
-    public TDBulkImportParts(@JsonProperty("parts") List<String> parts) {
+    public TDBulkImportParts(@JsonProperty("parts") List<String> parts)
+    {
         this.parts = parts;
     }
 

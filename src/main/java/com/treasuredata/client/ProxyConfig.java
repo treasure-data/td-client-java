@@ -20,8 +20,6 @@ package com.treasuredata.client;
 
 import com.google.common.base.Optional;
 
-import java.util.Properties;
-
 /**
  * Proxy configuration to access TD API
  */
@@ -40,7 +38,8 @@ public class ProxyConfig
         this.password = password;
     }
 
-    public String getUri() {
+    public String getUri()
+    {
         return String.format("http://%s:%s", host, port);
     }
 
@@ -64,7 +63,8 @@ public class ProxyConfig
         return password;
     }
 
-    public boolean requireAuthentication() {
+    public boolean requireAuthentication()
+    {
         return user.isPresent() || password.isPresent();
     }
 

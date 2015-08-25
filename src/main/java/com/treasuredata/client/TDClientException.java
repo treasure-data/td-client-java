@@ -36,17 +36,14 @@ public class TDClientException
         // Configuration error
         INVALID_CONFIGURATION,
         INVALID_INPUT,
-
         // HTTP error
         AUTHENTICATION_FAILURE,
         TARGET_NOT_FOUND,
         TARGET_ALREADY_EXISTS,
         SERVER_ERROR,
         CLIENT_ERROR,
-
         // Proxy error
         PROXY_AUTHENTICATION_FAILURE,
-
         // Request handling error
         INTERRUPTED,
         REQUEST_TIMEOUT,
@@ -71,7 +68,6 @@ public class TDClientException
         checkNotNull(errorType, "errorType is null");
         checkNotNull(cause, "cause is null");
         this.errorType = errorType;
-        ;
         this.rootCause = cause;
     }
 

@@ -62,4 +62,3 @@ public class TDApiError
         return String.format("[%s] %s", severity, text);
     }
 }
-

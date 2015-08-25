@@ -195,11 +195,13 @@ public class TDClient
         return validateName(databaseName, "Database");
     }
 
-    private static String validateTableName(String tableName) {
+    private static String validateTableName(String tableName)
+    {
         return validateName(tableName, "Table");
     }
 
-    private static String validateName(String name, String type) {
+    private static String validateName(String name, String type)
+    {
         // Validate database name
         if (name.length() < 3 || name.length() > 256) {
             throw new TDClientException(
@@ -207,7 +209,7 @@ public class TDClient
                     "%s name must be 3 to 256 characters but got %d characters: %s", type, name.length(), name));
         }
 
-        if(!databaseNamePattern.matcher(name).matches()) {
+        if (!databaseNamePattern.matcher(name).matches()) {
             throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT,
                     String.format("%s name must follow this pattern %s: %s", type, databaseNamePattern.pattern(), name));
         }
@@ -261,8 +263,8 @@ public class TDClient
         try {
             return listDatabases().contains(databaseName);
         }
-        catch(TDClientHttpException e) {
-            if(e.getStatusCode() == HttpStatus.NOT_FOUND_404) {
+        catch (TDClientHttpException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND_404) {
                 return false;
             }
             else {
@@ -283,8 +285,8 @@ public class TDClient
             }
             return false;
         }
-        catch(TDClientHttpException e) {
-            if(e.getStatusCode() == HttpStatus.NOT_FOUND_404) {
+        catch (TDClientHttpException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND_404) {
                 return false;
             }
             else {
@@ -430,12 +432,14 @@ public class TDClient
     }
 
     @Override
-    public List<TDBulkImportSession> listBulkImportSessions() {
+    public List<TDBulkImportSession> listBulkImportSessions()
+    {
         return doGet(buildUrl("/v3/bulk_import/list"), TDBulkImportSessionList.class).getSessions();
     }
 
     @Override
-    public List<String> listBulkImportParts(String sessionName) {
+    public List<String> listBulkImportParts(String sessionName)
+    {
         return doGet(buildUrl("/v3/bulk_import/list_parts", sessionName), TDBulkImportParts.class).getParts();
     }
 
@@ -457,7 +461,8 @@ public class TDClient
         doPut(buildUrl("/v3/bulk_import/upload_port", sessionName, uniquePartName), path);
     }
 
-    public void deleteBulkImportPart(String sessionName, String uniquePartName) {
+    public void deleteBulkImportPart(String sessionName, String uniquePartName)
+    {
         doPost(buildUrl("/v3/bulk_import/delete_part", sessionName, uniquePartName));
     }
 
@@ -492,7 +497,8 @@ public class TDClient
     }
 
     @Override
-    public void getBulkImportErrorRecords(String sessionName) {
+    public void getBulkImportErrorRecords(String sessionName)
+    {
         // TODO: MessagePack Stream
         // doGet(buildUrl("/v3/bulk_import/error_records", sessionName));
     }

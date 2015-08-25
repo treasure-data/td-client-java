@@ -222,8 +222,8 @@ public class TDHttpClient
         // JAX-RS Jetty binder in Jersey2 does not support proxy authentication, so we need to add Proxy-Authorization header here
         if (config.getProxy().isPresent()) {
             ProxyConfig proxy = config.getProxy().get();
-            if(proxy.requireAuthentication()) {
-                if(!proxyAuthenticationCache.isPresent()) {
+            if (proxy.requireAuthentication()) {
+                if (!proxyAuthenticationCache.isPresent()) {
                     proxyAuthenticationCache = Optional.of("Basic " + B64Code.encode(proxy.getUser().get() + ":" + proxy.getPassword().get(), StandardCharsets.ISO_8859_1));
                 }
                 request.header("Proxy-Authorization", proxyAuthenticationCache.get());
@@ -321,8 +321,9 @@ public class TDHttpClient
                         response.close();
                     }
                 }
+                nextInterval = retry.nextWaitTimeMillis();
             }
-            while ((nextInterval = retry.nextWaitTimeMillis()).isPresent());
+            while (nextInterval.isPresent());
         }
         catch (InterruptedException e) {
             logger.warn("API request interrupted", e);

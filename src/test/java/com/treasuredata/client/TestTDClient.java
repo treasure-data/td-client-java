@@ -166,12 +166,13 @@ public class TestTDClient
         }
     }
 
-    private static String SAMPLE_DB = "_tdclient_test";
-    private static String SAMPLE_TABLE = "sample";
+    private static final String SAMPLE_DB = "_tdclient_test";
+    private static final String SAMPLE_TABLE = "sample";
 
     @Test
-    public void databaaseOperation() {
-        if(System.getenv("CIRCLE_SHA1") != null) {
+    public void databaaseOperation()
+    {
+        if (System.getenv("CIRCLE_SHA1") != null) {
             // Skip modifying DB at CircleCI since the test user has no authority to modify databases
             logger.info("Skip create/delete database test at CircleCI");
         }
