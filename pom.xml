@@ -46,6 +46,11 @@
       <name>Michele Caramello</name>
       <email>michele.caramello@gmail.com</email>
     </developer>
+    <developer>
+      <id>xerial</id>
+      <name>Taro L. Saito</name>
+      <email>leo@xerial.org</email>
+    </developer>
   </developers>
 
   <properties>
