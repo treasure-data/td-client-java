@@ -170,18 +170,21 @@ public class TestTDClient
     private static String SAMPLE_TABLE = "sample";
 
     @Test
-    public void tableOperation()
-            throws Exception
-    {
+    public void databaaseOperation() {
         if(System.getenv("CIRCLE_SHA1") != null) {
             // Skip modifying DB at CircleCI since the test user has no authority to modify databases
             logger.info("Skip create/delete database test at CircleCI");
         }
         else {
-            client.deleteDatabaseIfExists(SAMPLE_DB);
-            client.createDatabaseIfNotExists(SAMPLE_DB);
+            client.deleteDatabaseIfExists(SAMPLE_DB + "_1");
+            client.createDatabaseIfNotExists(SAMPLE_DB + "_1");
         }
+    }
 
+    @Test
+    public void tableOperation()
+            throws Exception
+    {
         client.deleteTableIfExists(SAMPLE_DB, SAMPLE_TABLE);
 
         client.createTable(SAMPLE_DB, SAMPLE_TABLE);
@@ -208,6 +211,7 @@ public class TestTDClient
     public void authenticate()
             throws Exception
     {
+        // authenticate() method should retrieve apikey, and set it to the TDClient
         Properties p = TDClientConfig.readTDConf();
         TDClient client = new TDClient(new TDClientConfig.Builder().result()); // Set no API key
         String user = firstNonNull(p.getProperty("user"), System.getenv("TD_USER"));
