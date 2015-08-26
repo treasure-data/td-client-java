@@ -122,12 +122,6 @@ public class TDClient
         return httpClient.call(request, resultTypeClass);
     }
 
-    private <ResultType> ResultType doPost(String path, Class<ResultType> resultTypeClass)
-            throws TDClientException
-    {
-        return doPost(path, ImmutableMap.<String, String>of(), resultTypeClass);
-    }
-
     private <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
             throws TDClientException
     {

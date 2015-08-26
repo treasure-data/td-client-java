@@ -28,21 +28,25 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class TDColumn
 {
     private static Logger logger = LoggerFactory.getLogger(TDColumn.class);
-    private String name;
-    private TDColumnType type;
-    private byte[] key;
+    private final String name;
+    private final TDColumnType type;
+    private final byte[] key;
 
     public TDColumn(String name, TDColumnType type, byte[] key)
     {
-        this.name = name;
-        this.type = type;
-        this.key = key;
+        this.name = checkNotNull(name, "name is null");
+        this.type = checkNotNull(type, "type is null");
+        this.key = Arrays.copyOf(checkNotNull(key, "key is null"), key.length);
     }
 
     public String getName()
@@ -55,7 +59,7 @@ public class TDColumn
         return type;
     }
 
-    public byte[] getKey()
+    protected byte[] getKey()
     {
         return key;
     }
@@ -104,13 +108,13 @@ public class TDColumn
                 return new TDColumn(
                         tuple[0],
                         TDColumnTypeDeserializer.parseColumnType(tuple[1]),
-                        tuple[0].getBytes());
+                        tuple[0].getBytes(StandardCharsets.UTF_8));
             }
             else if (tuple.length == 3) {
                 return new TDColumn(
                         tuple[0],
                         TDColumnTypeDeserializer.parseColumnType(tuple[1]),
-                        tuple[2].getBytes());
+                        tuple[2].getBytes(StandardCharsets.UTF_8));
             }
         }
         throw new RuntimeJsonMappingException("Unexpected string tuple to deserialize TDColumn");
@@ -119,7 +123,7 @@ public class TDColumn
     @JsonValue
     public String[] getTuple()
     {
-        return new String[] {name, type.toString(), new String(key)};
+        return new String[] {name, type.toString(), new String(key, StandardCharsets.UTF_8)};
     }
 
     @Override
@@ -134,7 +138,7 @@ public class TDColumn
         TDColumn other = (TDColumn) obj;
         return Objects.equal(this.name, other.name) &&
                 Objects.equal(type, other.type) &&
-                Objects.equal(key, other.key);
+                Arrays.equals(key, other.key);
     }
 
     @Override

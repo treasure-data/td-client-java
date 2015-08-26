@@ -170,7 +170,7 @@ public class TestTDClient
     private static final String SAMPLE_TABLE = "sample";
 
     @Test
-    public void databaaseOperation()
+    public void databaseOperation()
     {
         if (System.getenv("CIRCLE_SHA1") != null) {
             // Skip modifying DB at CircleCI since the test user has no authority to modify databases

@@ -20,14 +20,15 @@ package com.treasuredata.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.base.Optional;
+import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -250,10 +251,9 @@ public class TDClientConfig
         Properties p = new Properties();
         logger.info(String.format("Reading configuration file: %s", file));
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+            List<String> lines = Files.readLines(file, StandardCharsets.UTF_8);
             StringBuilder extracted = new StringBuilder();
-            String line = null;
-            while ((line = reader.readLine()) != null) {
+            for (String line : lines) {
                 String trimmed = line.trim();
                 if (trimmed.startsWith("[") || trimmed.startsWith("#")) {
                     continue; // skip [... ] line or comment line

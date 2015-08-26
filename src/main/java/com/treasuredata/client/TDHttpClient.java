@@ -136,12 +136,12 @@ public class TDHttpClient
             }
             else {
                 // Error message from Proxy server etc.
-                String contentStr = new String(content);
+                String contentStr = new String(content, StandardCharsets.UTF_8);
                 return Optional.of(new TDApiError("error", contentStr, "error"));
             }
         }
         catch (IOException e) {
-            logger.warn(String.format("Failed to parse error response: %s", new String(content)), e);
+            logger.warn(String.format("Failed to parse error response: %s", new String(content, StandardCharsets.UTF_8)), e);
             return Optional.absent();
         }
     }
@@ -182,7 +182,7 @@ public class TDHttpClient
     {
         MessageDigest sha1 = SHA1.get();
         sha1.reset();
-        sha1.update(string.getBytes());
+        sha1.update(string.getBytes(StandardCharsets.UTF_8));
         byte[] bytes = sha1.digest();
 
         // convert binary to hex string
@@ -244,7 +244,7 @@ public class TDHttpClient
                     return request.post(Entity.entity(queryStr, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
                 }
                 else {
-                    // We should set content-length explicitely for an empty post
+                    // We should set content-length explicitly for an empty post
                     request.header("Content-Length", "0");
                     return request.post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED_TYPE));
                 }
@@ -385,7 +385,7 @@ public class TDHttpClient
                 try {
                     byte[] response = input.readEntity(byte[].class);
                     if (logger.isTraceEnabled()) {
-                        logger.trace("response:\n{}", new String(response));
+                        logger.trace("response:\n{}", new String(response, StandardCharsets.UTF_8));
                     }
                     return objectMapper.readValue(response, resultType);
                 }
