@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
@@ -139,7 +140,7 @@ public class TestTDClient
             public JSONArray apply(InputStream input)
             {
                 try {
-                    String result = new String(ByteStreams.toByteArray(input));
+                    String result = new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8);
                     logger.info("result:\n" + result);
                     return new JSONArray(result);
                 }
