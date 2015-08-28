@@ -35,13 +35,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
+import java.util.zip.GZIPInputStream;
 
 import static com.treasuredata.client.TDClientConfig.firstNonNull;
 import static org.junit.Assert.assertEquals;
@@ -155,6 +159,27 @@ public class TestTDClient
         });
         assertEquals(1, array.length());
         assertEquals(8807278, array.getLong(0));
+
+        // test msgpack.gz format
+        client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>() {
+            @Override
+            public Object apply(InputStream input)
+            {
+                try {
+                    logger.debug("Reading job result in msgpack.gz");
+                    MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
+                    int arraySize = unpacker.unpackArrayHeader();
+                    assertEquals(arraySize, 1);
+                    int numColumns = unpacker.unpackInt();
+                    assertEquals(8807278, numColumns);
+                    assertFalse(unpacker.hasNext());
+                    return null;
+                }
+                catch (IOException e) {
+                    throw Throwables.propagate(e);
+                }
+            }
+        });
     }
 
     @Test
