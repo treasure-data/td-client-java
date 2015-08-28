@@ -22,7 +22,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
-import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -30,6 +29,8 @@ import com.treasuredata.client.model.TDJobStatus;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -72,9 +73,12 @@ public class TestTDClient
 
     @Test
     public void serverStatus()
+            throws JSONException
     {
         String status = client.serverStatus();
         logger.info(status);
+        JSONObject s = new JSONObject(status);
+        assertEquals("ok", s.getString("status"));
     }
 
     @Test
@@ -218,8 +222,8 @@ public class TestTDClient
         TDClient client = new TDClient(new TDClientConfig.Builder().result()); // Set no API key
         String user = firstNonNull(p.getProperty("user"), System.getenv("TD_USER"));
         String password = firstNonNull(p.getProperty("password"), System.getenv("TD_PASS"));
-        TDAuthenticationResult result = client.authenticate(user, password);
-        List<TDTable> tableList = client.listTables("sample_datasets");
+        TDClient newClient = client.authenticate(user, password);
+        List<TDTable> tableList = newClient.listTables("sample_datasets");
         assertTrue(tableList.size() >= 2);
     }
 }

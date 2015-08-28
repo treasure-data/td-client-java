@@ -19,7 +19,6 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Function;
-import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
@@ -35,8 +34,27 @@ import java.util.List;
 /**
  * Treasure Data Client
  */
-public interface TDClientApi
+public interface TDClientApi<ClientImpl>
+        extends AutoCloseable
 {
+    /**
+     * Return a TDClientApi implementation that uses the given api key.
+     * This instance will share the same internal http client, so closing the returned client invalidate the current instance.
+     *
+     * @param newApiKey
+     * @return
+     */
+    ClientImpl withApiKey(String newApiKey);
+
+    /**
+     * Perform user email and password based authentication and return a new client that will use apikey based authentication
+     *
+     * @param email
+     * @param password
+     * @return
+     */
+    ClientImpl authenticate(String email, String password);
+
     String serverStatus();
 
     // Database operations
@@ -171,13 +189,4 @@ public interface TDClientApi
     void deleteBulkImportSession(String sessionName);
 
     void getBulkImportErrorRecords(String sessionName);
-
-    /**
-     * Perform user email and passsword based authentication.
-     *
-     * @param email
-     * @param password
-     * @return
-     */
-    TDAuthenticationResult authenticate(String email, String password);
 }

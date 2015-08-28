@@ -93,17 +93,6 @@ public class TDClientConfig
         return currentConfig;
     }
 
-    /**
-     * Return a new configuration with a given TD API key
-     *
-     * @param apiKey
-     * @return
-     */
-    public TDClientConfig withApiKey(String apiKey)
-    {
-        return new Builder(this).setApiKey(apiKey).result();
-    }
-
     public TDClientConfig withProxy(ProxyConfig proxy)
     {
         return new Builder(this).setProxyConfig(proxy).result();
@@ -322,7 +311,11 @@ public class TDClientConfig
             this(new Properties());
         }
 
-        public Builder(TDClientConfig config)
+        /***
+         * Cnstructor used for copying and overwriting an existing configuration
+         * @param config
+         */
+        Builder(TDClientConfig config)
         {
             this.endpoint = Optional.of(config.endpoint);
             this.port = Optional.of(config.port);

@@ -72,12 +72,12 @@ import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RES
  * An extension of Jetty HttpClient with request retry handler
  */
 public class TDHttpClient
+        implements AutoCloseable
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
     private final TDClientConfig config;
     private final Client httpClient;
     private final ObjectMapper objectMapper;
-    private Optional<String> credentialCache = Optional.absent();
     private Optional<String> proxyAuthenticationCache = Optional.absent();
 
     public TDHttpClient(TDClientConfig config)
@@ -118,12 +118,14 @@ public class TDHttpClient
 
     public void close()
     {
-        try {
-            httpClient.close();
-        }
-        catch (Exception e) {
-            logger.error("Failed to terminate Jetty client", e);
-            throw Throwables.propagate(e);
+        synchronized (this) {
+            try {
+                httpClient.close();
+            }
+            catch (Exception e) {
+                logger.error("Failed to terminate Jetty client", e);
+                throw Throwables.propagate(e);
+            }
         }
     }
 
@@ -195,7 +197,7 @@ public class TDHttpClient
         return new String(array);
     }
 
-    public Response submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyOverwrite)
+    public Response submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
         String requestUri = String.format("%s%s%s", config.getHttpScheme(), config.getEndpoint(), apiRequest.getPath());
@@ -213,7 +215,7 @@ public class TDHttpClient
                 .header(HttpHeaders.DATE, RFC2822_FORMAT.get().format(new Date()));
 
         // Set API Key
-        Optional<String> apiKey = apiKeyOverwrite.or(config.getApiKey());
+        Optional<String> apiKey = apiKeyCache.or(config.getApiKey());
         if (apiKey.isPresent()) {
             request.header(HttpHeaders.AUTHORIZATION, "TD1 " + apiKey.get());
         }
@@ -257,7 +259,7 @@ public class TDHttpClient
         return request.build(apiRequest.getMethod().asString()).invoke();
     }
 
-    public <Result> Result submitRequest(TDApiRequest apiRequest, Function<Response, Result> handler)
+    public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Function<Response, Result> handler)
             throws TDClientException
     {
         ExponentialBackOffRetry retry = new ExponentialBackOffRetry(config.getRetryLimit(), config.getRetryInitialWaitMillis(), config.getRetryIntervalMillis());
@@ -274,7 +276,7 @@ public class TDHttpClient
                 Response response = null;
                 try {
                     logger.debug("Sending API request to {}", apiRequest.getPath());
-                    response = submitRequest(apiRequest, credentialCache);
+                    response = submitRequest(apiRequest, apiKeyCache);
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
@@ -336,9 +338,9 @@ public class TDHttpClient
         throw rootCause.get();
     }
 
-    public String call(TDApiRequest apiRequest)
+    public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
-        return submitRequest(apiRequest, new Function<Response, String>()
+        return submitRequest(apiRequest, apiKeyCache, new Function<Response, String>()
         {
             @Override
             public String apply(Response input)
@@ -352,9 +354,9 @@ public class TDHttpClient
         });
     }
 
-    public <Result> Result call(TDApiRequest apiRequest, final Function<InputStream, Result> contentStreamHandler)
+    public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final Function<InputStream, Result> contentStreamHandler)
     {
-        return submitRequest(apiRequest, new Function<Response, Result>()
+        return submitRequest(apiRequest, apiKeyCache, new Function<Response, Result>()
         {
             @Override
             public Result apply(Response input)
@@ -374,10 +376,10 @@ public class TDHttpClient
      * @return
      * @throws TDClientException
      */
-    public <Result> Result call(TDApiRequest apiRequest, final Class<Result> resultType)
+    public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final Class<Result> resultType)
             throws TDClientException
     {
-        return submitRequest(apiRequest, new Function<Response, Result>()
+        return submitRequest(apiRequest, apiKeyCache, new Function<Response, Result>()
         {
             @Override
             public Result apply(Response input)
@@ -398,10 +400,5 @@ public class TDHttpClient
                 }
             }
         });
-    }
-
-    public void setCredentialCache(String apikey)
-    {
-        this.credentialCache = Optional.of(apikey);
     }
 }

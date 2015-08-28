@@ -19,6 +19,7 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportParts;
@@ -57,7 +58,7 @@ import static com.treasuredata.client.TDApiRequest.urlEncode;
  *
  */
 public class TDClient
-        implements TDClientApi
+        implements TDClientApi<TDClient>
 {
     private static final Logger logger = LoggerFactory.getLogger(TDClient.class);
     private static final String version;
@@ -86,6 +87,7 @@ public class TDClient
 
     private final TDClientConfig config;
     private final TDHttpClient httpClient;
+    private final Optional<String> apiKeyCache;
 
     public TDClient()
             throws TDClientException
@@ -95,8 +97,33 @@ public class TDClient
 
     public TDClient(TDClientConfig config)
     {
+        this(config, new TDHttpClient(config), config.getApiKey());
+    }
+
+    protected TDClient(TDClientConfig config, TDHttpClient httpClient, Optional<String> apiKeyCache)
+    {
         this.config = config;
-        this.httpClient = new TDHttpClient(config);
+        this.httpClient = httpClient;
+        this.apiKeyCache = apiKeyCache;
+    }
+
+    /**
+     * Create a new TDClient that uses the given api key for the authentication.
+     * The new instance of TDClient shares the same HttpClient, so closing this will invalidate the other copy of TDClient instances
+     *
+     * @param newApiKey
+     * @return
+     */
+    public TDClient withApiKey(String newApiKey)
+    {
+        return new TDClient(config, httpClient, Optional.of(newApiKey));
+    }
+
+    @Override
+    public TDClient authenticate(String email, String password)
+    {
+        TDAuthenticationResult authResult = doPost("/v3/user/authenticate", ImmutableMap.of("user", email, "password", password), TDAuthenticationResult.class);
+        return withApiKey(authResult.getApikey());
     }
 
     public void close()
@@ -119,7 +146,7 @@ public class TDClient
             throws TDClientException
     {
         TDApiRequest request = TDApiRequest.Builder.GET(path).build();
-        return httpClient.call(request, resultTypeClass);
+        return httpClient.call(request, apiKeyCache, resultTypeClass);
     }
 
     private <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
@@ -133,7 +160,7 @@ public class TDClient
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
             request.addQueryParam(e.getKey(), e.getValue());
         }
-        return httpClient.call(request.build(), resultTypeClass);
+        return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
     }
 
     private String doPost(String path, Map<String, String> queryParam)
@@ -146,28 +173,28 @@ public class TDClient
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
             request.addQueryParam(e.getKey(), e.getValue());
         }
-        return httpClient.call(request.build());
+        return httpClient.call(request.build(), apiKeyCache);
     }
 
     private String doPost(String path)
             throws TDClientException
     {
         TDApiRequest request = TDApiRequest.Builder.POST(path).build();
-        return httpClient.call(request);
+        return httpClient.call(request, apiKeyCache);
     }
 
     private String doPut(String path, File filePath)
             throws TDClientException
     {
         TDApiRequest request = TDApiRequest.Builder.PUT(path).setFile(filePath).build();
-        return httpClient.call(request);
+        return httpClient.call(request, apiKeyCache);
     }
 
     @Override
     public String serverStatus()
     {
-        TDApiRequest request = TDApiRequest.Builder.GET("/v3/system/server_status").build();
-        return httpClient.call(request);
+        // No API key is requried for server_status
+        return httpClient.call(TDApiRequest.Builder.GET("/v3/system/server_status").build(), Optional.<String>absent());
     }
 
     @Override
@@ -422,7 +449,7 @@ public class TDClient
                 .GET(buildUrl("/v3/job/result", jobId))
                 .addQueryParam("format", format.getName())
                 .build();
-        return httpClient.<Result>call(request, resultStreamHandler);
+        return httpClient.<Result>call(request, apiKeyCache, resultStreamHandler);
     }
 
     @Override
@@ -495,13 +522,5 @@ public class TDClient
     {
         // TODO: MessagePack Stream
         // doGet(buildUrl("/v3/bulk_import/error_records", sessionName));
-    }
-
-    @Override
-    public TDAuthenticationResult authenticate(String email, String password)
-    {
-        TDAuthenticationResult authResult = doPost("/v3/user/authenticate", ImmutableMap.of("user", email, "password", password), TDAuthenticationResult.class);
-        httpClient.setCredentialCache(authResult.getApikey());
-        return authResult;
     }
 }
