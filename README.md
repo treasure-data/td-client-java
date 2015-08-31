@@ -142,12 +142,19 @@ client.uploadBulkImportPart(session.getName(), "session_part01", f);
 |`apikey`  |               | API key to access Treasure Data. You can also set this via TD_API_KEY environment variable.  |
 |`user`    |               | Account e-mail address (unnecessary if `apikey` is set) |
 |`password`|               | Account password (unnecessary if `apikey` is set) |
-|`useSSL`  | false         | Use SSL encryption for accessing Treasure Data |
-|`httpproxyhost` |         | Proxy host (optional) e.g., "myproxy.com"  |
-|`httpproxyport`|         | Proxy port (optional) e.g., "80" |
-|`httpproxyuser` |         | Proxy user (optional)  |
-|`httpproxypassword` |     | Proxy password (optional)  |
-
+|`td.client.proxy.host` |         | (optional) Proxy host e.g., "myproxy.com"  |
+|`td.client.proxy.yport`|         | (optional) Proxy port e.g., "80" |
+|`td.client.proxy.user` |         | (optional) Proxy user |
+|`td.client.proxy.password` |     | (optional) Proxy password  |
+|`td.client.usessl` | false | (optional) Use SSL encryption |
+|`td.client.retry.limit` | 7 | (optinoal) The maximum number of API request retry |
+|`td.client.retry.initial-wait` | 1000 | (optional) Initial wait value|
+|`td.client.retry.interval` | 2000 | (optional) (initial-wait) + (interval) ^ (2 - (retry count)) |
+|`td.client.connect-timeout` | 15000 | (optional) connection timeout before reaching the API |
+|`td.client.idle-timeout` | 60000 | (optional) idle connection timeout when no data is coming from API |
+|`td.client.connection-pool-size` | 64 | (optional) Connection pool size|
+|`td.client.endpoint` | `api.treasuredata.com` | (optional) TD REST API endpoint name |
+|`td.client.port` | 80 for non-SSL, 443 for SSL connection | (optional) TD API port number |
 
 ## For Developers
 
