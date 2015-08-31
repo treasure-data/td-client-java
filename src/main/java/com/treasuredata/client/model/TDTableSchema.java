@@ -59,4 +59,12 @@ public class TDTableSchema
     {
         return Objects.hashCode(columns);
     }
+
+    @Override
+    public String toString()
+    {
+        return "TDTableSchema{" +
+                "columns=" + columns +
+                '}';
+    }
 }

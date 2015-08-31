@@ -19,6 +19,7 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
@@ -26,6 +27,7 @@ import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
+import com.treasuredata.client.model.TDTableSchema;
 
 import java.io.File;
 import java.io.InputStream;
@@ -101,6 +103,8 @@ public interface TDClientApi<ClientImpl>
     boolean existsDatabase(String databaseName);
 
     boolean existsTable(String databaseName, String table);
+
+    Optional<TDTable> findTable(String databaseName, String table);
 
     /**
      * Create a new table

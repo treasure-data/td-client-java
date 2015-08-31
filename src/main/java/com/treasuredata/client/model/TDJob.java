@@ -20,6 +20,7 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
 /**
@@ -276,6 +277,35 @@ public class TDJob
     {
         return debug;
     }
+
+    /**
+     * A short cut for reading cmdout message
+     * @return
+     */
+    public String getCmdOut() {
+        return debug.transform(new Function<Debug, String>() {
+            @Override
+            public String apply(Debug input)
+            {
+                return input.getCmdout();
+            }
+        }).or("");
+    }
+
+    /**
+     * A short cut for reading stderr messsage
+     * @return
+     */
+    public String getStdErr() {
+        return debug.transform(new Function<Debug, String>() {
+            @Override
+            public String apply(Debug input)
+            {
+                return input.getStderr();
+            }
+        }).or("");
+    }
+
 
     @Override
     public String toString()

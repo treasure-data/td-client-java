@@ -28,6 +28,7 @@ import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
+import com.treasuredata.client.model.TDTableSchema;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +38,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
+import org.msgpack.value.ArrayValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,6 +112,9 @@ public class TestTDClient
             else if (t.getName().equals("www_access")) {
                 assertTrue(t.getColumns().size() == 8);
             }
+
+            TDTableSchema schema = client.showTableSchema("sample_datasets", t.getName());
+            logger.debug("schema: " + schema);
         }
     }
 
@@ -168,11 +173,15 @@ public class TestTDClient
                 try {
                     logger.debug("Reading job result in msgpack.gz");
                     MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
-                    int arraySize = unpacker.unpackArrayHeader();
-                    assertEquals(arraySize, 1);
-                    int numColumns = unpacker.unpackInt();
-                    assertEquals(8807278, numColumns);
-                    assertFalse(unpacker.hasNext());
+                    int rowCount = 0;
+                    while(unpacker.hasNext()) {
+                        ArrayValue array = unpacker.unpackValue().asArrayValue();
+                        assertEquals(1, array.size());
+                        int numColumns = array.get(0).asIntegerValue().toInt();
+                        assertEquals(8807278, numColumns);
+                        rowCount ++;
+                    }
+                    assertEquals(rowCount, 1);
                     return null;
                 }
                 catch (IOException e) {

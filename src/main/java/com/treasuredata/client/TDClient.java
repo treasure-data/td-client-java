@@ -35,6 +35,7 @@ import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
+import com.treasuredata.client.model.TDTableSchema;
 import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
 import org.eclipse.jetty.http.HttpStatus;
@@ -380,6 +381,17 @@ public class TDClient
     public void swapTables(String databaseName, String tableName1, String tableName2)
     {
         doPost(buildUrl("/v3/table/swap", databaseName, tableName1, tableName2));
+    }
+
+    @Override
+    public Optional<TDTable> findTable(String databaseName, String tableName)
+    {
+        for(TDTable table : listTables(databaseName)) {
+            if(tableName.equals(table.getName())) {
+                return Optional.of(table);
+            }
+        }
+        return Optional.absent();
     }
 
     @Override
