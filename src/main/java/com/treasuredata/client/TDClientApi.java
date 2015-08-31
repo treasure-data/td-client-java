@@ -23,7 +23,7 @@ import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
-import com.treasuredata.client.model.TDJobStatus;
+import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 
@@ -32,14 +32,14 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * Treasure Data Client
+ * Treasure Data Client API
  */
 public interface TDClientApi<ClientImpl>
         extends AutoCloseable
 {
     /**
      * Return a TDClientApi implementation that uses the given api key.
-     * This instance will share the same internal http client, so closing the returned client invalidate the current instance.
+     * This instance will share the same internal http client, so closing the returned client will invalidate the current instance.
      *
      * @param newApiKey
      * @return
@@ -47,8 +47,8 @@ public interface TDClientApi<ClientImpl>
     ClientImpl withApiKey(String newApiKey);
 
     /**
-     * Perform user email and password based authentication and return a new client that will use apikey based authentication
-     *
+     * Perform user email and password based authentication and return a new client that will use apikey based authentication.
+     * Similary to {@link #withApiKey(String)} method, closing the returned client will invalidate the current instance.
      * @param email
      * @param password
      * @return
@@ -150,7 +150,7 @@ public interface TDClientApi<ClientImpl>
 
     void killJob(String jobId);
 
-    TDJobStatus jobStatus(String jobId);
+    TDJobSummary jobStatus(String jobId);
 
     TDJob jobInfo(String jobId);
 

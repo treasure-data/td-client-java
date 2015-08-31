@@ -28,7 +28,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import com.treasuredata.client.model.TDApiError;
+import com.treasuredata.client.model.TDApiErrorMessage;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.B64Code;
 import org.glassfish.jersey.client.ClientConfig;
@@ -129,17 +129,17 @@ public class TDHttpClient
         }
     }
 
-    protected Optional<TDApiError> parseErrorResponse(byte[] content)
+    protected Optional<TDApiErrorMessage> parseErrorResponse(byte[] content)
     {
         try {
             if (content.length > 0 && content[0] == '{') {
                 // Error message from TD API
-                return Optional.of(objectMapper.readValue(content, TDApiError.class));
+                return Optional.of(objectMapper.readValue(content, TDApiErrorMessage.class));
             }
             else {
                 // Error message from Proxy server etc.
                 String contentStr = new String(content, StandardCharsets.UTF_8);
-                return Optional.of(new TDApiError("error", contentStr, "error"));
+                return Optional.of(new TDApiErrorMessage("error", contentStr, "error"));
             }
         }
         catch (IOException e) {
@@ -285,7 +285,7 @@ public class TDHttpClient
                     }
                     else {
                         byte[] returnedContent = response.readEntity(byte[].class);
-                        Optional<TDApiError> errorResponse = parseErrorResponse(returnedContent);
+                        Optional<TDApiErrorMessage> errorResponse = parseErrorResponse(returnedContent);
                         String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
                         String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequest.getPath(), responseErrorText);
                         if (HttpStatus.isClientError(code)) {

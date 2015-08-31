@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  *
  */
-public class TDJobStatus
+public class TDJobSummary
 {
     private final TDJob.Status status;
     private final long resultSize;
@@ -36,7 +36,7 @@ public class TDJobStatus
     private final String endAt;
 
     @JsonCreator
-    public TDJobStatus(
+    public TDJobSummary(
             @JsonProperty("status") TDJob.Status status,
             @JsonProperty("result_size") long resultSize,
             @JsonProperty("duration") long duration,

@@ -30,8 +30,8 @@ import com.treasuredata.client.model.TDDatabaseList;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
-import com.treasuredata.client.model.TDJobStatus;
 import com.treasuredata.client.model.TDJobSubmitResult;
+import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
@@ -107,25 +107,6 @@ public class TDClient
         this.apiKeyCache = apiKeyCache;
     }
 
-    /**
-     * Create a new TDClient that uses the given api key for the authentication.
-     * The new instance of TDClient shares the same HttpClient, so closing this will invalidate the other copy of TDClient instances
-     *
-     * @param newApiKey
-     * @return
-     */
-    public TDClient withApiKey(String newApiKey)
-    {
-        return new TDClient(config, httpClient, Optional.of(newApiKey));
-    }
-
-    @Override
-    public TDClient authenticate(String email, String password)
-    {
-        TDAuthenticationResult authResult = doPost("/v3/user/authenticate", ImmutableMap.of("user", email, "password", password), TDAuthenticationResult.class);
-        return withApiKey(authResult.getApikey());
-    }
-
     public void close()
     {
         httpClient.close();
@@ -188,6 +169,26 @@ public class TDClient
     {
         TDApiRequest request = TDApiRequest.Builder.PUT(path).setFile(filePath).build();
         return httpClient.call(request, apiKeyCache);
+    }
+
+    /**
+     * Create a new TDClient that uses the given api key for the authentication.
+     * The new instance of TDClient shares the same HttpClient, so closing this will invalidate the other copy of TDClient instances
+     *
+     * @param newApiKey
+     * @return
+     */
+    @Override
+    public TDClient withApiKey(String newApiKey)
+    {
+        return new TDClient(config, httpClient, Optional.of(newApiKey));
+    }
+
+    @Override
+    public TDClient authenticate(String email, String password)
+    {
+        TDAuthenticationResult authResult = doPost("/v3/user/authenticate", ImmutableMap.of("user", email, "password", password), TDAuthenticationResult.class);
+        return withApiKey(authResult.getApikey());
     }
 
     @Override
@@ -428,10 +429,10 @@ public class TDClient
     }
 
     @Override
-    public TDJobStatus jobStatus(String jobId)
+    public TDJobSummary jobStatus(String jobId)
             throws TDClientException
     {
-        return doGet(buildUrl("/v3/job/status", jobId), TDJobStatus.class);
+        return doGet(buildUrl("/v3/job/status", jobId), TDJobSummary.class);
     }
 
     @Override

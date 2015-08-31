@@ -24,14 +24,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  *
  */
-public class TDApiError
+public class TDApiErrorMessage
 {
     private final String error;
     private final String text;
     private final String severity;
 
     @JsonCreator
-    public TDApiError(
+    public TDApiErrorMessage(
             @JsonProperty("error") String error,
             @JsonProperty("text") String text,
             @JsonProperty("severity") String severity)
