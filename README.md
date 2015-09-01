@@ -71,7 +71,7 @@ If you need to access Web through proxy, add the following configuration to `$HO
 
 ## Usage
 
-```
+```java
 import com.treasuredata.client.TDClient;
 import com.google.common.base.Function;
 import org.msgpack.core.MessagePack;
@@ -124,7 +124,7 @@ client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream
 
 ### Bulk-Upload Data on Bulk Import Session
 
-```
+```java
 // Create a new TD client by using configurations in $HOME/.td/td.conf
 TDClient client = new TDClient();
 
@@ -134,8 +134,20 @@ TDBulkImportSession session = client.createBulkImportSession("session_name", "da
 client.uploadBulkImportPart(session.getName(), "session_part01", f);
 ```
 
-## Configurations
+## Configuration Parameters
 
+You can set configuration parameters of td-client as follows:
+
+```java
+Properties prop = new Properties();
+prop.setProperty("key", "value");
+...
+
+// This uses configuration parameters in the Properties object as the default values.
+// You can overwrite this by using System properties
+TDClietnConfig config = TDClientConfig.newConfig(p)
+TDClient client = new TDClient(config);
+```
 
 |key              | default value | description |
 |-----------------|---------------|-------------|
@@ -155,6 +167,14 @@ client.uploadBulkImportPart(session.getName(), "session_part01", f);
 |`td.client.connection-pool-size` | 64 | (optional) Connection pool size|
 |`td.client.endpoint` | `api.treasuredata.com` | (optional) TD REST API endpoint name |
 |`td.client.port` | 80 for non-SSL, 443 for SSL connection | (optional) TD API port number |
+
+
+You can overwrite configuration by using environment variables or System properties. The precedence of configuration parmaetrs is:
+
+1. Environment variable (only for TD_API_KEY parameter)
+1. System properties (passed with `-D` option when launching JVM)
+1. Properties object passed to TDClientConfig.newConfig(Properties p)
+
 
 ## For Developers
 

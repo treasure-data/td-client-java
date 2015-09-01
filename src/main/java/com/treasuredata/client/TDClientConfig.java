@@ -109,7 +109,7 @@ public class TDClientConfig
      * @param p the default values
      * @return
      */
-    public static TDClientConfig newTDClientConfig(Properties p)
+    public static TDClientConfig newConfig(Properties p)
     {
         Builder b = new Builder(p);
         return b.result();
