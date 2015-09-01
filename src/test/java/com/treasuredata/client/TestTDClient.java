@@ -28,7 +28,6 @@ import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
-import com.treasuredata.client.model.TDTableSchema;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -105,16 +104,13 @@ public class TestTDClient
         assertTrue(tableList.size() >= 2);
         logger.debug(Joiner.on(", ").join(tableList));
 
-        for (TDTable t : tableList) {
+        for (final TDTable t : tableList) {
             if (t.getName().equals("nasdaq")) {
                 assertTrue(t.getColumns().size() == 6);
             }
             else if (t.getName().equals("www_access")) {
                 assertTrue(t.getColumns().size() == 8);
             }
-
-            TDTableSchema schema = client.showTableSchema("sample_datasets", t.getName());
-            logger.debug("schema: " + schema);
         }
     }
 
@@ -166,7 +162,8 @@ public class TestTDClient
         assertEquals(8807278, array.getLong(0));
 
         // test msgpack.gz format
-        client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>() {
+        client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>()
+        {
             @Override
             public Object apply(InputStream input)
             {
@@ -174,12 +171,12 @@ public class TestTDClient
                     logger.debug("Reading job result in msgpack.gz");
                     MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
                     int rowCount = 0;
-                    while(unpacker.hasNext()) {
+                    while (unpacker.hasNext()) {
                         ArrayValue array = unpacker.unpackValue().asArrayValue();
                         assertEquals(1, array.size());
                         int numColumns = array.get(0).asIntegerValue().toInt();
                         assertEquals(8807278, numColumns);
-                        rowCount ++;
+                        rowCount++;
                     }
                     assertEquals(rowCount, 1);
                     return null;

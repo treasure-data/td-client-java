@@ -280,10 +280,13 @@ public class TDJob
 
     /**
      * A short cut for reading cmdout message
+     *
      * @return
      */
-    public String getCmdOut() {
-        return debug.transform(new Function<Debug, String>() {
+    public String getCmdOut()
+    {
+        return debug.transform(new Function<Debug, String>()
+        {
             @Override
             public String apply(Debug input)
             {
@@ -294,10 +297,13 @@ public class TDJob
 
     /**
      * A short cut for reading stderr messsage
+     *
      * @return
      */
-    public String getStdErr() {
-        return debug.transform(new Function<Debug, String>() {
+    public String getStdErr()
+    {
+        return debug.transform(new Function<Debug, String>()
+        {
             @Override
             public String apply(Debug input)
             {
@@ -305,7 +311,6 @@ public class TDJob
             }
         }).or("");
     }
-
 
     @Override
     public String toString()
