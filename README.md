@@ -33,7 +33,7 @@ Add the following sbt settings:
 libraryDependencies ++= Seq("com.treasuredata.client" % "td-client" % "${client.version}")
 ```
 
-### Configuration
+## Usage
 
 To use td-client-java, you need to set your API key in the following file:
 
@@ -55,7 +55,7 @@ export TD_API_KEY = (your API key)
 
 For Windows, Add `TD_API_KEY` environment variable from the user preference panel.
 
-#### Proxy Server
+### Proxy Server
 
 If you need to access Web through proxy, add the following configuration to `$HOME/.td/td.conf` file:
 
@@ -69,7 +69,7 @@ If you need to access Web through proxy, add the following configuration to `$HO
   td.client.proxy.password = (optional: proxy password)
 ```
 
-## Usage
+### Example Code
 
 ```java
 import com.treasuredata.client.TDClient;
@@ -122,7 +122,7 @@ client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream
 
 ```
 
-### Bulk-Upload Data on Bulk Import Session
+### Bulk upload
 
 ```java
 // Create a new TD client by using configurations in $HOME/.td/td.conf
@@ -134,12 +134,13 @@ TDBulkImportSession session = client.createBulkImportSession("session_name", "da
 client.uploadBulkImportPart(session.getName(), "session_part01", f);
 ```
 
-## Configuration Parameters
+### Custom Configuration
 
-You can set configuration parameters of td-client as follows:
+You can set configuration parameters by using ``$HOME/.td/td.conf`` file and `Properties` object:
 
 ```java
-Properties prop = new Properties();
+Properties prop = TDClientConfig.readTDConf(); // Set the default values by reading $HOME/.td/td.conf file
+// Set your own properties
 prop.setProperty("key", "value");
 ...
 
@@ -148,6 +149,8 @@ prop.setProperty("key", "value");
 TDClietnConfig config = TDClientConfig.newConfig(p)
 TDClient client = new TDClient(config);
 ```
+
+## List of Configuration Parameters
 
 |key              | default value | description |
 |-----------------|---------------|-------------|
