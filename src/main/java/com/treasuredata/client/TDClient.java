@@ -126,6 +126,9 @@ public class TDClient
     private <ResultType> ResultType doGet(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
+        checkNotNull(path, "path is null");
+        checkNotNull(resultTypeClass, "resultTypeClass is null");
+
         TDApiRequest request = TDApiRequest.Builder.GET(path).build();
         return httpClient.call(request, apiKeyCache, resultTypeClass);
     }
@@ -133,7 +136,7 @@ public class TDClient
     private <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(path, "pash is null");
+        checkNotNull(path, "path is null");
         checkNotNull(queryParam, "param is null");
         checkNotNull(resultTypeClass, "resultTypeClass is null");
 
@@ -160,6 +163,8 @@ public class TDClient
     private String doPost(String path)
             throws TDClientException
     {
+        checkNotNull(path, "path is null");
+
         TDApiRequest request = TDApiRequest.Builder.POST(path).build();
         return httpClient.call(request, apiKeyCache);
     }
@@ -167,6 +172,9 @@ public class TDClient
     private String doPut(String path, File filePath)
             throws TDClientException
     {
+        checkNotNull(path, "path is null");
+        checkNotNull(filePath, "filePath is null");
+
         TDApiRequest request = TDApiRequest.Builder.PUT(path).setFile(filePath).build();
         return httpClient.call(request, apiKeyCache);
     }
