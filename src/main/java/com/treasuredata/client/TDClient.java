@@ -210,9 +210,9 @@ public class TDClient
         return tableList;
     }
 
-    private static Pattern databaseNamePattern = Pattern.compile("^([a-z0-9_]+)$");
+    private static Pattern acceptableNamePattern = Pattern.compile("^([a-z0-9_]+)$");
 
-    public static String validateDatabaseName(String databaseName)
+    private static String validateDatabaseName(String databaseName)
     {
         return validateName(databaseName, "Database");
     }
@@ -231,9 +231,9 @@ public class TDClient
                     "%s name must be 3 to 256 characters but got %d characters: %s", type, name.length(), name));
         }
 
-        if (!databaseNamePattern.matcher(name).matches()) {
+        if (!acceptableNamePattern.matcher(name).matches()) {
             throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT,
-                    String.format("%s name must follow this pattern %s: %s", type, databaseNamePattern.pattern(), name));
+                    String.format("%s name must follow this pattern %s: %s", type, acceptableNamePattern.pattern(), name));
         }
         return name;
     }
