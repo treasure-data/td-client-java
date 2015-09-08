@@ -58,7 +58,7 @@ public class TDClientConfig
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
     public static final String TD_CLIENT_PROXY_PASSWORD = "td.client.proxy.password";
     /**
-     * endpoint URL (e.g., api.treasuredata.com, api-staging.treasuredata.com)
+     * endpoint URL (e.g., api.treasuredata.com, ybi.jp-east.idcfcloud.com)
      */
     private final String endpoint;
     private final int port;
@@ -88,14 +88,14 @@ public class TDClientConfig
     {
         if (currentConfig == null) {
             Properties p = readTDConf();
-            currentConfig = new Builder(p).result();
+            currentConfig = new Builder(p).build();
         }
         return currentConfig;
     }
 
     public TDClientConfig withProxy(ProxyConfig proxy)
     {
-        return new Builder(this).setProxyConfig(proxy).result();
+        return new Builder(this).setProxyConfig(proxy).build();
     }
 
     /**
@@ -112,7 +112,7 @@ public class TDClientConfig
     public static TDClientConfig newConfig(Properties p)
     {
         Builder b = new Builder(p);
-        return b.result();
+        return b.build();
     }
 
     @JsonCreator
@@ -466,7 +466,7 @@ public class TDClientConfig
             return this;
         }
 
-        public TDClientConfig result()
+        public TDClientConfig build()
         {
             return new TDClientConfig(
                     endpoint,

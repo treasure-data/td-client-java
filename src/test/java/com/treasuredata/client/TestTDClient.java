@@ -250,7 +250,7 @@ public class TestTDClient
     {
         // authenticate() method should retrieve apikey, and set it to the TDClient
         Properties p = TDClientConfig.readTDConf();
-        TDClient client = new TDClient(new TDClientConfig.Builder().result()); // Set no API key
+        TDClient client = new TDClient(new TDClientConfig.Builder().build()); // Set no API key
         String user = firstNonNull(p.getProperty("user"), System.getenv("TD_USER"));
         String password = firstNonNull(p.getProperty("password"), System.getenv("TD_PASS"));
         TDClient newClient = client.authenticate(user, password);
