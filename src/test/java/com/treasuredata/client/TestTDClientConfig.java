@@ -34,6 +34,7 @@ import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_HOST;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_PASSWORD;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_PORT;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_USER;
+import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_USESSL;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_INITIAL_WAIT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_INTERVAL_MILLIS;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_LIMIT;
@@ -89,6 +90,7 @@ public class TestTDClientConfig
         m.put(TD_CLIENT_PROXY_PORT, 8982);
         m.put(TD_CLIENT_PROXY_USER, "pp");
         m.put(TD_CLIENT_PROXY_PASSWORD, "xyz");
+        m.put(TD_CLIENT_PROXY_USESSL, true);
         Properties p = new Properties();
         for (Map.Entry<String, Object> e : m.entrySet()) {
             p.setProperty(e.getKey(), e.getValue().toString());
@@ -98,6 +100,7 @@ public class TestTDClientConfig
         assertEquals(m.get(TD_CLIENT_PROXY_HOST), proxy.getHost());
         assertEquals(m.get(TD_CLIENT_PROXY_PORT), proxy.getPort());
         assertEquals(m.get(TD_CLIENT_PROXY_USER), proxy.getUser().get());
+        assertEquals(m.get(TD_CLIENT_PROXY_USESSL), proxy.useSSL());
         assertEquals(m.get(TD_CLIENT_PROXY_PASSWORD), proxy.getPassword().get());
     }
 }

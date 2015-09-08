@@ -18,23 +18,36 @@
  */
 package com.treasuredata.client;
 
+import com.sun.istack.internal.tools.DefaultAuthenticator;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDTable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.ProxyAuthenticator;
+import org.littleshoot.proxy.extras.SelfSignedSslEngineSource;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.ServerSocket;
+import javax.net.ssl.HttpsURLConnection;
+
+import java.io.InputStream;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,25 +55,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class TestProxyAccess
+/**
+ *
+ */
+public class TestSSLProxyAccess
 {
     private static Logger logger = LoggerFactory.getLogger(TestProxyAccess.class);
     private HttpProxyServer proxyServer;
     private int proxyPort;
-
-    static int findAvailablePort()
-            throws IOException
-    {
-        ServerSocket socket = new ServerSocket(0);
-        try {
-            int port = socket.getLocalPort();
-            return port;
-        }
-        finally {
-            socket.close();
-        }
-    }
-
     private static final String PROXY_USER = "test";
     private static final String PROXY_PASS = "helloproxy";
     private AtomicInteger proxyAccessCount = new AtomicInteger(0);
@@ -70,18 +72,21 @@ public class TestProxyAccess
             throws Exception
     {
         proxyAccessCount.set(0);
-        this.proxyPort = findAvailablePort();
-        this.proxyServer = DefaultHttpProxyServer.bootstrap().withPort(proxyPort)
-                .withProxyAuthenticator(new ProxyAuthenticator()
-                {
-                    @Override
-                    public boolean authenticate(String user, String pass)
-                    {
-                        boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
-                        logger.debug("Proxy Authentication: " + (isValid ? "success" : "failure"));
-                        return isValid;
-                    }
-                })
+        this.proxyPort = TestProxyAccess.findAvailablePort();
+        this.proxyServer = DefaultHttpProxyServer
+                .bootstrap()
+                .withPort(proxyPort)
+                .withSslEngineSource(new SelfSignedSslEngineSource(true, false))
+//                .withProxyAuthenticator(new ProxyAuthenticator()
+//                {
+//                    @Override
+//                    public boolean authenticate(String user, String pass)
+//                    {
+//                        boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
+//                        logger.debug("Proxy Authentication: " + (isValid ? "success" : "failure"));
+//                        return isValid;
+//                    }
+//                })
                 .withFiltersSource(new HttpFiltersSourceAdapter()
                 {
                     @Override
@@ -103,14 +108,40 @@ public class TestProxyAccess
     }
 
     @Test
+    public void httpsProxyServerTest()
+            throws Exception
+    {
+        System.setProperty("http.proxyHost", "localhost");
+        System.setProperty("http.proxyPort", Integer.toString(proxyPort));
+        try {
+            URL url = new URL("http://api.treasuredata.com/v3/system/server_status");
+            try (InputStream in = url.openConnection().getInputStream()) {
+                String content = IOUtils.toString(in);
+                logger.info(content);
+            }
+            assertEquals(1, proxyAccessCount.get());
+        }
+        finally {
+            System.clearProperty("http.proxyHost");
+            System.clearProperty("http.proxyPort");
+        }
+
+    }
+
+    @Test
     public void proxyApiAccess()
     {
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
+        proxy.useSSL(true);
         proxy.setHost("localhost");
         proxy.setPort(proxyPort);
-        proxy.setUser(PROXY_USER);
-        proxy.setPassword(PROXY_PASS);
-        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
+        //proxy.setUser(PROXY_USER);
+        //proxy.setPassword(PROXY_PASS);
+        TDClient client = new TDClient(TDClientConfig
+                .newBuilder()
+                .setUseSSL(true)
+                .setProxyConfig(proxy.createProxyConfig())
+                .build());
         try {
             List<TDTable> tableList = client.listTables("sample_datasets");
             assertTrue(tableList.size() >= 2);
@@ -125,11 +156,13 @@ public class TestProxyAccess
         }
     }
 
+    @Ignore
     @Test
     public void wrongPassword()
     {
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
         proxy.setHost("localhost");
+        proxy.useSSL(true);
         proxy.setPort(proxyPort);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS + "---"); // Use an wrong password

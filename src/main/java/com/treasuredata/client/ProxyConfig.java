@@ -27,20 +27,23 @@ public class ProxyConfig
 {
     private final String host;
     private final int port;
+    private final boolean useSSL;
     private final Optional<String> user;
     private final Optional<String> password;
 
-    public ProxyConfig(String host, int port, Optional<String> user, Optional<String> password)
+    public ProxyConfig(String host, int port, boolean useSSL, Optional<String> user, Optional<String> password)
     {
         this.host = host;
         this.port = port;
+        this.useSSL = useSSL;
         this.user = user;
         this.password = password;
     }
 
     public String getUri()
     {
-        return String.format("http://%s:%s", host, port);
+        String protocol = useSSL ? "https" : "http";
+        return String.format("%s://%s:%s", protocol, host, port);
     }
 
     public String getHost()
@@ -63,6 +66,11 @@ public class ProxyConfig
         return password;
     }
 
+    public boolean useSSL()
+    {
+        return useSSL;
+    }
+
     public boolean requireAuthentication()
     {
         return user.isPresent() || password.isPresent();
@@ -74,7 +82,9 @@ public class ProxyConfig
         return "ProxyConfig{" +
                 "host='" + host + '\'' +
                 ", port=" + port +
-                ", user='" + user + '\'' +
+                ", useSSL=" + useSSL +
+                ", user=" + user +
+                ", password=" + password +
                 '}';
     }
 
@@ -82,6 +92,7 @@ public class ProxyConfig
     {
         private String host = "localhost";
         private int port = 8080;
+        private boolean useSSL = false;
         private Optional<String> user;
         private Optional<String> password;
 
@@ -93,6 +104,7 @@ public class ProxyConfig
         {
             this.host = config.host;
             this.port = config.port;
+            this.useSSL = config.useSSL;
             this.user = config.user;
             this.password = config.password;
         }
@@ -109,6 +121,11 @@ public class ProxyConfig
             return this;
         }
 
+        public void useSSL(boolean useSSL)
+        {
+            this.useSSL = useSSL;
+        }
+
         public ProxyConfigBuilder setUser(String user)
         {
             this.user = Optional.of(user);
@@ -123,7 +140,7 @@ public class ProxyConfig
 
         public ProxyConfig createProxyConfig()
         {
-            return new ProxyConfig(host, port, user, password);
+            return new ProxyConfig(host, port, useSSL, user, password);
         }
     }
 }
