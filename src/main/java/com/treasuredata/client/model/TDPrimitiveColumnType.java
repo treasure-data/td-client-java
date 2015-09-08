@@ -25,7 +25,6 @@ public enum TDPrimitiveColumnType
     LONG("long"),
     FLOAT("float"),
     DOUBLE("double"),
-    BOOLEAN("boolean"),
     STRING("string");
     private String name;
 
