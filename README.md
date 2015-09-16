@@ -194,7 +194,6 @@ Below is an example of issuing a query from a Java program. The query API is asy
 
             Job job = new Job(new Database("testdb"), "SELECT COUNT(1) FROM www_access");
             client.submitJob(job);
-            client.submitJob(job);
             String jobID = job.getJobID();
             System.out.println(jobID);
 
