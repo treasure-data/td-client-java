@@ -147,7 +147,7 @@ public interface TDClientApi<ClientImpl>
 
     TDJobList listJobs();
 
-    TDJobList listJobs(long from, long to);
+    TDJobList listJobs(long fromJobId, long toJobId);
 
     void killJob(String jobId);
 

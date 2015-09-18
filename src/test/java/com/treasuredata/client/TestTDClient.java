@@ -20,7 +20,9 @@ package com.treasuredata.client;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Iterators;
 import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
@@ -77,6 +79,25 @@ public class TestTDClient
     }
 
     @Test
+    public void dbNameValidation() {
+        TDClient.validateDatabaseName("abc01234_134");
+        TDClient.validateTableName("ab430_9");
+        try {
+            TDClient.validateDatabaseName("a");
+        }
+        catch(TDClientException e) {
+            assertEquals(TDClientException.ErrorType.INVALID_INPUT, e.getErrorType());
+        }
+        try {
+            TDClient.validateDatabaseName("a---4");
+        }
+        catch(TDClientException e) {
+            assertEquals(TDClientException.ErrorType.INVALID_INPUT, e.getErrorType());
+        }
+    }
+
+
+    @Test
     public void serverStatus()
             throws JSONException
     {
@@ -120,6 +141,9 @@ public class TestTDClient
     {
         TDJobList jobs = client.listJobs();
         logger.debug("job list: " + jobs);
+
+        TDJobList jobsInAnIDRange = client.listJobs(34022478, 34022600);
+        logger.debug("job list: " + jobsInAnIDRange);
     }
 
     @Test
@@ -186,6 +210,15 @@ public class TestTDClient
                 }
             }
         });
+    }
+
+    @Test
+    public void killJob()
+    {
+        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java job kill test\n select time from nasdaq"));
+        client.killJob(jobId);
+        TDJobSummary summary = client.jobStatus(jobId);
+        assertEquals(TDJob.Status.KILLED, summary.getStatus());
     }
 
     @Test

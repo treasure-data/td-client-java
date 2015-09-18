@@ -220,12 +220,12 @@ public class TDClient
 
     private static Pattern acceptableNamePattern = Pattern.compile("^([a-z0-9_]+)$");
 
-    private static String validateDatabaseName(String databaseName)
+    static String validateDatabaseName(String databaseName)
     {
         return validateName(databaseName, "Database");
     }
 
-    private static String validateTableName(String tableName)
+    static String validateTableName(String tableName)
     {
         return validateName(tableName, "Table");
     }
@@ -423,10 +423,10 @@ public class TDClient
     }
 
     @Override
-    public TDJobList listJobs(long from, long to)
+    public TDJobList listJobs(long fromJobId, long toJobId)
             throws TDClientException
     {
-        return doGet(String.format("/v3/job/list?from=%d&to=%d", from, to), TDJobList.class);
+        return doGet(String.format("/v3/job/list?from_id=%d&to_id=%d", fromJobId, toJobId), TDJobList.class);
     }
 
     @Override
