@@ -108,7 +108,6 @@ public class TestProxyAccess
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
         proxy.setHost("localhost");
         proxy.setPort(proxyPort);
-        proxy.useSSL(true);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS);
         TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
