@@ -155,6 +155,7 @@ public class TestTDClient
 
         TDJobList jobsInAnIDRange = client.listJobs(34022478, 34022600);
         logger.debug("job list: " + jobsInAnIDRange);
+        assertTrue(jobsInAnIDRange.getJobs().size() > 0);
     }
 
     @Test
@@ -371,7 +372,7 @@ public class TestTDClient
             client.performBulkImportSession(session);
 
             // Wait the perform completion
-            long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
+            long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
             bs = client.getBulkImportSession(session);
             while (bs.getStatus() == TDBulkImportSession.ImportStatus.PERFORMING) {
                 if (System.currentTimeMillis() > deadline) {
