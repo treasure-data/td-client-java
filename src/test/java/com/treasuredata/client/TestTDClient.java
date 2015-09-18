@@ -260,6 +260,24 @@ public class TestTDClient
 
         client.createTableIfNotExists(SAMPLE_DB, SAMPLE_TABLE);
 
+        // conflict test
+        try {
+            client.createTable(SAMPLE_DB, SAMPLE_TABLE);
+            fail("should not reach here");
+        }
+        catch (TDClientHttpConflictException e) {
+            // OK
+        }
+
+        // not found test
+        try {
+            client.listTables("__unknown__database");
+            fail("should not reach here");
+        }
+        catch (TDClientHttpNotFoundException e) {
+            // OK
+        }
+
         // rename
         String newTableName = SAMPLE_TABLE + "_renamed";
         client.deleteTableIfExists(SAMPLE_DB, newTableName);
