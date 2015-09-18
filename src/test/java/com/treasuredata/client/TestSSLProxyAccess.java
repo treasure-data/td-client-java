@@ -24,6 +24,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
@@ -33,8 +34,6 @@ import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,25 +41,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class TestProxyAccess
+/**
+ *
+ */
+public class TestSSLProxyAccess
 {
     private static Logger logger = LoggerFactory.getLogger(TestProxyAccess.class);
     private HttpProxyServer proxyServer;
     private int proxyPort;
-
-    static int findAvailablePort()
-            throws IOException
-    {
-        ServerSocket socket = new ServerSocket(0);
-        try {
-            int port = socket.getLocalPort();
-            return port;
-        }
-        finally {
-            socket.close();
-        }
-    }
-
     private static final String PROXY_USER = "test";
     private static final String PROXY_PASS = "helloproxy";
     private AtomicInteger proxyAccessCount = new AtomicInteger(0);
@@ -70,8 +58,10 @@ public class TestProxyAccess
             throws Exception
     {
         proxyAccessCount.set(0);
-        this.proxyPort = findAvailablePort();
-        this.proxyServer = DefaultHttpProxyServer.bootstrap().withPort(proxyPort)
+        this.proxyPort = TestProxyAccess.findAvailablePort();
+        this.proxyServer = DefaultHttpProxyServer
+                .bootstrap()
+                .withPort(proxyPort)
                 .withProxyAuthenticator(new ProxyAuthenticator()
                 {
                     @Override
@@ -106,31 +96,39 @@ public class TestProxyAccess
     public void proxyApiAccess()
     {
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
+        proxy.useSSL(true);
         proxy.setHost("localhost");
         proxy.setPort(proxyPort);
-        proxy.useSSL(true);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS);
-        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
+        TDClient client = new TDClient(TDClientConfig
+                .newBuilder()
+                .setProxyConfig(proxy.createProxyConfig())
+                .build());
         try {
+            client.serverStatus();
+            assertEquals(1, proxyAccessCount.get());
+
             List<TDTable> tableList = client.listTables("sample_datasets");
             assertTrue(tableList.size() >= 2);
-            assertEquals(1, proxyAccessCount.get());
+            assertEquals(2, proxyAccessCount.get());
 
             TDJobList jobList = client.listJobs();
             assertTrue(jobList.getJobs().size() > 0);
-            assertEquals(2, proxyAccessCount.get());
+            assertEquals(3, proxyAccessCount.get());
         }
         finally {
             logger.debug("proxy access count: {}", proxyAccessCount);
         }
     }
 
+    @Ignore
     @Test
     public void wrongPassword()
     {
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
         proxy.setHost("localhost");
+        proxy.useSSL(true);
         proxy.setPort(proxyPort);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS + "---"); // Use an wrong password

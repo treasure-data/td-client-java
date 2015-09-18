@@ -56,6 +56,7 @@ public class TDClientConfig
     public static final String TD_CLIENT_PROXY_HOST = "td.client.proxy.host";
     public static final String TD_CLIENT_PROXY_PORT = "td.client.proxy.port";
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
+    public static final String TD_CLIENT_PROXY_USESSL = "td.client.proxy.usessl";
     public static final String TD_CLIENT_PROXY_PASSWORD = "td.client.proxy.password";
     /**
      * endpoint URL (e.g., api.treasuredata.com, ybi.jp-east.idcfcloud.com)
@@ -74,7 +75,12 @@ public class TDClientConfig
     private final int connectTimeoutMillis;
     private final int idleTimeoutMillis;
     private final int connectionPoolSize;
-    private static TDClientConfig currentConfig;
+    private static Properties tdConf;
+
+    public TDClientConfig withProxy(ProxyConfig proxy)
+    {
+        return new Builder(this).setProxyConfig(proxy).build();
+    }
 
     /**
      * Get the default TDClientConfig by reading $HOME/.td/td.conf file.
@@ -86,16 +92,15 @@ public class TDClientConfig
     public static TDClientConfig currentConfig()
             throws TDClientException
     {
-        if (currentConfig == null) {
-            Properties p = readTDConf();
-            currentConfig = new Builder(p).build();
-        }
-        return currentConfig;
+        return newBuilder().build();
     }
 
-    public TDClientConfig withProxy(ProxyConfig proxy)
+    public static Builder newBuilder()
     {
-        return new Builder(this).setProxyConfig(proxy).build();
+        if (tdConf == null) {
+            tdConf = readTDConf();
+        }
+        return new Builder(tdConf);
     }
 
     /**
@@ -273,7 +278,7 @@ public class TDClientConfig
     {
         private Optional<String> endpoint = Optional.absent();
         private Optional<Integer> port = Optional.absent();
-        private boolean useSSL = false;
+        private boolean useSSL;
         private Optional<String> apiKey = Optional.absent();
         private Optional<String> user = Optional.absent();
         private Optional<String> password = Optional.absent();
@@ -306,13 +311,14 @@ public class TDClientConfig
             }
         }
 
-        public Builder()
+        Builder()
         {
             this(new Properties());
         }
 
         /***
          * Cnstructor used for copying and overwriting an existing configuration
+         *
          * @param config
          */
         Builder(TDClientConfig config)
@@ -332,7 +338,15 @@ public class TDClientConfig
             this.connectionPoolSize = config.connectionPoolSize;
         }
 
-        public Builder(Properties defaultValues)
+        /**
+         * Populate a builder populated with the default values. Precedence of the default values is:
+         * - Environment variable
+         * - System property
+         * - Given Property object
+         *
+         * @param defaultValues
+         */
+        Builder(Properties defaultValues)
         {
             this.endpoint = getConfigProperty(TD_CLIENT_API_ENDPOINT, defaultValues);
             this.port = getConfigPropertyInt(TD_CLIENT_API_PORT, defaultValues);
@@ -351,6 +365,7 @@ public class TDClientConfig
             // proxy
             Optional<String> proxyHost = getConfigProperty(TD_CLIENT_PROXY_HOST, defaultValues);
             Optional<Integer> proxyPort = getConfigPropertyInt(TD_CLIENT_PROXY_PORT, defaultValues);
+            Optional<String> proxyUseSSL = getConfigProperty(TD_CLIENT_PROXY_USESSL, defaultValues);
             Optional<String> proxyUser = getConfigProperty(TD_CLIENT_PROXY_USER, defaultValues);
             Optional<String> proxyPassword = getConfigProperty(TD_CLIENT_PROXY_PASSWORD, defaultValues);
             boolean hasProxy = false;
@@ -362,6 +377,10 @@ public class TDClientConfig
             if (proxyPort.isPresent()) {
                 hasProxy = true;
                 proxyConfig.setPort(proxyPort.get());
+            }
+            if (proxyUseSSL.isPresent()) {
+                hasProxy = true;
+                proxyConfig.useSSL(Boolean.parseBoolean(proxyUseSSL.get()));
             }
             if (proxyUser.isPresent()) {
                 hasProxy = true;
