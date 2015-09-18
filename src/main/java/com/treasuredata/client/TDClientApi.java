@@ -183,11 +183,11 @@ public interface TDClientApi<ClientImpl>
 
     void unfreezeBulkImportSession(String sessionName);
 
-    void performBulkImportSession(String sessionName, int priority);
+    void performBulkImportSession(String sessionName);
 
     void commitBulkImportSession(String sessionName);
 
     void deleteBulkImportSession(String sessionName);
 
-    void getBulkImportErrorRecords(String sessionName);
+    <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
 }

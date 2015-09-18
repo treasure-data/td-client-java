@@ -488,7 +488,7 @@ public class TDClient
     @Override
     public void uploadBulkImportPart(String sessionName, String uniquePartName, File path)
     {
-        doPut(buildUrl("/v3/bulk_import/upload_port", sessionName, uniquePartName), path);
+        doPut(buildUrl("/v3/bulk_import/upload_part", sessionName, uniquePartName), path);
     }
 
     public void deleteBulkImportPart(String sessionName, String uniquePartName)
@@ -509,7 +509,7 @@ public class TDClient
     }
 
     @Override
-    public void performBulkImportSession(String sessionName, int priority)
+    public void performBulkImportSession(String sessionName)
     {
         doPost(buildUrl("/v3/bulk_import/perform", sessionName));
     }
@@ -527,9 +527,12 @@ public class TDClient
     }
 
     @Override
-    public void getBulkImportErrorRecords(String sessionName)
+    public <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler)
     {
-        // TODO: MessagePack Stream
-        // doGet(buildUrl("/v3/bulk_import/error_records", sessionName));
+        TDApiRequest request = TDApiRequest.Builder
+                .GET(buildUrl("/v3/bulk_import/error_records", sessionName))
+                .build();
+        return httpClient.<Result>call(request, apiKeyCache, resultStreamHandler);
+
     }
 }

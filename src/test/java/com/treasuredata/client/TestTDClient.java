@@ -20,8 +20,12 @@ package com.treasuredata.client;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
+import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -37,17 +41,26 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ArrayValue;
+import org.msgpack.value.Value;
+import org.msgpack.value.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import static com.treasuredata.client.TDClientConfig.firstNonNull;
 import static org.junit.Assert.assertEquals;
@@ -236,6 +249,7 @@ public class TestTDClient
 
     private static final String SAMPLE_DB = "_tdclient_test";
     private static final String SAMPLE_TABLE = "sample";
+    private static final String BULK_IMPORT_TABLE = "sample_bi";
 
     @Test
     public void databaseOperation()
@@ -291,9 +305,142 @@ public class TestTDClient
 
     @Ignore
     @Test
-    public void testBuilkImport()
+    public void testBulkImport()
+            throws Exception
     {
-        // TODO
+        client.deleteTableIfExists(SAMPLE_DB, BULK_IMPORT_TABLE);
+        client.createTableIfNotExists(SAMPLE_DB, BULK_IMPORT_TABLE);
+
+        final int numRowsInPart = 10;
+        String session = "td-client-java-test-session";
+        try {
+            client.createBulkImportSession(session, SAMPLE_DB, BULK_IMPORT_TABLE);
+
+            TDBulkImportSession bs = client.getBulkImportSession(session);
+            assertEquals(session, bs.getName());
+            assertEquals(SAMPLE_DB, bs.getDatabaseName());
+            assertEquals(BULK_IMPORT_TABLE, bs.getTableName());
+
+            int count = 0;
+            final long time = System.currentTimeMillis() / 1000;
+
+            // Upload part 0, 1, 2
+            for (int i = 0; i < 3; ++i) {
+                String partName = "bip" + i;
+                // Prepare msgpack.gz
+                ByteArrayOutputStream buf = new ByteArrayOutputStream();
+                OutputStream out = new GZIPOutputStream(buf);
+                MessagePacker packer = MessagePack.newDefaultPacker(out);
+                for (int n = 0; n < numRowsInPart; ++n) {
+                    ValueFactory.MapBuilder b = ValueFactory.newMapBuilder();
+                    b.put(ValueFactory.newString("time"), ValueFactory.newInteger(time + count));
+                    b.put(ValueFactory.newString("event"), ValueFactory.newString("log" + count));
+                    b.put(ValueFactory.newString("description"), ValueFactory.newString("sample data"));
+                    packer.packValue(b.build());
+                    count += 1;
+                }
+                // Embed an error record
+                packer.packValue(ValueFactory.newMap(new Value[] {ValueFactory.newNil(), ValueFactory.newString("invalid data")}));
+
+                packer.close();
+                out.close();
+
+                File tmpFile = File.createTempFile(partName, ".msgpack.gz", new File("target"));
+                Files.write(tmpFile.toPath(), buf.toByteArray());
+                client.uploadBulkImportPart(session, partName, tmpFile);
+
+                // list parts
+                List<String> parts = client.listBulkImportParts(session);
+                assertTrue(parts.contains(partName));
+
+                // freeze test
+                client.freezeBulkImportSession(session);
+
+                // unfreeze test
+                client.unfreezeBulkImportSession(session);
+            }
+
+            // delete the last
+            client.deleteBulkImportPart(session, "bip2");
+
+            List<String> parts = client.listBulkImportParts(session);
+            assertTrue(!parts.contains("bip2"));
+
+            // Freeze the session
+            client.freezeBulkImportSession(session);
+
+            // Perform the session
+            client.performBulkImportSession(session);
+
+            // Wait the perform completion
+            long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
+            bs = client.getBulkImportSession(session);
+            while (bs.getStatus() == TDBulkImportSession.ImportStatus.PERFORMING) {
+                if (System.currentTimeMillis() > deadline) {
+                    throw new IllegalStateException("timeout error: bulk import perform");
+                }
+                logger.info("Waiting bulk import completion");
+                Thread.sleep(TimeUnit.SECONDS.toMillis(10));
+                bs = client.getBulkImportSession(session);
+            }
+
+            // Error record check
+            int errorCount = client.getBulkImportErrorRecords(session, new Function<InputStream, Integer>()
+            {
+                int errorRecordCount = 0;
+
+                @Override
+                public Integer apply(InputStream input)
+                {
+                    try {
+                        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
+                        while (unpacker.hasNext()) {
+                            Value v = unpacker.unpackValue();
+                            logger.info("error record: " + v);
+                            errorRecordCount += 1;
+                        }
+                        return errorRecordCount;
+                    }
+                    catch (IOException e) {
+                        throw Throwables.propagate(e);
+                    }
+                }
+            });
+            assertEquals(2, errorCount);
+
+            // Commit the session
+            deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
+            client.commitBulkImportSession(session);
+
+            // Wait the commit completion
+            bs = client.getBulkImportSession(session);
+            while (bs.getStatus() != TDBulkImportSession.ImportStatus.COMMITTED) {
+                if (System.currentTimeMillis() > deadline) {
+                    throw new IllegalStateException("timeout error: bulk import commit");
+                }
+                logger.info("Waiting bulk import perform step completion");
+                Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+                bs = client.getBulkImportSession(session);
+            }
+
+            // Check the data
+            TDTable imported = Iterables.find(client.listTables(SAMPLE_DB), new Predicate<TDTable>()
+            {
+                @Override
+                public boolean apply(TDTable input)
+                {
+                    return input.getName().equals(BULK_IMPORT_TABLE);
+                }
+            });
+
+            assertEquals(numRowsInPart * 2, imported.getRowCount());
+            List<TDColumn> columns = imported.getColumns();
+            logger.info(Joiner.on(", ").join(columns));
+            assertEquals(2, columns.size()); // event, description, (time)
+        }
+        finally {
+            client.deleteBulkImportSession(session);
+        }
     }
 
     @Test
