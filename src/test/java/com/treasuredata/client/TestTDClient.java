@@ -20,9 +20,7 @@ package com.treasuredata.client;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Iterators;
 import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
@@ -79,23 +77,23 @@ public class TestTDClient
     }
 
     @Test
-    public void dbNameValidation() {
+    public void dbNameValidation()
+    {
         TDClient.validateDatabaseName("abc01234_134");
         TDClient.validateTableName("ab430_9");
         try {
             TDClient.validateDatabaseName("a");
         }
-        catch(TDClientException e) {
+        catch (TDClientException e) {
             assertEquals(TDClientException.ErrorType.INVALID_INPUT, e.getErrorType());
         }
         try {
             TDClient.validateDatabaseName("a---4");
         }
-        catch(TDClientException e) {
+        catch (TDClientException e) {
             assertEquals(TDClientException.ErrorType.INVALID_INPUT, e.getErrorType());
         }
     }
-
 
     @Test
     public void serverStatus()

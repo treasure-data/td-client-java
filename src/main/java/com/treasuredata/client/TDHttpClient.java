@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -51,8 +50,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -157,45 +154,6 @@ public class TDHttpClient
                     return new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
                 }
             };
-    private static final ThreadLocal<MessageDigest> SHA1 =
-            new ThreadLocal<MessageDigest>()
-            {
-                @Override
-                protected MessageDigest initialValue()
-                {
-                    try {
-                        return MessageDigest.getInstance("SHA-1");
-                    }
-                    catch (NoSuchAlgorithmException e) {
-                        throw new RuntimeException("SHA-1 digest algorithm must be available but not found", e);
-                    }
-                }
-            };
-    private static final char[] hexChars = new char[16];
-
-    static {
-        for (int i = 0; i < 16; i++) {
-            hexChars[i] = Integer.toHexString(i).charAt(0);
-        }
-    }
-
-    @VisibleForTesting
-    static String sha1HexFromString(String string)
-    {
-        MessageDigest sha1 = SHA1.get();
-        sha1.reset();
-        sha1.update(string.getBytes(StandardCharsets.UTF_8));
-        byte[] bytes = sha1.digest();
-
-        // convert binary to hex string
-        char[] array = new char[bytes.length * 2];
-        for (int i = 0; i < bytes.length; i++) {
-            int b = (int) bytes[i];
-            array[i * 2] = hexChars[(b & 0xf0) >> 4];
-            array[i * 2 + 1] = hexChars[b & 0x0f];
-        }
-        return new String(array);
-    }
 
     public Response submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
