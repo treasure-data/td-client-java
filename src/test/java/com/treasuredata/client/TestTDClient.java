@@ -162,7 +162,7 @@ public class TestTDClient
     public void submitJob()
             throws Exception
     {
-        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(*) from nasdaq"));
+        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq"));
         logger.debug("job id: " + jobId);
 
         int retryCount = 0;
