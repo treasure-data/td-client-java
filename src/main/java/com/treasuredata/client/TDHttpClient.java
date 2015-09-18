@@ -28,6 +28,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.treasuredata.client.model.TDApiErrorMessage;
+import org.eclipse.jetty.client.HttpResponseException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.B64Code;
 import org.glassfish.jersey.client.ClientConfig;
@@ -243,38 +244,21 @@ public class TDHttpClient
                     }
                     else {
                         byte[] returnedContent = response.readEntity(byte[].class);
-                        Optional<TDApiErrorMessage> errorResponse = parseErrorResponse(returnedContent);
-                        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
-                        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequest.getPath(), responseErrorText);
-                        if (HttpStatus.isClientError(code)) {
-                            logger.error(errorMessage);
-                            // 4xx error. We do not retry the execution on this type of error
-                            switch (code) {
-                                case HttpStatus.UNAUTHORIZED_401:
-                                    throw new TDClientHttpUnauthorizedException(errorMessage);
-                                case HttpStatus.NOT_FOUND_404:
-                                    throw new TDClientHttpNotFoundException(errorMessage);
-                                case HttpStatus.CONFLICT_409:
-                                    throw new TDClientHttpConflictException(errorMessage);
-                                case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
-                                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code);
-                                default:
-                                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code);
-                            }
-                        }
-                        logger.warn(errorMessage);
-                        if (HttpStatus.isServerError(code)) {
-                            // 5xx errors
-                            rootCause = Optional.<TDClientException>of(new TDClientHttpException(SERVER_ERROR, errorMessage, code));
-                        }
-                        else {
-                            rootCause = Optional.<TDClientException>of(new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code));
-                        }
+                        rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent));
                     }
                 }
                 catch (ProcessingException e) {
                     logger.warn("API request failed", e);
-                    rootCause = Optional.<TDClientException>of(new TDClientProcessingException(e));
+                    // Jetty client + jersey may return ProcessingException for 401 errors
+                    Optional<HttpResponseException> responseError = findHttpResponseException(e);
+                    if (responseError.isPresent()) {
+                        HttpResponseException re = responseError.get();
+                        int code = re.getResponse().getStatus();
+                        throw handleHttpResponseError(apiRequest.getPath(), code, new byte[] {});
+                    }
+                    else {
+                        throw new TDClientProcessingException(e);
+                    }
                 }
                 finally {
                     if (response != null) {
@@ -294,6 +278,52 @@ public class TDHttpClient
         checkState(rootCause.isPresent(), "rootCause must be present here");
         // Throw the last seen error
         throw rootCause.get();
+    }
+
+    protected TDClientException handleHttpResponseError(String apiRequestPath, int code, byte[] returnedContent)
+    {
+        Optional<TDApiErrorMessage> errorResponse = parseErrorResponse(returnedContent);
+        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
+        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequestPath, responseErrorText);
+        if (HttpStatus.isClientError(code)) {
+            logger.error(errorMessage);
+            // 4xx error. We do not retry the execution on this type of error
+            switch (code) {
+                case HttpStatus.UNAUTHORIZED_401:
+                    throw new TDClientHttpUnauthorizedException(errorMessage);
+                case HttpStatus.NOT_FOUND_404:
+                    throw new TDClientHttpNotFoundException(errorMessage);
+                case HttpStatus.CONFLICT_409:
+                    throw new TDClientHttpConflictException(errorMessage);
+                case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
+                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code);
+                default:
+                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code);
+            }
+        }
+        logger.warn(errorMessage);
+        if (HttpStatus.isServerError(code)) {
+            // 5xx errors
+            return new TDClientHttpException(SERVER_ERROR, errorMessage, code);
+        }
+        else {
+            return new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code);
+        }
+    }
+
+    protected static Optional<HttpResponseException> findHttpResponseException(Throwable e)
+    {
+        if (e == null) {
+            return Optional.absent();
+        }
+        else {
+            if (HttpResponseException.class.isAssignableFrom(e.getClass())) {
+                return Optional.of((HttpResponseException) e);
+            }
+            else {
+                return findHttpResponseException(e.getCause());
+            }
+        }
     }
 
     public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)

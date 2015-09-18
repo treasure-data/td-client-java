@@ -28,6 +28,7 @@ import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
+import org.eclipse.jetty.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -267,6 +268,7 @@ public class TestTDClient
         }
         catch (TDClientHttpConflictException e) {
             // OK
+            assertEquals(HttpStatus.CONFLICT_409, e.getStatusCode());
         }
 
         // not found test
@@ -276,6 +278,7 @@ public class TestTDClient
         }
         catch (TDClientHttpNotFoundException e) {
             // OK
+            assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
         }
 
         // rename
@@ -305,5 +308,19 @@ public class TestTDClient
         TDClient newClient = client.authenticate(user, password);
         List<TDTable> tableList = newClient.listTables("sample_datasets");
         assertTrue(tableList.size() >= 2);
+    }
+
+    @Test
+    public void wrongApiKey()
+    {
+        TDClient client = new TDClient(new TDClientConfig.Builder().setApiKey("1/xxfasdfafd").build()); // Set a wrong API key
+        try {
+            client.listDatabases();
+            fail("should not reach here");
+        }
+        catch (TDClientHttpUnauthorizedException e) {
+            // OK
+            assertEquals(HttpStatus.UNAUTHORIZED_401, e.getStatusCode());
+        }
     }
 }
