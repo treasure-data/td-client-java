@@ -158,6 +158,26 @@ public class TestTDClient
         assertTrue(jobsInAnIDRange.getJobs().size() > 0);
     }
 
+    private TDJobSummary waitJobCompletion(String jobId)
+            throws InterruptedException
+    {
+        int retryCount = 0;
+        long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
+
+        TDJobSummary tdJob = null;
+        do {
+            if (System.currentTimeMillis() > deadline) {
+                throw new IllegalStateException(String.format("waiting job %s has timed out", jobId));
+            }
+            Thread.sleep(1000);
+            tdJob = client.jobStatus(jobId);
+            logger.debug("job status: " + tdJob);
+            retryCount++;
+        }
+        while (retryCount < 10 && !tdJob.getStatus().isFinished());
+        return tdJob;
+    }
+
     @Test
     public void submitJob()
             throws Exception
@@ -167,15 +187,7 @@ public class TestTDClient
 
         int retryCount = 0;
 
-        TDJobSummary tdJob = null;
-        do {
-            Thread.sleep(1000);
-            tdJob = client.jobStatus(jobId);
-            logger.debug("job status: " + tdJob);
-            retryCount++;
-        }
-        while (retryCount < 10 && !tdJob.getStatus().isFinished());
-
+        TDJobSummary tdJob = waitJobCompletion(jobId);
         TDJob jobInfo = client.jobInfo(jobId);
         logger.debug("job show result: " + tdJob);
 
@@ -222,6 +234,17 @@ public class TestTDClient
                 }
             }
         });
+    }
+
+    @Test
+    public void submitJobWithResultOutput()
+            throws Exception
+    {
+        client.deleteTableIfExists(SAMPLE_DB, "sample_output");
+        String resultOutput = String.format("td://%s@/%s/sample_output?mode=replace", TDClientConfig.currentConfig().getApiKey().get(), SAMPLE_DB);
+        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", resultOutput));
+        TDJobSummary tdJob = waitJobCompletion(jobId);
+        client.existsTable(SAMPLE_DB, "sample_output");
     }
 
     @Test
@@ -311,14 +334,26 @@ public class TestTDClient
         client.createTableIfNotExists(SAMPLE_DB, BULK_IMPORT_TABLE);
 
         final int numRowsInPart = 10;
-        String session = "td-client-java-test-session";
+        final String session = "td-client-java-test-session";
         try {
             client.createBulkImportSession(session, SAMPLE_DB, BULK_IMPORT_TABLE);
+
+            List<TDBulkImportSession> sessionList = client.listBulkImportSessions();
+            TDBulkImportSession foundInList = Iterables.find(sessionList, new Predicate<TDBulkImportSession>()
+            {
+                @Override
+                public boolean apply(TDBulkImportSession input)
+                {
+                    return input.getName().equals(session);
+                }
+            });
 
             TDBulkImportSession bs = client.getBulkImportSession(session);
             assertEquals(session, bs.getName());
             assertEquals(SAMPLE_DB, bs.getDatabaseName());
             assertEquals(BULK_IMPORT_TABLE, bs.getTableName());
+
+            assertEquals(foundInList, bs);
 
             int count = 0;
             final long time = System.currentTimeMillis() / 1000;

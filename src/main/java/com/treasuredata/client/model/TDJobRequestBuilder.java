@@ -29,9 +29,10 @@ public class TDJobRequestBuilder
     private String result;
     private int retryLimit = 10;
 
-    public void setResult(String result)
+    public TDJobRequestBuilder setResultOutput(String result)
     {
         this.result = result;
+        return this;
     }
 
     public TDJobRequestBuilder setDatabase(String database)

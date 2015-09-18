@@ -51,11 +51,30 @@ public class TDJobRequest
                 .createTDJobRequest();
     }
 
+    public static TDJobRequest newPrestoQuery(String database, String query, String resultOutput)
+    {
+        return new TDJobRequestBuilder()
+                .setType(TDJob.Type.PRESTO)
+                .setDatabase(database)
+                .setQuery(query)
+                .setResultOutput(resultOutput)
+                .createTDJobRequest();
+    }
+
     public static TDJobRequest newHiveQuery(String database, String query)
     {
         return new TDJobRequestBuilder().setType(TDJob.Type.HIVE)
                 .setDatabase(database)
                 .setQuery(query)
+                .createTDJobRequest();
+    }
+
+    public static TDJobRequest newHiveQuery(String database, String query, String resultOutput)
+    {
+        return new TDJobRequestBuilder().setType(TDJob.Type.HIVE)
+                .setDatabase(database)
+                .setQuery(query)
+                .setResultOutput(resultOutput)
                 .createTDJobRequest();
     }
 
