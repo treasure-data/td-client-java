@@ -201,6 +201,7 @@ public class TDHttpClient
     {
         String queryStr = "";
         String requestUri = String.format("%s%s%s", config.getHttpScheme(), config.getEndpoint(), apiRequest.getPath());
+        logger.debug("Sending API request to {}", requestUri);
         WebTarget target = httpClient.target(requestUri);
         if (!apiRequest.getQueryParams().isEmpty()) {
             List<String> queryParamList = new ArrayList<String>(apiRequest.getQueryParams().size());
@@ -275,7 +276,6 @@ public class TDHttpClient
 
                 Response response = null;
                 try {
-                    logger.debug("Sending API request to {}", apiRequest.getPath());
                     response = submitRequest(apiRequest, apiKeyCache);
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {

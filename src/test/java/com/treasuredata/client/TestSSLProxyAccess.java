@@ -18,12 +18,10 @@
  */
 package com.treasuredata.client;
 
-import com.sun.istack.internal.tools.DefaultAuthenticator;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDTable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -32,22 +30,10 @@ import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.ProxyAuthenticator;
-import org.littleshoot.proxy.extras.SelfSignedSslEngineSource;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HttpsURLConnection;
-
-import java.io.InputStream;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -76,17 +62,16 @@ public class TestSSLProxyAccess
         this.proxyServer = DefaultHttpProxyServer
                 .bootstrap()
                 .withPort(proxyPort)
-                .withSslEngineSource(new SelfSignedSslEngineSource(true, false))
-//                .withProxyAuthenticator(new ProxyAuthenticator()
-//                {
-//                    @Override
-//                    public boolean authenticate(String user, String pass)
-//                    {
-//                        boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
-//                        logger.debug("Proxy Authentication: " + (isValid ? "success" : "failure"));
-//                        return isValid;
-//                    }
-//                })
+                .withProxyAuthenticator(new ProxyAuthenticator()
+                {
+                    @Override
+                    public boolean authenticate(String user, String pass)
+                    {
+                        boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
+                        logger.debug("Proxy Authentication: " + (isValid ? "success" : "failure"));
+                        return isValid;
+                    }
+                })
                 .withFiltersSource(new HttpFiltersSourceAdapter()
                 {
                     @Override
@@ -108,48 +93,29 @@ public class TestSSLProxyAccess
     }
 
     @Test
-    public void httpsProxyServerTest()
-            throws Exception
-    {
-        System.setProperty("http.proxyHost", "localhost");
-        System.setProperty("http.proxyPort", Integer.toString(proxyPort));
-        try {
-            URL url = new URL("http://api.treasuredata.com/v3/system/server_status");
-            try (InputStream in = url.openConnection().getInputStream()) {
-                String content = IOUtils.toString(in);
-                logger.info(content);
-            }
-            assertEquals(1, proxyAccessCount.get());
-        }
-        finally {
-            System.clearProperty("http.proxyHost");
-            System.clearProperty("http.proxyPort");
-        }
-
-    }
-
-    @Test
     public void proxyApiAccess()
     {
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
         proxy.useSSL(true);
         proxy.setHost("localhost");
         proxy.setPort(proxyPort);
-        //proxy.setUser(PROXY_USER);
-        //proxy.setPassword(PROXY_PASS);
+        proxy.setUser(PROXY_USER);
+        proxy.setPassword(PROXY_PASS);
         TDClient client = new TDClient(TDClientConfig
                 .newBuilder()
-                .setUseSSL(true)
                 .setProxyConfig(proxy.createProxyConfig())
                 .build());
         try {
+            client.serverStatus();
+            assertEquals(1, proxyAccessCount.get());
+
             List<TDTable> tableList = client.listTables("sample_datasets");
             assertTrue(tableList.size() >= 2);
-            assertEquals(1, proxyAccessCount.get());
+            assertEquals(2, proxyAccessCount.get());
 
             TDJobList jobList = client.listJobs();
             assertTrue(jobList.getJobs().size() > 0);
-            assertEquals(2, proxyAccessCount.get());
+            assertEquals(3, proxyAccessCount.get());
         }
         finally {
             logger.debug("proxy access count: {}", proxyAccessCount);

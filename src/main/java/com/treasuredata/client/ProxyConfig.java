@@ -93,8 +93,8 @@ public class ProxyConfig
         private String host = "localhost";
         private int port = 8080;
         private boolean useSSL = false;
-        private Optional<String> user;
-        private Optional<String> password;
+        private Optional<String> user = Optional.absent();
+        private Optional<String> password = Optional.absent();
 
         public ProxyConfigBuilder()
         {

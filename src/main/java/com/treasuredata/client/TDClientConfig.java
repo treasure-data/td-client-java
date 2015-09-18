@@ -95,7 +95,8 @@ public class TDClientConfig
         return newBuilder().build();
     }
 
-    public static Builder newBuilder() {
+    public static Builder newBuilder()
+    {
         if (tdConf == null) {
             tdConf = readTDConf();
         }
@@ -277,7 +278,7 @@ public class TDClientConfig
     {
         private Optional<String> endpoint = Optional.absent();
         private Optional<Integer> port = Optional.absent();
-        private boolean useSSL = false;
+        private boolean useSSL;
         private Optional<String> apiKey = Optional.absent();
         private Optional<String> user = Optional.absent();
         private Optional<String> password = Optional.absent();
@@ -317,6 +318,7 @@ public class TDClientConfig
 
         /***
          * Cnstructor used for copying and overwriting an existing configuration
+         *
          * @param config
          */
         Builder(TDClientConfig config)
@@ -338,9 +340,10 @@ public class TDClientConfig
 
         /**
          * Populate a builder populated with the default values. Precedence of the default values is:
-         *  - Environment variable
-         *  - System property
-         *  - Given Property object
+         * - Environment variable
+         * - System property
+         * - Given Property object
+         *
          * @param defaultValues
          */
         Builder(Properties defaultValues)
@@ -375,7 +378,7 @@ public class TDClientConfig
                 hasProxy = true;
                 proxyConfig.setPort(proxyPort.get());
             }
-            if(proxyUseSSL.isPresent()) {
+            if (proxyUseSSL.isPresent()) {
                 hasProxy = true;
                 proxyConfig.useSSL(Boolean.parseBoolean(proxyUseSSL.get()));
             }
