@@ -20,6 +20,7 @@ package com.treasuredata.client;
 
 import org.junit.Test;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -43,6 +44,7 @@ import static com.treasuredata.client.TDClientConfig.TD_CLIENT_USESSL;
 import static com.treasuredata.client.TDClientConfig.newConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -102,5 +104,17 @@ public class TestTDClientConfig
         assertEquals(m.get(TD_CLIENT_PROXY_USER), proxy.getUser().get());
         assertEquals(m.get(TD_CLIENT_PROXY_USESSL), proxy.useSSL());
         assertEquals(m.get(TD_CLIENT_PROXY_PASSWORD), proxy.getPassword().get());
+    }
+
+    @Test
+    public void readInvalidFile()
+    {
+        try {
+            TDClientConfig.readTDConf(new File("target/missing-file-xxxxxxx"));
+            fail("should not reach here");
+        }
+        catch (TDClientException e) {
+            assertEquals(TDClientException.ErrorType.INVALID_CONFIGURATION, e.getErrorType());
+        }
     }
 }
