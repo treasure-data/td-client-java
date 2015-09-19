@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -62,7 +63,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
 import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE;
-import static com.treasuredata.client.TDClientException.ErrorType.RESPONSE_READ_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
 
@@ -127,7 +127,8 @@ public class TDHttpClient
         }
     }
 
-    protected Optional<TDApiErrorMessage> parseErrorResponse(byte[] content)
+    @VisibleForTesting
+    Optional<TDApiErrorMessage> parseErrorResponse(byte[] content)
     {
         try {
             if (content.length > 0 && content[0] == '{') {
@@ -159,7 +160,7 @@ public class TDHttpClient
     public Response submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
-        String requestUri = String.format("%s%s%s", config.getHttpScheme(), config.getEndpoint(), apiRequest.getPath());
+        String requestUri = String.format("%s%s:%s%s", config.getHttpScheme(), config.getEndpoint(), config.getPort(), apiRequest.getPath());
         logger.debug("Sending API request to {}", requestUri);
         WebTarget target = httpClient.target(requestUri);
         if (!apiRequest.getQueryParams().isEmpty()) {
@@ -307,7 +308,7 @@ public class TDHttpClient
             return new TDClientHttpException(SERVER_ERROR, errorMessage, code);
         }
         else {
-            return new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code);
+            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code);
         }
     }
 
@@ -384,7 +385,7 @@ public class TDHttpClient
                     throw new TDClientException(INVALID_JSON_RESPONSE, e);
                 }
                 catch (IOException e) {
-                    throw new TDClientException(RESPONSE_READ_FAILURE, e);
+                    throw new TDClientException(INVALID_JSON_RESPONSE, e);
                 }
             }
         });

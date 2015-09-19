@@ -49,8 +49,7 @@ public class TDClientException
         REQUEST_TIMEOUT,
         EXECUTION_FAILURE,
         UNEXPECTED_RESPONSE_CODE,
-        INVALID_JSON_RESPONSE,
-        RESPONSE_READ_FAILURE;
+        INVALID_JSON_RESPONSE;
     }
 
     private final ErrorType errorType;
