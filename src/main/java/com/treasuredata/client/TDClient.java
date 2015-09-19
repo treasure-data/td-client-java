@@ -68,9 +68,10 @@ public class TDClient
         return version;
     }
 
-    static String readMavenVersion(URL mavenProperties) {
+    static String readMavenVersion(URL mavenProperties)
+    {
         String v = "unknown";
-        if(mavenProperties != null) {
+        if (mavenProperties != null) {
             try (InputStream in = mavenProperties.openStream()) {
                 Properties p = new Properties();
                 p.load(in);
@@ -527,6 +528,5 @@ public class TDClient
                 .GET(buildUrl("/v3/bulk_import/error_records", sessionName))
                 .build();
         return httpClient.<Result>call(request, apiKeyCache, resultStreamHandler);
-
     }
 }

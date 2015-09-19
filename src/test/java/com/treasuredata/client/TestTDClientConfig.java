@@ -22,8 +22,6 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
