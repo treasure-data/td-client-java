@@ -68,10 +68,9 @@ public class TDClient
         return version;
     }
 
-    static {
-        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client.td-client/pom.properties");
+    static String readMavenVersion(URL mavenProperties) {
         String v = "unknown";
-        if (mavenProperties != null) {
+        if(mavenProperties != null) {
             try (InputStream in = mavenProperties.openStream()) {
                 Properties p = new Properties();
                 p.load(in);
@@ -81,7 +80,12 @@ public class TDClient
                 logger.warn("Error in reading pom.properties file", e);
             }
         }
-        version = v;
+        return v;
+    }
+
+    static {
+        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client.td-client/pom.properties");
+        version = readMavenVersion(mavenProperties);
         logger.info("td-client version: " + version);
     }
 

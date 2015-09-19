@@ -92,6 +92,12 @@ public class TestTDClient
     }
 
     @Test
+    public void readMavenVersion() {
+        String v = TDClient.readMavenVersion(TestTDClient.class.getResource("/pom.properties"));
+        assertEquals("0.6.x", v);
+    }
+
+    @Test
     public void dbNameValidation()
     {
         TDClient.validateDatabaseName("abc01234_134");
