@@ -22,6 +22,8 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -45,6 +47,7 @@ import static com.treasuredata.client.TDClientConfig.TD_CLIENT_USESSL;
 import static com.treasuredata.client.TDClientConfig.newConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -136,7 +139,19 @@ public class TestTDClientConfig
 
     @Test
     public void readInvalidFile()
+            throws Exception
     {
+        String home = System.getProperty("user.home");
+        try {
+            System.setProperty("user.home", "/tmp");
+            Properties p = TDClientConfig.readTDConf();
+            assertTrue(p.isEmpty());
+        }
+        finally {
+            System.setProperty("user.home", home);
+        }
+
+        // Reading a missing file causes IOException
         try {
             TDClientConfig.readTDConf(new File("target/missing-file-xxxxxxx"));
             fail("should not reach here");
