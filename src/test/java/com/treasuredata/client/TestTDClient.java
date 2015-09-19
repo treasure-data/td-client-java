@@ -55,6 +55,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -93,9 +95,13 @@ public class TestTDClient
 
     @Test
     public void readMavenVersion()
+            throws MalformedURLException
     {
         String v = TDClient.readMavenVersion(TestTDClient.class.getResource("/pom.properties"));
         assertEquals("0.6.x", v);
+
+        String v2 = TDClient.readMavenVersion(new URL("http://localhost/"));
+        assertEquals("unknown", v2);
     }
 
     @Test
