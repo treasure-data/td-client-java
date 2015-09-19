@@ -137,12 +137,11 @@ public class TestServerFailures
                 logger.debug("request: " + request);
                 if (request.getRequestURI().endsWith("server_status")) {
                     response.setStatus(600); // return invalid response code
-                    baseRequest.setHandled(true);
                 }
                 else {
                     response.setStatus(HttpStatus.NOT_ACCEPTABLE_406); // return invalid response code
-                    baseRequest.setHandled(true);
                 }
+                baseRequest.setHandled(true);
             }
         });
         startServer();
@@ -176,6 +175,7 @@ public class TestServerFailures
     {
         server.setHandler(new AbstractHandler()
         {
+            AtomicInteger count = new AtomicInteger(0);
             @Override
             public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
                     throws IOException, ServletException
@@ -183,8 +183,15 @@ public class TestServerFailures
                 logger.debug("request: " + request);
                 response.setStatus(HttpStatus.OK_200);
                 response.setContentType("plain/text");
-                response.getOutputStream().print("{broken json}");
+                if (count.get() == 0) {
+                    response.getOutputStream().print("{broken json}");
+                }
+                else {
+                    // invalid response
+                    response.getOutputStream().print("{\"databases\":1}");
+                }
                 baseRequest.setHandled(true);
+                count.incrementAndGet();
             }
         });
         startServer();
@@ -202,5 +209,14 @@ public class TestServerFailures
         catch (TDClientException e) {
             assertEquals(TDClientException.ErrorType.INVALID_JSON_RESPONSE, e.getErrorType());
         }
+
+        try {
+            client.listDatabases();
+            fail("cannot reach here");
+        }
+        catch (TDClientException e) {
+            assertEquals(TDClientException.ErrorType.INVALID_JSON_RESPONSE, e.getErrorType());
+        }
+
     }
 }
