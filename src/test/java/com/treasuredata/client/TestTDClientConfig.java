@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.io.File;
@@ -51,27 +52,26 @@ import static org.junit.Assert.fail;
  */
 public class TestTDClientConfig
 {
-    @Test
-    public void testConfigParam()
-    {
-        Map<String, Object> m = new HashMap<String, Object>();
-        m.put(TD_CLIENT_API_ENDPOINT, "api-staging.treasuredata.com");
-        m.put(TD_CLIENT_API_PORT, 8981);
-        m.put(TD_CLIENT_USESSL, true);
-        m.put(TD_CLIENT_CONNECT_TIMEOUT_MILLIS, 2345);
-        m.put(TD_CLIENT_IDLE_TIMEOUT_MILLIS, 3456);
-        m.put(TD_CLIENT_CONNECTION_POOL_SIZE, 234);
-        m.put(TD_CLIENT_RETRY_INITIAL_WAIT_MILLIS, 456);
-        m.put(TD_CLIENT_RETRY_LIMIT, 11);
-        m.put(TD_CLIENT_RETRY_INTERVAL_MILLIS, 3500);
-        m.put(TD_CLIENT_USER, "xxxx");
-        m.put(TD_CLIENT_PASSOWRD, "yyyy");
+    static ImmutableMap<String, Object> m;
 
-        Properties p = new Properties();
-        for (Map.Entry<String, Object> e : m.entrySet()) {
-            p.setProperty(e.getKey(), e.getValue().toString());
-        }
-        TDClientConfig config = newConfig(p);
+    static {
+        ImmutableMap.Builder p = ImmutableMap.<String, Object>builder();
+        p.put(TD_CLIENT_API_ENDPOINT, "api2.treasuredata.com");
+        p.put(TD_CLIENT_API_PORT, 8981);
+        p.put(TD_CLIENT_USESSL, true);
+        p.put(TD_CLIENT_CONNECT_TIMEOUT_MILLIS, 2345);
+        p.put(TD_CLIENT_IDLE_TIMEOUT_MILLIS, 3456);
+        p.put(TD_CLIENT_CONNECTION_POOL_SIZE, 234);
+        p.put(TD_CLIENT_RETRY_INITIAL_WAIT_MILLIS, 456);
+        p.put(TD_CLIENT_RETRY_LIMIT, 11);
+        p.put(TD_CLIENT_RETRY_INTERVAL_MILLIS, 3500);
+        p.put(TD_CLIENT_USER, "xxxx");
+        p.put(TD_CLIENT_PASSOWRD, "yyyy");
+        m = p.build();
+    }
+
+    private void validate(TDClientConfig config)
+    {
         assertEquals(m.get(TD_CLIENT_API_ENDPOINT), config.getEndpoint());
         assertEquals(m.get(TD_CLIENT_API_PORT), config.getPort());
         assertEquals(m.get(TD_CLIENT_USESSL), config.isUseSSL());
@@ -79,9 +79,37 @@ public class TestTDClientConfig
         assertEquals(m.get(TD_CLIENT_CONNECTION_POOL_SIZE), config.getConnectionPoolSize());
         assertEquals(m.get(TD_CLIENT_RETRY_INITIAL_WAIT_MILLIS), config.getRetryInitialWaitMillis());
         assertEquals(m.get(TD_CLIENT_RETRY_INTERVAL_MILLIS), config.getRetryIntervalMillis());
+        assertEquals(m.get(TD_CLIENT_RETRY_LIMIT), config.getRetryLimit());
         assertEquals(m.get(TD_CLIENT_USER), config.getUser().get());
         assertEquals(m.get(TD_CLIENT_PASSOWRD), config.getPassword().get());
         assertFalse(config.getProxy().isPresent());
+    }
+
+    @Test
+    public void testConfigParam()
+    {
+        // Configuration via Properties object
+        Properties p = new Properties();
+        for (Map.Entry<String, Object> e : m.entrySet()) {
+            p.setProperty(e.getKey(), e.getValue().toString());
+        }
+        TDClientConfig config = newConfig(p);
+        validate(config);
+
+        // Configuration via setters
+        TDClientConfig.Builder b = TDClientConfig.newBuilder();
+        b.setEndpoint(m.get(TD_CLIENT_API_ENDPOINT).toString());
+        b.setPort(Integer.parseInt(m.get(TD_CLIENT_API_PORT).toString()));
+        b.setUseSSL(Boolean.parseBoolean(m.get(TD_CLIENT_USESSL).toString()));
+        b.setConnectTimeoutMillis(Integer.parseInt(m.get(TD_CLIENT_CONNECT_TIMEOUT_MILLIS).toString()));
+        b.setConnectionPoolSize(Integer.parseInt(m.get(TD_CLIENT_CONNECTION_POOL_SIZE).toString()));
+        b.setRetryInitialWaitMillis(Integer.parseInt(m.get(TD_CLIENT_RETRY_INITIAL_WAIT_MILLIS).toString()));
+        b.setRetryIntervalMillis(Integer.parseInt(m.get(TD_CLIENT_RETRY_INTERVAL_MILLIS).toString()));
+        b.setRetryLimit(Integer.parseInt(m.get(TD_CLIENT_RETRY_LIMIT).toString()));
+        b.setUser(m.get(TD_CLIENT_USER).toString());
+        b.setPassword(m.get(TD_CLIENT_PASSOWRD).toString());
+        TDClientConfig config2 = b.build();
+        validate(config2);
     }
 
     @Test

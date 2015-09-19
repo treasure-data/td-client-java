@@ -425,12 +425,6 @@ public class TDClientConfig
             return this;
         }
 
-        public Builder unsetApiKey()
-        {
-            this.apiKey = Optional.absent();
-            return this;
-        }
-
         public Builder setUser(String user)
         {
             this.user = Optional.of(user);
