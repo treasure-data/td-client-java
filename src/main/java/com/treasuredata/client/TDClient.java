@@ -290,17 +290,7 @@ public class TDClient
     public boolean existsDatabase(String databaseName)
             throws TDClientException
     {
-        try {
-            return listDatabases().contains(databaseName);
-        }
-        catch (TDClientHttpException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND_404) {
-                return false;
-            }
-            else {
-                throw e;
-            }
-        }
+        return listDatabases().contains(databaseName);
     }
 
     @Override

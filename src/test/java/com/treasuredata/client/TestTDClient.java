@@ -24,6 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDJob;
@@ -52,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -298,6 +300,8 @@ public class TestTDClient
 
         client.createTableIfNotExists(SAMPLE_DB, SAMPLE_TABLE);
 
+        assertFalse(client.existsTable(SAMPLE_DB + "_nonexistent", "sample"));
+
         // conflict test
         try {
             client.createTable(SAMPLE_DB, SAMPLE_TABLE);
@@ -324,6 +328,57 @@ public class TestTDClient
         client.renameTable(SAMPLE_DB, SAMPLE_TABLE, newTableName);
         assertTrue(client.existsTable(SAMPLE_DB, newTableName));
         assertFalse(client.existsTable(SAMPLE_DB, SAMPLE_TABLE));
+    }
+
+    private String queryResult(String database, String sql)
+            throws InterruptedException
+    {
+        String jobId = client.submit(TDJobRequest.newPrestoQuery(database, sql));
+        waitJobCompletion(jobId);
+        return client.jobResult(jobId, TDResultFormat.CSV, new Function<InputStream, String>()
+        {
+            @Override
+            public String apply(InputStream input)
+            {
+                try {
+                    String result = CharStreams.toString(new InputStreamReader(input));
+                    logger.info(result);
+                    return result;
+                }
+                catch (IOException e) {
+                    throw Throwables.propagate(e);
+                }
+            }
+        });
+    }
+
+    @Test
+    public void swapTest()
+            throws Exception
+    {
+        // swap
+        String t1 = SAMPLE_TABLE + "_1";
+        String t2 = SAMPLE_TABLE + "_2";
+        client.deleteTableIfExists(SAMPLE_DB, t1);
+        client.deleteTableIfExists(SAMPLE_DB, t2);
+        client.createTableIfNotExists(SAMPLE_DB, t1);
+        client.createTableIfNotExists(SAMPLE_DB, t2);
+
+        String job1 = client.submit(TDJobRequest.newPrestoQuery(SAMPLE_DB, String.format("INSERT INTO %s select 1", t1)));
+        String job2 = client.submit(TDJobRequest.newPrestoQuery(SAMPLE_DB, String.format("INSERT INTO %s select 2", t2)));
+        waitJobCompletion(job1);
+        waitJobCompletion(job2);
+
+        String before1 = queryResult(SAMPLE_DB, String.format("select * from %s", t1));
+        String before2 = queryResult(SAMPLE_DB, String.format("select * from %s", t2));
+
+        client.swapTables(SAMPLE_DB, t1, t2);
+
+        String after1 = queryResult(SAMPLE_DB, String.format("select * from %s", t1));
+        String after2 = queryResult(SAMPLE_DB, String.format("select * from %s", t2));
+
+        assertEquals(before1, after2);
+        assertEquals(before2, after1);
     }
 
     @Test
