@@ -160,7 +160,14 @@ public class TDHttpClient
     public Response submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
-        String requestUri = String.format("%s%s:%s%s", config.getHttpScheme(), config.getEndpoint(), config.getPort(), apiRequest.getPath());
+        String portStr = config.getPort().transform(new Function<Integer, String>() {
+            @Override
+            public String apply(Integer input)
+            {
+                return ":" + input.toString();
+            }
+        }).or("");
+        String requestUri = String.format("%s%s%s%s", config.getHttpScheme(), config.getEndpoint(), portStr, apiRequest.getPath());
         logger.debug("Sending API request to {}", requestUri);
         WebTarget target = httpClient.target(requestUri);
         if (!apiRequest.getQueryParams().isEmpty()) {

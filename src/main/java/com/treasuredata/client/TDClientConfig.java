@@ -62,7 +62,7 @@ public class TDClientConfig
      * endpoint URL (e.g., api.treasuredata.com, ybi.jp-east.idcfcloud.com)
      */
     private final String endpoint;
-    private final int port;
+    private final Optional<Integer> port;
     private final Optional<String> apiKey;
     private final Optional<String> user;
     private final Optional<String> password;
@@ -139,7 +139,7 @@ public class TDClientConfig
     {
         this.httpScheme = useSSL ? "https://" : "http://";
         this.endpoint = endpoint.or("api.treasuredata.com");
-        this.port = port.or(useSSL ? 443 : 80);
+        this.port = port.or(useSSL ? Optional.of(443) : Optional.<Integer>absent());
         this.useSSL = useSSL;
         this.apiKey = apiKey;
         this.user = user;
@@ -203,7 +203,7 @@ public class TDClientConfig
         return connectionPoolSize;
     }
 
-    public int getPort()
+    public Optional<Integer> getPort()
     {
         return port;
     }
@@ -324,7 +324,7 @@ public class TDClientConfig
         Builder(TDClientConfig config)
         {
             this.endpoint = Optional.of(config.endpoint);
-            this.port = Optional.of(config.port);
+            this.port = config.port;
             this.useSSL = config.useSSL;
             this.apiKey = config.apiKey;
             this.user = config.user;
