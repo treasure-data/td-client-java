@@ -387,6 +387,8 @@ public class TestTDClient
 
         client.swapTables(SAMPLE_DB, t1, t2);
 
+        Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+
         String after1 = queryResult(SAMPLE_DB, String.format("select * from %s", t1));
         String after2 = queryResult(SAMPLE_DB, String.format("select * from %s", t2));
 
