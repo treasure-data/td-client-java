@@ -74,7 +74,7 @@ public class TestTDClientConfig
     private void validate(TDClientConfig config)
     {
         assertEquals(m.get(TD_CLIENT_API_ENDPOINT), config.getEndpoint());
-        assertEquals(m.get(TD_CLIENT_API_PORT), config.getPort());
+        assertEquals(m.get(TD_CLIENT_API_PORT), config.getPort().get());
         assertEquals(m.get(TD_CLIENT_USESSL), config.isUseSSL());
         assertEquals(m.get(TD_CLIENT_CONNECT_TIMEOUT_MILLIS), config.getConnectTimeoutMillis());
         assertEquals(m.get(TD_CLIENT_CONNECTION_POOL_SIZE), config.getConnectionPoolSize());
