@@ -378,7 +378,8 @@ public class TestTDClient
         });
     }
 
-    private static String newTemporaryTableName(String prefix) {
+    private static String newTemporaryTableName(String prefix)
+    {
         String dateStr = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
         return prefix + "_" + dateStr;
     }
@@ -406,7 +407,7 @@ public class TestTDClient
                 client.partialDelete(SAMPLE_DB, t, 1420070400, 1420070400 + 1);
                 fail("should not reach here");
             }
-            catch(TDClientException e) {
+            catch (TDClientException e) {
                 assertEquals(TDClientException.ErrorType.INVALID_INPUT, e.getErrorType());
             }
             long from = 1420070400 - (1420070400 % 3600);

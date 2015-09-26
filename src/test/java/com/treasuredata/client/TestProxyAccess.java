@@ -102,7 +102,8 @@ public class TestProxyAccess
         }
     }
 
-    private ProxyConfig proxyBaseConfig() {
+    private ProxyConfig proxyBaseConfig()
+    {
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
         proxy.setHost("localhost");
         proxy.setPort(proxyPort);
@@ -110,7 +111,6 @@ public class TestProxyAccess
         proxy.setPassword(PROXY_PASS);
         return proxy.createProxyConfig();
     }
-
 
     @Test
     public void proxyApiAccess()
