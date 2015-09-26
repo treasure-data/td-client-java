@@ -34,6 +34,8 @@ public class TDColumnType
     public static final TDColumnType DOUBLE = new TDColumnType(TDTypeName.DOUBLE, Optional.<List<TDColumnType>>absent());
     public static final TDColumnType STRING = new TDColumnType(TDTypeName.STRING, Optional.<List<TDColumnType>>absent());
 
+    public static final List<TDColumnType> primitiveTypes = ImmutableList.of(INT, LONG, FLOAT, DOUBLE, STRING);
+
     public static TDColumnType newArrayType(TDColumnType elementType)
     {
         return new TDColumnType(TDTypeName.ARRAY, Optional.<List<TDColumnType>>of(ImmutableList.of(elementType)));

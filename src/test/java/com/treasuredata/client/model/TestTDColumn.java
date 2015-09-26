@@ -18,7 +18,11 @@
  */
 package com.treasuredata.client.model;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.treasuredata.client.model.TDColumnType.FLOAT;
 import static com.treasuredata.client.model.TDColumnType.INT;
@@ -27,6 +31,8 @@ import static com.treasuredata.client.model.TDColumnType.STRING;
 import static com.treasuredata.client.model.TDColumnType.newArrayType;
 import static com.treasuredata.client.model.TDColumnType.newMapType;
 import static com.treasuredata.client.model.TDColumnType.parseColumnType;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -35,17 +41,40 @@ import static org.junit.Assert.fail;
 /**
  *
  */
-public class TDColumnTest
+public class TestTDColumn
 {
+    @Test
+    public void column()
+    {
+        TDColumn t = new TDColumn("time", LONG, "time".getBytes(UTF_8));
+        assertEquals("time", t.getName());
+        assertEquals(LONG, t.getType());
+        assertArrayEquals(new String[] {"time", "long", "time"}, t.getTuple());
+
+        // hashCode, equals test
+        Set<TDColumn> columnSet = new HashSet<>();
+        columnSet.add(t);
+        columnSet.add(t);
+        assertTrue(columnSet.contains(t));
+        columnSet.remove(t);
+        assertFalse(columnSet.contains(t));
+    }
+
     @Test
     public void parsePrimitiveColumnTypes()
     {
+        // primitive type set
+        Set<TDColumnType> primitives = ImmutableSet.copyOf(TDColumnType.primitiveTypes);
+
         // primitive types
         for (String name : new String[] {"int", "long", "float", "double", "string"}) {
             TDColumnType t = parseColumnType(name);
             assertFalse(t.isArrayType());
             assertFalse(t.isMapType());
             assertTrue(t.isPrimitive());
+            assertTrue(TDColumnType.primitiveTypes.contains(t));
+            assertTrue(primitives.contains(t));
+            assertEquals(name, t.getTypeName().toString());
             try {
                 t.getArrayElementType();
                 fail("should not reach here");
@@ -100,6 +129,7 @@ public class TDColumnTest
         assertEquals(a1s, a1.toString());
         TDColumnType a1p = parseColumnType(a1s);
         assertEquals(a1, a1p);
+        assertEquals(a1, parseColumnType(" array< array <float> >"));
 
         TDColumnType a2 = newArrayType(newMapType(STRING, newArrayType(LONG)));
         String a2s = "array<map<string,array<long>>>";
@@ -114,9 +144,46 @@ public class TDColumnTest
         TDColumnType m1 = newMapType(INT, STRING);
         assertEquals("map<int,string>", m1.toString());
         assertEquals(m1, parseColumnType(m1.toString()));
+        assertEquals(m1, parseColumnType("map< int , string >"));
 
         TDColumnType m2 = newMapType(INT, newArrayType(newMapType(INT, FLOAT)));
         assertEquals("map<int,array<map<int,float>>>", m2.toString());
         assertEquals(m2, parseColumnType(m2.toString()));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseInvalidType1()
+    {
+        TDColumnType.parseColumnType("int2");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseInvalidType2()
+    {
+        TDColumnType.parseColumnType("array[int]");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseInvalidType3()
+    {
+        TDColumnType.parseColumnType("array<int]");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseInvalidType4()
+    {
+        TDColumnType.parseColumnType("map<int>");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseInvalidType5()
+    {
+        TDColumnType.parseColumnType("map<int2>");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseInvalidType6()
+    {
+        TDColumnType.parseColumnType("map<int, int]");
     }
 }

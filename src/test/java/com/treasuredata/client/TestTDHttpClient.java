@@ -35,9 +35,9 @@ import static org.junit.Assert.assertFalse;
 /**
  *
  */
-public class TDHttpClientTest
+public class TestTDHttpClient
 {
-    private static Logger logger = LoggerFactory.getLogger(TDHttpClientTest.class);
+    private static Logger logger = LoggerFactory.getLogger(TestTDHttpClient.class);
     private TDHttpClient client;
 
     @Before

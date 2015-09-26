@@ -61,8 +61,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -153,13 +155,22 @@ public class TestTDClient
         assertTrue(tableList.size() >= 2);
         logger.debug(Joiner.on(", ").join(tableList));
 
+        Set<TDTable> tableSet = new HashSet<>();
         for (final TDTable t : tableList) {
+            logger.info("estimated size:" + t.getEstimatedStorageSize());
+            logger.info("last log timestamp: " + t.getLastLogTimeStamp());
+            logger.info("expire days:" + t.getExpireDays());
+            logger.info("created at: " + t.getCreatedAt());
+            logger.info("updated at: " + t.getUpdatedAt());
+
             if (t.getName().equals("nasdaq")) {
                 assertTrue(t.getColumns().size() == 6);
             }
             else if (t.getName().equals("www_access")) {
                 assertTrue(t.getColumns().size() == 8);
             }
+            // To use equals and hashCode
+            tableSet.add(t);
         }
     }
 
