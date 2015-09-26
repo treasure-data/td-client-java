@@ -107,13 +107,13 @@ public class TDColumn
             if (tuple.length == 2) {
                 return new TDColumn(
                         tuple[0],
-                        TDColumnTypeDeserializer.parseColumnType(tuple[1]),
+                        TDColumnType.parseColumnType(tuple[1]),
                         tuple[0].getBytes(StandardCharsets.UTF_8));
             }
             else if (tuple.length == 3) {
                 return new TDColumn(
                         tuple[0],
-                        TDColumnTypeDeserializer.parseColumnType(tuple[1]),
+                        TDColumnType.parseColumnType(tuple[1]),
                         tuple[2].getBytes(StandardCharsets.UTF_8));
             }
         }

@@ -20,22 +20,214 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+
+import java.util.List;
 
 @JsonDeserialize(using = TDColumnTypeDeserializer.class)
-public interface TDColumnType
+public class TDColumnType
 {
-    public boolean isPrimitive();
+    public static final TDColumnType INT = new TDColumnType(TDTypeName.INT, Optional.<List<TDColumnType>>absent());
+    public static final TDColumnType LONG = new TDColumnType(TDTypeName.LONG, Optional.<List<TDColumnType>>absent());
+    public static final TDColumnType FLOAT = new TDColumnType(TDTypeName.FLOAT, Optional.<List<TDColumnType>>absent());
+    public static final TDColumnType DOUBLE = new TDColumnType(TDTypeName.DOUBLE, Optional.<List<TDColumnType>>absent());
+    public static final TDColumnType STRING = new TDColumnType(TDTypeName.STRING, Optional.<List<TDColumnType>>absent());
 
-    public boolean isArrayType();
+    public static TDColumnType newArrayType(TDColumnType elementType)
+    {
+        return new TDColumnType(TDTypeName.ARRAY, Optional.<List<TDColumnType>>of(ImmutableList.of(elementType)));
+    }
 
-    public boolean isMapType();
+    public static TDColumnType newMapType(TDColumnType keyType, TDColumnType valueType)
+    {
+        return new TDColumnType(TDTypeName.MAP, Optional.<List<TDColumnType>>of(ImmutableList.of(keyType, valueType)));
+    }
 
-    public TDPrimitiveColumnType asPrimitiveType();
+    private final TDTypeName typeName;
+    private final Optional<List<TDColumnType>> elementTypes;
 
-    public TDArrayColumnType asArrayType();
+    private TDColumnType(TDTypeName typeName, Optional<List<TDColumnType>> elementTypes)
+    {
+        this.typeName = typeName;
+        this.elementTypes = elementTypes;
+    }
 
-    public TDMapColumnType asMapType();
+    public TDTypeName getTypeName()
+    {
+        return typeName;
+    }
+
+    public boolean isPrimitive()
+    {
+        return !elementTypes.isPresent();
+    }
+
+    public boolean isArrayType()
+    {
+        return typeName == TDTypeName.ARRAY;
+    }
+
+    public boolean isMapType()
+    {
+        return typeName == TDTypeName.MAP;
+    }
+
+    public TDColumnType getArrayElementType()
+    {
+        if (!isArrayType()) {
+            throw new UnsupportedOperationException("getArrayElementType is not supported for " + this);
+        }
+        return elementTypes.get().get(0);
+    }
+
+    public TDColumnType getMapKeyType()
+    {
+        if (!isMapType()) {
+            throw new UnsupportedOperationException("getmapKeyType is not supported for " + this);
+        }
+        return elementTypes.get().get(0);
+    }
+
+    public TDColumnType getMapValueType()
+    {
+        if (!isMapType()) {
+            throw new UnsupportedOperationException("getMapValueType is not supported for " + this);
+        }
+        return elementTypes.get().get(1);
+    }
 
     @JsonValue
-    public String toString();
+    public String toString()
+    {
+        if (isArrayType()) {
+            return String.format("array<%s>", getArrayElementType());
+        }
+        else if (isMapType()) {
+            return String.format("map<%s,%s>", getMapKeyType(), getMapValueType());
+        }
+        else {
+            return typeName.toString();
+        }
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        TDColumnType that = (TDColumnType) o;
+        if (!typeName.equals(that.typeName)) {
+            return false;
+        }
+        return !(elementTypes != null ? !elementTypes.equals(that.elementTypes) : that.elementTypes != null);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = typeName != null ? typeName.hashCode() : 0;
+        result = 31 * result + (elementTypes != null ? elementTypes.hashCode() : 0);
+        return result;
+    }
+
+    public static TDColumnType parseColumnType(String str)
+    {
+        Parser p = new Parser(str);
+        TDColumnType type = parseColumnTypeRecursive(p);
+        if (!p.eof()) {
+            throw new IllegalArgumentException("Cannot parse type: EOF expected: " + str);
+        }
+        return type;
+    }
+
+    private static TDColumnType parseColumnTypeRecursive(Parser p)
+    {
+        if (p.scan("string")) {
+            return STRING;
+        }
+        else if (p.scan("int")) {
+            return INT;
+        }
+        else if (p.scan("long")) {
+            return LONG;
+        }
+        else if (p.scan("double")) {
+            return DOUBLE;
+        }
+        else if (p.scan("float")) {
+            return FLOAT;
+        }
+        else if (p.scan("array")) {
+            if (!p.scan("<")) {
+                throw new IllegalArgumentException("Cannot parse type: expected '<' for array type: " + p.getString());
+            }
+            TDColumnType elementType = parseColumnTypeRecursive(p);
+            if (!p.scan(">")) {
+                throw new IllegalArgumentException("Cannot parse type: expected '>' for array type: " + p.getString());
+            }
+            return newArrayType(elementType);
+        }
+        else if (p.scan("map")) {
+            if (!p.scan("<")) {
+                throw new IllegalArgumentException("Cannot parse type: expected '<' for map type: " + p.getString());
+            }
+            TDColumnType keyType = parseColumnTypeRecursive(p);
+            if (!p.scan(",")) {
+                throw new IllegalArgumentException("Cannot parse type: expected ',' for map type: " + p.getString());
+            }
+            TDColumnType valueType = parseColumnTypeRecursive(p);
+            if (!p.scan(">")) {
+                throw new IllegalArgumentException("Cannot parse type: expected '>' for map type: " + p.getString());
+            }
+            return newMapType(keyType, valueType);
+        }
+        else {
+            throw new IllegalArgumentException("Cannot parse type: " + p.getString());
+        }
+    }
+
+    private static class Parser
+    {
+        private final String string;
+        private int offset;
+
+        public Parser(String string)
+        {
+            this.string = string;
+        }
+
+        public String getString()
+        {
+            return string;
+        }
+
+        public boolean scan(String s)
+        {
+            skipSpaces();
+            if (string.startsWith(s, offset)) {
+                offset += s.length();
+                return true;
+            }
+            return false;
+        }
+
+        public boolean eof()
+        {
+            skipSpaces();
+            return string.length() <= offset;
+        }
+
+        private void skipSpaces()
+        {
+            while (string.startsWith(" ", offset)) {
+                offset++;
+            }
+        }
+    }
 }

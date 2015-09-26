@@ -59,6 +59,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -404,7 +406,9 @@ public class TestTDClient
         client.createTableIfNotExists(SAMPLE_DB, BULK_IMPORT_TABLE);
 
         final int numRowsInPart = 10;
-        final String session = "td-client-java-test-session";
+        final int numParts = 3;
+        String dateStr = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
+        final String session = "td-client-java-test-session-" + dateStr;
         try {
             client.createBulkImportSession(session, SAMPLE_DB, BULK_IMPORT_TABLE);
 
@@ -419,11 +423,13 @@ public class TestTDClient
             });
 
             TDBulkImportSession bs = client.getBulkImportSession(session);
+            logger.info("bulk import session: {}, error message: {}", bs.getJobId(), bs.getErrorMessage());
             assertEquals(session, bs.getName());
             assertEquals(SAMPLE_DB, bs.getDatabaseName());
             assertEquals(BULK_IMPORT_TABLE, bs.getTableName());
+            assertTrue(bs.isUploading());
 
-            assertEquals(foundInList, bs);
+            assertEquals(foundInList.getStatus(), bs.getStatus());
 
             int count = 0;
             final long time = System.currentTimeMillis() / 1000;
@@ -480,6 +486,7 @@ public class TestTDClient
             long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
             bs = client.getBulkImportSession(session);
             while (bs.getStatus() == TDBulkImportSession.ImportStatus.PERFORMING) {
+                assertFalse(bs.isUploading());
                 if (System.currentTimeMillis() > deadline) {
                     throw new IllegalStateException("timeout error: bulk import perform");
                 }
@@ -487,6 +494,10 @@ public class TestTDClient
                 Thread.sleep(TimeUnit.SECONDS.toMillis(10));
                 bs = client.getBulkImportSession(session);
             }
+
+            // Check session contents
+            assertTrue(bs.hasErrorOnPerform());
+            logger.debug(bs.getErrorMessage());
 
             // Error record check
             int errorCount = client.getBulkImportErrorRecords(session, new Function<InputStream, Integer>()
@@ -510,7 +521,13 @@ public class TestTDClient
                     }
                 }
             });
-            assertEquals(2, errorCount);
+
+            final int numValidParts = numParts - 1;
+            assertEquals(numValidParts, errorCount);
+            assertEquals(0, bs.getErrorParts());
+            assertEquals(numValidParts, bs.getValidParts());
+            assertEquals(numValidParts, bs.getErrorRecords());
+            assertEquals(numValidParts * numRowsInPart, bs.getValidRecords());
 
             // Commit the session
             deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);

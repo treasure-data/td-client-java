@@ -106,7 +106,7 @@ public class TDBulkImportSession
     }
 
     @JsonProperty("upload_frozen")
-    public boolean getUploadFrozen()
+    public boolean isUploadFrozen()
     {
         return uploadFrozen;
     }
@@ -146,12 +146,7 @@ public class TDBulkImportSession
         return status == ImportStatus.UPLOADING;
     }
 
-    public boolean is(ImportStatus expecting)
-    {
-        return status == expecting;
-    }
-
-    public boolean isPerformError()
+    public boolean hasErrorOnPerform()
     {
         return validRecords == 0 || errorParts > 0 || errorRecords > 0;
     }
@@ -169,63 +164,5 @@ public class TDBulkImportSession
         }
 
         return null;
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        TDBulkImportSession that = (TDBulkImportSession) o;
-
-        if (uploadFrozen != that.uploadFrozen) {
-            return false;
-        }
-        if (validRecords != that.validRecords) {
-            return false;
-        }
-        if (errorRecords != that.errorRecords) {
-            return false;
-        }
-        if (validParts != that.validParts) {
-            return false;
-        }
-        if (errorParts != that.errorParts) {
-            return false;
-        }
-        if (name != null ? !name.equals(that.name) : that.name != null) {
-            return false;
-        }
-        if (databaseName != null ? !databaseName.equals(that.databaseName) : that.databaseName != null) {
-            return false;
-        }
-        if (tableName != null ? !tableName.equals(that.tableName) : that.tableName != null) {
-            return false;
-        }
-        if (status != that.status) {
-            return false;
-        }
-        return !(jobId != null ? !jobId.equals(that.jobId) : that.jobId != null);
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (databaseName != null ? databaseName.hashCode() : 0);
-        result = 31 * result + (tableName != null ? tableName.hashCode() : 0);
-        result = 31 * result + (status != null ? status.hashCode() : 0);
-        result = 31 * result + (uploadFrozen ? 1 : 0);
-        result = 31 * result + (jobId != null ? jobId.hashCode() : 0);
-        result = 31 * result + (int) (validRecords ^ (validRecords >>> 32));
-        result = 31 * result + (int) (errorRecords ^ (errorRecords >>> 32));
-        result = 31 * result + (int) (validParts ^ (validParts >>> 32));
-        result = 31 * result + (int) (errorParts ^ (errorParts >>> 32));
-        return result;
     }
 }

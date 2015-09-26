@@ -18,17 +18,19 @@
  */
 package com.treasuredata.client.model;
 
-public enum TDPrimitiveColumnType
-        implements TDColumnType
+public enum TDTypeName
 {
     INT("int"),
     LONG("long"),
     FLOAT("float"),
     DOUBLE("double"),
-    STRING("string");
-    private String name;
+    STRING("string"),
+    ARRAY("array"),
+    MAP("map");
 
-    private TDPrimitiveColumnType(String name)
+    private final String name;
+
+    private TDTypeName(String name)
     {
         this.name = name;
     }
@@ -37,41 +39,5 @@ public enum TDPrimitiveColumnType
     public String toString()
     {
         return name;
-    }
-
-    @Override
-    public boolean isPrimitive()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isArrayType()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isMapType()
-    {
-        return false;
-    }
-
-    @Override
-    public TDPrimitiveColumnType asPrimitiveType()
-    {
-        return this;
-    }
-
-    @Override
-    public TDArrayColumnType asArrayType()
-    {
-        return null;
-    }
-
-    @Override
-    public TDMapColumnType asMapType()
-    {
-        return null;
     }
 }
