@@ -378,6 +378,51 @@ public class TestTDClient
         });
     }
 
+    private static String newTemporaryTableName(String prefix) {
+        String dateStr = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
+        return prefix + "_" + dateStr;
+    }
+
+    @Test
+    public void partialDeleteTest()
+            throws Exception
+    {
+        String t = newTemporaryTableName("td_client_test");
+        try {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+
+            String jobId = client.submit(TDJobRequest.newPrestoQuery(SAMPLE_DB,
+                    String.format("CREATE TABLE %s AS SELECT * FROM (VALUES TD_TIME_PARSE('2015-01-01', 'UTC'), TD_TIME_PARSE('2015-02-01', 'UTC')) as sample(time)", t, t)));
+
+            waitJobCompletion(jobId);
+
+            String before = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
+
+            assertTrue(before.contains("1420070400"));
+            assertTrue(before.contains("1422748800"));
+
+            // delete 2015-01-01 entry
+            try {
+                client.partialDelete(SAMPLE_DB, t, 1420070400, 1420070400 + 1);
+                fail("should not reach here");
+            }
+            catch(TDClientException e) {
+                assertEquals(TDClientException.ErrorType.INVALID_INPUT, e.getErrorType());
+            }
+            long from = 1420070400 - (1420070400 % 3600);
+            long to = from + 3600;
+            client.partialDelete(SAMPLE_DB, t, from, to);
+
+            Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+            String after = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
+            assertFalse(after.contains("1420070400"));
+            assertTrue(after.contains("1422748800"));
+        }
+        finally {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+        }
+    }
+
     @Test
     public void swapTest()
             throws Exception

@@ -373,6 +373,10 @@ public class TDClient
     public void partialDelete(String databaseName, String tableName, long from, long to)
             throws TDClientException
     {
+        if((from % 3600 != 0) || (to % 3600 != 0)) {
+            throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, String.format("from/to value must be a multiple of 3600: [%s, %s)", from, to));
+        }
+
         Map<String, String> queryParams = ImmutableMap.of(
                 "from", Long.toString(from),
                 "to", Long.toString(to));
