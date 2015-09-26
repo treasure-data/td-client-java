@@ -102,15 +102,20 @@ public class TestProxyAccess
         }
     }
 
-    @Test
-    public void proxyApiAccess()
-    {
+    private ProxyConfig proxyBaseConfig() {
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
         proxy.setHost("localhost");
         proxy.setPort(proxyPort);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS);
-        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
+        return proxy.createProxyConfig();
+    }
+
+
+    @Test
+    public void proxyApiAccess()
+    {
+        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxyBaseConfig()));
         try {
             List<TDTable> tableList = client.listTables("sample_datasets");
             assertTrue(tableList.size() >= 2);
@@ -128,10 +133,7 @@ public class TestProxyAccess
     @Test
     public void wrongPassword()
     {
-        ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder();
-        proxy.setHost("localhost");
-        proxy.setPort(proxyPort);
-        proxy.setUser(PROXY_USER);
+        ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder(proxyBaseConfig());
         proxy.setPassword(PROXY_PASS + "---"); // Use an wrong password
         TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
         try {
