@@ -133,7 +133,7 @@ public interface TDClientApi<ClientImpl>
 
     void deleteTableIfExists(String databaseName, String tableName);
 
-    TDPartialDeleteJob lDelete(String databaseName, String tableName, long from, long to);
+    TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to);
 
     void swapTables(String databaseName, String tableName1, String tableName2);
 
