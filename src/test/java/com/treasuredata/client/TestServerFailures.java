@@ -162,7 +162,7 @@ public class TestServerFailures
 
         // 406 error
         try {
-            client.listDatabases();
+            client.listDatabaseNames();
             fail("cannot reach heer");
         }
         catch (TDClientHttpException e) {
@@ -203,7 +203,7 @@ public class TestServerFailures
                 .build();
         TDClient client = new TDClient(config);
         try {
-            client.listDatabases();
+            client.listDatabaseNames();
             fail("cannot reach here");
         }
         catch (TDClientException e) {
@@ -211,7 +211,7 @@ public class TestServerFailures
         }
 
         try {
-            client.listDatabases();
+            client.listDatabaseNames();
             fail("cannot reach here");
         }
         catch (TDClientException e) {

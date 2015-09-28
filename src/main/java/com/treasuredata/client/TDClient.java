@@ -26,7 +26,6 @@ import com.treasuredata.client.model.TDBulkImportParts;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkImportSessionList;
 import com.treasuredata.client.model.TDDatabase;
-import com.treasuredata.client.model.TDDatabaseList;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -37,6 +36,7 @@ import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
+import com.treasuredata.client.model.impl.TDDatabaseList;
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -212,15 +212,22 @@ public class TDClient
     }
 
     @Override
-    public List<String> listDatabases()
+    public List<String> listDatabaseNames()
             throws TDClientException
     {
-        TDDatabaseList result = doGet("/v3/database/list", TDDatabaseList.class);
-        List<String> tableList = new ArrayList<String>(result.getDatabases().size());
-        for (TDDatabase db : result.getDatabases()) {
+        ArrayList<String> tableList = new ArrayList<>();
+        for (TDDatabase db : listDatabases()) {
             tableList.add(db.getName());
         }
         return tableList;
+    }
+
+    @Override
+    public List<TDDatabase> listDatabases()
+            throws TDClientException
+    {
+        TDDatabaseList result = doGet("/v3/database/list", TDDatabaseList.class);
+        return result.getDatabases();
     }
 
     private static Pattern acceptableNamePattern = Pattern.compile("^([a-z0-9_]+)$");
@@ -295,7 +302,7 @@ public class TDClient
     public boolean existsDatabase(String databaseName)
             throws TDClientException
     {
-        return listDatabases().contains(databaseName);
+        return listDatabaseNames().contains(databaseName);
     }
 
     @Override

@@ -51,6 +51,7 @@ import static org.junit.Assert.fail;
 /**
  *
  */
+@SuppressWarnings("unchecked")
 public class TestTDClientConfig
 {
     static ImmutableMap<String, Object> m;

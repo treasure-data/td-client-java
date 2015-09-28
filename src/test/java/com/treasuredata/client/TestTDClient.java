@@ -141,7 +141,7 @@ public class TestTDClient
     public void listDatabases()
             throws Exception
     {
-        List<String> dbList = client.listDatabases();
+        List<String> dbList = client.listDatabaseNames();
         assertTrue("should contain sample_datasets", dbList.contains("sample_datasets"));
 
         logger.debug(Joiner.on(", ").join(dbList));
@@ -640,7 +640,7 @@ public class TestTDClient
     {
         TDClient client = new TDClient(new TDClientConfig.Builder().setApiKey("1/xxfasdfafd").build()); // Set a wrong API key
         try {
-            client.listDatabases();
+            client.listDatabaseNames();
             fail("should not reach here");
         }
         catch (TDClientHttpUnauthorizedException e) {

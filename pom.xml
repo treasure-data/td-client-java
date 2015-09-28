@@ -227,6 +227,7 @@
           <encoding>${project.build.sourceEncoding}</encoding>
           <maxmem>${project.build.jvmsize}</maxmem>
           <showWarnings>true</showWarnings>
+          <compilerArgument>-Xlint:unchecked</compilerArgument>
         </configuration>
       </plugin>
 

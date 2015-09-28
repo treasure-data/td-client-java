@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.treasuredata.client.model.impl.TDColumnTypeDeserializer;
 
 import java.util.List;
 

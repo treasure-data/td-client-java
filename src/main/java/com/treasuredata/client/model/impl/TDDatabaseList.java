@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client.model;
+package com.treasuredata.client.model.impl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.treasuredata.client.model.TDDatabase;
 
 import java.util.List;
 

@@ -20,6 +20,7 @@ package com.treasuredata.client;
 
 import com.google.common.base.Function;
 import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -66,7 +67,14 @@ public interface TDClientApi<ClientImpl>
      * @return list of databases
      * @throws TDClientException if failed to retrieve the database list
      */
-    List<String> listDatabases();
+    List<String> listDatabaseNames();
+
+    /**
+     * Get the detailed information of databases
+     * @return list of TDDatabase
+     * @throws TDClientException if failed to retrieve the database list.
+     */
+    List<TDDatabase> listDatabases();
 
     /**
      * Create a new database
