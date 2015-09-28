@@ -190,14 +190,14 @@ public class TestTDClient
             throws InterruptedException
     {
         int retryCount = 0;
+        ExponentialBackOff backoff = new ExponentialBackOff();
         long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
-
         TDJobSummary tdJob = null;
         do {
             if (System.currentTimeMillis() > deadline) {
                 throw new IllegalStateException(String.format("waiting job %s has timed out", jobId));
             }
-            Thread.sleep(1000);
+            Thread.sleep(backoff.nextWaitTimeMillis());
             tdJob = client.jobStatus(jobId);
             logger.debug("job status: " + tdJob);
             retryCount++;
@@ -540,6 +540,7 @@ public class TestTDClient
             client.performBulkImportSession(session);
 
             // Wait the perform completion
+            ExponentialBackOff backoff = new ExponentialBackOff();
             long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
             bs = client.getBulkImportSession(session);
             while (bs.getStatus() == TDBulkImportSession.ImportStatus.PERFORMING) {
@@ -548,7 +549,7 @@ public class TestTDClient
                     throw new IllegalStateException("timeout error: bulk import perform");
                 }
                 logger.info("Waiting bulk import completion");
-                Thread.sleep(TimeUnit.SECONDS.toMillis(10));
+                Thread.sleep(backoff.nextWaitTimeMillis());
                 bs = client.getBulkImportSession(session);
             }
 

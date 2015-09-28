@@ -163,8 +163,9 @@ TDClient client = new TDClient(config);
 |`td.client.proxy.password` |     | (optional) Proxy password  |
 |`td.client.usessl` | false | (optional) Use SSL encryption |
 |`td.client.retry.limit` | 7 | (optinoal) The maximum number of API request retry |
-|`td.client.retry.initial-wait` | 1000 | (optional) Initial wait value|
-|`td.client.retry.interval` | 2000 | (optional) (initial-wait) + (interval) ^ (2 - (retry count)) |
+|`td.client.retry.initial-interval` | 500 | (optional) backoff retry interval = (interval) * (multiplier) ^ (retry count) |
+|`td.client.retry.max-interval` | 60000 | (optional) max retry interval |
+|`td.client.retry.multiplier` | 2.0 | (optional) retry interval multiplier |
 |`td.client.connect-timeout` | 15000 | (optional) connection timeout before reaching the API |
 |`td.client.idle-timeout` | 60000 | (optional) idle connection timeout when no data is coming from API |
 |`td.client.connection-pool-size` | 64 | (optional) Connection pool size|

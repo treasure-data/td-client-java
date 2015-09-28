@@ -48,8 +48,9 @@ public class TDClientConfig
     public static final String TD_CLIENT_API_ENDPOINT = "td.client.endpoint";
     public static final String TD_CLIENT_API_PORT = "td.client.port";
     public static final String TD_CLIENT_RETRY_LIMIT = "td.client.retry.limit";
-    public static final String TD_CLIENT_RETRY_INITIAL_WAIT_MILLIS = "td.client.retry.initial-wait";
-    public static final String TD_CLIENT_RETRY_INTERVAL_MILLIS = "td.client.retry.interval";
+    public static final String TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS = "td.client.retry.initial-interval";
+    public static final String TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS = "td.client.retry.max-interval";
+    public static final String TD_CLIENT_RETRY_MULTIPLIER = "td.client.retry.multiplier";
     public static final String TD_CLIENT_CONNECT_TIMEOUT_MILLIS = "td.client.connect-timeout";
     public static final String TD_CLIENT_IDLE_TIMEOUT_MILLIS = "td.client.idle-timeout";
     public static final String TD_CLIENT_CONNECTION_POOL_SIZE = "td.client.connection-pool-size";
@@ -70,8 +71,9 @@ public class TDClientConfig
     private final String httpScheme;
     private final boolean useSSL;
     private final int retryLimit;
-    private final int retryInitialWaitMillis;
-    private final int retryIntervalMillis;
+    private final int retryInitialIntervalMillis;
+    private final int retryMaxIntervalMillis;
+    private final double retryMultiplier;
     private final int connectTimeoutMillis;
     private final int idleTimeoutMillis;
     private final int connectionPoolSize;
@@ -130,8 +132,9 @@ public class TDClientConfig
             Optional<String> password,
             Optional<ProxyConfig> proxy,
             int retryLimit,
-            int retryInitialWaitMillis,
-            int retryIntervalMillis,
+            int retryInitialIntervalMillis,
+            int retryMaxIntervalMillis,
+            double retryMultiplier,
             int connectTimeoutMillis,
             int idleTimeoutMillis,
             int connectionPoolSize
@@ -146,8 +149,9 @@ public class TDClientConfig
         this.password = password;
         this.proxy = proxy;
         this.retryLimit = retryLimit;
-        this.retryInitialWaitMillis = retryInitialWaitMillis;
-        this.retryIntervalMillis = retryIntervalMillis;
+        this.retryInitialIntervalMillis = retryInitialIntervalMillis;
+        this.retryMaxIntervalMillis = retryMaxIntervalMillis;
+        this.retryMultiplier = retryMultiplier;
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.idleTimeoutMillis = idleTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
@@ -178,14 +182,19 @@ public class TDClientConfig
         return retryLimit;
     }
 
-    public int getRetryInitialWaitMillis()
+    public int getRetryInitialIntervalMillis()
     {
-        return retryInitialWaitMillis;
+        return retryInitialIntervalMillis;
     }
 
-    public int getRetryIntervalMillis()
+    public int getRetryMaxIntervalMillis()
     {
-        return retryIntervalMillis;
+        return retryMaxIntervalMillis;
+    }
+
+    public double getRetryMultiplier()
+    {
+        return retryMultiplier;
     }
 
     public int getConnectTimeoutMillis()
@@ -284,8 +293,9 @@ public class TDClientConfig
         private Optional<String> password = Optional.absent();
         private Optional<ProxyConfig> proxy = Optional.absent();
         private int retryLimit;
-        private int retryInitialWaitMillis;
-        private int retryIntervalMillis;
+        private int retryInitialIntervalMillis;
+        private int retryMaxIntervalMillis;
+        private double retryMultiplier;
         private int connectTimeoutMillis;
         private int idleTimeoutMillis;
         private int connectionPoolSize;
@@ -311,13 +321,29 @@ public class TDClientConfig
             }
         }
 
+        private static Optional<Double> getConfigPropertyDouble(String key, Properties defaultProperty)
+        {
+            String v = firstNonNull(System.getProperty(key), defaultProperty.getProperty(key));
+            if (v != null) {
+                try {
+                    return Optional.of(Double.parseDouble(v));
+                }
+                catch (NumberFormatException e) {
+                    throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, String.format("[%s] cannot cast %s to double", key, v));
+                }
+            }
+            else {
+                return Optional.absent();
+            }
+        }
+
         Builder()
         {
             this(new Properties());
         }
 
         /***
-         * Cnstructor used for copying and overwriting an existing configuration
+         * Constructor used for copying and overwriting an existing configuration
          *
          * @param config
          */
@@ -331,8 +357,9 @@ public class TDClientConfig
             this.password = config.password;
             this.proxy = config.proxy;
             this.retryLimit = config.retryLimit;
-            this.retryInitialWaitMillis = config.retryInitialWaitMillis;
-            this.retryIntervalMillis = config.retryIntervalMillis;
+            this.retryInitialIntervalMillis = config.retryInitialIntervalMillis;
+            this.retryMaxIntervalMillis = config.retryMaxIntervalMillis;
+            this.retryMultiplier = config.retryMultiplier;
             this.connectTimeoutMillis = config.connectTimeoutMillis;
             this.idleTimeoutMillis = config.idleTimeoutMillis;
             this.connectionPoolSize = config.connectionPoolSize;
@@ -394,8 +421,9 @@ public class TDClientConfig
 
             // http client parameter
             this.retryLimit = getConfigPropertyInt(TD_CLIENT_RETRY_LIMIT, defaultValues).or(7);
-            this.retryInitialWaitMillis = getConfigPropertyInt(TD_CLIENT_RETRY_INITIAL_WAIT_MILLIS, defaultValues).or(1000);
-            this.retryIntervalMillis = getConfigPropertyInt(TD_CLIENT_RETRY_INTERVAL_MILLIS, defaultValues).or(2000);
+            this.retryInitialIntervalMillis = getConfigPropertyInt(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS, defaultValues).or(500);
+            this.retryMaxIntervalMillis = getConfigPropertyInt(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS, defaultValues).or(60000);
+            this.retryMultiplier = getConfigPropertyDouble(TD_CLIENT_RETRY_MULTIPLIER, defaultValues).or(2.0);
             this.connectTimeoutMillis = getConfigPropertyInt(TD_CLIENT_CONNECT_TIMEOUT_MILLIS, defaultValues).or(15000);
             this.idleTimeoutMillis = getConfigPropertyInt(TD_CLIENT_IDLE_TIMEOUT_MILLIS, defaultValues).or(60000);
             this.connectionPoolSize = getConfigPropertyInt(TD_CLIENT_CONNECTION_POOL_SIZE, defaultValues).or(64);
@@ -449,16 +477,21 @@ public class TDClientConfig
             return this;
         }
 
-        public Builder setRetryInitialWaitMillis(int retryInitialWaitMillis)
+        public Builder setRetryInitialIntervalMillis(int retryInitialIntervalMillis)
         {
-            this.retryInitialWaitMillis = retryInitialWaitMillis;
+            this.retryInitialIntervalMillis = retryInitialIntervalMillis;
             return this;
         }
 
-        public Builder setRetryIntervalMillis(int retryIntervalMillis)
+        public Builder setRetryMaxIntervalMillis(int retryMaxIntervalMillis)
         {
-            this.retryIntervalMillis = retryIntervalMillis;
+            this.retryMaxIntervalMillis = retryMaxIntervalMillis;
             return this;
+        }
+
+        public void setRetryMultiplier(double retryMultiplier)
+        {
+            this.retryMultiplier = retryMultiplier;
         }
 
         public Builder setConnectTimeoutMillis(int connectTimeoutMillis)
@@ -490,8 +523,9 @@ public class TDClientConfig
                     password,
                     proxy,
                     retryLimit,
-                    retryInitialWaitMillis,
-                    retryIntervalMillis,
+                    retryInitialIntervalMillis,
+                    retryMaxIntervalMillis,
+                    retryMultiplier,
                     connectTimeoutMillis,
                     idleTimeoutMillis,
                     connectionPoolSize

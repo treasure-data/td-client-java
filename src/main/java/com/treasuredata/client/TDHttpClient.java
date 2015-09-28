@@ -160,7 +160,8 @@ public class TDHttpClient
     public Response submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
-        String portStr = config.getPort().transform(new Function<Integer, String>() {
+        String portStr = config.getPort().transform(new Function<Integer, String>()
+        {
             @Override
             public String apply(Integer input)
             {
@@ -230,14 +231,14 @@ public class TDHttpClient
     public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Function<Response, Result> handler)
             throws TDClientException
     {
-        ExponentialBackOffRetry retry = new ExponentialBackOffRetry(config.getRetryLimit(), config.getRetryInitialWaitMillis(), config.getRetryIntervalMillis());
+        ExponentialBackOff backoff = new ExponentialBackOff(config.getRetryInitialIntervalMillis(), config.getRetryMaxIntervalMillis(), config.getRetryMultiplier());
         Optional<TDClientException> rootCause = Optional.absent();
         try {
-            Optional<Integer> nextInterval = Optional.absent();
-            do {
-                if (retry.getExecutionCount() > 0) {
-                    int waitTimeMillis = nextInterval.get();
-                    logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", apiRequest.getPath(), retry.getExecutionCount(), retry.getMaxRetryCount(), waitTimeMillis / 1000.0));
+            final int retryLimit = config.getRetryLimit();
+            for (int retryCount = 0; retryCount <= retryLimit; ++retryCount) {
+                if (retryCount > 0) {
+                    int waitTimeMillis = backoff.nextWaitTimeMillis();
+                    logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", apiRequest.getPath(), backoff.getExecutionCount(), retryLimit, waitTimeMillis / 1000.0));
                     Thread.sleep(waitTimeMillis);
                 }
 
@@ -273,9 +274,7 @@ public class TDHttpClient
                         response.close();
                     }
                 }
-                nextInterval = retry.nextWaitTimeMillis();
             }
-            while (nextInterval.isPresent());
         }
         catch (InterruptedException e) {
             logger.warn("API request interrupted", e);
