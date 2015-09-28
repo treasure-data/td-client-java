@@ -22,6 +22,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -57,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -192,8 +194,20 @@ public class TestTDClient
             tableSet.add(t);
         }
 
+        // equality tests
         for (TDTable t : tableSet) {
             tableSet.contains(t);
+        }
+
+        for (int i = 0; i < tableList.size(); ++i) {
+            for (int j = 0; j < tableList.size(); ++j) {
+                if (i == j) {
+                    assertEquals(tableList.get(i), tableList.get(j));
+                }
+                else {
+                    assertFalse(tableList.get(i).equals(tableList.get(j)));
+                }
+            }
         }
     }
 
@@ -207,6 +221,22 @@ public class TestTDClient
         TDJobList jobsInAnIDRange = client.listJobs(34022478, 34022600);
         logger.debug("job list: " + jobsInAnIDRange);
         assertTrue(jobsInAnIDRange.getJobs().size() > 0);
+
+        // Check getters
+        Iterable<Method> getters = Iterables.filter(ImmutableList.copyOf(TDJob.class.getDeclaredMethods()), new Predicate<Method>()
+        {
+            @Override
+            public boolean apply(Method input)
+            {
+                return input.getName().startsWith("get");
+            }
+        });
+        // Call getters
+        for (TDJob job : jobs.getJobs()) {
+            for (Method m : getters) {
+                m.invoke(job);
+            }
+        }
     }
 
     private TDJobSummary waitJobCompletion(String jobId)
@@ -220,7 +250,9 @@ public class TestTDClient
             if (System.currentTimeMillis() > deadline) {
                 throw new IllegalStateException(String.format("waiting job %s has timed out", jobId));
             }
-            Thread.sleep(backoff.nextWaitTimeMillis());
+            int nextWait = backoff.nextWaitTimeMillis();
+            logger.debug(String.format("Running job status check in %.2f sec.", nextWait / 1000.0));
+            Thread.sleep(nextWait);
             tdJob = client.jobStatus(jobId);
             logger.debug("job status: " + tdJob);
             retryCount++;

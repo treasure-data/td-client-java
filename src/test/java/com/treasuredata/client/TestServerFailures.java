@@ -91,6 +91,7 @@ public class TestServerFailures
     public void retryTest()
             throws Exception
     {
+        logger.warn("Start request retry tests on 500 errors");
         final int retryLimit = 3;
         final AtomicInteger accessCount = new AtomicInteger(0);
         server.setHandler(new AbstractHandler()
@@ -176,6 +177,7 @@ public class TestServerFailures
         server.setHandler(new AbstractHandler()
         {
             AtomicInteger count = new AtomicInteger(0);
+
             @Override
             public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
                     throws IOException, ServletException
@@ -217,6 +219,5 @@ public class TestServerFailures
         catch (TDClientException e) {
             assertEquals(TDClientException.ErrorType.INVALID_JSON_RESPONSE, e.getErrorType());
         }
-
     }
 }
