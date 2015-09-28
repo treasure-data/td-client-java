@@ -21,6 +21,7 @@ package com.treasuredata.client.model;
 import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,7 +50,12 @@ public class TestTDColumn
         TDColumn t = new TDColumn("time", LONG, "time".getBytes(UTF_8));
         assertEquals("time", t.getName());
         assertEquals(LONG, t.getType());
+        assertEquals("time", new String(t.getKey(), StandardCharsets.UTF_8));
         assertArrayEquals(new String[] {"time", "long", "time"}, t.getTuple());
+
+        TDColumn t2 = new TDColumn("time", LONG);
+        assertEquals(t, t2);
+        assertEquals(t.hashCode(), t2.hashCode());
 
         // hashCode, equals test
         Set<TDColumn> columnSet = new HashSet<>();
@@ -58,6 +64,15 @@ public class TestTDColumn
         assertTrue(columnSet.contains(t));
         columnSet.remove(t);
         assertFalse(columnSet.contains(t));
+    }
+
+    @Test
+    public void parseRenamedColumns()
+    {
+        TDColumn t = TDColumn.parseTuple(new String[] {"mycol", "string", "mycol_prev"});
+        assertEquals("mycol", t.getName());
+        assertEquals(TDColumnType.STRING, t.getType());
+        assertEquals("mycol_prev", new String(t.getKey(), StandardCharsets.UTF_8));
     }
 
     @Test

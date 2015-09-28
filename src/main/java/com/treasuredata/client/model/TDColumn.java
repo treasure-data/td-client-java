@@ -42,6 +42,11 @@ public class TDColumn
     private final TDColumnType type;
     private final byte[] key;
 
+    public TDColumn(String name, TDColumnType type)
+    {
+        this(name, type, name.getBytes(StandardCharsets.UTF_8));
+    }
+
     public TDColumn(String name, TDColumnType type, byte[] key)
     {
         this.name = checkNotNull(name, "name is null");
@@ -144,7 +149,7 @@ public class TDColumn
     @Override
     public int hashCode()
     {
-        return Objects.hashCode(name, type, key);
+        return Objects.hashCode(name, type, Arrays.hashCode(key));
     }
 
     @Override
