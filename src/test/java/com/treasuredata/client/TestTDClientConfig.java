@@ -163,4 +163,20 @@ public class TestTDClientConfig
             assertEquals(TDClientException.ErrorType.INVALID_CONFIGURATION, e.getErrorType());
         }
     }
+
+    @Test(expected = TDClientException.class)
+    public void readInvalidValue()
+    {
+        Properties p = new Properties();
+        p.setProperty(TD_CLIENT_API_PORT, "xxxx");
+        TDClientConfig.newConfig(p);
+    }
+
+    @Test(expected = TDClientException.class)
+    public void readInvalidDoubleValue()
+    {
+        Properties p = new Properties();
+        p.setProperty(TD_CLIENT_RETRY_MULTIPLIER, "xxx");
+        TDClientConfig.newConfig(p);
+    }
 }
