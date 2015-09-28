@@ -31,6 +31,7 @@ import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSubmitResult;
 import com.treasuredata.client.model.TDJobSummary;
+import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
@@ -377,7 +378,7 @@ public class TDClient
     }
 
     @Override
-    public void partialDelete(String databaseName, String tableName, long from, long to)
+    public TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to)
             throws TDClientException
     {
         if ((from % 3600 != 0) || (to % 3600 != 0)) {
@@ -387,7 +388,8 @@ public class TDClient
         Map<String, String> queryParams = ImmutableMap.of(
                 "from", Long.toString(from),
                 "to", Long.toString(to));
-        doPost(buildUrl("/v3/table/partialdelete", databaseName, tableName), queryParams);
+        TDPartialDeleteJob job = doPost(buildUrl("/v3/table/partialdelete", databaseName, tableName), queryParams, TDPartialDeleteJob.class);
+        return job;
     }
 
     @Override

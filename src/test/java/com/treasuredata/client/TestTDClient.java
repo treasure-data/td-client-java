@@ -31,6 +31,7 @@ import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
+import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 import org.eclipse.jetty.http.HttpStatus;
@@ -412,9 +413,9 @@ public class TestTDClient
             }
             long from = 1420070400 - (1420070400 % 3600);
             long to = from + 3600;
-            client.partialDelete(SAMPLE_DB, t, from, to);
+            TDPartialDeleteJob partialDeleteJob = client.partialDelete(SAMPLE_DB, t, from, to);
+            waitJobCompletion(partialDeleteJob.getJobId());
 
-            Thread.sleep(TimeUnit.SECONDS.toMillis(3));
             String after = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
             assertFalse(after.contains("1420070400"));
             assertTrue(after.contains("1422748800"));

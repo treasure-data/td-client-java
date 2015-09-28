@@ -25,6 +25,7 @@ import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
+import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDTable;
 
@@ -71,6 +72,7 @@ public interface TDClientApi<ClientImpl>
 
     /**
      * Get the detailed information of databases
+     *
      * @return list of TDDatabase
      * @throws TDClientException if failed to retrieve the database list.
      */
@@ -131,7 +133,7 @@ public interface TDClientApi<ClientImpl>
 
     void deleteTableIfExists(String databaseName, String tableName);
 
-    void partialDelete(String databaseName, String tableName, long from, long to);
+    TDPartialDeleteJob lDelete(String databaseName, String tableName, long from, long to);
 
     void swapTables(String databaseName, String tableName1, String tableName2);
 
