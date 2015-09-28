@@ -33,7 +33,7 @@ public class ExponentialBackOff
 
     public ExponentialBackOff()
     {
-        this(500, 60000, 2.0);
+        this(2000, 60000, 1.5);
     }
 
     public ExponentialBackOff(int initialIntervalMillis, int maxIntervalMillis, double multiplier)
