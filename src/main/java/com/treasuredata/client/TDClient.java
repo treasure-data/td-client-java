@@ -257,8 +257,11 @@ public class TDClient
     public void createDatabaseIfNotExists(String databaseName)
             throws TDClientException
     {
-        if (!existsDatabase(databaseName)) {
+        try {
             createDatabase(databaseName);
+        }
+        catch (TDClientHttpConflictException e) {
+            // This can be thrown when the database already exists or Nginx returns conflict(409) upon request retry
         }
     }
 
@@ -273,8 +276,11 @@ public class TDClient
     public void deleteDatabaseIfExists(String databaseName)
             throws TDClientException
     {
-        if (existsDatabase(databaseName)) {
+        try {
             deleteDatabase(databaseName);
+        }
+        catch (TDClientHttpNotFoundException e) {
+            // This will be thrown when the database does not exist, or Nginx calls this delete request twice
         }
     }
 
@@ -326,8 +332,11 @@ public class TDClient
     public void createTableIfNotExists(String databaseName, String tableName)
             throws TDClientException
     {
-        if (!existsTable(databaseName, tableName)) {
+        try {
             createTable(databaseName, tableName);
+        }
+        catch (TDClientHttpConflictException e) {
+            // This can be thrown when the table already exists or Nginx returns conflict(409) upon request retry
         }
     }
 
@@ -359,8 +368,11 @@ public class TDClient
     public void deleteTableIfExists(String databaseName, String tableName)
             throws TDClientException
     {
-        if (existsTable(databaseName, tableName)) {
+        try {
             deleteTable(databaseName, tableName);
+        }
+        catch (TDClientHttpNotFoundException e) {
+            // This will be thrown the table does not exists or Nginx calls this API request twice
         }
     }
 

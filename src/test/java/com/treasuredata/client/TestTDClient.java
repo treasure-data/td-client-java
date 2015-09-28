@@ -365,8 +365,9 @@ public class TestTDClient
             logger.info("Skip create/delete database test at CircleCI");
         }
         else {
-            client.deleteDatabaseIfExists(SAMPLE_DB + "_1");
-            client.createDatabaseIfNotExists(SAMPLE_DB + "_1");
+            String dbName = newTemporaryName(SAMPLE_DB);
+            client.deleteDatabaseIfExists(dbName);
+            client.createDatabaseIfNotExists(dbName);
         }
     }
 
@@ -374,41 +375,49 @@ public class TestTDClient
     public void tableOperation()
             throws Exception
     {
-        client.deleteTableIfExists(SAMPLE_DB, SAMPLE_TABLE);
+        String t = newTemporaryName("sample");
+        String newTableName = t + "_renamed";
 
-        client.createTable(SAMPLE_DB, SAMPLE_TABLE);
-        client.deleteTable(SAMPLE_DB, SAMPLE_TABLE);
-
-        client.createTableIfNotExists(SAMPLE_DB, SAMPLE_TABLE);
-
-        assertFalse(client.existsTable(SAMPLE_DB + "_nonexistent", "sample"));
-
-        // conflict test
         try {
-            client.createTable(SAMPLE_DB, SAMPLE_TABLE);
-            fail("should not reach here");
-        }
-        catch (TDClientHttpConflictException e) {
-            // OK
-            assertEquals(HttpStatus.CONFLICT_409, e.getStatusCode());
-        }
+            client.deleteTableIfExists(SAMPLE_DB, t);
 
-        // not found test
-        try {
-            client.listTables("__unknown__database");
-            fail("should not reach here");
-        }
-        catch (TDClientHttpNotFoundException e) {
-            // OK
-            assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
-        }
+            client.createTable(SAMPLE_DB, t);
+            client.deleteTable(SAMPLE_DB, t);
 
-        // rename
-        String newTableName = SAMPLE_TABLE + "_renamed";
-        client.deleteTableIfExists(SAMPLE_DB, newTableName);
-        client.renameTable(SAMPLE_DB, SAMPLE_TABLE, newTableName);
-        assertTrue(client.existsTable(SAMPLE_DB, newTableName));
-        assertFalse(client.existsTable(SAMPLE_DB, SAMPLE_TABLE));
+            client.createTableIfNotExists(SAMPLE_DB, t);
+
+            assertFalse(client.existsTable(SAMPLE_DB + "_nonexistent", t));
+
+            // conflict test
+            try {
+                client.createTable(SAMPLE_DB, t);
+                fail("should not reach here");
+            }
+            catch (TDClientHttpConflictException e) {
+                // OK
+                assertEquals(HttpStatus.CONFLICT_409, e.getStatusCode());
+            }
+
+            // not found test
+            try {
+                client.listTables("__unknown__database");
+                fail("should not reach here");
+            }
+            catch (TDClientHttpNotFoundException e) {
+                // OK
+                assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
+            }
+
+            // rename
+            client.deleteTableIfExists(SAMPLE_DB, newTableName);
+            client.renameTable(SAMPLE_DB, t, newTableName);
+            assertTrue(client.existsTable(SAMPLE_DB, newTableName));
+            assertFalse(client.existsTable(SAMPLE_DB, t));
+        }
+        finally {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+            client.deleteTableIfExists(SAMPLE_DB, newTableName);
+        }
     }
 
     private String queryResult(String database, String sql)
@@ -433,7 +442,7 @@ public class TestTDClient
         });
     }
 
-    private static String newTemporaryTableName(String prefix)
+    private static String newTemporaryName(String prefix)
     {
         String dateStr = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
         return prefix + "_" + dateStr;
@@ -443,7 +452,7 @@ public class TestTDClient
     public void partialDeleteTest()
             throws Exception
     {
-        String t = newTemporaryTableName("td_client_test");
+        String t = newTemporaryName("td_client_test");
         try {
             client.deleteTableIfExists(SAMPLE_DB, t);
 
