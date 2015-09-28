@@ -27,6 +27,7 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDColumn;
+import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -105,6 +106,7 @@ public class TestTDClient
         String v = TDClient.readMavenVersion(TestTDClient.class.getResource("/pom.properties"));
         assertEquals("0.6.x", v);
 
+        logger.warn("Running failing test for readMavenVersion");
         String v2 = TDClient.readMavenVersion(new URL("http://localhost/"));
         assertEquals("unknown", v2);
     }
@@ -145,7 +147,22 @@ public class TestTDClient
         List<String> dbList = client.listDatabaseNames();
         assertTrue("should contain sample_datasets", dbList.contains("sample_datasets"));
 
-        logger.debug(Joiner.on(", ").join(dbList));
+        String dbListStr = Joiner.on(", ").join(dbList);
+        logger.debug(dbListStr);
+
+                List < TDDatabase > detailedDBList = client.listDatabases();
+        Iterable<String> dbStr = Iterables.transform(detailedDBList, new Function<TDDatabase, String>()
+        {
+            @Override
+            public String apply(TDDatabase input)
+            {
+                String summary = String.format("name:%s, count:%s, createdAt:%s, updatedAt:%s, organization:%s, permission:%s", input.getName(), input.getCount(), input.getCreatedAt(), input.getUpdatedAt(), input.getOrganization(), input.getPermission());
+                return summary;
+            }
+        });
+
+        String detailedDbListStr = Joiner.on(", ").join(dbStr);
+        logger.trace(detailedDbListStr);
     }
 
     @Test
@@ -549,7 +566,7 @@ public class TestTDClient
                 if (System.currentTimeMillis() > deadline) {
                     throw new IllegalStateException("timeout error: bulk import perform");
                 }
-                logger.info("Waiting bulk import completion");
+                logger.debug("Waiting bulk import completion");
                 Thread.sleep(backoff.nextWaitTimeMillis());
                 bs = client.getBulkImportSession(session);
             }
