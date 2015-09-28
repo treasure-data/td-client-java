@@ -56,6 +56,7 @@ public class TestTDColumn
         TDColumn t2 = new TDColumn("time", LONG);
         assertEquals(t, t2);
         assertEquals(t.hashCode(), t2.hashCode());
+        assertFalse(t.equals(""));
 
         // hashCode, equals test
         Set<TDColumn> columnSet = new HashSet<>();
@@ -201,4 +202,17 @@ public class TestTDColumn
     {
         TDColumnType.parseColumnType("map<int, int]");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseInvalidType7()
+    {
+        TDColumnType.parseColumnType("map[int, int]");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseUnknownType()
+    {
+        TDColumnType.parseColumnType("xint");
+    }
+
 }

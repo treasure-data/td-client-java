@@ -153,19 +153,6 @@ public class TDClient
         return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
     }
 
-    private String doPost(String path, Map<String, String> queryParam)
-            throws TDClientException
-    {
-        checkNotNull(path, "path is null");
-        checkNotNull(queryParam, "param is null");
-
-        TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
-        for (Map.Entry<String, String> e : queryParam.entrySet()) {
-            request.addQueryParam(e.getKey(), e.getValue());
-        }
-        return httpClient.call(request.build(), apiKeyCache);
-    }
-
     private String doPost(String path)
             throws TDClientException
     {

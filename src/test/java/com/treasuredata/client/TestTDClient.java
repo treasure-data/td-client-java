@@ -150,7 +150,7 @@ public class TestTDClient
         String dbListStr = Joiner.on(", ").join(dbList);
         logger.debug(dbListStr);
 
-                List < TDDatabase > detailedDBList = client.listDatabases();
+        List<TDDatabase> detailedDBList = client.listDatabases();
         Iterable<String> dbStr = Iterables.transform(detailedDBList, new Function<TDDatabase, String>()
         {
             @Override
@@ -175,12 +175,13 @@ public class TestTDClient
 
         Set<TDTable> tableSet = new HashSet<>();
         for (final TDTable t : tableList) {
+            logger.info("id: " + t.getId());
+            logger.info("type: " + t.getType());
             logger.info("estimated size:" + t.getEstimatedStorageSize());
             logger.info("last log timestamp: " + t.getLastLogTimeStamp());
             logger.info("expire days:" + t.getExpireDays());
             logger.info("created at: " + t.getCreatedAt());
             logger.info("updated at: " + t.getUpdatedAt());
-
             if (t.getName().equals("nasdaq")) {
                 assertTrue(t.getColumns().size() == 6);
             }
@@ -190,6 +191,11 @@ public class TestTDClient
             // To use equals and hashCode
             tableSet.add(t);
         }
+
+        for(TDTable t : tableSet) {
+            tableSet.contains(t);
+        }
+
     }
 
     @Test
@@ -431,7 +437,14 @@ public class TestTDClient
             long from = 1420070400 - (1420070400 % 3600);
             long to = from + 3600;
             TDPartialDeleteJob partialDeleteJob = client.partialDelete(SAMPLE_DB, t, from, to);
+            logger.debug("partial delete job: " + partialDeleteJob);
+            assertEquals(from, partialDeleteJob.getFrom());
+            assertEquals(to, partialDeleteJob.getTo());
+            assertEquals(SAMPLE_DB, partialDeleteJob.getDatabase());
+            assertEquals(t, partialDeleteJob.getTable());
+
             waitJobCompletion(partialDeleteJob.getJobId());
+
 
             String after = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
             assertFalse(after.contains("1420070400"));
