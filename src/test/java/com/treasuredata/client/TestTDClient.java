@@ -414,7 +414,7 @@ public class TestTDClient
             long to = from + 3600;
             client.partialDelete(SAMPLE_DB, t, from, to);
 
-            Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+            Thread.sleep(TimeUnit.SECONDS.toMillis(3));
             String after = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
             assertFalse(after.contains("1420070400"));
             assertTrue(after.contains("1422748800"));
