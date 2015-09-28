@@ -214,5 +214,4 @@ public class TestTDColumn
     {
         TDColumnType.parseColumnType("xint");
     }
-
 }

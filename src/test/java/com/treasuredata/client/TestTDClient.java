@@ -192,10 +192,9 @@ public class TestTDClient
             tableSet.add(t);
         }
 
-        for(TDTable t : tableSet) {
+        for (TDTable t : tableSet) {
             tableSet.contains(t);
         }
-
     }
 
     @Test
@@ -444,7 +443,6 @@ public class TestTDClient
             assertEquals(t, partialDeleteJob.getTable());
 
             waitJobCompletion(partialDeleteJob.getJobId());
-
 
             String after = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
             assertFalse(after.contains("1420070400"));
