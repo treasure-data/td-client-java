@@ -356,8 +356,6 @@ public class TestTDClient
     }
 
     private static final String SAMPLE_DB = "_tdclient_test";
-    private static final String SAMPLE_TABLE = "sample";
-    private static final String BULK_IMPORT_TABLE = "sample_bi";
 
     @Test
     public void databaseOperation()
@@ -501,8 +499,8 @@ public class TestTDClient
             throws Exception
     {
         // swap
-        String t1 = SAMPLE_TABLE + "_1";
-        String t2 = SAMPLE_TABLE + "_2";
+        String t1 = newTemporaryName("sample1");
+        String t2 = newTemporaryName("sample2");
         client.deleteTableIfExists(SAMPLE_DB, t1);
         client.deleteTableIfExists(SAMPLE_DB, t2);
         client.createTableIfNotExists(SAMPLE_DB, t1);
@@ -531,15 +529,16 @@ public class TestTDClient
     public void testBulkImport()
             throws Exception
     {
-        client.deleteTableIfExists(SAMPLE_DB, BULK_IMPORT_TABLE);
-        client.createTableIfNotExists(SAMPLE_DB, BULK_IMPORT_TABLE);
+        final String bulkImportTable = newTemporaryName("sample_bi");
+        client.deleteTableIfExists(SAMPLE_DB, bulkImportTable);
+        client.createTableIfNotExists(SAMPLE_DB, bulkImportTable);
 
         final int numRowsInPart = 10;
         final int numParts = 3;
         String dateStr = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
         final String session = "td-client-java-test-session-" + dateStr;
         try {
-            client.createBulkImportSession(session, SAMPLE_DB, BULK_IMPORT_TABLE);
+            client.createBulkImportSession(session, SAMPLE_DB, bulkImportTable);
 
             List<TDBulkImportSession> sessionList = client.listBulkImportSessions();
             TDBulkImportSession foundInList = Iterables.find(sessionList, new Predicate<TDBulkImportSession>()
@@ -555,7 +554,7 @@ public class TestTDClient
             logger.info("bulk import session: {}, error message: {}", bs.getJobId(), bs.getErrorMessage());
             assertEquals(session, bs.getName());
             assertEquals(SAMPLE_DB, bs.getDatabaseName());
-            assertEquals(BULK_IMPORT_TABLE, bs.getTableName());
+            assertEquals(bulkImportTable, bs.getTableName());
             assertTrue(bs.isUploading());
 
             assertEquals(foundInList.getStatus(), bs.getStatus());
@@ -680,7 +679,7 @@ public class TestTDClient
                 @Override
                 public boolean apply(TDTable input)
                 {
-                    return input.getName().equals(BULK_IMPORT_TABLE);
+                    return input.getName().equals(bulkImportTable);
                 }
             });
 
