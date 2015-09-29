@@ -172,6 +172,12 @@ public class HttpConnectionImpl {
         conn.connect();
     }
 
+    /*
+     * This method requires all 'params' are URL encoded as CGI parameters.
+     * Use HttpConnectionImpl.e() that does URLEncoder.encode() + '+' => '%20'.
+     *
+     * Preferably you should not use this method.
+     */
     public void doPostRequest(Request<?> request, String path, Map<String, String> header,
             Map<String, String> params) throws IOException {
         StringBuilder sbuf = new StringBuilder();
@@ -194,8 +200,12 @@ public class HttpConnectionImpl {
         } else {
             URL url = new URL(sbuf.toString());
             conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Content-Length", "0");
         }
+        // this method always send POST content as CGI parameters.
+        // By calling setFixedLengthStreamingMode() with 0 this sets Content-Length: 0 to cope with
+        // old squid proxy server that returns 411 when it does not exist.
+        conn.setFixedLengthStreamingMode(0);
+        conn.setDoOutput(true);
         conn.setReadTimeout(postReadTimeout);
 
         // header
