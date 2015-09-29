@@ -165,7 +165,7 @@ TDClient client = new TDClient(config);
 |`td.client.proxy.port` |         | (optional) Proxy port e.g., "80" |
 |`td.client.proxy.user` |         | (optional) Proxy user |
 |`td.client.proxy.password` |     | (optional) Proxy password  |
-|`td.client.usessl` | false | (optional) Use SSL encryption |
+|`td.client.usessl` | true | (optional) Use SSL encryption |
 |`td.client.retry.limit` | 7 | (optinoal) The maximum number of API request retry |
 |`td.client.retry.initial-interval` | 500 | (optional) backoff retry interval = (interval) * (multiplier) ^ (retry count) |
 |`td.client.retry.max-interval` | 60000 | (optional) max retry interval |
