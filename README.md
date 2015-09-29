@@ -1,351 +1,196 @@
-# Treasure Data Client for Java
+# td-client for java
 
-## Overview
+A java client for accessing [Treasure Data API](http://docs.treasuredata.com/articles/rest-api).
+With this client, you can:
+ - Make queries to Treasure Data
+ - Check the status of jobs (queries)
+ - Retrieve query results
+ - Check the information of databases and tables
 
-Many web/mobile applications generate huge amount of event logs (c,f. login,
-logout, purchase, follow, etc).  Analyzing these event logs can be quite
-valuable for improving services.  However, analyzing these logs easily and
-reliably is a challenging task.
+td-client-java is built for Java 1.7 or higher, and licensed under Apache License Version 2.0.
 
-Treasure Data Cloud solves the problem by having: easy installation, small
-footprint, plugins reliable buffering, log forwarding, the log analyzing, etc.
+## Download
 
-  * Treasure Data website: [http://treasure-data.com/](http://treasure-data.com/)
-  * Treasure Data GitHub: [https://github.com/treasure-data/](https://github.com/treasure-data/)
+You can download a jar file (td-client-java-(version)-jar-with-dependencies.jar) from here: http://central.maven.org/maven2/com/treasuredata/client/td-jdbc
 
-**td-client-java** is a Java library, to access Treasure Data Cloud from Java application.
+### For Maven Users
 
-## Requirements
+Use the following dependency setting:
 
-Java >= 1.6
+```
+<dependency>
+  <groupId>com.treasuredata.client</groupId>
+  <artifactId>td-client</artifactId>
+  <version>${client.version}</version>
+</dependency>
+```
 
-## Install
+### For Scala Users
 
-### Install with all-in-one jar file
+Add the following sbt settings:
 
-You can download all-in-one jar file for Treasure Data Logger.
+```
+libraryDependencies ++= Seq("com.treasuredata.client" % "td-client" % "${client.version}")
+```
 
-    $ wget http://central.maven.org/maven2/com/treasuredata/td-client/${client.version}/td-client-${client.version}-jar-with-dependencies.jar
+## Usage
 
-To use Treasure Data Cloud for Java, set the above jar file to your classpath.
+To use td-client-java, you need to set your API key in the following file:
 
-### Install from Maven repository
+**$HOME/.td/td.conf**
 
-Treasure Data Client for Java is released on Treasure Data's Maven repository.
-You can configure your pom.xml as follows to use it:
+```
+[account]
+  user = (your TD account e-mail address)
+  apikey = (your API key)
+```
 
-    <dependencies>
-      ...
-      <dependency>
-        <groupId>com.treasuredata</groupId>
-        <artifactId>td-client</artifactId>
-        <version>${client.version}</version>
-      </dependency>
-      ...
-    </dependencies>
+You can retrieve your API key from [My profile](https://console.treasuredata.com/users/current) page.
 
-### Install with SBT (Scala Build Tool)
+It is also possible to use `TD_API_KEY` environment variable. Add the following configuration to your shell configuration `.bash_profile`, `.zprofile`, etc.
 
-To install td-client From SBT (a build tool for Scala), please add the following lines to your build.sbt.
+```
+export TD_API_KEY = (your API key)
+```
 
-    /* in build.sbt */
-    // Repositories
-    resolvers ++= Seq(
-      "fluent-logger Maven Repository" at "http://fluentd.org/maven2/"
-    )
-    // Dependencies
-    libraryDependencies ++= Seq(
-      "com.treasuredata" % "td-client" % "${client.version}"
-    )
+For Windows, Add `TD_API_KEY` environment variable from the user preference panel.
 
-### Install from GitHub repository
+### Proxy Server
 
-You can get latest source code using git.
+If you need to access Web through proxy, add the following configuration to `$HOME/.td/td.conf` file:
 
-    $ git clone https://github.com/treasure-data/td-client-java.git
-    $ cd td-client-java
-    $ mvn package -Dmaven.test.skip=true
+```
+[account]
+  user = (your TD account e-mail address)
+  apikey = (your API key)
+  td.client.proxy.host = (optional: proxy host name)
+  td.client.proxy.port = (optional: proxy port number)
+  td.client.proxy.user = (optional: proxy user name)
+  td.client.proxy.password = (optional: proxy password)
+```
 
-You will get the td-client jar file in td-client-java/target
-directory.  File name will be td-client-${client.version}-jar-with-dependencies.jar.
-For more detail, see pom.xml.
+### Example Code
 
-**Replace ${client.version} with the current version of Treasure Data Cloud for Java.**
-**The current version is 0.5.0.**
+```java
+import com.treasuredata.client.TDClient;
+import com.google.common.base.Function;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
+import org.msgpack.value.ArrayValue;
+...
 
-## Configuration
+// Create a new TD client by using configurations in $HOME/.td/td.conf
+TDClient client = new TDClient();
 
-Please configure your treasure-data.properties file using the properties listed below:
+// Retrieve database and table names
+List<String> databaseNames = client.listDatabases();
+for(String db : databaseNames) {
+   System.out.println("database: " + db);
+   for(TDTable table : client.listTables(db)) {
+      System.out.println(" table: " + table);
+   }
+}
 
-### API key
+// Submit a new Presto query
+String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_dataset", "select count(1) from www_accesses"));
 
-Please configure your treasure-data.properties file using the commands shown below:
+// Wait until the query finishes
+TDJobSummary job = client.jobStatus(jobId);
+while(!job.getStatus().isFinished()) {
+  Thread.sleep(2000);
+  job = client.jobStatus(jobId);
+}
 
-    td.api.key=<your API key>
+// Read the detailed job information
+TDJob jobInfo = client.jobInfo(jobId)
+System.out.println("log:\n" + jobInfo.getCmdOut());
+System.out.println("error log:\n" + jobInfo.getStdErr());
 
-The same information can be provided with the `TREASURE_DATA_API_KEY` environment
-variable, e.g.:
-
-    TREASURE_DATA_API_KEY="<your API key>"
-
-The environment variable takes precedence over the property specified above.
-
-### Endpoint
-
-The endpoint is specified with the `td.api.server.*` properties:
-
-    td.api.server.scheme=https://
-    td.api.server.host=api.treasuredata.com
-    td.api.server.port=443
-
-The default `td-client-java` endpoint is `https://api.treasuredata.com:443` and
-by default the HTTPS protocol is used. If you want to use http instead of https,
-you can configure your properties file like following.
-
-    td.api.server.scheme=http://
-    td.api.server.host=api.treasuredata.com
-    td.api.server.port=80
-
-The same information can be provided with the `TD_API_SERVER` environment
-variable, e.g.:
-
-    TD_API_SERVER="https://api.treasuredata.com:443"
-
-The environment variable takes precedence over the properties specified above.
-
-### Proxy
-
-If you configure http proxy, please add the following lines to your treasure-data.properties.
-
-    http.proxyHost=<your proxy server's host>
-    http.proxyPort=<your proxy server's port>
-
-
-## Quickstart
-
-### List Databases and Tables
-
-Below is an example of listing databases and tables.
-
-    import java.io.IOException;
-    import java.util.List;
-    import java.util.Properties;
-
-    import com.treasure_data.client.ClientException;
-    import com.treasure_data.client.TreasureDataClient;
-    import com.treasure_data.model.DatabaseSummary;
-    import com.treasure_data.model.TableSummary;
-
-    public class Main {
-        static {
-            try {
-                Properties props = System.getProperties();
-                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
-            } catch (IOException e) {
-                // do something
-            }
-        }
-
-        public void doApp() throws ClientException {
-            TreasureDataClient client = new TreasureDataClient();
-
-            List<DatabaseSummary> databases = client.listDatabases();
-            for (DatabaseSummary database : databases) {
-                String databaseName = database.getName();
-                List<TableSummary> tables = client.listTables(databaseName);
-                for (TableSummary table : tables) {
-                    System.out.println(databaseName);
-                    System.out.println(table.getName());
-                    System.out.println(table.getCount());
-                }
-            }
-        }
+// Read the job results in msgpack.gz format
+client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>() {
+  @Override
+  public Object apply(InputStream input) {
+  try {
+    MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
+    while(unpacker.hasNext()) {
+       // Each row of the query result is array type value (e.g., [1, "name", ...])
+       ArrayValue array = unpacker.unpackValue().asArrayValue();
+       int id = array.get(0).asIntegerValue().toInt
     }
+  }
+});
 
-### Issue Queries
+```
 
-Below is an example of issuing a query from a Java program. The query API is asynchronous, and you can wait for the query to complete by polling the job periodically.
+### Bulk upload
 
-    import java.io.IOException;
-    import java.util.Properties;
+```java
+// Create a new TD client by using configurations in $HOME/.td/td.conf
+TDClient client = new TDClient();
 
-    import org.msgpack.unpacker.Unpacker;
-    import org.msgpack.unpacker.UnpackerIterator;
+File f = new File("./sess/part01.msgpack.gz");
 
-    import com.treasure_data.client.ClientException;
-    import com.treasure_data.client.TreasureDataClient;
-    import com.treasure_data.model.Database;
-    import com.treasure_data.model.Job;
-    import com.treasure_data.model.JobResult;
-    import com.treasure_data.model.JobSummary;
+TDBulkImportSession session = client.createBulkImportSession("session_name", "database_name", "table_name");
+client.uploadBulkImportPart(session.getName(), "session_part01", f);
+```
 
-    public class Main {
-        static {
-            try {
-                Properties props = System.getProperties();
-                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
-            } catch (IOException e) {
-                // do something
-            }
-        }
+### Custom Configuration
 
-        public void doApp() throws ClientException {
-            TreasureDataClient client = new TreasureDataClient();
+You can set configuration parameters by using ``$HOME/.td/td.conf`` file and `Properties` object:
 
-            Job job = new Job(new Database("testdb"), "SELECT COUNT(1) FROM www_access");
-            client.submitJob(job);
-            String jobID = job.getJobID();
-            System.out.println(jobID);
+```java
+Properties prop = TDClientConfig.readTDConf(); // Set the default values by reading $HOME/.td/td.conf file
+// Set your own properties
+prop.setProperty("key", "value");
+...
 
-            while (true) {
-                JobSummary.Status stat = client.showJobStatus(job);
-                if (stat == JobSummary.Status.SUCCESS) {
-                    break;
-                } else if (stat == JobSummary.Status.ERROR) {
-                    String msg = String.format("Job '%s' failed: got Job status 'error'", jobID);
-                    JobSummary js = client.showJob(job);
-                    if (js.getDebug() != null) {
-                        System.out.println("cmdout:");
-                        System.out.println(js.getDebug().getCmdout());
-                        System.out.println("stderr:");
-                        System.out.println(js.getDebug().getStderr());
-                    }
-                    throw new ClientException(msg);
-                } else if (stat == JobSummary.Status.KILLED) {
-                    String msg = String.format("Job '%s' failed: got Job status 'killed'", jobID);
-                    throw new ClientException(msg);
-                }
+// This uses configuration parameters in the Properties object as the default values.
+// You can overwrite this by using System properties
+TDClietnConfig config = TDClientConfig.newConfig(p)
+TDClient client = new TDClient(config);
+```
 
-                try {
-                    Thread.sleep(2 * 1000);
-                } catch (InterruptedException e) {
-                    // do something
-                }
-            }
+## List of Configuration Parameters
 
-            JobResult jobResult = client.getJobResult(job);
-            Unpacker unpacker = jobResult.getResult(); // Unpacker class is MessagePack's deserializer
-            UnpackerIterator iter = unpacker.iterator();
-            while (iter.hasNext()) {
-                ArrayValue row = iter.next().asArrayValue();
-                for (Value elm : row) {
-                    System.out.print(elm + ",");
-                }
-                System.out.println();
-            }
-        }
-    }
-
-JobResult is model class for query result. The object has Unpacker object. The Unpacker and the iterator, UnpackerIterator object, allow users to download query result via internet and use the raw data.
-
-### List and Get the Status of Jobs
-
-Below is an example of listing and get the status of jobs.
-
-    import java.io.IOException;
-    import java.util.List;
-    import java.util.Properties;
-
-    import com.treasure_data.client.ClientException;
-    import com.treasure_data.client.TreasureDataClient;
-    import com.treasure_data.model.JobSummary;
-
-    public class Main {
-        static {
-            try {
-                Properties props = System.getProperties();
-                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
-            } catch (IOException e) {
-                // do something
-            }
-        }
-
-        public void doApp() throws ClientException {
-            TreasureDataClient client = new TreasureDataClient();
-
-            List<JobSummary> jobs = client.listJobs(0, 127);
-            for (JobSummary job : jobs) {
-                System.out.println(job.getJobID());
-                System.out.println(job.getStatus());
-            }
-        }
-    }
-
-### Show Table Schema and Update the Schema to Table
-
-    import java.io.IOException;
-    import java.util.Arrays;
-    import java.util.Properties;
-
-    import com.treasure_data.client.ClientException;
-    import com.treasure_data.client.TreasureDataClient;
-    import com.treasure_data.model.TableSchema;
-
-    public class Main {
-        static {
-            try {
-                Properties props = System.getProperties();
-                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
-            } catch (IOException e) {
-                // do something
-            }
-        }
-
-        public void doApp() throws ClientException {
-            TreasureDataClient client = new TreasureDataClient();
-
-            // show current schema
-            TableSchema schema = client.showTableSchema("testdb", "testtbl");
-            System.out.println(schema.getPairsOfColsAndTypes());
-
-            // set schema
-            client.setTableSchema("testdb", "testtbl", Arrays.asList("id:string", "age:int", "name:string"));
-
-            // remove schema
-            client.removeTableSchema("testdb", "testtbl", Arrays.asList("age", "name"));
-        }
-    }
-
-### Bulk-Upload Data on Bulk Import Session
-
-    import java.io.BufferedInputStream;
-    import java.io.File;
-    import java.io.FileInputStream;
-    import java.io.InputStream;
-
-    import com.treasure_data.auth.TreasureDataCredentials;
-    import com.treasure_data.client.TreasureDataClient;
-    import com.treasure_data.client.bulkimport.BulkImportClient;
-    import com.treasure_data.model.bulkimport.Session;
-
-    public class Main {
-        static {
-            try {
-                Properties props = System.getProperties();
-                props.load(Main.class.getClassLoader().getResourceAsStream("treasure-data.properties"));
-            } catch (IOException e) {
-                // do something
-            }
-        }
-
-        public void doApp() throws ClientException {
-            TreasureDataClient client = new TreasureDataClient();
-            BulkImportClient biclient = new BulkImportClient(client);
-
-            String name = "session_name";
-            String database = "database_name";
-            String table = "table_name";
-            String partID = "session_part01";
-
-            File f = new File("./sess/part01.msgpack.gz");
-            InputStream in = new BufferedInputStream(new FileInputStream(f));
-
-            Session session = new Session(name, database, table);
-            biclient.uploadPart(session, partID, in, (int) f.length());
-        }
-    }
+|key              | default value | description |
+|-----------------|---------------|-------------|
+|`apikey`  |               | API key to access Treasure Data. You can also set this via TD_API_KEY environment variable.  |
+|`user`    |               | Account e-mail address (unnecessary if `apikey` is set) |
+|`password`|               | Account password (unnecessary if `apikey` is set) |
+|`td.client.proxy.host` |         | (optional) Proxy host e.g., "myproxy.com"  |
+|`td.client.proxy.yport`|         | (optional) Proxy port e.g., "80" |
+|`td.client.proxy.user` |         | (optional) Proxy user |
+|`td.client.proxy.password` |     | (optional) Proxy password  |
+|`td.client.usessl` | false | (optional) Use SSL encryption |
+|`td.client.retry.limit` | 7 | (optinoal) The maximum number of API request retry |
+|`td.client.retry.initial-interval` | 500 | (optional) backoff retry interval = (interval) * (multiplier) ^ (retry count) |
+|`td.client.retry.max-interval` | 60000 | (optional) max retry interval |
+|`td.client.retry.multiplier` | 2.0 | (optional) retry interval multiplier |
+|`td.client.connect-timeout` | 15000 | (optional) connection timeout before reaching the API |
+|`td.client.idle-timeout` | 60000 | (optional) idle connection timeout when no data is coming from API |
+|`td.client.connection-pool-size` | 64 | (optional) Connection pool size|
+|`td.client.endpoint` | `api.treasuredata.com` | (optional) TD REST API endpoint name |
+|`td.client.port` | 80 for non-SSL, 443 for SSL connection | (optional) TD API port number |
 
 
-## License
+You can overwrite configuration by using environment variables or System properties. The precedence of configuration parmaetrs is:
 
-Apache License, Version 2.0
+1. Environment variable (only for TD_API_KEY parameter)
+1. System properties (passed with `-D` option when launching JVM)
+1. Properties object passed to TDClientConfig.newConfig(Properties p)
+
+
+## For Developers
+
+### Build from the source code
+
+```
+$ git clone https://github.com/treasure-data/td-client-java.git
+$ cd td-client-java
+$ mvn package
+```
+
+This creates jar files within `target` folder.
+
+
+

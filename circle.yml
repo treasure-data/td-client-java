@@ -1,6 +1,6 @@
 machine:
-  maven:
-    version: 3.0.5
+  java:
+    version: openjdk7
 
 test:
   override:
