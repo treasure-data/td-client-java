@@ -11,7 +11,7 @@ td-client-java is built for Java 1.7 or higher, and licensed under Apache Licens
 
 ## Download
 
-You can download a jar file (td-client-java-(version)-jar-with-dependencies.jar) from here: http://central.maven.org/maven2/com/treasuredata/client/td-jdbc
+You can download a jar file (td-client-java-(version)-jar-with-dependencies.jar) from here: http://central.maven.org/maven2/com/treasuredata/client/td-client-java
 
 For the information of the older versions, see <https://github.com/treasure-data/td-client-java/tree/0.5.x>.
 
