@@ -418,7 +418,6 @@ public class TDHttpClient
 
         public byte[] onError(Response response)
         {
-            int code = response.getStatus();
             try (InputStream in = listner.getInputStream()) {
                 byte[] errorResponse = ByteStreams.toByteArray(in);
                 return errorResponse;
