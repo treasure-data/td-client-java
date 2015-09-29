@@ -19,6 +19,7 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Throwables;
+import com.google.common.io.CharStreams;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -35,6 +36,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
@@ -55,15 +59,17 @@ public class TestServerFailures
             throws Exception
     {
         server = new Server();
+        port = TestProxyAccess.findAvailablePort();
         http = new ServerConnector(server);
         http.setHost("localhost");
-        port = TestProxyAccess.findAvailablePort();
         http.setPort(port);
         server.addConnector(http);
     }
 
     private void startServer()
+            throws InterruptedException
     {
+        final AtomicBoolean ready = new AtomicBoolean(false);
         new Thread(new Runnable()
         {
             @Override
@@ -71,6 +77,7 @@ public class TestServerFailures
             {
                 try {
                     server.start();
+                    ready.set(true);
                     server.join();
                 }
                 catch (Throwable e) {
@@ -78,6 +85,11 @@ public class TestServerFailures
                 }
             }
         }).start();
+
+        ExponentialBackOff backoff = new ExponentialBackOff(10, 1000, 1.5);
+        while (!ready.get()) {
+            Thread.sleep(backoff.nextWaitTimeMillis());
+        }
     }
 
     @After
@@ -85,6 +97,34 @@ public class TestServerFailures
             throws Exception
     {
         server.stop();
+    }
+
+    @Test
+    public void jettyServerTest()
+            throws Exception
+    {
+        final AtomicInteger accessCount = new AtomicInteger(0);
+        server.setHandler(new AbstractHandler()
+        {
+            @Override
+            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+                    throws IOException, ServletException
+            {
+                logger.debug("request: " + request);
+                accessCount.incrementAndGet();
+                response.setStatus(HttpStatus.OK_200);
+                response.getWriter().print("hello!");
+                baseRequest.setHandled(true);
+            }
+        });
+        startServer();
+        String url = String.format("http://localhost:%s/v3/system/server_status", port);
+        logger.info("url: " + url);
+        try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
+            String content = CharStreams.toString(reader);
+            logger.info(content);
+        }
+        assertEquals(1, accessCount.get());
     }
 
     @Test
@@ -112,6 +152,7 @@ public class TestServerFailures
         TDClientConfig config = TDClientConfig
                 .newBuilder()
                 .setEndpoint("localhost")
+                .setUseSSL(false)
                 .setPort(port)
                 .setRetryLimit(3)
                 .build();
@@ -128,6 +169,7 @@ public class TestServerFailures
 
     @Test
     public void unknownResponseCode()
+            throws Exception
     {
         server.setHandler(new AbstractHandler()
         {
@@ -150,6 +192,7 @@ public class TestServerFailures
         TDClientConfig config = TDClientConfig
                 .newBuilder()
                 .setEndpoint("localhost")
+                .setUseSSL(false)
                 .setPort(port)
                 .build();
         TDClient client = new TDClient(config);
@@ -173,6 +216,7 @@ public class TestServerFailures
 
     @Test
     public void corruptedJsonResponse()
+            throws Exception
     {
         server.setHandler(new AbstractHandler()
         {
@@ -201,6 +245,7 @@ public class TestServerFailures
         TDClientConfig config = TDClientConfig
                 .newBuilder()
                 .setEndpoint("localhost")
+                .setUseSSL(false)
                 .setPort(port)
                 .build();
         TDClient client = new TDClient(config);
