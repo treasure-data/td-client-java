@@ -28,26 +28,23 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
+import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDApiErrorMessage;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.client.HttpResponseException;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.api.Response;
+import org.eclipse.jetty.client.util.InputStreamResponseListener;
+import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.util.B64Code;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.jetty.connector.JettyClientProperties;
-import org.glassfish.jersey.jetty.connector.JettyConnectorProvider;
+import org.eclipse.jetty.util.HttpCookieStore;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,8 +55,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.treasuredata.client.TDApiRequest.urlEncode;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
 import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE;
@@ -74,51 +76,50 @@ public class TDHttpClient
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
     private final TDClientConfig config;
-    private final Client httpClient;
+    private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
     private Optional<String> proxyAuthenticationCache = Optional.absent();
 
     public TDHttpClient(TDClientConfig config)
     {
         this.config = config;
+        this.httpClient = new HttpClient();
+        httpClient.setConnectTimeout(config.getConnectTimeoutMillis());
+        httpClient.setIdleTimeout(config.getIdleTimeoutMillis());
+        httpClient.setTCPNoDelay(true);
+        httpClient.setExecutor(new QueuedThreadPool(config.getConnectionPoolSize(), 2));
+        httpClient.setCookieStore(new HttpCookieStore.Empty());
 
-        ClientConfig httpConfig = new ClientConfig();
-
-        // We need to use Jetty connector to support proxy requests
-        httpConfig.connectorProvider(new JettyConnectorProvider());
-
-        // Basic http client configurations
-        httpConfig
-                .property(ClientProperties.CONNECT_TIMEOUT, config.getConnectTimeoutMillis())
-                .property(ClientProperties.READ_TIMEOUT, config.getConnectTimeoutMillis());
-
-        // Jetty specific configuration. Disable cookie
-        httpConfig.property(JettyClientProperties.DISABLE_COOKIES, true);
-
-        // Connection pool size
-        httpConfig.property(ClientProperties.ASYNC_THREADPOOL_SIZE, config.getConnectionPoolSize());
-
-        // Configure proxy server
+        // Proxy configuration
         if (config.getProxy().isPresent()) {
-            ProxyConfig proxyConfig = config.getProxy().get();
+            final ProxyConfig proxyConfig = config.getProxy().get();
             logger.trace("proxy configuration: " + proxyConfig);
-            httpConfig.property(ClientProperties.PROXY_URI, proxyConfig.getUri());
+            HttpProxy httpProxy = new HttpProxy(proxyConfig.getHost(), proxyConfig.getPort());
+            httpClient.getProxyConfiguration().getProxies().add(httpProxy);
+            if (proxyConfig.requireAuthentication()) {
+                httpClient.getAuthenticationStore().addAuthentication(new ProxyAuthentication(proxyConfig.getUser().or(""), proxyConfig.getPassword().or("")));
+            }
         }
-
         // Prepare jackson json-object mapper
         this.objectMapper = new ObjectMapper()
                 .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
                 .registerModule(new GuavaModule())   // for mapping to Guava Optional class
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        this.httpClient = ClientBuilder.newClient(httpConfig);
+        try {
+            httpClient.start();
+        }
+        catch (Exception e) {
+            logger.error("Failed to initialize Jetty client", e);
+            throw Throwables.propagate(e);
+        }
     }
 
     public void close()
     {
         synchronized (this) {
             try {
-                httpClient.close();
+                httpClient.stop();
             }
             catch (Exception e) {
                 logger.error("Failed to terminate Jetty client", e);
@@ -157,7 +158,7 @@ public class TDHttpClient
                 }
             };
 
-    public Response submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
+    public Request prepareRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
         String portStr = config.getPort().transform(new Function<Integer, String>()
@@ -169,38 +170,29 @@ public class TDHttpClient
             }
         }).or("");
         String requestUri = String.format("%s%s%s%s", config.getHttpScheme(), config.getEndpoint(), portStr, apiRequest.getPath());
-        logger.debug("Sending API request to {}", requestUri);
-        WebTarget target = httpClient.target(requestUri);
+
         if (!apiRequest.getQueryParams().isEmpty()) {
             List<String> queryParamList = new ArrayList<String>(apiRequest.getQueryParams().size());
             for (Map.Entry<String, String> queryParam : apiRequest.getQueryParams().entrySet()) {
-                target = target.queryParam(queryParam.getKey(), queryParam.getValue());
-                queryParamList.add(String.format("%s=%s", queryParam.getKey(), queryParam.getValue()));
+                queryParamList.add(String.format("%s=%s", urlEncode(queryParam.getKey()), urlEncode(queryParam.getValue())));
             }
             queryStr = Joiner.on("&").join(queryParamList);
+            if (apiRequest.getMethod() == HttpMethod.GET) {
+                requestUri += "?" + queryStr;
+            }
         }
-        Invocation.Builder request = target.request()
-                .header(HttpHeaders.USER_AGENT, "TDClient " + TDClient.getVersion())
-                .header(HttpHeaders.DATE, RFC2822_FORMAT.get().format(new Date()));
+
+        logger.debug("Sending API request to {}", requestUri);
+        Request request = httpClient.newRequest(requestUri);
+        request.method(apiRequest.getMethod());
+        request.agent("td-client-java-" + TDClient.getVersion());
+        request.header(HttpHeader.DATE, RFC2822_FORMAT.get().format(new Date()));
 
         // Set API Key
         Optional<String> apiKey = apiKeyCache.or(config.getApiKey());
         if (apiKey.isPresent()) {
-            request.header(HttpHeaders.AUTHORIZATION, "TD1 " + apiKey.get());
+            request.header(HttpHeader.AUTHORIZATION, "TD1 " + apiKey.get());
         }
-
-        // Set Proxy-Authorization header.
-        // JAX-RS Jetty binder in Jersey2 does not support proxy authentication, so we need to add Proxy-Authorization header here
-        if (config.getProxy().isPresent()) {
-            ProxyConfig proxy = config.getProxy().get();
-            if (proxy.requireAuthentication()) {
-                if (!proxyAuthenticationCache.isPresent()) {
-                    proxyAuthenticationCache = Optional.of("Basic " + B64Code.encode(proxy.getUser().get() + ":" + proxy.getPassword().get(), StandardCharsets.ISO_8859_1));
-                }
-                request.header("Proxy-Authorization", proxyAuthenticationCache.get());
-            }
-        }
-
         // Set other headers
         for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entrySet()) {
             request.header(entry.getKey(), entry.getValue());
@@ -209,26 +201,31 @@ public class TDHttpClient
         // Submit the request
         switch (apiRequest.getMethod()) {
             case GET:
-                return request.get();
+                break;
             case POST:
-                if (queryStr != null && queryStr.length() > 0) {
-                    return request.post(Entity.entity(queryStr, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+                if (queryStr.length() > 0) {
+                    request.content(new StringContentProvider(queryStr), "application/x-www-form-urlencoded");
                 }
                 else {
                     // We should set content-length explicitly for an empty post
                     request.header("Content-Length", "0");
-                    return request.post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED_TYPE));
                 }
+                break;
             case PUT:
                 if (apiRequest.getPutFile().isPresent()) {
-                    return request.put(Entity.entity(apiRequest.getPutFile().get(), MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                    try {
+                        request.file(apiRequest.getPutFile().get().toPath(), "application/octet-stream");
+                    }
+                    catch (IOException e) {
+                        throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, "Failed to read input file: " + apiRequest.getPutFile().get());
+                    }
                 }
                 break;
         }
-        return request.build(apiRequest.getMethod().asString()).invoke();
+        return request;
     }
 
-    public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Function<Response, Result> handler)
+    public <ResponseType extends Response, Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Handler<ResponseType, Result> handler)
             throws TDClientException
     {
         ExponentialBackOff backoff = new ExponentialBackOff(config.getRetryInitialIntervalMillis(), config.getRetryMaxIntervalMillis(), config.getRetryMultiplier());
@@ -242,21 +239,22 @@ public class TDHttpClient
                     Thread.sleep(waitTimeMillis);
                 }
 
-                Response response = null;
+                ResponseType response = null;
                 try {
-                    response = submitRequest(apiRequest, apiKeyCache);
+                    Request request = prepareRequest(apiRequest, apiKeyCache);
+                    response = handler.submit(request);
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
                         logger.info(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), apiRequest.getPath()));
-                        return handler.apply(response);
+                        return handler.onSuccess(response);
                     }
                     else {
-                        byte[] returnedContent = response.readEntity(byte[].class);
+                        byte[] returnedContent = handler.onError(response);
                         rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent));
                     }
                 }
-                catch (ProcessingException e) {
+                catch (ExecutionException e) {
                     logger.warn("API request failed", e);
                     // Jetty client + jersey may return ProcessingException for 401 errors
                     Optional<HttpResponseException> responseError = findHttpResponseException(e);
@@ -269,10 +267,9 @@ public class TDHttpClient
                         throw new TDClientProcessingException(e);
                     }
                 }
-                finally {
-                    if (response != null) {
-                        response.close();
-                    }
+                catch (TimeoutException e) {
+                    logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
+                    rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
                 }
             }
         }
@@ -335,30 +332,18 @@ public class TDHttpClient
 
     public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
-        return submitRequest(apiRequest, apiKeyCache, new Function<Response, String>()
-        {
-            @Override
-            public String apply(Response input)
-            {
-                String response = input.readEntity(String.class);
-                if (logger.isTraceEnabled()) {
-                    logger.trace("response:\n{}", response);
-                }
-                return response;
-            }
-        });
+        ContentResponse response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
+        String content = response.getContentAsString();
+        if (logger.isTraceEnabled()) {
+            logger.trace("response:\n{}", content);
+        }
+        return content;
     }
 
     public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final Function<InputStream, Result> contentStreamHandler)
     {
-        return submitRequest(apiRequest, apiKeyCache, new Function<Response, Result>()
-        {
-            @Override
-            public Result apply(Response input)
-            {
-                return contentStreamHandler.apply(input.readEntity(InputStream.class));
-            }
-        });
+        InputStream input = submitRequest(apiRequest, apiKeyCache, new ContentStreamHandler());
+        return contentStreamHandler.apply(input);
     }
 
     /**
@@ -374,26 +359,90 @@ public class TDHttpClient
     public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final Class<Result> resultType)
             throws TDClientException
     {
-        return submitRequest(apiRequest, apiKeyCache, new Function<Response, Result>()
-        {
-            @Override
-            public Result apply(Response input)
-            {
-                try {
-                    byte[] response = input.readEntity(byte[].class);
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("response:\n{}", new String(response, StandardCharsets.UTF_8));
-                    }
-                    return objectMapper.readValue(response, resultType);
-                }
-                catch (JsonMappingException e) {
-                    logger.error("Jackson mapping error", e);
-                    throw new TDClientException(INVALID_JSON_RESPONSE, e);
-                }
-                catch (IOException e) {
-                    throw new TDClientException(INVALID_JSON_RESPONSE, e);
-                }
+        try {
+            ContentResponse response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
+            byte[] content = response.getContent();
+            if (logger.isTraceEnabled()) {
+                logger.trace("response:\n{}", new String(content, StandardCharsets.UTF_8));
             }
-        });
+            return objectMapper.readValue(content, resultType);
+        }
+        catch (JsonMappingException e) {
+            logger.error("Jackson mapping error", e);
+            throw new TDClientException(INVALID_JSON_RESPONSE, e);
+        }
+        catch (IOException e) {
+            throw new TDClientException(INVALID_JSON_RESPONSE, e);
+        }
+    }
+
+    static interface Handler<ResponseType extends Response, Result>
+    {
+        ResponseType submit(Request request)
+                throws InterruptedException, ExecutionException, TimeoutException;
+
+        Result onSuccess(ResponseType response);
+
+        /**
+         * @param response
+         * @return returned content
+         */
+        byte[] onError(ResponseType response);
+    }
+
+    class ContentStreamHandler
+            implements Handler<Response, InputStream>
+    {
+        private InputStreamResponseListener listner = null;
+
+        public Response submit(Request request)
+                throws InterruptedException, ExecutionException, TimeoutException
+        {
+            listner = new InputStreamResponseListener();
+            request.send(listner);
+            long timeout = httpClient.getIdleTimeout();
+            return listner.get(timeout, TimeUnit.MILLISECONDS);
+        }
+
+        public InputStream onSuccess(Response response)
+        {
+            checkNotNull(listner, "listner is null");
+            return listner.getInputStream();
+        }
+
+        public byte[] onError(Response response)
+        {
+            int code = response.getStatus();
+            try (InputStream in = listner.getInputStream()) {
+                byte[] errorResponse = ByteStreams.toByteArray(in);
+                return errorResponse;
+            }
+            catch (IOException e) {
+                throw new TDClientException(INVALID_JSON_RESPONSE, e);
+            }
+        }
+    }
+
+    public static class DefaultContentHandler
+            implements Handler<ContentResponse, ContentResponse>
+    {
+        @Override
+        public ContentResponse submit(Request request)
+                throws InterruptedException, ExecutionException, TimeoutException
+        {
+            return request.send();
+        }
+
+        @Override
+        public ContentResponse onSuccess(ContentResponse response)
+        {
+            return response;
+        }
+
+        @Override
+        public byte[] onError(ContentResponse response)
+        {
+            return response.getContent();
+        }
     }
 }
