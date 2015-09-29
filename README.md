@@ -13,6 +13,8 @@ td-client-java is built for Java 1.7 or higher, and licensed under Apache Licens
 
 You can download a jar file (td-client-java-(version)-jar-with-dependencies.jar) from here: http://central.maven.org/maven2/com/treasuredata/client/td-jdbc
 
+For the information of the older versions, see <https://github.com/treasure-data/td-client-java/tree/0.5.x>.
+
 ### For Maven Users
 
 Use the following dependency setting:
@@ -53,7 +55,7 @@ It is also possible to use `TD_API_KEY` environment variable. Add the following 
 export TD_API_KEY = (your API key)
 ```
 
-For Windows, Add `TD_API_KEY` environment variable from the user preference panel.
+For Windows, add `TD_API_KEY` environment variable in the user preference panel.
 
 ### Proxy Server
 
@@ -73,6 +75,7 @@ If you need to access Web through proxy, add the following configuration to `$HO
 
 ```java
 import com.treasuredata.client.TDClient;
+import com.treasuredata.client.ExponentialBackOff;
 import com.google.common.base.Function;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -95,9 +98,10 @@ for(String db : databaseNames) {
 String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_dataset", "select count(1) from www_accesses"));
 
 // Wait until the query finishes
+ExponentialBackOff backoff = new ExponentialBackOff();
 TDJobSummary job = client.jobStatus(jobId);
 while(!job.getStatus().isFinished()) {
-  Thread.sleep(2000);
+  Thread.sleep(backOff.nextWaitTimeMillis());
   job = client.jobStatus(jobId);
 }
 
@@ -158,7 +162,7 @@ TDClient client = new TDClient(config);
 |`user`    |               | Account e-mail address (unnecessary if `apikey` is set) |
 |`password`|               | Account password (unnecessary if `apikey` is set) |
 |`td.client.proxy.host` |         | (optional) Proxy host e.g., "myproxy.com"  |
-|`td.client.proxy.yport`|         | (optional) Proxy port e.g., "80" |
+|`td.client.proxy.port` |         | (optional) Proxy port e.g., "80" |
 |`td.client.proxy.user` |         | (optional) Proxy user |
 |`td.client.proxy.password` |     | (optional) Proxy password  |
 |`td.client.usessl` | false | (optional) Use SSL encryption |
@@ -173,7 +177,7 @@ TDClient client = new TDClient(config);
 |`td.client.port` | 80 for non-SSL, 443 for SSL connection | (optional) TD API port number |
 
 
-You can overwrite configuration by using environment variables or System properties. The precedence of configuration parmaetrs is:
+You can overwrite the configurations by using environment variables or System properties. The precedence of the configuration parmeters are as follows:
 
 1. Environment variable (only for TD_API_KEY parameter)
 1. System properties (passed with `-D` option when launching JVM)
