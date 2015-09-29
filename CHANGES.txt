@@ -1,3 +1,15 @@
+Release 0.6.0 - 2015/09/29
+  This is a major upgrade from 0.5.0 to simplify the td-client APIs. You can still use the previous version (0.5.x, released under `com.treasuredata` group) and this version (0.6.0, released as `com.treasuredata.client` group) within the same code. For the complete migration, rewriting your application code is necessary. For general usage of the new version, please look at the examples in README file. 
+  Changes in 0.6.0 includes  
+   - Use of https connections by default
+   - Configuration parameter name changes (See README.md for details)
+     - Support reading configurations from $(HOME)/.td/td.conf file 
+   - Switched to Jetty-client based implementation
+   - Added TDClientException as a base class of all exceptions thrown by TDClient
+   - Reduced the number of model classes. See `com.treasuredata.client.model` package. 
+   - Improved the API request retry mechanism
+   - Improved the test coverage
+  
 Release 0.5.6 - 20XX/XX/XX
   IMPROVEMENTS
     Escapes ' 's (spaces) included in URL path or the parameters to '%20'
