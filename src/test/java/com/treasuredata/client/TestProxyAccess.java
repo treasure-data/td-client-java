@@ -124,7 +124,7 @@ public class TestProxyAccess
     }
 
     @Test
-    public void sslAccess()
+    public void proxyServerTest()
             throws Exception
     {
         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", proxyPort));
@@ -143,11 +143,18 @@ public class TestProxyAccess
                 String ret = CharStreams.toString(new InputStreamReader(in));
                 logger.info(ret);
             }
+            assertEquals(1, proxyAccessCount.get());
+
+            // Non SSL access
+            try (InputStream in = new URL("http://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
+                String ret = CharStreams.toString(new InputStreamReader(in));
+                logger.info(ret);
+            }
+            assertEquals(2, proxyAccessCount.get());
         }
         finally {
             Authenticator.setDefault(null);
         }
-        assertEquals(1, proxyAccessCount.get());
     }
 
     @Test
@@ -155,16 +162,17 @@ public class TestProxyAccess
     {
         TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxyBaseConfig()));
         try {
+            client.serverStatus();
+
             List<TDTable> tableList = client.listTables("sample_datasets");
             assertTrue(tableList.size() >= 2);
-            assertEquals(1, proxyAccessCount.get());
 
             TDJobList jobList = client.listJobs();
             assertTrue(jobList.getJobs().size() > 0);
-            assertEquals(2, proxyAccessCount.get());
         }
         finally {
             logger.debug("proxy access count: {}", proxyAccessCount);
+            assertEquals(1, proxyAccessCount.get());
         }
     }
 
@@ -181,7 +189,6 @@ public class TestProxyAccess
         catch (TDClientException e) {
             logger.debug(e.getMessage());
             assertEquals(TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE, e.getErrorType());
-            assertEquals(1, proxyAccessCount.get());
         }
     }
 }

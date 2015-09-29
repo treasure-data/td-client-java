@@ -332,9 +332,11 @@ public class TestTDClient
 
     @Test
     public void killJob()
+            throws Exception
     {
         String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java job kill test\n select time from nasdaq"));
         client.killJob(jobId);
+        waitJobCompletion(jobId);
         TDJobSummary summary = client.jobStatus(jobId);
         assertEquals(TDJob.Status.KILLED, summary.getStatus());
     }

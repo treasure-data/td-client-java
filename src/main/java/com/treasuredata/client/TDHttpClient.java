@@ -29,19 +29,23 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
+import com.treasuredata.client.impl.ProxyAuthResult;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.client.HttpResponseException;
+import org.eclipse.jetty.client.Origin;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.util.InputStreamResponseListener;
 import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.HttpCookieStore;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,26 +82,29 @@ public class TDHttpClient
     private final TDClientConfig config;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
-    private Optional<String> proxyAuthenticationCache = Optional.absent();
 
     public TDHttpClient(TDClientConfig config)
     {
         this.config = config;
-        this.httpClient = new HttpClient();
+        this.httpClient = config.isUseSSL() ? new HttpClient(new SslContextFactory()) : new HttpClient();
         httpClient.setConnectTimeout(config.getConnectTimeoutMillis());
         httpClient.setIdleTimeout(config.getIdleTimeoutMillis());
         httpClient.setTCPNoDelay(true);
         httpClient.setExecutor(new QueuedThreadPool(config.getConnectionPoolSize(), 2));
         httpClient.setCookieStore(new HttpCookieStore.Empty());
+        httpClient.setUserAgentField(new HttpField(HttpHeader.USER_AGENT, "td-client-java-" + TDClient.getVersion()));
 
         // Proxy configuration
         if (config.getProxy().isPresent()) {
             final ProxyConfig proxyConfig = config.getProxy().get();
             logger.trace("proxy configuration: " + proxyConfig);
-            HttpProxy httpProxy = new HttpProxy(proxyConfig.getHost(), proxyConfig.getPort());
+            HttpProxy httpProxy = new HttpProxy(new Origin.Address(proxyConfig.getHost(), proxyConfig.getPort()), proxyConfig.useSSL());
+
+            // Do not proxy requests for the proxy server
+            httpProxy.getExcludedAddresses().add(proxyConfig.getHost() + ":" + proxyConfig.getPort());
             httpClient.getProxyConfiguration().getProxies().add(httpProxy);
             if (proxyConfig.requireAuthentication()) {
-                httpClient.getAuthenticationStore().addAuthentication(new ProxyAuthentication(proxyConfig.getUser().or(""), proxyConfig.getPassword().or("")));
+                httpClient.getAuthenticationStore().addAuthenticationResult(new ProxyAuthResult(proxyConfig));
             }
         }
         // Prepare jackson json-object mapper
@@ -183,10 +190,11 @@ public class TDHttpClient
         }
 
         logger.debug("Sending API request to {}", requestUri);
-        Request request = httpClient.newRequest(requestUri);
-        request.method(apiRequest.getMethod());
-        request.agent("td-client-java-" + TDClient.getVersion());
-        request.header(HttpHeader.DATE, RFC2822_FORMAT.get().format(new Date()));
+        Request request = httpClient.newRequest(requestUri)
+                .scheme(config.isUseSSL() ? "https" : "http")
+                .method(apiRequest.getMethod())
+                .agent("td-client-java-" + TDClient.getVersion())
+                .header(HttpHeader.DATE, RFC2822_FORMAT.get().format(new Date()));
 
         // Set API Key
         Optional<String> apiKey = apiKeyCache.or(config.getApiKey());
@@ -198,10 +206,8 @@ public class TDHttpClient
             request.header(entry.getKey(), entry.getValue());
         }
 
-        // Submit the request
+        // Submit method specific headers
         switch (apiRequest.getMethod()) {
-            case GET:
-                break;
             case POST:
                 if (queryStr.length() > 0) {
                     request.content(new StringContentProvider(queryStr), "application/x-www-form-urlencoded");

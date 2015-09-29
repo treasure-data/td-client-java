@@ -20,6 +20,9 @@ package com.treasuredata.client;
 
 import com.google.common.base.Optional;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 /**
  * Proxy configuration to access TD API
  */
@@ -40,10 +43,16 @@ public class ProxyConfig
         this.password = password;
     }
 
-    public String getUri()
+    public URI getUri()
     {
         String protocol = useSSL ? "https" : "http";
-        return String.format("%s://%s:%s", protocol, host, port);
+        String url = String.format("%s://%s:%s", protocol, host, port);
+        try {
+            return new URI(url);
+        }
+        catch (URISyntaxException e) {
+            throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, "invalid proxy url: " + url);
+        }
     }
 
     public String getHost()
