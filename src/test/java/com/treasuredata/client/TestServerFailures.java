@@ -58,6 +58,7 @@ public class TestServerFailures
     public void setUp()
             throws Exception
     {
+        // NOTICE. This jetty server does not accept SSL connection. So use http in TDClient
         server = new Server();
         port = TestProxyAccess.findAvailablePort();
         http = new ServerConnector(server);
