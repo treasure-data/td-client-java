@@ -366,8 +366,13 @@ public class TestTDClient
         }
         else {
             String dbName = newTemporaryName(SAMPLE_DB);
-            client.deleteDatabaseIfExists(dbName);
-            client.createDatabaseIfNotExists(dbName);
+            try {
+                client.deleteDatabaseIfExists(dbName);
+                client.createDatabaseIfNotExists(dbName);
+            }
+            finally {
+                client.deleteDatabaseIfExists(dbName);
+            }
         }
     }
 
