@@ -24,7 +24,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
@@ -101,28 +100,22 @@ public class TestSSLProxyAccess
         proxy.setPort(proxyPort);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS);
-        TDClient client = new TDClient(TDClientConfig
-                .newBuilder()
-                .setProxyConfig(proxy.createProxyConfig())
-                .build());
+        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
         try {
             client.serverStatus();
-            assertEquals(1, proxyAccessCount.get());
 
             List<TDTable> tableList = client.listTables("sample_datasets");
             assertTrue(tableList.size() >= 2);
-            assertEquals(2, proxyAccessCount.get());
 
             TDJobList jobList = client.listJobs();
             assertTrue(jobList.getJobs().size() > 0);
-            assertEquals(3, proxyAccessCount.get());
         }
         finally {
             logger.debug("proxy access count: {}", proxyAccessCount);
+            assertEquals(1, proxyAccessCount.get());
         }
     }
 
-    @Ignore
     @Test
     public void wrongPassword()
     {

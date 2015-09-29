@@ -142,7 +142,7 @@ public class TDClientConfig
     {
         this.httpScheme = useSSL ? "https://" : "http://";
         this.endpoint = endpoint.or("api.treasuredata.com");
-        this.port = port.or(useSSL ? Optional.of(443) : Optional.<Integer>absent());
+        this.port = port;
         this.useSSL = useSSL;
         this.apiKey = apiKey;
         this.user = user;
@@ -377,7 +377,7 @@ public class TDClientConfig
         {
             this.endpoint = getConfigProperty(TD_CLIENT_API_ENDPOINT, defaultValues);
             this.port = getConfigPropertyInt(TD_CLIENT_API_PORT, defaultValues);
-            this.useSSL = Boolean.parseBoolean(getConfigProperty(TD_CLIENT_USESSL, defaultValues).or("false"));
+            this.useSSL = Boolean.parseBoolean(getConfigProperty(TD_CLIENT_USESSL, defaultValues).or("true"));
 
             // For APIKEY we read the environment variable.
             // We also read apikey, user and password specified in td.conf file

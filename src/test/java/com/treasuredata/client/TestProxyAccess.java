@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDTable;
 import io.netty.channel.ChannelHandlerContext;
@@ -34,7 +35,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Authenticator;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.net.ServerSocket;
+import java.net.URL;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -71,7 +79,10 @@ public class TestProxyAccess
     {
         proxyAccessCount.set(0);
         this.proxyPort = findAvailablePort();
-        this.proxyServer = DefaultHttpProxyServer.bootstrap().withPort(proxyPort)
+
+        this.proxyServer = DefaultHttpProxyServer
+                .bootstrap()
+                .withPort(proxyPort)
                 .withProxyAuthenticator(new ProxyAuthenticator()
                 {
                     @Override
@@ -113,20 +124,55 @@ public class TestProxyAccess
     }
 
     @Test
+    public void proxyServerTest()
+            throws Exception
+    {
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", proxyPort));
+        Authenticator auth = new Authenticator()
+        {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication()
+            {
+                return new PasswordAuthentication(PROXY_USER, PROXY_PASS.toCharArray());
+            }
+        };
+
+        try {
+            Authenticator.setDefault(auth);
+            try (InputStream in = new URL("https://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
+                String ret = CharStreams.toString(new InputStreamReader(in));
+                logger.info(ret);
+            }
+            assertEquals(1, proxyAccessCount.get());
+
+            // Non SSL access
+            try (InputStream in = new URL("http://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
+                String ret = CharStreams.toString(new InputStreamReader(in));
+                logger.info(ret);
+            }
+            assertEquals(2, proxyAccessCount.get());
+        }
+        finally {
+            Authenticator.setDefault(null);
+        }
+    }
+
+    @Test
     public void proxyApiAccess()
     {
         TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxyBaseConfig()));
         try {
+            client.serverStatus();
+
             List<TDTable> tableList = client.listTables("sample_datasets");
             assertTrue(tableList.size() >= 2);
-            assertEquals(1, proxyAccessCount.get());
 
             TDJobList jobList = client.listJobs();
             assertTrue(jobList.getJobs().size() > 0);
-            assertEquals(2, proxyAccessCount.get());
         }
         finally {
             logger.debug("proxy access count: {}", proxyAccessCount);
+            assertEquals(1, proxyAccessCount.get());
         }
     }
 

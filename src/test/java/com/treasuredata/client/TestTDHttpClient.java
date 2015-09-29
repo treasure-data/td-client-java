@@ -20,13 +20,12 @@ package com.treasuredata.client;
 
 import com.google.common.base.Optional;
 import com.treasuredata.client.model.TDApiErrorMessage;
+import org.eclipse.jetty.client.api.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.core.Response;
 
 import java.nio.charset.StandardCharsets;
 
@@ -65,7 +64,7 @@ public class TestTDHttpClient
     public void addHttpRequestHeader()
     {
         TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").addHeader("TEST_HEADER", "hello td-client-java").build();
-        Response resp = client.submitRequest(req, Optional.<String>absent());
+        Response resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler());
     }
 
     @Test
@@ -73,7 +72,7 @@ public class TestTDHttpClient
     {
         try {
             TDApiRequest req = TDApiRequest.Builder.DELETE("/v3/dummy_endpoint").build();
-            Response resp = client.submitRequest(req, Optional.<String>absent());
+            Response resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler());
         }
         catch (TDClientHttpException e) {
             logger.warn("error", e);
