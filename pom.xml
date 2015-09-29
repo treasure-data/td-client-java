@@ -5,7 +5,7 @@
   <artifactId>td-client</artifactId>
   <name>Treasure Data Client for Java</name>
   <description>Treasure Data Client for Java.</description>
-  <version>0.6.0-SNAPSHOT</version>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-client-java</url>
 
@@ -483,6 +483,33 @@
   </reporting>
 
   <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <!-- Disable linting for Java8 -->
     <profile>
       <id>doclint-java8-disable</id>
