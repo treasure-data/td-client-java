@@ -382,7 +382,7 @@ public class TDHttpClient
         }
     }
 
-    static interface Handler<ResponseType extends Response, Result>
+    public static interface Handler<ResponseType extends Response, Result>
     {
         ResponseType submit(Request request)
                 throws InterruptedException, ExecutionException, TimeoutException;
