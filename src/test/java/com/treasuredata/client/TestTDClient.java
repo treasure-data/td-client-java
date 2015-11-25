@@ -331,6 +331,17 @@ public class TestTDClient
     }
 
     @Test
+    public void submitJobWithPoolName()
+            throws Exception
+    {
+        client.deleteTableIfExists(SAMPLE_DB, "sample_output");
+        String poolName = "hadoop2";
+        String jobId = client.submit(TDJobRequest.newHiveQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
+        TDJobSummary tdJob = waitJobCompletion(jobId);
+        client.existsTable(SAMPLE_DB, "sample_output");
+    }
+
+    @Test
     public void killJob()
             throws Exception
     {

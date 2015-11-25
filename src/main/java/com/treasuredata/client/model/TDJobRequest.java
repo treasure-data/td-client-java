@@ -31,8 +31,9 @@ public class TDJobRequest
     private final TDJob.Priority priority;
     private final Optional<String> resultOutput;
     private final int retryLimit;
+    private final Optional<String> poolName;
 
-    public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, Optional<String> resultOutput, int retryLimit)
+    public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, Optional<String> resultOutput, int retryLimit, Optional<String> poolName)
     {
         this.database = database;
         this.type = type;
@@ -40,6 +41,7 @@ public class TDJobRequest
         this.priority = priority;
         this.resultOutput = resultOutput;
         this.retryLimit = retryLimit;
+        this.poolName = poolName;
     }
 
     public static TDJobRequest newPrestoQuery(String database, String query)
@@ -78,6 +80,16 @@ public class TDJobRequest
                 .createTDJobRequest();
     }
 
+    public static TDJobRequest newHiveQuery(String database, String query, String resultOutput, String poolName)
+    {
+        return new TDJobRequestBuilder().setType(TDJob.Type.HIVE)
+                .setDatabase(database)
+                .setQuery(query)
+                .setResultOutput(resultOutput)
+                .setPoolName(poolName)
+                .createTDJobRequest();
+    }
+
     public String getDatabase()
     {
         return database;
@@ -106,6 +118,11 @@ public class TDJobRequest
     public Optional<String> getResultOutput()
     {
         return resultOutput;
+    }
+
+    public Optional<String> getPoolName()
+    {
+        return poolName;
     }
 
     @Override
