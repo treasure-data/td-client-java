@@ -28,6 +28,7 @@ public class TDJobRequestBuilder
     private TDJob.Priority priority = TDJob.Priority.NORMAL;
     private String result;
     private int retryLimit = 10;
+    private String poolName;
 
     public TDJobRequestBuilder setResultOutput(String result)
     {
@@ -77,8 +78,14 @@ public class TDJobRequestBuilder
         return this;
     }
 
+    public TDJobRequestBuilder setPoolName(String poolName)
+    {
+        this.poolName = poolName;
+        return this;
+    }
+
     public TDJobRequest createTDJobRequest()
     {
-        return new TDJobRequest(database, type, query, priority, Optional.fromNullable(result), retryLimit);
+        return new TDJobRequest(database, type, query, priority, Optional.fromNullable(result), retryLimit, Optional.fromNullable(poolName));
     }
 }
