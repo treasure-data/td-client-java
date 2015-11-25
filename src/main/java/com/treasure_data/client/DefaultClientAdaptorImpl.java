@@ -1505,6 +1505,9 @@ public class DefaultClientAdaptorImpl extends AbstractClientAdaptor implements
             }
             params.put("priority", "" + request.getJob().getPriority().getPriority());
             params.put("retry_limit", "" + request.getJob().getRetryLimit());
+            if (request.getJob().getPoolName() != null) {
+                params.put("pool_name", "" + request.getJob().getPoolName());
+            }
             conn.doPostRequest(request, path, header, params);
 
             // receive response code
