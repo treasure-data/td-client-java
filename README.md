@@ -39,7 +39,7 @@ You can configure your pom.xml as follows to use it:
       <dependency>
         <groupId>com.treasuredata</groupId>
         <artifactId>td-client</artifactId>
-        <version>${client.version}</version>
+        <version>0.5.9</version>
       </dependency>
       ...
     </dependencies>
@@ -55,7 +55,7 @@ To install td-client From SBT (a build tool for Scala), please add the following
     )
     // Dependencies
     libraryDependencies ++= Seq(
-      "com.treasuredata" % "td-client" % "${client.version}"
+      "com.treasuredata" % "td-client" % "0.5.9"
     )
 
 ### Install from GitHub repository
@@ -71,7 +71,7 @@ directory.  File name will be td-client-${client.version}-jar-with-dependencies.
 For more detail, see pom.xml.
 
 **Replace ${client.version} with the current version of Treasure Data Cloud for Java.**
-**The current version is 0.5.0.**
+**The current version is 0.5.9.**
 
 ## Configuration
 
