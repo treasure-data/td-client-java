@@ -108,6 +108,8 @@ public class Job extends AbstractModel {
 
     private int retryLimit = 0;
 
+    private String poolName;
+
     public Job(String jobID) {
         this(jobID, Job.Type.HIVE, null, null, null);
     }
@@ -203,5 +205,13 @@ public class Job extends AbstractModel {
 
     public String getResultTable() {
         return resultTable;
+    }
+
+    public void setPoolName(String poolName) {
+        this.poolName = poolName;
+    }
+
+    public String getPoolName() {
+        return poolName;
     }
 }
