@@ -1,3 +1,5 @@
+Release 0.6.2
+  - Fix TDJob result schema retrieval
 Release 0.6.1
   - Add pool_name parameter to TDJobRequest
 

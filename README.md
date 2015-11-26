@@ -23,7 +23,7 @@ Use the following dependency setting:
 <dependency>
   <groupId>com.treasuredata.client</groupId>
   <artifactId>td-client</artifactId>
-  <version>0.6.1</version>
+  <version>0.6.2</version>
 </dependency>
 ```
 
@@ -32,7 +32,7 @@ Use the following dependency setting:
 Add the following sbt settings:
 
 ```
-libraryDependencies ++= Seq("com.treasuredata.client" % "td-client" % "0.6.1")
+libraryDependencies ++= Seq("com.treasuredata.client" % "td-client" % "0.6.2")
 ```
 
 ## Usage
