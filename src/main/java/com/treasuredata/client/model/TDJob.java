@@ -162,7 +162,7 @@ public class TDJob
             @JsonProperty("start_at") String startAt,
             @JsonProperty("updated_at") String updatedAt,
             @JsonProperty("end_at") String endAt,
-            @JsonProperty("result_schema") Optional<String> resultSchema,
+            @JsonProperty("hive_result_schema") Optional<String> resultSchema,
             @JsonProperty("database") String database,
             @JsonProperty("result") String result,
             @JsonProperty("url") String url,

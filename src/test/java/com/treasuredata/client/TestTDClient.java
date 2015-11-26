@@ -20,6 +20,7 @@ package com.treasuredata.client;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
@@ -265,7 +266,7 @@ public class TestTDClient
     public void submitJob()
             throws Exception
     {
-        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq"));
+        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) cnt from nasdaq"));
         logger.debug("job id: " + jobId);
 
         int retryCount = 0;
@@ -273,6 +274,10 @@ public class TestTDClient
         TDJobSummary tdJob = waitJobCompletion(jobId);
         TDJob jobInfo = client.jobInfo(jobId);
         logger.debug("job show result: " + tdJob);
+        logger.debug("job info: " + jobInfo);
+        Optional<String> schema = jobInfo.getResultSchema();
+        assertTrue(schema.isPresent());
+        assertEquals("[[\"cnt\", \"bigint\"]]", schema.get());
 
         JSONArray array = client.jobResult(jobId, TDResultFormat.JSON, new Function<InputStream, JSONArray>()
         {
