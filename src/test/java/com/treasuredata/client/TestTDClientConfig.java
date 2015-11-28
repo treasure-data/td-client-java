@@ -65,6 +65,7 @@ public class TestTDClientConfig
         p.put(TD_CLIENT_CONNECT_TIMEOUT_MILLIS, 2345);
         p.put(TD_CLIENT_IDLE_TIMEOUT_MILLIS, 3456);
         p.put(TD_CLIENT_CONNECTION_POOL_SIZE, 234);
+        p.put(TD_CLIENT_IDLE_TIMEOUT_MILLIS, 143);
         p.put(TD_CLIENT_RETRY_LIMIT, 11);
         p.put(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS, 456);
         p.put(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS, 10000);
@@ -81,6 +82,7 @@ public class TestTDClientConfig
         assertEquals(m.get(TD_CLIENT_USESSL), config.useSSL);
         assertEquals(m.get(TD_CLIENT_CONNECT_TIMEOUT_MILLIS), config.connectTimeoutMillis);
         assertEquals(m.get(TD_CLIENT_CONNECTION_POOL_SIZE), config.connectionPoolSize);
+        assertEquals(m.get(TD_CLIENT_IDLE_TIMEOUT_MILLIS), config.idleTimeoutMillis);
         assertEquals(m.get(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS), config.retryInitialIntervalMillis);
         assertEquals(m.get(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS), config.retryMaxIntervalMillis);
         assertEquals((double) m.get(TD_CLIENT_RETRY_MULTIPLIER), config.retryMultiplier, 0.001);
@@ -108,6 +110,7 @@ public class TestTDClientConfig
         b.setUseSSL(Boolean.parseBoolean(m.get(TD_CLIENT_USESSL).toString()));
         b.setConnectTimeoutMillis(Integer.parseInt(m.get(TD_CLIENT_CONNECT_TIMEOUT_MILLIS).toString()));
         b.setConnectionPoolSize(Integer.parseInt(m.get(TD_CLIENT_CONNECTION_POOL_SIZE).toString()));
+        b.setIdleTimeoutMillis(Integer.parseInt(m.get(TD_CLIENT_IDLE_TIMEOUT_MILLIS).toString()));
         b.setRetryInitialIntervalMillis(Integer.parseInt(m.get(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS).toString()));
         b.setRetryMaxIntervalMillis(Integer.parseInt(m.get(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS).toString()));
         b.setRetryMultiplier(Double.parseDouble(m.get(TD_CLIENT_RETRY_MULTIPLIER).toString()));
