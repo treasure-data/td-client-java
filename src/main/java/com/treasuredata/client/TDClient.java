@@ -103,7 +103,7 @@ public class TDClient
 
     public TDClient(TDClientConfig config)
     {
-        this(config, new TDHttpClient(config), config.getApiKey());
+        this(config, new TDHttpClient(config), config.apiKey);
     }
 
     protected TDClient(TDClientConfig config, TDHttpClient httpClient, Optional<String> apiKeyCache)

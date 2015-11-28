@@ -86,17 +86,17 @@ public class TDHttpClient
     public TDHttpClient(TDClientConfig config)
     {
         this.config = config;
-        this.httpClient = config.isUseSSL() ? new HttpClient(new SslContextFactory()) : new HttpClient();
-        httpClient.setConnectTimeout(config.getConnectTimeoutMillis());
-        httpClient.setIdleTimeout(config.getIdleTimeoutMillis());
+        this.httpClient = config.useSSL ? new HttpClient(new SslContextFactory()) : new HttpClient();
+        httpClient.setConnectTimeout(config.connectTimeoutMillis);
+        httpClient.setIdleTimeout(config.idleTimeoutMillis);
         httpClient.setTCPNoDelay(true);
-        httpClient.setExecutor(new QueuedThreadPool(config.getConnectionPoolSize(), 2));
+        httpClient.setExecutor(new QueuedThreadPool(config.connectionPoolSize, 2));
         httpClient.setCookieStore(new HttpCookieStore.Empty());
         httpClient.setUserAgentField(new HttpField(HttpHeader.USER_AGENT, "td-client-java-" + TDClient.getVersion()));
 
         // Proxy configuration
-        if (config.getProxy().isPresent()) {
-            final ProxyConfig proxyConfig = config.getProxy().get();
+        if (config.proxy.isPresent()) {
+            final ProxyConfig proxyConfig = config.proxy.get();
             logger.trace("proxy configuration: " + proxyConfig);
             HttpProxy httpProxy = new HttpProxy(new Origin.Address(proxyConfig.getHost(), proxyConfig.getPort()), proxyConfig.useSSL());
 
@@ -168,7 +168,7 @@ public class TDHttpClient
     public Request prepareRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
-        String portStr = config.getPort().transform(new Function<Integer, String>()
+        String portStr = config.port.transform(new Function<Integer, String>()
         {
             @Override
             public String apply(Integer input)
@@ -176,7 +176,7 @@ public class TDHttpClient
                 return ":" + input.toString();
             }
         }).or("");
-        String requestUri = String.format("%s%s%s%s", config.getHttpScheme(), config.getEndpoint(), portStr, apiRequest.getPath());
+        String requestUri = String.format("%s%s%s%s", config.httpScheme, config.endpoint, portStr, apiRequest.getPath());
 
         if (!apiRequest.getQueryParams().isEmpty()) {
             List<String> queryParamList = new ArrayList<String>(apiRequest.getQueryParams().size());
@@ -191,13 +191,13 @@ public class TDHttpClient
 
         logger.debug("Sending API request to {}", requestUri);
         Request request = httpClient.newRequest(requestUri)
-                .scheme(config.isUseSSL() ? "https" : "http")
+                .scheme(config.useSSL ? "https" : "http")
                 .method(apiRequest.getMethod())
                 .agent("td-client-java-" + TDClient.getVersion())
                 .header(HttpHeader.DATE, RFC2822_FORMAT.get().format(new Date()));
 
         // Set API Key
-        Optional<String> apiKey = apiKeyCache.or(config.getApiKey());
+        Optional<String> apiKey = apiKeyCache.or(config.apiKey);
         if (apiKey.isPresent()) {
             request.header(HttpHeader.AUTHORIZATION, "TD1 " + apiKey.get());
         }
@@ -234,10 +234,10 @@ public class TDHttpClient
     public <ResponseType extends Response, Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Handler<ResponseType, Result> handler)
             throws TDClientException
     {
-        ExponentialBackOff backoff = new ExponentialBackOff(config.getRetryInitialIntervalMillis(), config.getRetryMaxIntervalMillis(), config.getRetryMultiplier());
+        ExponentialBackOff backoff = new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);
         Optional<TDClientException> rootCause = Optional.absent();
         try {
-            final int retryLimit = config.getRetryLimit();
+            final int retryLimit = config.retryLimit;
             for (int retryCount = 0; retryCount <= retryLimit; ++retryCount) {
                 if (retryCount > 0) {
                     int waitTimeMillis = backoff.nextWaitTimeMillis();
@@ -283,7 +283,7 @@ public class TDHttpClient
             logger.warn("API request interrupted", e);
             throw new TDClientInterruptedException(e);
         }
-        logger.warn("API request retry limit exceeded: ({}/{})", config.getRetryLimit(), config.getRetryLimit());
+        logger.warn("API request retry limit exceeded: ({}/{})", config.retryLimit, config.retryLimit);
 
         checkState(rootCause.isPresent(), "rootCause must be present here");
         // Throw the last seen error

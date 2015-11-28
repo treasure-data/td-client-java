@@ -62,22 +62,22 @@ public class TDClientConfig
     /**
      * endpoint URL (e.g., api.treasuredata.com, ybi.jp-east.idcfcloud.com)
      */
-    private final String endpoint;
-    private final Optional<Integer> port;
-    private final Optional<String> apiKey;
-    private final Optional<String> user;
-    private final Optional<String> password;
-    private final Optional<ProxyConfig> proxy;
-    private final String httpScheme;
-    private final boolean useSSL;
-    private final int retryLimit;
-    private final int retryInitialIntervalMillis;
-    private final int retryMaxIntervalMillis;
-    private final double retryMultiplier;
-    private final int connectTimeoutMillis;
-    private final int idleTimeoutMillis;
-    private final int connectionPoolSize;
-    private static Properties tdConf;
+    public final String endpoint;
+    public final Optional<Integer> port;
+    public final Optional<String> apiKey;
+    public final Optional<String> user;
+    public final Optional<String> password;
+    public final Optional<ProxyConfig> proxy;
+    public final String httpScheme;
+    public final boolean useSSL;
+    public final int retryLimit;
+    public final int retryInitialIntervalMillis;
+    public final int retryMaxIntervalMillis;
+    public final double retryMultiplier;
+    public final int connectTimeoutMillis;
+    public final int idleTimeoutMillis;
+    public final int connectionPoolSize;
+    public static Properties tdConf;
 
     public TDClientConfig withProxy(ProxyConfig proxy)
     {
@@ -155,81 +155,6 @@ public class TDClientConfig
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.idleTimeoutMillis = idleTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
-    }
-
-    public String getEndpoint()
-    {
-        return endpoint;
-    }
-
-    public Optional<String> getApiKey()
-    {
-        return apiKey;
-    }
-
-    public Optional<String> getUser()
-    {
-        return user;
-    }
-
-    public Optional<String> getPassword()
-    {
-        return password;
-    }
-
-    public int getRetryLimit()
-    {
-        return retryLimit;
-    }
-
-    public int getRetryInitialIntervalMillis()
-    {
-        return retryInitialIntervalMillis;
-    }
-
-    public int getRetryMaxIntervalMillis()
-    {
-        return retryMaxIntervalMillis;
-    }
-
-    public double getRetryMultiplier()
-    {
-        return retryMultiplier;
-    }
-
-    public int getConnectTimeoutMillis()
-    {
-        return connectTimeoutMillis;
-    }
-
-    public int getIdleTimeoutMillis()
-    {
-        return idleTimeoutMillis;
-    }
-
-    public int getConnectionPoolSize()
-    {
-        return connectionPoolSize;
-    }
-
-    public Optional<Integer> getPort()
-    {
-        return port;
-    }
-
-    public Optional<ProxyConfig> getProxy()
-    {
-        return proxy;
-    }
-
-    public String getHttpScheme()
-    {
-        return httpScheme;
-    }
-
-    public boolean isUseSSL()
-    {
-        return useSSL;
     }
 
     /**

@@ -329,7 +329,7 @@ public class TestTDClient
             throws Exception
     {
         client.deleteTableIfExists(SAMPLE_DB, "sample_output");
-        String resultOutput = String.format("td://%s@/%s/sample_output?mode=replace", TDClientConfig.currentConfig().getApiKey().get(), SAMPLE_DB);
+        String resultOutput = String.format("td://%s@/%s/sample_output?mode=replace", TDClientConfig.currentConfig().apiKey.get(), SAMPLE_DB);
         String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", resultOutput));
         TDJobSummary tdJob = waitJobCompletion(jobId);
         client.existsTable(SAMPLE_DB, "sample_output");

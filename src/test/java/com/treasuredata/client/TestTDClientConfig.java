@@ -76,18 +76,18 @@ public class TestTDClientConfig
 
     private void validate(TDClientConfig config)
     {
-        assertEquals(m.get(TD_CLIENT_API_ENDPOINT), config.getEndpoint());
-        assertEquals(m.get(TD_CLIENT_API_PORT), config.getPort().get());
-        assertEquals(m.get(TD_CLIENT_USESSL), config.isUseSSL());
-        assertEquals(m.get(TD_CLIENT_CONNECT_TIMEOUT_MILLIS), config.getConnectTimeoutMillis());
-        assertEquals(m.get(TD_CLIENT_CONNECTION_POOL_SIZE), config.getConnectionPoolSize());
-        assertEquals(m.get(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS), config.getRetryInitialIntervalMillis());
-        assertEquals(m.get(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS), config.getRetryMaxIntervalMillis());
-        assertEquals((double) m.get(TD_CLIENT_RETRY_MULTIPLIER), config.getRetryMultiplier(), 0.001);
-        assertEquals(m.get(TD_CLIENT_RETRY_LIMIT), config.getRetryLimit());
-        assertEquals(m.get(TD_CLIENT_USER), config.getUser().get());
-        assertEquals(m.get(TD_CLIENT_PASSOWRD), config.getPassword().get());
-        assertFalse(config.getProxy().isPresent());
+        assertEquals(m.get(TD_CLIENT_API_ENDPOINT), config.endpoint);
+        assertEquals(m.get(TD_CLIENT_API_PORT), config.port.get());
+        assertEquals(m.get(TD_CLIENT_USESSL), config.useSSL);
+        assertEquals(m.get(TD_CLIENT_CONNECT_TIMEOUT_MILLIS), config.connectTimeoutMillis);
+        assertEquals(m.get(TD_CLIENT_CONNECTION_POOL_SIZE), config.connectionPoolSize);
+        assertEquals(m.get(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS), config.retryInitialIntervalMillis);
+        assertEquals(m.get(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS), config.retryMaxIntervalMillis);
+        assertEquals((double) m.get(TD_CLIENT_RETRY_MULTIPLIER), config.retryMultiplier, 0.001);
+        assertEquals(m.get(TD_CLIENT_RETRY_LIMIT), config.retryLimit);
+        assertEquals(m.get(TD_CLIENT_USER), config.user.get());
+        assertEquals(m.get(TD_CLIENT_PASSOWRD), config.password.get());
+        assertFalse(config.proxy.isPresent());
     }
 
     @Test
@@ -132,7 +132,7 @@ public class TestTDClientConfig
             p.setProperty(e.getKey(), e.getValue().toString());
         }
         TDClientConfig config = newConfig(p);
-        ProxyConfig proxy = config.getProxy().get();
+        ProxyConfig proxy = config.proxy.get();
         assertEquals(m.get(TD_CLIENT_PROXY_HOST), proxy.getHost());
         assertEquals(m.get(TD_CLIENT_PROXY_PORT), proxy.getPort());
         assertEquals(m.get(TD_CLIENT_PROXY_USER), proxy.getUser().get());
