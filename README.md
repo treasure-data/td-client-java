@@ -187,12 +187,13 @@ TDClient client = TDClient.newBuilder().setProperties(prop).build();
 
 The precedence of the configuration parameters are as follows:
 
-1. Properties object passed to `TDClient.newBuilder().setProperties(Properties p)``
+1. Properties object passed to `TDClient.newBuilder().setProperties(Properties p)`
+1. Parameters written in `$HOME/.td/td.conf`
 1. System properties (passed with `-D` option when launching JVM)
 1. Environment variable (only for TD_API_KEY parameter)
 
-You can override the default configuartion parameters given by the environment
-variables with System properties, and then by Properties object.
+You can override the default configuration parameters given by the environment
+variables with System properties, and then by `$HOME/.td/td.conf` file or `Properties` object.
 
 ## For Developers
 
