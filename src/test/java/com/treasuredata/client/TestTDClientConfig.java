@@ -43,7 +43,6 @@ import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_MAX_INTERVA
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_MULTIPLIER;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_USER;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_USESSL;
-import static com.treasuredata.client.TDClientConfig.newConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -65,7 +64,6 @@ public class TestTDClientConfig
         p.put(TD_CLIENT_CONNECT_TIMEOUT_MILLIS, 2345);
         p.put(TD_CLIENT_IDLE_TIMEOUT_MILLIS, 3456);
         p.put(TD_CLIENT_CONNECTION_POOL_SIZE, 234);
-        p.put(TD_CLIENT_IDLE_TIMEOUT_MILLIS, 143);
         p.put(TD_CLIENT_RETRY_LIMIT, 11);
         p.put(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS, 456);
         p.put(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS, 10000);
@@ -100,11 +98,12 @@ public class TestTDClientConfig
         for (Map.Entry<String, Object> e : m.entrySet()) {
             p.setProperty(e.getKey(), e.getValue().toString());
         }
-        TDClientConfig config = newConfig(p);
+        TDClient client = TDClient.newBuilder().setProperties(p).build();
+        TDClientConfig config = client.config;
         validate(config);
 
         // Configuration via setters
-        TDClientConfig.Builder b = TDClientConfig.newBuilder();
+        TDClientBuilder b = TDClient.newBuilder();
         b.setEndpoint(m.get(TD_CLIENT_API_ENDPOINT).toString());
         b.setPort(Integer.parseInt(m.get(TD_CLIENT_API_PORT).toString()));
         b.setUseSSL(Boolean.parseBoolean(m.get(TD_CLIENT_USESSL).toString()));
@@ -117,7 +116,7 @@ public class TestTDClientConfig
         b.setRetryLimit(Integer.parseInt(m.get(TD_CLIENT_RETRY_LIMIT).toString()));
         b.setUser(m.get(TD_CLIENT_USER).toString());
         b.setPassword(m.get(TD_CLIENT_PASSOWRD).toString());
-        TDClientConfig config2 = b.build();
+        TDClientConfig config2 = b.build().config;
         validate(config2);
     }
 
@@ -134,7 +133,7 @@ public class TestTDClientConfig
         for (Map.Entry<String, Object> e : m.entrySet()) {
             p.setProperty(e.getKey(), e.getValue().toString());
         }
-        TDClientConfig config = newConfig(p);
+        TDClientConfig config = TDClient.newBuilder().setProperties(p).build().config;
         ProxyConfig proxy = config.proxy.get();
         assertEquals(m.get(TD_CLIENT_PROXY_HOST), proxy.getHost());
         assertEquals(m.get(TD_CLIENT_PROXY_PORT), proxy.getPort());
@@ -172,7 +171,7 @@ public class TestTDClientConfig
     {
         Properties p = new Properties();
         p.setProperty(TD_CLIENT_API_PORT, "xxxx");
-        TDClientConfig.newConfig(p);
+        TDClient.newBuilder().setProperties(p);
     }
 
     @Test(expected = TDClientException.class)
@@ -180,6 +179,6 @@ public class TestTDClientConfig
     {
         Properties p = new Properties();
         p.setProperty(TD_CLIENT_RETRY_MULTIPLIER, "xxx");
-        TDClientConfig.newConfig(p);
+        TDClient.newBuilder().setProperties(p);
     }
 }

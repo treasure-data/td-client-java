@@ -176,7 +176,7 @@ public class TDHttpClient
                 return ":" + input.toString();
             }
         }).or("");
-        String requestUri = String.format("%s%s%s%s", config.httpScheme, config.endpoint, portStr, apiRequest.getPath());
+        String requestUri = String.format("%s://%s%s%s", config.useSSL ? "https" : "http", config.endpoint, portStr, apiRequest.getPath());
 
         if (!apiRequest.getQueryParams().isEmpty()) {
             List<String> queryParamList = new ArrayList<String>(apiRequest.getQueryParams().size());

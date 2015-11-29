@@ -150,14 +150,13 @@ public class TestServerFailures
         });
         startServer();
 
-        TDClientConfig config = TDClientConfig
+        TDClient client = TDClient
                 .newBuilder()
                 .setEndpoint("localhost")
                 .setUseSSL(false)
                 .setPort(port)
                 .setRetryLimit(3)
                 .build();
-        TDClient client = new TDClient(config);
         try {
             client.serverStatus();
             fail("cannot reach here");
@@ -190,13 +189,11 @@ public class TestServerFailures
         });
         startServer();
 
-        TDClientConfig config = TDClientConfig
-                .newBuilder()
+        TDClient client = TDClient.newBuilder()
                 .setEndpoint("localhost")
                 .setUseSSL(false)
                 .setPort(port)
                 .build();
-        TDClient client = new TDClient(config);
         try {
             client.serverStatus();
             fail("cannot reach here");
@@ -243,13 +240,12 @@ public class TestServerFailures
         });
         startServer();
 
-        TDClientConfig config = TDClientConfig
+        TDClient client = TDClient
                 .newBuilder()
                 .setEndpoint("localhost")
                 .setUseSSL(false)
                 .setPort(port)
                 .build();
-        TDClient client = new TDClient(config);
         try {
             client.listDatabaseNames();
             fail("cannot reach here");

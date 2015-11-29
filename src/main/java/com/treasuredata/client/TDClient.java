@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -91,15 +92,34 @@ public class TDClient
         logger.info("td-client version: " + version);
     }
 
-    private final TDClientConfig config;
-    private final TDHttpClient httpClient;
-    private final Optional<String> apiKeyCache;
-
-    public TDClient()
-            throws TDClientException
+    public static TDClient newClient()
     {
-        this(TDClientConfig.currentConfig());
+        return new TDClientBuilder(true).build();
     }
+
+    public static TDClientBuilder newBuilder()
+    {
+        return new TDClientBuilder(true);
+    }
+
+    /**
+     * Create a new TDClient that uses the given api key for the authentication.
+     * The new instance of TDClient shares the same HttpClient, so closing this will invalidate the other copy of TDClient instances
+     *
+     * @param newApiKey
+     * @return
+     */
+    @Override
+    public TDClient withApiKey(String newApiKey)
+    {
+        return new TDClient(config, httpClient, Optional.of(newApiKey));
+    }
+
+    @VisibleForTesting
+    final TDClientConfig config;
+    @VisibleForTesting
+    final TDHttpClient httpClient;
+    private final Optional<String> apiKeyCache;
 
     public TDClient(TDClientConfig config)
     {
@@ -170,19 +190,6 @@ public class TDClient
 
         TDApiRequest request = TDApiRequest.Builder.PUT(path).setFile(filePath).build();
         return httpClient.call(request, apiKeyCache);
-    }
-
-    /**
-     * Create a new TDClient that uses the given api key for the authentication.
-     * The new instance of TDClient shares the same HttpClient, so closing this will invalidate the other copy of TDClient instances
-     *
-     * @param newApiKey
-     * @return
-     */
-    @Override
-    public TDClient withApiKey(String newApiKey)
-    {
-        return new TDClient(config, httpClient, Optional.of(newApiKey));
     }
 
     @Override

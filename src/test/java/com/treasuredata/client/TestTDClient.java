@@ -74,7 +74,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static com.treasuredata.client.TDClientConfig.firstNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -92,7 +91,7 @@ public class TestTDClient
     public void setUp()
             throws Exception
     {
-        client = new TDClient();
+        client = TDClient.newClient();
     }
 
     @After
@@ -329,7 +328,7 @@ public class TestTDClient
             throws Exception
     {
         client.deleteTableIfExists(SAMPLE_DB, "sample_output");
-        String resultOutput = String.format("td://%s@/%s/sample_output?mode=replace", TDClientConfig.currentConfig().apiKey.get(), SAMPLE_DB);
+        String resultOutput = String.format("td://%s@/%s/sample_output?mode=replace", client.config.apiKey.get(), SAMPLE_DB);
         String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", resultOutput));
         TDJobSummary tdJob = waitJobCompletion(jobId);
         client.existsTable(SAMPLE_DB, "sample_output");
@@ -714,13 +713,23 @@ public class TestTDClient
         }
     }
 
+    public static String firstNonNull(String... values)
+    {
+        for (String v : values) {
+            if (v != null) {
+                return v;
+            }
+        }
+        return null;
+    }
+
     @Test
     public void authenticate()
             throws Exception
     {
         // authenticate() method should retrieve apikey, and set it to the TDClient
         Properties p = TDClientConfig.readTDConf();
-        TDClient client = new TDClient(new TDClientConfig.Builder().build()); // Set no API key
+        TDClient client = new TDClientBuilder(false).build(); // Set no API key
         String user = firstNonNull(p.getProperty("user"), System.getenv("TD_USER"));
         String password = firstNonNull(p.getProperty("password"), System.getenv("TD_PASS"));
         TDClient newClient = client.authenticate(user, password);
@@ -731,7 +740,7 @@ public class TestTDClient
     @Test
     public void wrongApiKey()
     {
-        TDClient client = new TDClient(new TDClientConfig.Builder().setApiKey("1/xxfasdfafd").build()); // Set a wrong API key
+        TDClient client = TDClient.newBuilder().setApiKey("1/xxfasdfafd").build(); // Set a wrong API key
         try {
             client.listDatabaseNames();
             fail("should not reach here");
