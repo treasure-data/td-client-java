@@ -83,7 +83,7 @@ import org.msgpack.value.ArrayValue;
 ...
 
 // Create a new TD client by using configurations in $HOME/.td/td.conf
-TDClient client = new TDClient();
+TDClient client = TDClient.newClient();
 
 // Retrieve database and table names
 List<String> databaseNames = client.listDatabases();
@@ -130,7 +130,7 @@ client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream
 
 ```java
 // Create a new TD client by using configurations in $HOME/.td/td.conf
-TDClient client = new TDClient();
+TDClient client = TDClient.newClient();
 
 File f = new File("./sess/part01.msgpack.gz");
 
@@ -138,20 +138,28 @@ TDBulkImportSession session = client.createBulkImportSession("session_name", "da
 client.uploadBulkImportPart(session.getName(), "session_part01", f);
 ```
 
-### Custom Configuration
+### Configuring TDClient
 
-You can set configuration parameters by using ``$HOME/.td/td.conf`` file and `Properties` object:
+To configure TDClient, use `TDClient.newBuilder()`:
 
 ```java
-Properties prop = TDClientConfig.readTDConf(); // Set the default values by reading $HOME/.td/td.conf file
+TDClient client = TDClient
+    .newBuider()
+    .setApiKey("(your api key)")
+    .setEndPoint("ybi.jp-east.idcfcloud.com")   // For using a non-default endpoint
+    .build()
+```
+
+It is also possible to set the configuration with a `Properties` object:
+
+```java
+Properties prop = new Properties();
 // Set your own properties
-prop.setProperty("key", "value");
+prop.setProperty("td.client.retry.limit", "10");
 ...
 
-// This uses configuration parameters in the Properties object as the default values.
-// You can overwrite this by using System properties
-TDClietnConfig config = TDClientConfig.newConfig(p)
-TDClient client = new TDClient(config);
+// This overrides the default configuration parameters with the given Properties
+TDClient client = TDClient.newBuilder().setProperties(prop).build();
 ```
 
 ## List of Configuration Parameters
@@ -177,12 +185,14 @@ TDClient client = new TDClient(config);
 |`td.client.port` | 80 for non-SSL, 443 for SSL connection | (optional) TD API port number |
 
 
-You can overwrite the configurations by using environment variables or System properties. The precedence of the configuration parmeters are as follows:
+The precedence of the configuration parameters are as follows:
 
-1. Environment variable (only for TD_API_KEY parameter)
+1. Properties object passed to `TDClient.newBuilder().setProperties(Properties p)``
 1. System properties (passed with `-D` option when launching JVM)
-1. Properties object passed to TDClientConfig.newConfig(Properties p)
+1. Environment variable (only for TD_API_KEY parameter)
 
+You can override the default configuartion parameters given by the environment
+variables with System properties, and then by Properties object.
 
 ## For Developers
 
