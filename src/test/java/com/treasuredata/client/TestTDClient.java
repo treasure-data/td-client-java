@@ -251,7 +251,7 @@ public class TestTDClient
                 throw new IllegalStateException(String.format("waiting job %s has timed out", jobId));
             }
             int nextWait = backoff.nextWaitTimeMillis();
-            logger.debug(String.format("Running job status check in %.2f sec.", nextWait / 1000.0));
+            logger.debug(String.format("Run job status check in %.2f sec.", nextWait / 1000.0));
             Thread.sleep(nextWait);
             tdJob = client.jobStatus(jobId);
             logger.debug("job status: " + tdJob);

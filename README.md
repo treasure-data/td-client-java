@@ -207,5 +207,13 @@ $ mvn package
 
 This creates jar files within `target` folder.
 
+### How to deploy to the Central repository
+
+```
+# update pom.xml, README.md and CHANGES.txt
+$ mvn deploy -DperformRelease=true
+$ sbt "sonatypeReleaseAll com.treasuredata"
+```
+
 
 
