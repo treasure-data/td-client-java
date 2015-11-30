@@ -43,7 +43,6 @@ import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_MAX_INTERVA
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_MULTIPLIER;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_USER;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_USESSL;
-import static com.treasuredata.client.TDClientConfig.newConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -76,18 +75,19 @@ public class TestTDClientConfig
 
     private void validate(TDClientConfig config)
     {
-        assertEquals(m.get(TD_CLIENT_API_ENDPOINT), config.getEndpoint());
-        assertEquals(m.get(TD_CLIENT_API_PORT), config.getPort().get());
-        assertEquals(m.get(TD_CLIENT_USESSL), config.isUseSSL());
-        assertEquals(m.get(TD_CLIENT_CONNECT_TIMEOUT_MILLIS), config.getConnectTimeoutMillis());
-        assertEquals(m.get(TD_CLIENT_CONNECTION_POOL_SIZE), config.getConnectionPoolSize());
-        assertEquals(m.get(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS), config.getRetryInitialIntervalMillis());
-        assertEquals(m.get(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS), config.getRetryMaxIntervalMillis());
-        assertEquals((double) m.get(TD_CLIENT_RETRY_MULTIPLIER), config.getRetryMultiplier(), 0.001);
-        assertEquals(m.get(TD_CLIENT_RETRY_LIMIT), config.getRetryLimit());
-        assertEquals(m.get(TD_CLIENT_USER), config.getUser().get());
-        assertEquals(m.get(TD_CLIENT_PASSOWRD), config.getPassword().get());
-        assertFalse(config.getProxy().isPresent());
+        assertEquals(m.get(TD_CLIENT_API_ENDPOINT), config.endpoint);
+        assertEquals(m.get(TD_CLIENT_API_PORT), config.port.get());
+        assertEquals(m.get(TD_CLIENT_USESSL), config.useSSL);
+        assertEquals(m.get(TD_CLIENT_CONNECT_TIMEOUT_MILLIS), config.connectTimeoutMillis);
+        assertEquals(m.get(TD_CLIENT_CONNECTION_POOL_SIZE), config.connectionPoolSize);
+        assertEquals(m.get(TD_CLIENT_IDLE_TIMEOUT_MILLIS), config.idleTimeoutMillis);
+        assertEquals(m.get(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS), config.retryInitialIntervalMillis);
+        assertEquals(m.get(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS), config.retryMaxIntervalMillis);
+        assertEquals((double) m.get(TD_CLIENT_RETRY_MULTIPLIER), config.retryMultiplier, 0.001);
+        assertEquals(m.get(TD_CLIENT_RETRY_LIMIT), config.retryLimit);
+        assertEquals(m.get(TD_CLIENT_USER), config.user.get());
+        assertEquals(m.get(TD_CLIENT_PASSOWRD), config.password.get());
+        assertFalse(config.proxy.isPresent());
     }
 
     @Test
@@ -98,23 +98,25 @@ public class TestTDClientConfig
         for (Map.Entry<String, Object> e : m.entrySet()) {
             p.setProperty(e.getKey(), e.getValue().toString());
         }
-        TDClientConfig config = newConfig(p);
+        TDClient client = TDClient.newBuilder().setProperties(p).build();
+        TDClientConfig config = client.config;
         validate(config);
 
         // Configuration via setters
-        TDClientConfig.Builder b = TDClientConfig.newBuilder();
+        TDClientBuilder b = TDClient.newBuilder();
         b.setEndpoint(m.get(TD_CLIENT_API_ENDPOINT).toString());
         b.setPort(Integer.parseInt(m.get(TD_CLIENT_API_PORT).toString()));
         b.setUseSSL(Boolean.parseBoolean(m.get(TD_CLIENT_USESSL).toString()));
         b.setConnectTimeoutMillis(Integer.parseInt(m.get(TD_CLIENT_CONNECT_TIMEOUT_MILLIS).toString()));
         b.setConnectionPoolSize(Integer.parseInt(m.get(TD_CLIENT_CONNECTION_POOL_SIZE).toString()));
+        b.setIdleTimeoutMillis(Integer.parseInt(m.get(TD_CLIENT_IDLE_TIMEOUT_MILLIS).toString()));
         b.setRetryInitialIntervalMillis(Integer.parseInt(m.get(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS).toString()));
         b.setRetryMaxIntervalMillis(Integer.parseInt(m.get(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS).toString()));
         b.setRetryMultiplier(Double.parseDouble(m.get(TD_CLIENT_RETRY_MULTIPLIER).toString()));
         b.setRetryLimit(Integer.parseInt(m.get(TD_CLIENT_RETRY_LIMIT).toString()));
         b.setUser(m.get(TD_CLIENT_USER).toString());
         b.setPassword(m.get(TD_CLIENT_PASSOWRD).toString());
-        TDClientConfig config2 = b.build();
+        TDClientConfig config2 = b.build().config;
         validate(config2);
     }
 
@@ -131,8 +133,8 @@ public class TestTDClientConfig
         for (Map.Entry<String, Object> e : m.entrySet()) {
             p.setProperty(e.getKey(), e.getValue().toString());
         }
-        TDClientConfig config = newConfig(p);
-        ProxyConfig proxy = config.getProxy().get();
+        TDClientConfig config = TDClient.newBuilder().setProperties(p).build().config;
+        ProxyConfig proxy = config.proxy.get();
         assertEquals(m.get(TD_CLIENT_PROXY_HOST), proxy.getHost());
         assertEquals(m.get(TD_CLIENT_PROXY_PORT), proxy.getPort());
         assertEquals(m.get(TD_CLIENT_PROXY_USER), proxy.getUser().get());
@@ -169,7 +171,7 @@ public class TestTDClientConfig
     {
         Properties p = new Properties();
         p.setProperty(TD_CLIENT_API_PORT, "xxxx");
-        TDClientConfig.newConfig(p);
+        TDClient.newBuilder().setProperties(p);
     }
 
     @Test(expected = TDClientException.class)
@@ -177,6 +179,6 @@ public class TestTDClientConfig
     {
         Properties p = new Properties();
         p.setProperty(TD_CLIENT_RETRY_MULTIPLIER, "xxx");
-        TDClientConfig.newConfig(p);
+        TDClient.newBuilder().setProperties(p);
     }
 }

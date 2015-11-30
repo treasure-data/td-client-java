@@ -43,7 +43,7 @@ public class TestTDHttpClient
     public void setUp()
             throws Exception
     {
-        client = new TDHttpClient(TDClientConfig.currentConfig());
+        client = TDClient.newClient().httpClient;
     }
 
     @After

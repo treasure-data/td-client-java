@@ -100,7 +100,7 @@ public class TestSSLProxyAccess
         proxy.setPort(proxyPort);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS);
-        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
+        TDClient client = TDClient.newBuilder().setProxy(proxy.createProxyConfig()).build();
         try {
             client.serverStatus();
 
@@ -125,7 +125,7 @@ public class TestSSLProxyAccess
         proxy.setPort(proxyPort);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS + "---"); // Use an wrong password
-        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
+        TDClient client = TDClient.newBuilder().setProxy(proxy.createProxyConfig()).build();
         try {
             client.listTables("sample_datasets");
             fail("should not reach here");

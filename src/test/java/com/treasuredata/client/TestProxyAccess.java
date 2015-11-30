@@ -160,7 +160,7 @@ public class TestProxyAccess
     @Test
     public void proxyApiAccess()
     {
-        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxyBaseConfig()));
+        TDClient client = TDClient.newBuilder().setProxy(proxyBaseConfig()).build();
         try {
             client.serverStatus();
 
@@ -181,7 +181,7 @@ public class TestProxyAccess
     {
         ProxyConfig.ProxyConfigBuilder proxy = new ProxyConfig.ProxyConfigBuilder(proxyBaseConfig());
         proxy.setPassword(PROXY_PASS + "---"); // Use an wrong password
-        TDClient client = new TDClient(TDClientConfig.currentConfig().withProxy(proxy.createProxyConfig()));
+        TDClient client = TDClient.newBuilder().setProxy(proxy.createProxyConfig()).build();
         try {
             client.listTables("sample_datasets");
             fail("should not reach here");
