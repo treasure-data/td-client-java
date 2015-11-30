@@ -1,11 +1,12 @@
-Release 0.7.0
+Release 0.7.0 - 2015-11-30
   - Introduced TDClient.newBuilder() for the ease of configuration.
   - Add TDClient.newClient() method
   - Configuration precedence change: Properties > $HOME/.td/td.conf > System Properties > Environment Variable (only for TD_API_KEY)
 
-Release 0.6.2
+Release 0.6.2 - 2015-11-26
   - Fix TDJob result schema retrieval
-Release 0.6.1
+
+Release 0.6.1, 0.5.9 - 2015-11-25
   - Add pool_name parameter to TDJobRequest
 
 Release 0.6.0 - 2015/09/29
