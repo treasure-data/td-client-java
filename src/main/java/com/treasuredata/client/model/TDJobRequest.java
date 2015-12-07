@@ -30,10 +30,10 @@ public class TDJobRequest
     private final String query;
     private final TDJob.Priority priority;
     private final Optional<String> resultOutput;
-    private final int retryLimit;
+    private final Optional<Integer> retryLimit;
     private final Optional<String> poolName;
 
-    public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, Optional<String> resultOutput, int retryLimit, Optional<String> poolName)
+    public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, Optional<String> resultOutput, Optional<Integer> retryLimit, Optional<String> poolName)
     {
         this.database = database;
         this.type = type;
@@ -110,7 +110,7 @@ public class TDJobRequest
         return priority;
     }
 
-    public int getRetryLimit()
+    public Optional<Integer> getRetryLimit()
     {
         return retryLimit;
     }
