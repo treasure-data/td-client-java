@@ -238,5 +238,6 @@ $ mvn deploy -DperformRelease=true
 $ sbt "sonatypeReleaseAll com.treasuredata"
 ```
 
+See also https://github.com/xerial/sbt-sonatype#publishing-maven-projects to use `sbt sonatypeReleaseAll` command.
 
 
