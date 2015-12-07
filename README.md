@@ -2,10 +2,10 @@
 
 A java client for accessing [Treasure Data API](http://docs.treasuredata.com/articles/rest-api).
 With this client, you can:
- - Make queries to Treasure Data
- - Check the status of jobs (queries)
- - Retrieve query results
- - Check the information of databases and tables
+ - submit Hive/Presto queries to Treasure Data
+ - check the status of jobs (queries)
+ - retrieve query results
+ - check the information of databases and tables
 
 td-client-java is built for Java 1.7 or higher, and licensed under Apache License Version 2.0.
 
@@ -17,7 +17,7 @@ For the information of the older versions, see <https://github.com/treasure-data
 
 ### For Maven Users
 
-Use the following dependency setting:
+Use the following dependency settings:
 
 ```
 <dependency>
@@ -34,6 +34,7 @@ Use the following dependency setting:
 </dependency>
 ```
 
+#### Standalone jar
 td-client-java uses jetty-client 9.2.2.v20140723 to support Java7.
 If you are using an older (or non-compatible) version of jetty in your project, use `td-client-(version)-jar-with-dependencies.jar``
 to avoid class name conflict:
@@ -109,7 +110,7 @@ for(TDDatabase db : databaseNames) {
    }
 }
 
-// Submit a new Presto query
+// Submit a new Presto query (for Hive, use TDJobReqult.newHiveQuery)
 String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(1) from www_access"));
 
 // Wait until the query finishes
