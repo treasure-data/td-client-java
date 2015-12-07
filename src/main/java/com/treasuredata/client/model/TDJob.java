@@ -107,11 +107,11 @@ public class TDJob
 
     private static class Debug
     {
-        private final String cmdout;
-        private final String stderr;
+        private final Optional<String> cmdout;
+        private final Optional<String> stderr;
 
         @JsonCreator
-        public Debug(@JsonProperty("cmdout") String cmdout, @JsonProperty("stderr") String stderr)
+        public Debug(@JsonProperty("cmdout") Optional<String> cmdout, @JsonProperty("stderr") Optional<String> stderr)
         {
             this.cmdout = cmdout;
             this.stderr = stderr;
@@ -119,12 +119,12 @@ public class TDJob
 
         public String getCmdout()
         {
-            return cmdout;
+            return cmdout.or("");
         }
 
         public String getStderr()
         {
-            return stderr;
+            return stderr.or("");
         }
 
         @Override

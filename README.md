@@ -27,6 +27,22 @@ Use the following dependency setting:
 </dependency>
 ```
 
+td-client-java uses jetty-client 9.2.2.v20140723 to support Java7.
+If you are using an older (or non-compatible) version of jetty in your project, use `td-client-(version)-jar-with-dependencies.jar``
+to avoid class name conflict:
+
+```
+<dependency>
+  <groupId>com.treasuredata.client</groupId>
+  <artifactId>td-client</artifactId>
+  <version>0.7.1</version>
+  <classifier>jar-with-dependencies</classifier>
+</dependency>
+```
+
+td-client-(version)-jar-with-dependencies.jar renames `org.eclipse.jetty` package into `com.treasuredata.client.jetty922`
+so that you can use td-client-java and any version of jetty at the same time.
+
 ### For Scala Users
 
 Add the following sbt settings:
