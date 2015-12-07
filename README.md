@@ -23,7 +23,7 @@ Use the following dependency setting:
 <dependency>
   <groupId>com.treasuredata.client</groupId>
   <artifactId>td-client</artifactId>
-  <version>0.7.1</version>
+  <version>0.7.2</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ to avoid class name conflict:
 <dependency>
   <groupId>com.treasuredata.client</groupId>
   <artifactId>td-client</artifactId>
-  <version>0.7.1</version>
+  <version>0.7.2</version>
   <classifier>jar-with-dependencies</classifier>
 </dependency>
 ```
@@ -48,7 +48,7 @@ so that you can use td-client-java and any version of jetty at the same time.
 Add the following sbt settings:
 
 ```
-libraryDependencies ++= Seq("com.treasuredata.client" % "td-client" % "0.7.1")
+libraryDependencies ++= Seq("com.treasuredata.client" % "td-client" % "0.7.2")
 ```
 
 ## Usage
