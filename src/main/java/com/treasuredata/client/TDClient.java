@@ -415,7 +415,9 @@ public class TDClient
             queryParam.put("result", jobRequest.getResultOutput().get());
         }
         queryParam.put("priority", Integer.toString(jobRequest.getPriority().toInt()));
-        queryParam.put("retry_limit", Integer.toString(jobRequest.getRetryLimit()));
+        if (jobRequest.getRetryLimit().isPresent()) {
+            queryParam.put("retry_limit", Integer.toString(jobRequest.getRetryLimit().get()));
+        }
         if (jobRequest.getPoolName().isPresent()) {
             queryParam.put("pool_name", jobRequest.getPoolName().get());
         }
