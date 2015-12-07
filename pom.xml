@@ -220,25 +220,6 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.5.5</version>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attached</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <version>2.4.2</version>
@@ -256,7 +237,7 @@
                 </relocation>
               </relocations>
               <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>shade</shadedClassifierName>
+              <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
             </configuration>
           </execution>
         </executions>
