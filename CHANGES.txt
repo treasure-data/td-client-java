@@ -1,3 +1,6 @@
+Release 0.7.1 - 2015-12-07
+  - Changed not to set the retry_limit value in TDJobRequest by default
+
 Release 0.7.0 - 2015-11-30
   - Introduced TDClient.newBuilder() for the ease of configuration.
   - Add TDClient.newClient() method
