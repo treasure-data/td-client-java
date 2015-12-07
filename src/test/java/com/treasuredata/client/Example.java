@@ -20,7 +20,6 @@ package com.treasuredata.client;
 
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
-import com.google.common.io.ByteStreams;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobRequest;
@@ -30,10 +29,7 @@ import com.treasuredata.client.model.TDTable;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ArrayValue;
-import org.msgpack.value.Value;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -76,7 +72,8 @@ public class Example
             System.out.println("error log:\n" + jobInfo.getStdErr());
 
             // Read the job results in msgpack.gz format
-            client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Integer>() {
+            client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Integer>()
+            {
                 @Override
                 public Integer apply(InputStream input)
                 {
