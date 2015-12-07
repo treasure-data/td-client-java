@@ -27,7 +27,7 @@ public class TDJobRequestBuilder
     private String query;
     private TDJob.Priority priority = TDJob.Priority.NORMAL;
     private String result;
-    private int retryLimit = 10;
+    private Optional<Integer> retryLimit = Optional.absent();
     private String poolName;
 
     public TDJobRequestBuilder setResultOutput(String result)
@@ -74,7 +74,7 @@ public class TDJobRequestBuilder
 
     public TDJobRequestBuilder setRetryLimit(int retryLimit)
     {
-        this.retryLimit = retryLimit;
+        this.retryLimit = Optional.of(retryLimit);
         return this;
     }
 
