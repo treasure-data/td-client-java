@@ -36,7 +36,7 @@ Use the following dependency settings:
 
 #### Standalone jar
 td-client-java uses jetty-client 9.2.2.v20140723 to support Java7.
-If you are using an older (or non-compatible) version of jetty in your project, use `td-client-(version)-jar-with-dependencies.jar``
+If you are using an older (or non-compatible) version of jetty in your project, use `td-client-(version)-jar-with-dependencies.jar`
 to avoid class name conflict:
 
 ```
