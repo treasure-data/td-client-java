@@ -25,6 +25,13 @@ Use the following dependency setting:
   <artifactId>td-client</artifactId>
   <version>0.7.2</version>
 </dependency>
+
+<!-- If you are not using any slf4 logger binder, add the following dependency, too. -->
+<dependency>
+  <groupId>ch.qos.logback</groupId>
+  <artifactId>logback-classic</artifactId>
+  <version>1.1.3</version>
+</dependency>
 ```
 
 td-client-java uses jetty-client 9.2.2.v20140723 to support Java7.
@@ -42,14 +49,6 @@ to avoid class name conflict:
 
 td-client-(version)-jar-with-dependencies.jar renames `org.eclipse.jetty` package into `com.treasuredata.client.jetty922`
 so that you can use td-client-java and any version of jetty at the same time.
-
-### For Scala Users
-
-Add the following sbt settings:
-
-```
-libraryDependencies ++= Seq("com.treasuredata.client" % "td-client" % "0.7.2")
-```
 
 ## Usage
 
