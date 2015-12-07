@@ -90,8 +90,7 @@ If you need to access Web through proxy, add the following configuration to `$HO
 ### Example Code
 
 ```java
-import com.treasuredata.client.TDClient;
-import com.treasuredata.client.ExponentialBackOff;
+import com.treasuredata.client.*;
 import com.google.common.base.Function;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -100,18 +99,19 @@ import org.msgpack.value.ArrayValue;
 
 // Create a new TD client by using configurations in $HOME/.td/td.conf
 TDClient client = TDClient.newClient();
+try {
 
 // Retrieve database and table names
-List<String> databaseNames = client.listDatabases();
-for(String db : databaseNames) {
-   System.out.println("database: " + db);
-   for(TDTable table : client.listTables(db)) {
+List<TDDatabase> databaseNames = client.listDatabases();
+for(TDDatabase db : databaseNames) {
+   System.out.println("database: " + db.getName());
+   for(TDTable table : client.listTables(db.getName(0)) {
       System.out.println(" table: " + table);
    }
 }
 
 // Submit a new Presto query
-String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_dataset", "select count(1) from www_accesses"));
+String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(1) from www_access"));
 
 // Wait until the query finishes
 ExponentialBackOff backoff = new ExponentialBackOff();
@@ -122,7 +122,7 @@ while(!job.getStatus().isFinished()) {
 }
 
 // Read the detailed job information
-TDJob jobInfo = client.jobInfo(jobId)
+TDJob jobInfo = client.jobInfo(jobId);
 System.out.println("log:\n" + jobInfo.getCmdOut());
 System.out.println("error log:\n" + jobInfo.getStdErr());
 
@@ -135,11 +135,18 @@ client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream
     while(unpacker.hasNext()) {
        // Each row of the query result is array type value (e.g., [1, "name", ...])
        ArrayValue array = unpacker.unpackValue().asArrayValue();
-       int id = array.get(0).asIntegerValue().toInt
+       int id = array.get(0).asIntegerValue().toInt();
     }
   }
 });
 
+...
+
+}
+finally {
+  // Never forget to close the TDClient. 
+  client.close();
+}
 ```
 
 ### Bulk upload
