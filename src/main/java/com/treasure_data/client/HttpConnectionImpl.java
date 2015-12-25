@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
@@ -177,34 +178,41 @@ public class HttpConnectionImpl {
         StringBuilder sbuf = new StringBuilder();
         sbuf.append(getSchemeHostPort(System.getenv(Config.TD_ENV_API_SERVER))).append(path);
 
-        // parameters
-        if (params != null && !params.isEmpty()) {
-            sbuf.append("?");
-            int paramSize = params.size();
-            Iterator<Map.Entry<String, String>> iter = params.entrySet().iterator();
-            for (int i = 0; i < paramSize; ++i) {
-                Map.Entry<String, String> e = iter.next();
-                sbuf.append(e.getKey()).append("=").append(e.getValue());
-                if (i + 1 != paramSize) {
-                    sbuf.append("&");
-                }
-            }
-            URL url = new URL(sbuf.toString());
-            conn = (HttpURLConnection) url.openConnection();
-        } else {
-            URL url = new URL(sbuf.toString());
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Content-Length", "0");
-        }
+        URL url = new URL(sbuf.toString());
+        conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
         conn.setReadTimeout(postReadTimeout);
 
         // header
-        conn.setRequestMethod("POST");
         setRequestAuthHeader(request, conn);
         if (header != null && !header.isEmpty()) {
             for (Map.Entry<String, String> e : header.entrySet()) {
                 conn.setRequestProperty(e.getKey(), e.getValue());
             }
+        }
+
+        // parameters
+        if (params != null && !params.isEmpty()) {
+            StringBuilder queryParam = new StringBuilder();
+            int paramSize = params.size();
+            Iterator<Map.Entry<String, String>> iter = params.entrySet().iterator();
+            for (int i = 0; i < paramSize; ++i) {
+                Map.Entry<String, String> e = iter.next();
+                queryParam.append(e.getKey()).append("=").append(e.getValue());
+                if (i + 1 != paramSize) {
+                    queryParam.append("&");
+                }
+            }
+
+            byte[] bodyData = queryParam.toString().getBytes("UTF-8");
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setRequestProperty("Content-Length", Integer.toString(bodyData.length));
+            conn.setDoOutput(true);
+            OutputStream body = conn.getOutputStream();
+            body.write(bodyData);
+            body.flush();
+        } else {
+            conn.setRequestProperty("Content-Length", "0");
         }
 
         if (LOG.isLoggable(Level.FINE)) {
@@ -300,7 +308,7 @@ public class HttpConnectionImpl {
 
     public String getResponseBody() throws IOException {
         StringBuilder sbuf = new StringBuilder();
-        BufferedReader reader = new BufferedReader( 
+        BufferedReader reader = new BufferedReader(
                 new InputStreamReader(conn.getInputStream()));
         while (true) {
             String line = reader.readLine();
