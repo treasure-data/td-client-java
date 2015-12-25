@@ -1,3 +1,7 @@
+Release 0.5.10 - 2015-12-25
+  - Hotfix release for 0.5.x 
+  - Fix POST request to support large query string [#22](https://github.com/treasure-data/td-client-java/pull/22)
+  
 Release 0.7.2 - 2015-12-07
   - Provide td-client-java-(version)-jar-with-dependencies.jar as a standalone jar
   - Remove logback jar from the dependencies
