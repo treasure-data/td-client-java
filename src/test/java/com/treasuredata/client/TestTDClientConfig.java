@@ -76,7 +76,7 @@ public class TestTDClientConfig
         p.put(TD_CLIENT_INTERNAL_KEY_VERSION, "abcd");
         m = p.build();
 
-        assert (TDClientConfig.knownProperties.containsAll(m.keySet()));
+        assertTrue(TDClientConfig.knownProperties.containsAll(m.keySet()));
     }
 
     private void validate(TDClientConfig config)
