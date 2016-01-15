@@ -79,7 +79,7 @@ public class TDHttpClient
         implements AutoCloseable
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
-    private final TDClientConfig config;
+    protected final TDClientConfig config;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
@@ -165,6 +165,17 @@ public class TDHttpClient
                 }
             };
 
+    protected Request setTDAuthHeaders(Request request, String dateHeader)
+    {
+        // Do nothing
+        return request;
+    }
+
+    protected String getClientName()
+    {
+        return "td-client-java " + TDClient.getVersion();
+    }
+
     public Request prepareRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
@@ -190,17 +201,21 @@ public class TDHttpClient
         }
 
         logger.debug("Sending API request to {}", requestUri);
+        String dateHeader = RFC2822_FORMAT.get().format(new Date());
         Request request = httpClient.newRequest(requestUri)
+                .agent(getClientName())
                 .scheme(config.useSSL ? "https" : "http")
                 .method(apiRequest.getMethod())
-                .agent("td-client-java-" + TDClient.getVersion())
-                .header(HttpHeader.DATE, RFC2822_FORMAT.get().format(new Date()));
+                .header(HttpHeader.DATE, dateHeader);
+
+        request = setTDAuthHeaders(request, dateHeader);
 
         // Set API Key
         Optional<String> apiKey = apiKeyCache.or(config.apiKey);
         if (apiKey.isPresent()) {
             request.header(HttpHeader.AUTHORIZATION, "TD1 " + apiKey.get());
         }
+
         // Set other headers
         for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entrySet()) {
             request.header(entry.getKey(), entry.getValue());

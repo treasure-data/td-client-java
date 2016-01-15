@@ -20,6 +20,7 @@ package com.treasuredata.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,34 @@ public class TDClientConfig
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
     public static final String TD_CLIENT_PROXY_USESSL = "td.client.proxy.usessl";
     public static final String TD_CLIENT_PROXY_PASSWORD = "td.client.proxy.password";
+    public static final String TD_CLIENT_INTERNAL_KEY = "td.client.internal-key";
+    public static final String TD_CLIENT_INTERNAL_KEY_VERSION = "td.client.internal-key-version";
+
+    public static final ImmutableSet<String> knownProperties = ImmutableSet.<String>builder()
+            .add("apikey")
+            .add("user")
+            .add("password")
+            .add(TD_CLIENT_APIKEY)
+            .add(TD_CLIENT_USER)
+            .add(TD_CLIENT_PASSOWRD)
+            .add(TD_CLIENT_USESSL)
+            .add(TD_CLIENT_API_ENDPOINT)
+            .add(TD_CLIENT_API_PORT)
+            .add(TD_CLIENT_RETRY_LIMIT)
+            .add(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS)
+            .add(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS)
+            .add(TD_CLIENT_RETRY_MULTIPLIER)
+            .add(TD_CLIENT_CONNECT_TIMEOUT_MILLIS)
+            .add(TD_CLIENT_IDLE_TIMEOUT_MILLIS)
+            .add(TD_CLIENT_CONNECTION_POOL_SIZE)
+            .add(TD_CLIENT_PROXY_HOST)
+            .add(TD_CLIENT_PROXY_PORT)
+            .add(TD_CLIENT_PROXY_USER)
+            .add(TD_CLIENT_PROXY_PASSWORD)
+            .add(TD_CLIENT_INTERNAL_KEY)
+            .add(TD_CLIENT_INTERNAL_KEY_VERSION)
+            .build();
+
     /**
      * endpoint URL (e.g., api.treasuredata.com, ybi.jp-east.idcfcloud.com)
      */
@@ -75,6 +104,8 @@ public class TDClientConfig
     public final int connectTimeoutMillis;
     public final int idleTimeoutMillis;
     public final int connectionPoolSize;
+    public final Optional<String> internalKey;
+    public final Optional<String> internalKeyVersion;
 
     @JsonCreator
     public TDClientConfig(
@@ -91,7 +122,9 @@ public class TDClientConfig
             double retryMultiplier,
             int connectTimeoutMillis,
             int idleTimeoutMillis,
-            int connectionPoolSize
+            int connectionPoolSize,
+            Optional<String> internalKey,
+            Optional<String> internalKeyVersion
     )
     {
         this.endpoint = endpoint.or("api.treasuredata.com");
@@ -108,6 +141,8 @@ public class TDClientConfig
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.idleTimeoutMillis = idleTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
+        this.internalKey = internalKey;
+        this.internalKeyVersion = internalKeyVersion;
     }
 
     private static Logger logger = LoggerFactory.getLogger(TDClientConfig.class);

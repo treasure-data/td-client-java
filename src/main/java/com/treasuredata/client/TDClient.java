@@ -116,10 +116,10 @@ public class TDClient
     }
 
     @VisibleForTesting
-    final TDClientConfig config;
+    protected final TDClientConfig config;
     @VisibleForTesting
-    final TDHttpClient httpClient;
-    private final Optional<String> apiKeyCache;
+    protected final TDHttpClient httpClient;
+    protected final Optional<String> apiKeyCache;
 
     public TDClient(TDClientConfig config)
     {
@@ -138,7 +138,7 @@ public class TDClient
         httpClient.close();
     }
 
-    private static String buildUrl(String urlPrefix, String... args)
+    protected static String buildUrl(String urlPrefix, String... args)
     {
         StringBuilder s = new StringBuilder();
         s.append(urlPrefix);
@@ -149,7 +149,7 @@ public class TDClient
         return s.toString();
     }
 
-    private <ResultType> ResultType doGet(String path, Class<ResultType> resultTypeClass)
+    protected <ResultType> ResultType doGet(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
         checkNotNull(path, "path is null");
@@ -159,7 +159,7 @@ public class TDClient
         return httpClient.call(request, apiKeyCache, resultTypeClass);
     }
 
-    private <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
+    protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
         checkNotNull(path, "path is null");
@@ -173,7 +173,7 @@ public class TDClient
         return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
     }
 
-    private String doPost(String path)
+    protected String doPost(String path)
             throws TDClientException
     {
         checkNotNull(path, "path is null");
@@ -182,7 +182,7 @@ public class TDClient
         return httpClient.call(request, apiKeyCache);
     }
 
-    private String doPut(String path, File filePath)
+    protected String doPut(String path, File filePath)
             throws TDClientException
     {
         checkNotNull(path, "path is null");
