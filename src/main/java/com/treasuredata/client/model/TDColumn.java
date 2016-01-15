@@ -34,10 +34,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class TDColumn
 {
     private static Logger logger = LoggerFactory.getLogger(TDColumn.class);
+    static final byte[] LOG_TABLE_PUSHDOWN_KEY = "time".getBytes(UTF_8);
+
     private final String name;
     private final TDColumnType type;
     private final byte[] key;
@@ -123,6 +126,11 @@ public class TDColumn
             }
         }
         throw new RuntimeJsonMappingException("Unexpected string tuple to deserialize TDColumn");
+    }
+
+    public boolean isPartitionKey()
+    {
+        return Arrays.equals(LOG_TABLE_PUSHDOWN_KEY, getKey());
     }
 
     @JsonValue
