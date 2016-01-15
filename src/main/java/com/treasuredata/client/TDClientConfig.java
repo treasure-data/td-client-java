@@ -59,8 +59,6 @@ public class TDClientConfig
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
     public static final String TD_CLIENT_PROXY_USESSL = "td.client.proxy.usessl";
     public static final String TD_CLIENT_PROXY_PASSWORD = "td.client.proxy.password";
-    public static final String TD_CLIENT_INTERNAL_KEY = "td.client.internal-key";
-    public static final String TD_CLIENT_INTERNAL_KEY_VERSION = "td.client.internal-key-version";
 
     public static final ImmutableSet<String> knownProperties = ImmutableSet.<String>builder()
             .add("apikey")
@@ -83,8 +81,6 @@ public class TDClientConfig
             .add(TD_CLIENT_PROXY_PORT)
             .add(TD_CLIENT_PROXY_USER)
             .add(TD_CLIENT_PROXY_PASSWORD)
-            .add(TD_CLIENT_INTERNAL_KEY)
-            .add(TD_CLIENT_INTERNAL_KEY_VERSION)
             .build();
 
     /**
@@ -104,8 +100,6 @@ public class TDClientConfig
     public final int connectTimeoutMillis;
     public final int idleTimeoutMillis;
     public final int connectionPoolSize;
-    public final Optional<String> internalKey;
-    public final Optional<String> internalKeyVersion;
 
     @JsonCreator
     public TDClientConfig(
@@ -122,9 +116,7 @@ public class TDClientConfig
             double retryMultiplier,
             int connectTimeoutMillis,
             int idleTimeoutMillis,
-            int connectionPoolSize,
-            Optional<String> internalKey,
-            Optional<String> internalKeyVersion
+            int connectionPoolSize
     )
     {
         this.endpoint = endpoint.or("api.treasuredata.com");
@@ -141,8 +133,6 @@ public class TDClientConfig
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.idleTimeoutMillis = idleTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
-        this.internalKey = internalKey;
-        this.internalKeyVersion = internalKeyVersion;
     }
 
     private static Logger logger = LoggerFactory.getLogger(TDClientConfig.class);

@@ -31,8 +31,6 @@ import static com.treasuredata.client.TDClientConfig.TD_CLIENT_API_PORT;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_CONNECTION_POOL_SIZE;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_CONNECT_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_IDLE_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_INTERNAL_KEY;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_INTERNAL_KEY_VERSION;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PASSOWRD;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_HOST;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_PASSWORD;
@@ -72,8 +70,6 @@ public class TestTDClientConfig
         p.put(TD_CLIENT_RETRY_MULTIPLIER, 1.5);
         p.put(TD_CLIENT_USER, "xxxx");
         p.put(TD_CLIENT_PASSOWRD, "yyyy");
-        p.put(TD_CLIENT_INTERNAL_KEY, "xxx-xxx-xxx");
-        p.put(TD_CLIENT_INTERNAL_KEY_VERSION, "abcd");
         m = p.build();
 
         assertTrue(TDClientConfig.knownProperties.containsAll(m.keySet()));
@@ -93,8 +89,6 @@ public class TestTDClientConfig
         assertEquals(m.get(TD_CLIENT_RETRY_LIMIT), config.retryLimit);
         assertEquals(m.get(TD_CLIENT_USER), config.user.get());
         assertEquals(m.get(TD_CLIENT_PASSOWRD), config.password.get());
-        assertEquals(m.get(TD_CLIENT_INTERNAL_KEY), config.internalKey.get());
-        assertEquals(m.get(TD_CLIENT_INTERNAL_KEY_VERSION), config.internalKeyVersion.get());
         assertFalse(config.proxy.isPresent());
     }
 
@@ -124,8 +118,6 @@ public class TestTDClientConfig
         b.setRetryLimit(Integer.parseInt(m.get(TD_CLIENT_RETRY_LIMIT).toString()));
         b.setUser(m.get(TD_CLIENT_USER).toString());
         b.setPassword(m.get(TD_CLIENT_PASSOWRD).toString());
-        b.setInternalKey(m.get(TD_CLIENT_INTERNAL_KEY).toString());
-        b.setInternalKeyVersion(m.get(TD_CLIENT_INTERNAL_KEY_VERSION).toString());
         TDClientConfig config2 = b.build().config;
         validate(config2);
     }

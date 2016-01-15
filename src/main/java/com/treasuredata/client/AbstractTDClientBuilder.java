@@ -29,8 +29,6 @@ import static com.treasuredata.client.TDClientConfig.TD_CLIENT_API_PORT;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_CONNECTION_POOL_SIZE;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_CONNECT_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_IDLE_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_INTERNAL_KEY;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_INTERNAL_KEY_VERSION;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PASSOWRD;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_HOST;
 import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_PASSWORD;
@@ -64,8 +62,6 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
     protected int connectTimeoutMillis = 15000;
     protected int idleTimeoutMillis = 60000;
     protected int connectionPoolSize = 64;
-    protected Optional<String> internalKey = Optional.absent();
-    protected Optional<String> internalKeyVersion = Optional.absent();
 
     private static Optional<String> getConfigProperty(Properties p, String key)
     {
@@ -200,10 +196,6 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
         this.idleTimeoutMillis = getConfigPropertyInt(p, TD_CLIENT_IDLE_TIMEOUT_MILLIS).or(idleTimeoutMillis);
         this.connectionPoolSize = getConfigPropertyInt(p, TD_CLIENT_CONNECTION_POOL_SIZE).or(connectionPoolSize);
 
-        // internal-client only configuration
-        this.internalKey = getConfigProperty(p, TD_CLIENT_INTERNAL_KEY);
-        this.internalKeyVersion = getConfigProperty(p, TD_CLIENT_INTERNAL_KEY_VERSION);
-
         return this;
     }
 
@@ -291,18 +283,6 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
         return this;
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setInternalKey(String internalKey)
-    {
-        this.internalKey = Optional.of(internalKey);
-        return this;
-    }
-
-    public AbstractTDClientBuilder<ClientImpl> setInternalKeyVersion(String internalKeyVersion)
-    {
-        this.internalKeyVersion = Optional.of(internalKeyVersion);
-        return this;
-    }
-
     protected TDClientConfig buildConfig()
     {
         return new TDClientConfig(
@@ -319,9 +299,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
                 retryMultiplier,
                 connectTimeoutMillis,
                 idleTimeoutMillis,
-                connectionPoolSize,
-                internalKey,
-                internalKeyVersion
+                connectionPoolSize
         );
     }
 
