@@ -64,8 +64,8 @@ public class TDClientBuilder
     private int connectTimeoutMillis = 15000;
     private int idleTimeoutMillis = 60000;
     private int connectionPoolSize = 64;
-    private Optional<String> internalKey;
-    private Optional<String> internalKeyVersion;
+    private Optional<String> internalKey = Optional.absent();
+    private Optional<String> internalKeyVersion = Optional.absent();
 
     private static Optional<String> getConfigProperty(Properties p, String key)
     {
