@@ -19,6 +19,7 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.google.common.base.Objects;
@@ -34,10 +35,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class TDColumn
 {
     private static Logger logger = LoggerFactory.getLogger(TDColumn.class);
+    static final byte[] LOG_TABLE_PUSHDOWN_KEY = "time".getBytes(UTF_8);
+
     private final String name;
     private final TDColumnType type;
     private final byte[] key;
@@ -45,6 +49,15 @@ public class TDColumn
     public TDColumn(String name, TDColumnType type)
     {
         this(name, type, name.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @JsonCreator
+    public TDColumn(
+            @JsonProperty("name") String name,
+            @JsonProperty("type") String type,
+            @JsonProperty("key") String key)
+    {
+        this(name, TDColumnType.parseColumnType(type), key.getBytes(UTF_8));
     }
 
     public TDColumn(String name, TDColumnType type, byte[] key)
@@ -104,7 +117,6 @@ public class TDColumn
         }
     }
 
-    @JsonCreator
     public static TDColumn parseTuple(String[] tuple)
     {
         // TODO encode key in some ways
@@ -123,6 +135,11 @@ public class TDColumn
             }
         }
         throw new RuntimeJsonMappingException("Unexpected string tuple to deserialize TDColumn");
+    }
+
+    public boolean isPartitionKey()
+    {
+        return Arrays.equals(LOG_TABLE_PUSHDOWN_KEY, getKey());
     }
 
     @JsonValue

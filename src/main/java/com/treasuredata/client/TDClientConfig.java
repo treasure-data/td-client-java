@@ -20,6 +20,7 @@ package com.treasuredata.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,30 @@ public class TDClientConfig
     public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
     public static final String TD_CLIENT_PROXY_USESSL = "td.client.proxy.usessl";
     public static final String TD_CLIENT_PROXY_PASSWORD = "td.client.proxy.password";
+
+    public static final ImmutableSet<String> knownProperties = ImmutableSet.<String>builder()
+            .add("apikey")
+            .add("user")
+            .add("password")
+            .add(TD_CLIENT_APIKEY)
+            .add(TD_CLIENT_USER)
+            .add(TD_CLIENT_PASSOWRD)
+            .add(TD_CLIENT_USESSL)
+            .add(TD_CLIENT_API_ENDPOINT)
+            .add(TD_CLIENT_API_PORT)
+            .add(TD_CLIENT_RETRY_LIMIT)
+            .add(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS)
+            .add(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS)
+            .add(TD_CLIENT_RETRY_MULTIPLIER)
+            .add(TD_CLIENT_CONNECT_TIMEOUT_MILLIS)
+            .add(TD_CLIENT_IDLE_TIMEOUT_MILLIS)
+            .add(TD_CLIENT_CONNECTION_POOL_SIZE)
+            .add(TD_CLIENT_PROXY_HOST)
+            .add(TD_CLIENT_PROXY_PORT)
+            .add(TD_CLIENT_PROXY_USER)
+            .add(TD_CLIENT_PROXY_PASSWORD)
+            .build();
+
     /**
      * endpoint URL (e.g., api.treasuredata.com, ybi.jp-east.idcfcloud.com)
      */

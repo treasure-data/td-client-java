@@ -71,6 +71,8 @@ public class TestTDClientConfig
         p.put(TD_CLIENT_USER, "xxxx");
         p.put(TD_CLIENT_PASSOWRD, "yyyy");
         m = p.build();
+
+        assertTrue(TDClientConfig.knownProperties.containsAll(m.keySet()));
     }
 
     private void validate(TDClientConfig config)
