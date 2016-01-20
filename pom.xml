@@ -89,6 +89,7 @@
       <groupId>org.msgpack</groupId>
       <artifactId>msgpack-core</artifactId>
       <version>0.8.1</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
