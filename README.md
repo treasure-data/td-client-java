@@ -23,7 +23,7 @@ Use the following dependency settings:
 <dependency>
   <groupId>com.treasuredata.client</groupId>
   <artifactId>td-client</artifactId>
-  <version>0.7.2</version>
+  <version>0.7.3</version>
 </dependency>
 
 <!-- If you are not using any slf4 logger binder, add the following dependency, too. -->
@@ -43,7 +43,7 @@ to avoid class name conflict:
 <dependency>
   <groupId>com.treasuredata.client</groupId>
   <artifactId>td-client</artifactId>
-  <version>0.7.2</version>
+  <version>0.7.3</version>
   <classifier>jar-with-dependencies</classifier>
 </dependency>
 ```

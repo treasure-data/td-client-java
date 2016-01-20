@@ -1,3 +1,7 @@
+Release 0.7.3 - 2016-01-20
+  - Minor modifications to the internal code
+  - Removed the dependency to org.msgpack:msgpack-core
+
 Release 0.5.10 - 2015-12-25
   - Hotfix release for 0.5.x 
   - Fix POST request to support large query string [#22](https://github.com/treasure-data/td-client-java/pull/22)
