@@ -1,3 +1,6 @@
+Release 0.7.4 - 2016-02-03
+  - TDColumn data becomes serializable
+
 Release 0.7.3 - 2016-01-20
   - Minor modifications to the internal code
   - Removed the dependency to org.msgpack:msgpack-core
