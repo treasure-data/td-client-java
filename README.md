@@ -17,13 +17,16 @@ For the information of the older versions, see <https://github.com/treasure-data
 
 ### For Maven Users
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.treasuredata.client/td-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.treasuredata.client/td-client/)
+[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.treasuredata.client/td-client/badge.svg)](http://www.javadoc.io/doc/com.treasuredata.client/td-client)
+
 Use the following dependency settings:
 
 ```
 <dependency>
   <groupId>com.treasuredata.client</groupId>
   <artifactId>td-client</artifactId>
-  <version>0.7.3</version>
+  <version>(version)</version>
 </dependency>
 
 <!-- If you are not using any slf4 logger binder, add the following dependency, too. -->
@@ -43,7 +46,7 @@ to avoid class name conflict:
 <dependency>
   <groupId>com.treasuredata.client</groupId>
   <artifactId>td-client</artifactId>
-  <version>0.7.3</version>
+  <version>(version)</version>
   <classifier>jar-with-dependencies</classifier>
 </dependency>
 ```
