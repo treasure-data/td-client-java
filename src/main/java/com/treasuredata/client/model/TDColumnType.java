@@ -24,10 +24,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.treasuredata.client.model.impl.TDColumnTypeDeserializer;
 
+import java.io.Serializable;
 import java.util.List;
 
 @JsonDeserialize(using = TDColumnTypeDeserializer.class)
-public class TDColumnType
+public class TDColumnType implements Serializable
 {
     public static final TDColumnType INT = new TDColumnType(TDTypeName.INT, Optional.<List<TDColumnType>>absent());
     public static final TDColumnType LONG = new TDColumnType(TDTypeName.LONG, Optional.<List<TDColumnType>>absent());

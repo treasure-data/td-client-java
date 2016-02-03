@@ -26,9 +26,9 @@ import com.google.common.base.Objects;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,9 +37,8 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class TDColumn
+public class TDColumn implements Serializable
 {
-    private static Logger logger = LoggerFactory.getLogger(TDColumn.class);
     static final byte[] LOG_TABLE_PUSHDOWN_KEY = "time".getBytes(UTF_8);
 
     private final String name;
@@ -82,8 +81,6 @@ public class TDColumn
         return key;
     }
 
-    private static List<TDColumn> emptyList = new ArrayList<TDColumn>(0);
-
     private static JSONArray castToArray(Object obj)
     {
         if (obj instanceof JSONArray) {
@@ -112,8 +109,8 @@ public class TDColumn
             return columnList;
         }
         catch (ParseException e) {
-            logger.error("Failed to parse json string", e);
-            return emptyList;
+            LoggerFactory.getLogger(TDColumn.class).error("Failed to parse json string", e);
+            return new ArrayList<TDColumn>(0);
         }
     }
 

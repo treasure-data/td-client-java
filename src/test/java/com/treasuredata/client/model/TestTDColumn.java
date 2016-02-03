@@ -21,6 +21,9 @@ package com.treasuredata.client.model;
 import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
@@ -213,5 +216,27 @@ public class TestTDColumn
     public void parseUnknownType()
     {
         TDColumnType.parseColumnType("xint");
+    }
+
+    private static void checkSerialization(Object o)
+            throws IOException
+    {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutputStream os = new ObjectOutputStream(b);
+        os.writeObject(o);
+        os.close();
+    }
+
+    @Test
+    public void serializableTest()
+            throws Exception
+    {
+        checkSerialization(new TDColumn("int", TDColumnType.INT));
+        checkSerialization(new TDColumn("str", TDColumnType.STRING));
+        checkSerialization(new TDColumn("long", TDColumnType.LONG));
+        checkSerialization(new TDColumn("double", TDColumnType.DOUBLE));
+        checkSerialization(new TDColumn("float", TDColumnType.FLOAT));
+        checkSerialization(newArrayType(TDColumnType.STRING));
+        checkSerialization(newMapType(TDColumnType.INT, TDColumnType.STRING));
     }
 }
