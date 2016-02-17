@@ -18,6 +18,8 @@
  */
 package com.treasuredata.client;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -85,6 +87,9 @@ import static org.junit.Assert.fail;
 public class TestTDClient
 {
     private static final Logger logger = LoggerFactory.getLogger(TestTDClient.class);
+
+    private static final String SAMPLE_DB = "_tdclient_test";
+
     private TDClient client;
 
     @Before
@@ -346,6 +351,21 @@ public class TestTDClient
     }
 
     @Test
+    public void submitBulkLoadJob()
+            throws Exception
+    {
+        ObjectNode config = JsonNodeFactory.instance.objectNode();
+        ObjectNode in = JsonNodeFactory.instance.objectNode();
+        in.put("type", "s3");
+        config.put("in", in);
+        client.createDatabaseIfNotExists(SAMPLE_DB);
+        client.createTableIfNotExists(SAMPLE_DB, "sample_output");
+        String jobId = client.submit(TDJobRequest.newBulkLoad(SAMPLE_DB, "sample_output", config));
+        TDJobSummary tdJob = waitJobCompletion(jobId);
+        // this job will fail because of lack of parameters for s3 input plugin
+    }
+
+    @Test
     public void killJob()
             throws Exception
     {
@@ -369,8 +389,6 @@ public class TestTDClient
             assertEquals(TDClientException.ErrorType.TARGET_NOT_FOUND, e.getErrorType());
         }
     }
-
-    private static final String SAMPLE_DB = "_tdclient_test";
 
     @Test
     public void databaseOperation()
