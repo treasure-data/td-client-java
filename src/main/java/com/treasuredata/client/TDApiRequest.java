@@ -45,6 +45,7 @@ public class TDApiRequest
     private final String path;
     private final Map<String, String> queryParams;
     private final Map<String, String> headerParams;
+    private final Optional<String> postJson;
     private final Optional<File> putFile;
 
     TDApiRequest(
@@ -52,6 +53,7 @@ public class TDApiRequest
             String path,
             Map<String, String> queryParams,
             Map<String, String> headerParams,
+            Optional<String> postJson,
             Optional<File> putFile
     )
     {
@@ -59,6 +61,7 @@ public class TDApiRequest
         this.path = checkNotNull(path, "uri is null");
         this.queryParams = checkNotNull(queryParams, "queryParms is null");
         this.headerParams = checkNotNull(headerParams, "headerParams is null");
+        this.postJson = checkNotNull(postJson, "postJson is null");
         this.putFile = checkNotNull(putFile, "putFile is null");
     }
 
@@ -82,6 +85,11 @@ public class TDApiRequest
         return headerParams;
     }
 
+    public Optional<String> getPostJson()
+    {
+        return postJson;
+    }
+
     public Optional<File> getPutFile()
     {
         return putFile;
@@ -94,6 +102,7 @@ public class TDApiRequest
         private String path;
         private Map<String, String> queryParams;
         private Map<String, String> headerParams;
+        private Optional<String> postJson = Optional.absent();
         private Optional<File> file = Optional.absent();
 
         Builder(HttpMethod method, String path)
@@ -140,6 +149,12 @@ public class TDApiRequest
             return this;
         }
 
+        public Builder setPostJson(String json)
+        {
+            this.postJson = Optional.of(json);
+            return this;
+        }
+
         public Builder setFile(File file)
         {
             this.file = Optional.of(file);
@@ -153,6 +168,7 @@ public class TDApiRequest
                     path,
                     queryParams != null ? queryParams : EMPTY_MAP,
                     headerParams != null ? headerParams : EMPTY_MAP,
+                    postJson,
                     file
             );
         }

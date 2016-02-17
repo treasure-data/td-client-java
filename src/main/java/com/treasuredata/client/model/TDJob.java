@@ -30,7 +30,7 @@ public class TDJob
 {
     public static enum Type
     {
-        HIVE("hive"), MAPRED("mapred"), PRESTO("presto"), UNKNOWN("none");
+        HIVE("hive"), MAPRED("mapred"), PRESTO("presto"), BULKLOAD("bulkload"), UNKNOWN("none");
         private final String type;
 
         private Type(String type)

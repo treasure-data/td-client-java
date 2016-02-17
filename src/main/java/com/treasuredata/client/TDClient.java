@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -159,18 +160,28 @@ public class TDClient
         return httpClient.call(request, apiKeyCache, resultTypeClass);
     }
 
-    protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
+    protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Optional<String> jsonBody, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
         checkNotNull(path, "path is null");
         checkNotNull(queryParam, "param is null");
+        checkNotNull(jsonBody, "body is null");
         checkNotNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
             request.addQueryParam(e.getKey(), e.getValue());
         }
+        if (jsonBody.isPresent()) {
+            request.setPostJson(jsonBody.get());
+        }
         return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
+    }
+
+    protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
+            throws TDClientException
+    {
+        return this.<ResultType>doPost(path, queryParam, Optional.<String>absent(), resultTypeClass);
     }
 
     protected String doPost(String path)
@@ -421,6 +432,9 @@ public class TDClient
         if (jobRequest.getPoolName().isPresent()) {
             queryParam.put("pool_name", jobRequest.getPoolName().get());
         }
+        if (jobRequest.getTable().isPresent()) {
+            queryParam.put("table", jobRequest.getTable().get());
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("submit job: " + jobRequest);
@@ -430,6 +444,14 @@ public class TDClient
                 doPost(
                         buildUrl("/v3/job/issue", jobRequest.getType().getType(), jobRequest.getDatabase()),
                         queryParam,
+                        jobRequest.getConfig().transform(new Function<ObjectNode, String>() {
+                            public String apply(ObjectNode config)
+                            {
+                                ObjectNode body = config.objectNode();
+                                body.set("config", config);
+                                return body.toString();
+                            }
+                        }),
                         TDJobSubmitResult.class);
         return result.getJobId();
     }

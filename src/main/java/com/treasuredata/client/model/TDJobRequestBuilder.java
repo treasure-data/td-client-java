@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client.model;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Optional;
 
 public class TDJobRequestBuilder
@@ -29,6 +30,8 @@ public class TDJobRequestBuilder
     private String result;
     private Optional<Integer> retryLimit = Optional.absent();
     private String poolName;
+    private Optional<String> table = Optional.absent();
+    private Optional<ObjectNode> config = Optional.absent();
 
     public TDJobRequestBuilder setResultOutput(String result)
     {
@@ -84,8 +87,20 @@ public class TDJobRequestBuilder
         return this;
     }
 
+    public TDJobRequestBuilder setTable(String table)
+    {
+        this.table = Optional.of(table);
+        return this;
+    }
+
+    public TDJobRequestBuilder setConfig(ObjectNode config)
+    {
+        this.config = Optional.of(config);
+        return this;
+    }
+
     public TDJobRequest createTDJobRequest()
     {
-        return new TDJobRequest(database, type, query, priority, Optional.fromNullable(result), retryLimit, Optional.fromNullable(poolName));
+        return new TDJobRequest(database, type, query, priority, Optional.fromNullable(result), retryLimit, Optional.fromNullable(poolName), table, config);
     }
 }

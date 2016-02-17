@@ -195,7 +195,8 @@ public class TDHttpClient
                 queryParamList.add(String.format("%s=%s", urlEncode(queryParam.getKey()), urlEncode(queryParam.getValue())));
             }
             queryStr = Joiner.on("&").join(queryParamList);
-            if (apiRequest.getMethod() == HttpMethod.GET) {
+            if (apiRequest.getMethod() == HttpMethod.GET ||
+                    (apiRequest.getMethod() == HttpMethod.POST && apiRequest.getPostJson().isPresent())) {
                 requestUri += "?" + queryStr;
             }
         }
@@ -224,7 +225,10 @@ public class TDHttpClient
         // Submit method specific headers
         switch (apiRequest.getMethod()) {
             case POST:
-                if (queryStr.length() > 0) {
+                if (apiRequest.getPostJson().isPresent()) {
+                    request.content(new StringContentProvider(apiRequest.getPostJson().get()), "application/json");
+                }
+                else if (queryStr.length() > 0) {
                     request.content(new StringContentProvider(queryStr), "application/x-www-form-urlencoded");
                 }
                 else {
