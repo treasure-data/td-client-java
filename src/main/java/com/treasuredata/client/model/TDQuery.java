@@ -28,7 +28,7 @@ import java.io.StringWriter;
 /**
  *
  */
-class TDQuery
+public class TDQuery
 {
     private final String query;
 

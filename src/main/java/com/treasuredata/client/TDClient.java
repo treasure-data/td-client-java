@@ -103,6 +103,11 @@ public class TDClient
         return new TDClientBuilder(true);
     }
 
+    public static TDClientBuilder newBuilder(boolean loadTDConf)
+    {
+        return new TDClientBuilder(loadTDConf);
+    }
+
     /**
      * Create a new TDClient that uses the given api key for the authentication.
      * The new instance of TDClient shares the same HttpClient, so closing this will invalidate the other copy of TDClient instances
