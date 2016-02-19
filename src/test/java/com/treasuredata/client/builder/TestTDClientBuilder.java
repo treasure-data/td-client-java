@@ -16,30 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.treasuredata.client;
+package com.treasuredata.client.builder;
 
-public class TDClientBuilder
-        extends AbstractTDClientBuilder<TDClient>
+import org.junit.Test;
+
+import com.treasuredata.client.TDClient;
+
+/**
+ *
+ */
+public class TestTDClientBuilder
 {
-    /**
-     * Create a new TDClinent builder whose configuration is initialized with System Properties and $HOME/.td/td.conf values.
-     * Precedence of properties is the following order:
-     * <ol>
-     * <li>System Properties</li>
-     * <li>$HOME/.td/td.conf values</li>
-     * </ol>
-     *
-     * @param loadTDConf
-     * @return
-     */
-    public TDClientBuilder(boolean loadTDConf)
+    @Test
+    public void setterMustBeAccessibleFromAnotherPackage()
     {
-        super(loadTDConf);
-    }
-
-    @Override
-    public TDClient build()
-    {
-        return new TDClient(buildConfig());
+        TDClient.newBuilder(false).setApiKey("ok").setEndpoint("ok");
     }
 }
