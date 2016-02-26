@@ -21,6 +21,7 @@ package com.treasuredata.client;
 import com.google.common.base.Function;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDDatabase;
+import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -200,4 +201,6 @@ public interface TDClientApi<ClientImpl>
     void deleteBulkImportSession(String sessionName);
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
+
+    String submitExportJob(TDExportJobRequest jobRequest);
 }

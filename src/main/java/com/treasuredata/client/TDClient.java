@@ -28,6 +28,7 @@ import com.treasuredata.client.model.TDBulkImportParts;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkImportSessionList;
 import com.treasuredata.client.model.TDDatabase;
+import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -579,5 +580,35 @@ public class TDClient
                 .GET(buildUrl("/v3/bulk_import/error_records", sessionName))
                 .build();
         return httpClient.<Result>call(request, apiKeyCache, resultStreamHandler);
+    }
+
+    @Override
+    public String submitExportJob(TDExportJobRequest jobRequest)
+            throws TDClientException
+    {
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("from", Long.toString(jobRequest.getFrom().getTime() / 1000));
+        queryParam.put("to", Long.toString(jobRequest.getTo().getTime() / 1000));
+        queryParam.put("file_prefix", jobRequest.getFilePrefix());
+        queryParam.put("file_format", jobRequest.getFileFormat().toString());
+        queryParam.put("storage_type", "s3");
+        queryParam.put("bucket", jobRequest.getBucketName());
+        queryParam.put("access_key_id", jobRequest.getAccessKeyId());
+        queryParam.put("secret_access_key", jobRequest.getSecretAccessKey());
+
+        if (jobRequest.getPoolName().isPresent()) {
+            queryParam.put("pool_name", jobRequest.getPoolName().get());
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("submit job: " + jobRequest);
+        }
+
+        TDJobSubmitResult result =
+                doPost(
+                        buildUrl("/v3/export/run", jobRequest.getDatabase(), jobRequest.getTable()),
+                        queryParam,
+                        TDJobSubmitResult.class);
+        return result.getJobId();
     }
 }

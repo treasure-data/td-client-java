@@ -32,6 +32,8 @@ import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDDatabase;
+import com.treasuredata.client.model.TDExportJobRequest;
+import com.treasuredata.client.model.TDExportFileFormatType;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -363,6 +365,28 @@ public class TestTDClient
         String jobId = client.submit(TDJobRequest.newBulkLoad(SAMPLE_DB, "sample_output", config));
         TDJobSummary tdJob = waitJobCompletion(jobId);
         // this job will fail because of lack of parameters for s3 input plugin
+    }
+
+    @Test
+    public void submitExportJob()
+            throws Exception
+    {
+        TDExportJobRequest jobRequest = new TDExportJobRequest(
+                SAMPLE_DB,
+                "sample_output",
+                new Date(0L),
+                new Date(1456522300L * 1000),
+                TDExportFileFormatType.JSONL_GZ,
+                "access key id",
+                "secret access key",
+                "bucket",
+                "prefix/",
+                Optional.<String>absent());
+        client.createDatabaseIfNotExists(SAMPLE_DB);
+        client.createTableIfNotExists(SAMPLE_DB, "sample_output");
+        String jobId = client.submitExportJob(jobRequest);
+        TDJobSummary tdJob = waitJobCompletion(jobId);
+        // this job will do nothing because sample_output table is empty
     }
 
     @Test
