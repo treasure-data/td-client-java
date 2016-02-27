@@ -162,7 +162,6 @@ public class TDJobRequest
                 ", type=" + type +
                 ", query='" + query + '\'' +
                 ", priority=" + priority +
-                ", resultOutput=" + resultOutput +
                 ", retryLimit=" + retryLimit +
                 ", table=" + table +
                 ", config=" + config +
