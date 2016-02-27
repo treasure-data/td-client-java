@@ -76,9 +76,9 @@ public class TDColumn implements Serializable
         return type;
     }
 
-    protected byte[] getKey()
+    public byte[] getKey()
     {
-        return key;
+        return Arrays.copyOf(key, key.length);
     }
 
     private static JSONArray castToArray(Object obj)
