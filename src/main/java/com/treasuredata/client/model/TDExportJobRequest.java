@@ -51,8 +51,8 @@ public class TDExportJobRequest
     {
         this.database = database;
         this.table = table;
-        this.from = from;
-        this.to = to;
+        this.from = (Date) from.clone();
+        this.to = (Date) to.clone();
         this.fileFormat = fileFormat;
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
@@ -73,12 +73,14 @@ public class TDExportJobRequest
 
     public Date getFrom()
     {
-        return from;
+        // Date object is mutable
+        return new Date(from.getTime());
     }
 
     public Date getTo()
     {
-        return to;
+        // Date object is mutable
+        return new Date(to.getTime());
     }
 
     public TDExportFileFormatType getFileFormat()

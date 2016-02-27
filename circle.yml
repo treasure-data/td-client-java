@@ -4,7 +4,7 @@ machine:
 
 test:
   override:
-    - mvn test
+    - mvn test findbugs:check
     - cp -af target/site/* $CIRCLE_ARTIFACTS
 
 notify:
