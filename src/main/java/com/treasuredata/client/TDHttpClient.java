@@ -271,7 +271,7 @@ public class TDHttpClient
                     int code = response.getStatus();
                     if (HttpStatus.isSuccess(code)) {
                         // 2xx success
-                        logger.info(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), apiRequest.getPath()));
+                        logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), apiRequest.getPath()));
                         return handler.onSuccess(response);
                     }
                     else {
@@ -315,7 +315,13 @@ public class TDHttpClient
         String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
         String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequestPath, responseErrorText);
         if (HttpStatus.isClientError(code)) {
-            logger.error(errorMessage);
+            if(code == HttpStatus.CONFLICT_409 || code == HttpStatus.NOT_FOUND_404) {
+                logger.warn(errorMessage);
+            }
+            else {
+                logger.error(errorMessage);
+            }
+
             // 4xx error. We do not retry the execution on this type of error
             switch (code) {
                 case HttpStatus.UNAUTHORIZED_401:
@@ -431,7 +437,7 @@ public class TDHttpClient
 
         public InputStream onSuccess(Response response)
         {
-            checkNotNull(listner, "listner is null");
+            checkNotNull(listner, "listener is null");
             return listner.getInputStream();
         }
 
