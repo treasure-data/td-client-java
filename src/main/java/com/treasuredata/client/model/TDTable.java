@@ -96,7 +96,6 @@ public class TDTable
         return getColumns();
     }
 
-
     public long getRowCount()
     {
         return rowCount;
