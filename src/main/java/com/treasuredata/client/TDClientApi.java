@@ -196,6 +196,8 @@ public interface TDClientApi<ClientImpl>
 
     void performBulkImportSession(String sessionName);
 
+    void performBulkImportSession(String sessionName, TDJob.Priority priority);
+
     void commitBulkImportSession(String sessionName);
 
     void deleteBulkImportSession(String sessionName);
