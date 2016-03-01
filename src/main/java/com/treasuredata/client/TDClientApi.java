@@ -20,6 +20,7 @@ package com.treasuredata.client;
 
 import com.google.common.base.Function;
 import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDJob;
@@ -139,13 +140,7 @@ public interface TDClientApi<ClientImpl>
     void swapTables(String databaseName, String tableName1, String tableName2);
 
     // schema API
-    //TDTableSchema showTableSchema(String databaseName, String tableName);
-
-    //void setTableSchema(String databaseName, String tableName, TDTableSchema newSchema);
-
-    //TDTableSchema addColumns(String databaseName, String tableName, List<TDColumn> newColumns);
-
-    //TDTableSchema removeColumns(String databaseName, String tableName, List<TDColumn> deleteTargetColumns);
+    void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema);
 
     /**
      * Submit a new job request

@@ -31,9 +31,10 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDColumn;
+import com.treasuredata.client.model.TDColumnType;
 import com.treasuredata.client.model.TDDatabase;
-import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDExportFileFormatType;
+import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -433,6 +434,16 @@ public class TestTDClient
         }
     }
 
+    private Optional<TDTable> findTable(String databaseName, String tableName)
+    {
+        for (TDTable table : client.listTables(databaseName)) {
+            if (table.getName().equals(tableName)) {
+                return Optional.of(table);
+            }
+        }
+        return Optional.absent();
+    }
+
     @Test
     public void tableOperation()
             throws Exception
@@ -469,6 +480,17 @@ public class TestTDClient
                 // OK
                 assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
             }
+
+            // schema test
+            TDTable targetTable = findTable(SAMPLE_DB, t).get();
+            List<TDColumn> newSchema = ImmutableList.<TDColumn>builder()
+                    .addAll(targetTable.getSchema())
+                    .add(new TDColumn("int_col", TDColumnType.INT))
+                    .build();
+            client.updateTableSchema(SAMPLE_DB, t, newSchema);
+            TDTable updatedTable = findTable(SAMPLE_DB, t).get();
+            logger.debug(updatedTable.toString());
+            assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("int_col", TDColumnType.INT)));
 
             // rename
             client.deleteTableIfExists(SAMPLE_DB, newTableName);
