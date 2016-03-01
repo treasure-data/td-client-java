@@ -591,7 +591,13 @@ public class TDClient
     @Override
     public void performBulkImportSession(String sessionName)
     {
-        doPost(buildUrl("/v3/bulk_import/perform", sessionName));
+        performBulkImportSession(sessionName, TDJob.Priority.NORMAL);
+    }
+
+    @Override
+    public void performBulkImportSession(String sessionName, TDJob.Priority priority)
+    {
+        doPost(buildUrl("/v3/bulk_import/perform", sessionName), ImmutableMap.of("priority", Integer.toString(priority.toInt())), Optional.<String>absent(), String.class);
     }
 
     @Override
