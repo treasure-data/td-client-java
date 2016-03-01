@@ -22,11 +22,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportParts;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkImportSessionList;
+import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDJob;
@@ -42,6 +44,7 @@ import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
 import com.treasuredata.client.model.impl.TDDatabaseList;
 import org.eclipse.jetty.http.HttpStatus;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -421,6 +424,35 @@ public class TDClient
         doPost(buildUrl("/v3/table/swap", databaseName, tableName1, tableName2));
     }
 
+    private TDTable getTable(String databaseName, String tableName)
+    {
+        checkNotNull(databaseName, "databaseName is null");
+        checkNotNull(tableName, "tableName is null");
+
+        // TODO This should be improved via v4 api
+        for (TDTable table : listTables(databaseName)) {
+            if (table.getName().equals(tableName)) {
+                return table;
+            }
+        }
+        throw new TDClientException(TDClientException.ErrorType.TARGET_NOT_FOUND, String.format("Table %s is not found", tableName));
+    }
+
+    @Override
+    public void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema)
+    {
+        checkNotNull(databaseName, "databaseName is null");
+        checkNotNull(tableName, "tableName is null");
+        checkNotNull(newSchema, "newSchema is null");
+
+        ImmutableList.Builder<List<String>> builder = ImmutableList.<List<String>>builder();
+        for (TDColumn newColumn : newSchema) {
+            builder.add(ImmutableList.of(newColumn.getName(), newColumn.getType().toString()));
+        }
+        String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build()));
+        doPost(buildUrl("/v3/table/update-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
+    }
+
     @Override
     public String submit(TDJobRequest jobRequest)
             throws TDClientException
@@ -450,7 +482,8 @@ public class TDClient
                 doPost(
                         buildUrl("/v3/job/issue", jobRequest.getType().getType(), jobRequest.getDatabase()),
                         queryParam,
-                        jobRequest.getConfig().transform(new Function<ObjectNode, String>() {
+                        jobRequest.getConfig().transform(new Function<ObjectNode, String>()
+                        {
                             public String apply(ObjectNode config)
                             {
                                 ObjectNode body = config.objectNode();

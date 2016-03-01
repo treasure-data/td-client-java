@@ -87,6 +87,16 @@ public class TDTable
         return columns;
     }
 
+    /**
+     * Alias to getColumns
+     * @return
+     */
+    public List<TDColumn> getSchema()
+    {
+        return getColumns();
+    }
+
+
     public long getRowCount()
     {
         return rowCount;
