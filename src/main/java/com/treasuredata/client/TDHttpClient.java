@@ -390,7 +390,7 @@ public class TDHttpClient
             if (logger.isTraceEnabled()) {
                 logger.trace("response:\n{}", new String(content, StandardCharsets.UTF_8));
             }
-            if(resultType == String.class) {
+            if (resultType == String.class) {
                 return resultType.cast(new String(content, StandardCharsets.UTF_8));
             }
             else {
