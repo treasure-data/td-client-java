@@ -92,7 +92,7 @@ public class TDClient
     }
 
     static {
-        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client.td-client/pom.properties");
+        URL mavenProperties = TDClient.class.getResource("META-INF/com.treasuredata.client/td-client/pom.properties");
         version = readMavenVersion(mavenProperties);
         logger.info("td-client version: " + version);
     }
