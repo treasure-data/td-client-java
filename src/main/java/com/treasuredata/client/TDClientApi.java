@@ -200,6 +200,13 @@ public interface TDClientApi<ClientImpl>
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
 
+    /**
+     * Start a query saved on the cloud.
+     *
+     * @param name name of the saved query
+     * @param scheduledTime the return time of TD_SCHEDULED_TIME
+     * @return job id
+     */
     String startSavedQuery(String name, Date scheduledTime);
 
     String submitExportJob(TDExportJobRequest jobRequest);
