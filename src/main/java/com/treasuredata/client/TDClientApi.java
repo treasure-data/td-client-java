@@ -200,7 +200,7 @@ public interface TDClientApi<ClientImpl>
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
 
-    String submitSchedule(String name, Date scheduledTime);
+    String startSavedQuery(String name, Date scheduledTime);
 
     String submitExportJob(TDExportJobRequest jobRequest);
 }

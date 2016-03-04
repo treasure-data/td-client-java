@@ -624,7 +624,7 @@ public class TDClient
     }
 
     @Override
-    public String submitSchedule(String name, Date scheduledTime)
+    public String startSavedQuery(String name, Date scheduledTime)
     {
         TDScheduleRunResult result =
             doPost(
