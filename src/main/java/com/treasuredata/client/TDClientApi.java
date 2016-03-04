@@ -209,5 +209,11 @@ public interface TDClientApi<ClientImpl>
      */
     String startSavedQuery(String name, Date scheduledTime);
 
+    /**
+     * Start a table export job.
+     *
+     * @param jobRequest
+     * @return job id
+     */
     String submitExportJob(TDExportJobRequest jobRequest);
 }
