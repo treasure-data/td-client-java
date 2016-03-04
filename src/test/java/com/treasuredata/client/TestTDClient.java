@@ -369,6 +369,22 @@ public class TestTDClient
     }
 
     @Test
+    public void submitSchedule()
+            throws Exception
+    {
+        Date scheduledTime = new Date(1457046000 * 1000L);
+        try {
+            System.out.println("scheduled time: " + scheduledTime);
+            String jobId = client.submitSchedule("no method to save a schedule yet", scheduledTime);
+            TDJobSummary tdJob = waitJobCompletion(jobId);
+            fail();
+        }
+        catch (TDClientHttpNotFoundException e) {
+            // OK
+        }
+    }
+
+    @Test
     public void submitExportJob()
             throws Exception
     {

@@ -33,6 +33,7 @@ import com.treasuredata.client.model.TDTable;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -198,6 +199,8 @@ public interface TDClientApi<ClientImpl>
     void deleteBulkImportSession(String sessionName);
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
+
+    String submitSchedule(String name, Date scheduledTime);
 
     String submitExportJob(TDExportJobRequest jobRequest);
 }
