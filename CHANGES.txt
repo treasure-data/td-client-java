@@ -1,3 +1,7 @@
+Release 0.7.9 - 2016-03-03
+  - Add startSavedQuery API
+  - Fix version name log
+
 Release 0.7.8 - 2016-03-01
   - Add updateSchema API
   - Reduced info logs
