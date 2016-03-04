@@ -43,6 +43,7 @@ import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
 import com.treasuredata.client.model.impl.TDDatabaseList;
+import com.treasuredata.client.model.impl.TDScheduleRunResult;
 import org.eclipse.jetty.http.HttpStatus;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -619,6 +621,17 @@ public class TDClient
                 .GET(buildUrl("/v3/bulk_import/error_records", sessionName))
                 .build();
         return httpClient.<Result>call(request, apiKeyCache, resultStreamHandler);
+    }
+
+    @Override
+    public String startSavedQuery(String name, Date scheduledTime)
+    {
+        TDScheduleRunResult result =
+            doPost(
+                    buildUrl("/v3/schedule/run", name, Long.toString(scheduledTime.getTime() / 1000)),
+                    ImmutableMap.<String, String>of(),
+                    TDScheduleRunResult.class);
+        return result.getJobs().get(0).getJobId();
     }
 
     @Override

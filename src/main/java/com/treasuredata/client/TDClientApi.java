@@ -33,6 +33,7 @@ import com.treasuredata.client.model.TDTable;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -199,5 +200,20 @@ public interface TDClientApi<ClientImpl>
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
 
+    /**
+     * Start a query saved on the cloud.
+     *
+     * @param name name of the saved query
+     * @param scheduledTime the return time of TD_SCHEDULED_TIME
+     * @return job id
+     */
+    String startSavedQuery(String name, Date scheduledTime);
+
+    /**
+     * Start a table export job.
+     *
+     * @param jobRequest
+     * @return job id
+     */
     String submitExportJob(TDExportJobRequest jobRequest);
 }
