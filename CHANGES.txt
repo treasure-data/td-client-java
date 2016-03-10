@@ -1,3 +1,6 @@
+Release 0.7.10 - 2016-03-10
+  - Fix td-client version message
+
 Release 0.7.9 - 2016-03-03
   - Add startSavedQuery API
   - Fix version name log
