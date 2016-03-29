@@ -315,13 +315,7 @@ public class TDHttpClient
         String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
         String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequestPath, responseErrorText);
         if (HttpStatus.isClientError(code)) {
-            if (code == HttpStatus.CONFLICT_409 || code == HttpStatus.NOT_FOUND_404) {
-                logger.warn(errorMessage);
-            }
-            else {
-                logger.error(errorMessage);
-            }
-
+	    logger.debug(errorMessage);
             // 4xx error. We do not retry the execution on this type of error
             switch (code) {
                 case HttpStatus.UNAUTHORIZED_401:
