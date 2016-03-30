@@ -23,24 +23,24 @@ import com.google.common.base.Optional;
 import java.util.Properties;
 
 import static com.treasuredata.client.TDClientConfig.ENV_TD_CLIENT_APIKEY;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_APIKEY;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_API_ENDPOINT;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_API_PORT;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_CONNECTION_POOL_SIZE;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_CONNECT_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_IDLE_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PASSOWRD;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_HOST;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_PASSWORD;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_PORT;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_USER;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_PROXY_USESSL;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_LIMIT;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_RETRY_MULTIPLIER;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_USER;
-import static com.treasuredata.client.TDClientConfig.TD_CLIENT_USESSL;
+import static com.treasuredata.client.TDClientConfig.Type.APIKEY;
+import static com.treasuredata.client.TDClientConfig.Type.API_ENDPOINT;
+import static com.treasuredata.client.TDClientConfig.Type.API_PORT;
+import static com.treasuredata.client.TDClientConfig.Type.CONNECTION_POOL_SIZE;
+import static com.treasuredata.client.TDClientConfig.Type.CONNECT_TIMEOUT_MILLIS;
+import static com.treasuredata.client.TDClientConfig.Type.IDLE_TIMEOUT_MILLIS;
+import static com.treasuredata.client.TDClientConfig.Type.PASSOWRD;
+import static com.treasuredata.client.TDClientConfig.Type.PROXY_HOST;
+import static com.treasuredata.client.TDClientConfig.Type.PROXY_PASSWORD;
+import static com.treasuredata.client.TDClientConfig.Type.PROXY_PORT;
+import static com.treasuredata.client.TDClientConfig.Type.PROXY_USER;
+import static com.treasuredata.client.TDClientConfig.Type.PROXY_USESSL;
+import static com.treasuredata.client.TDClientConfig.Type.RETRY_INITIAL_INTERVAL_MILLIS;
+import static com.treasuredata.client.TDClientConfig.Type.RETRY_LIMIT;
+import static com.treasuredata.client.TDClientConfig.Type.RETRY_MAX_INTERVAL_MILLIS;
+import static com.treasuredata.client.TDClientConfig.Type.RETRY_MULTIPLIER;
+import static com.treasuredata.client.TDClientConfig.Type.USER;
+import static com.treasuredata.client.TDClientConfig.Type.USESSL;
 import static com.treasuredata.client.TDClientConfig.getTDConfProperties;
 
 /**
@@ -63,14 +63,19 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
     protected int idleTimeoutMillis = 60000;
     protected int connectionPoolSize = 64;
 
+    private static Optional<String> getConfigProperty(Properties p, TDClientConfig.Type key)
+    {
+        return getConfigProperty(p, key.key);
+    }
+
     private static Optional<String> getConfigProperty(Properties p, String key)
     {
         return Optional.fromNullable(p.getProperty(key));
     }
 
-    private static Optional<Integer> getConfigPropertyInt(Properties p, String key)
+    private static Optional<Integer> getConfigPropertyInt(Properties p, TDClientConfig.Type key)
     {
-        String v = p.getProperty(key);
+        String v = p.getProperty(key.key);
         if (v != null) {
             try {
                 return Optional.of(Integer.parseInt(v));
@@ -84,9 +89,9 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
         }
     }
 
-    private static Optional<Double> getConfigPropertyDouble(Properties p, String key)
+    private static Optional<Double> getConfigPropertyDouble(Properties p, TDClientConfig.Type key)
     {
-        String v = p.getProperty(key);
+        String v = p.getProperty(key.key);
         if (v != null) {
             try {
                 return Optional.of(Double.parseDouble(v));
@@ -135,18 +140,18 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
      */
     public AbstractTDClientBuilder<ClientImpl> setProperties(Properties p)
     {
-        this.endpoint = getConfigProperty(p, TD_CLIENT_API_ENDPOINT).or(endpoint);
-        this.port = getConfigPropertyInt(p, TD_CLIENT_API_PORT).or(port);
-        if (p.containsKey(TD_CLIENT_USESSL)) {
-            setUseSSL(Boolean.parseBoolean(p.getProperty(TD_CLIENT_USESSL)));
+        this.endpoint = getConfigProperty(p, API_ENDPOINT).or(endpoint);
+        this.port = getConfigPropertyInt(p, API_PORT).or(port);
+        if (p.containsKey(USESSL.key)) {
+            setUseSSL(Boolean.parseBoolean(p.getProperty(USESSL.key)));
         }
-        this.apiKey = getConfigProperty(p, TD_CLIENT_APIKEY)
+        this.apiKey = getConfigProperty(p, APIKEY)
                 .or(getConfigProperty(p, "apikey"))
                 .or(apiKey);
-        this.user = getConfigProperty(p, TD_CLIENT_USER)
+        this.user = getConfigProperty(p, USER)
                 .or(getConfigProperty(p, "user"))
                 .or(user);
-        this.password = getConfigProperty(p, TD_CLIENT_PASSOWRD)
+        this.password = getConfigProperty(p, PASSOWRD)
                 .or(getConfigProperty(p, "password"))
                 .or(password);
 
@@ -160,11 +165,11 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
         else {
             proxyConfig = new ProxyConfig.ProxyConfigBuilder();
         }
-        Optional<String> proxyHost = getConfigProperty(p, TD_CLIENT_PROXY_HOST);
-        Optional<Integer> proxyPort = getConfigPropertyInt(p, TD_CLIENT_PROXY_PORT);
-        Optional<String> proxyUseSSL = getConfigProperty(p, TD_CLIENT_PROXY_USESSL);
-        Optional<String> proxyUser = getConfigProperty(p, TD_CLIENT_PROXY_USER);
-        Optional<String> proxyPassword = getConfigProperty(p, TD_CLIENT_PROXY_PASSWORD);
+        Optional<String> proxyHost = getConfigProperty(p, PROXY_HOST);
+        Optional<Integer> proxyPort = getConfigPropertyInt(p, PROXY_PORT);
+        Optional<String> proxyUseSSL = getConfigProperty(p, PROXY_USESSL);
+        Optional<String> proxyUser = getConfigProperty(p, PROXY_USER);
+        Optional<String> proxyPassword = getConfigProperty(p, PROXY_PASSWORD);
         if (proxyHost.isPresent()) {
             hasProxy = true;
             proxyConfig.setHost(proxyHost.get());
@@ -188,13 +193,13 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
         this.proxy = Optional.fromNullable(hasProxy ? proxyConfig.createProxyConfig() : null);
 
         // http client parameter
-        this.retryLimit = getConfigPropertyInt(p, TD_CLIENT_RETRY_LIMIT).or(retryLimit);
-        this.retryInitialIntervalMillis = getConfigPropertyInt(p, TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS).or(retryInitialIntervalMillis);
-        this.retryMaxIntervalMillis = getConfigPropertyInt(p, TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS).or(retryMaxIntervalMillis);
-        this.retryMultiplier = getConfigPropertyDouble(p, TD_CLIENT_RETRY_MULTIPLIER).or(retryMultiplier);
-        this.connectTimeoutMillis = getConfigPropertyInt(p, TD_CLIENT_CONNECT_TIMEOUT_MILLIS).or(connectTimeoutMillis);
-        this.idleTimeoutMillis = getConfigPropertyInt(p, TD_CLIENT_IDLE_TIMEOUT_MILLIS).or(idleTimeoutMillis);
-        this.connectionPoolSize = getConfigPropertyInt(p, TD_CLIENT_CONNECTION_POOL_SIZE).or(connectionPoolSize);
+        this.retryLimit = getConfigPropertyInt(p, RETRY_LIMIT).or(retryLimit);
+        this.retryInitialIntervalMillis = getConfigPropertyInt(p, RETRY_INITIAL_INTERVAL_MILLIS).or(retryInitialIntervalMillis);
+        this.retryMaxIntervalMillis = getConfigPropertyInt(p, RETRY_MAX_INTERVAL_MILLIS).or(retryMaxIntervalMillis);
+        this.retryMultiplier = getConfigPropertyDouble(p, RETRY_MULTIPLIER).or(retryMultiplier);
+        this.connectTimeoutMillis = getConfigPropertyInt(p, CONNECT_TIMEOUT_MILLIS).or(connectTimeoutMillis);
+        this.idleTimeoutMillis = getConfigPropertyInt(p, IDLE_TIMEOUT_MILLIS).or(idleTimeoutMillis);
+        this.connectionPoolSize = getConfigPropertyInt(p, CONNECTION_POOL_SIZE).or(connectionPoolSize);
 
         return this;
     }
@@ -283,7 +288,11 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
         return this;
     }
 
-    protected TDClientConfig buildConfig()
+    /**
+     * Build a config object.
+     * @return
+     */
+    public TDClientConfig buildConfig()
     {
         return new TDClientConfig(
                 endpoint,

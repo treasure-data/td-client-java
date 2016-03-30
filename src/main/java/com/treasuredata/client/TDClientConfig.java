@@ -20,7 +20,7 @@ package com.treasuredata.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,50 +38,49 @@ import java.util.Properties;
 public class TDClientConfig
 {
     public static final String ENV_TD_CLIENT_APIKEY = "TD_API_KEY";
+
     /**
      * Keys for configuring TDClient with a properties file (or System properties)
      */
-    public static final String TD_CLIENT_APIKEY = "td.client.apikey";
-    public static final String TD_CLIENT_USER = "td.client.user";
-    public static final String TD_CLIENT_PASSOWRD = "td.client.password";
-    public static final String TD_CLIENT_USESSL = "td.client.usessl";
-    public static final String TD_CLIENT_API_ENDPOINT = "td.client.endpoint";
-    public static final String TD_CLIENT_API_PORT = "td.client.port";
-    public static final String TD_CLIENT_RETRY_LIMIT = "td.client.retry.limit";
-    public static final String TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS = "td.client.retry.initial-interval";
-    public static final String TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS = "td.client.retry.max-interval";
-    public static final String TD_CLIENT_RETRY_MULTIPLIER = "td.client.retry.multiplier";
-    public static final String TD_CLIENT_CONNECT_TIMEOUT_MILLIS = "td.client.connect-timeout";
-    public static final String TD_CLIENT_IDLE_TIMEOUT_MILLIS = "td.client.idle-timeout";
-    public static final String TD_CLIENT_CONNECTION_POOL_SIZE = "td.client.connection-pool-size";
-    public static final String TD_CLIENT_PROXY_HOST = "td.client.proxy.host";
-    public static final String TD_CLIENT_PROXY_PORT = "td.client.proxy.port";
-    public static final String TD_CLIENT_PROXY_USER = "td.client.proxy.user";
-    public static final String TD_CLIENT_PROXY_USESSL = "td.client.proxy.usessl";
-    public static final String TD_CLIENT_PROXY_PASSWORD = "td.client.proxy.password";
+    public static enum Type
+    {
+        APIKEY("td.client.apikey", "API key to access Treasure Data."),
+        USER("td.client.user", "Account e-mail address (unnecessary if apikey is set)"),
+        PASSOWRD("td.client.password", "Account apssword (unnecessary if apikey is set"),
+        USESSL("td.client.usessl", "Use SSL encryption"),
+        API_ENDPOINT("td.client.endpoint", "TD API end point (e.g., api.treasuredata.com"),
+        API_PORT("td.client.port", "TD API port number"),
+        RETRY_LIMIT("td.client.retry.limit", "The maximum nubmer of API request retry"),
+        RETRY_INITIAL_INTERVAL_MILLIS("td.client.retry.initial-interval", "backoff retry interval = (interval) * (multiplier) ^ (retry count)"),
+        RETRY_MAX_INTERVAL_MILLIS("td.client.retry.max-interval", "max retry interval"),
+        RETRY_MULTIPLIER("td.client.retry.multiplier", "retry interval multiplier"),
+        CONNECT_TIMEOUT_MILLIS("td.client.connect-timeout", "connection timeout before reaching the API"),
+        IDLE_TIMEOUT_MILLIS("td.client.idle-timeout", "idle connection timeout when no data is coming from API"),
+        CONNECTION_POOL_SIZE("td.client.connection-pool-size", "connection pool size"),
+        PROXY_HOST("td.client.proxy.host", "Proxy host (e.g., myproxy.com)"),
+        PROXY_PORT("td.client.proxy.port", "Proxy port number"),
+        PROXY_USER("td.client.proxy.user", "Proxy user name"),
+        PROXY_PASSWORD("td.client.proxy.password", "Proxy paassword"),
+        PROXY_USESSL("td.client.proxy.usessl", "Use SSL for proxy");
 
-    public static final ImmutableSet<String> knownProperties = ImmutableSet.<String>builder()
-            .add("apikey")
-            .add("user")
-            .add("password")
-            .add(TD_CLIENT_APIKEY)
-            .add(TD_CLIENT_USER)
-            .add(TD_CLIENT_PASSOWRD)
-            .add(TD_CLIENT_USESSL)
-            .add(TD_CLIENT_API_ENDPOINT)
-            .add(TD_CLIENT_API_PORT)
-            .add(TD_CLIENT_RETRY_LIMIT)
-            .add(TD_CLIENT_RETRY_INITIAL_INTERVAL_MILLIS)
-            .add(TD_CLIENT_RETRY_MAX_INTERVAL_MILLIS)
-            .add(TD_CLIENT_RETRY_MULTIPLIER)
-            .add(TD_CLIENT_CONNECT_TIMEOUT_MILLIS)
-            .add(TD_CLIENT_IDLE_TIMEOUT_MILLIS)
-            .add(TD_CLIENT_CONNECTION_POOL_SIZE)
-            .add(TD_CLIENT_PROXY_HOST)
-            .add(TD_CLIENT_PROXY_PORT)
-            .add(TD_CLIENT_PROXY_USER)
-            .add(TD_CLIENT_PROXY_PASSWORD)
-            .build();
+        public final String key;
+        public final String description;
+
+        Type(String key, String description)
+        {
+            this.key = key;
+            this.description = description;
+        }
+    }
+
+    public static List<Type> knownProperties()
+    {
+        ImmutableList.Builder<Type> builder = ImmutableList.builder();
+        for (Type t : Type.values()) {
+            builder.add(t);
+        }
+        return builder.build();
+    }
 
     /**
      * endpoint URL (e.g., api.treasuredata.com, ybi.jp-east.idcfcloud.com)
@@ -133,6 +132,55 @@ public class TDClientConfig
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.idleTimeoutMillis = idleTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
+    }
+
+    private static <V> void saveProperty(Properties p, Type config, V value)
+    {
+        if (value == null) {
+            return;
+        }
+
+        if (value instanceof Optional) {
+            Optional<?> opt = (Optional<?>) value;
+            if (opt.isPresent()) {
+                Object v = opt.get();
+                saveProperty(p, config, v);
+            }
+        }
+        else {
+            p.setProperty(config.key, value.toString());
+        }
+    }
+
+    /**
+     * Output this configuration as a Properties object
+     *
+     * @return
+     */
+    public Properties toProperties()
+    {
+        Properties p = new Properties();
+        saveProperty(p, Type.API_ENDPOINT, endpoint);
+        saveProperty(p, Type.API_PORT, port);
+        saveProperty(p, Type.USESSL, useSSL);
+        saveProperty(p, Type.APIKEY, apiKey);
+        saveProperty(p, Type.USER, user);
+        saveProperty(p, Type.PASSOWRD, password);
+        if (proxy.isPresent()) {
+            ProxyConfig pc = proxy.get();
+            saveProperty(p, Type.PROXY_HOST, pc.getHost());
+            saveProperty(p, Type.PROXY_PORT, pc.getPort());
+            saveProperty(p, Type.PROXY_USER, pc.getUser());
+            saveProperty(p, Type.PROXY_PASSWORD, pc.getPassword());
+            saveProperty(p, Type.PROXY_USESSL, pc.useSSL());
+        }
+        saveProperty(p, Type.RETRY_LIMIT, retryLimit);
+        saveProperty(p, Type.RETRY_INITIAL_INTERVAL_MILLIS, retryInitialIntervalMillis);
+        saveProperty(p, Type.RETRY_MAX_INTERVAL_MILLIS, retryMaxIntervalMillis);
+        saveProperty(p, Type.RETRY_MULTIPLIER, retryMultiplier);
+        saveProperty(p, Type.CONNECT_TIMEOUT_MILLIS, connectTimeoutMillis);
+        saveProperty(p, Type.CONNECTION_POOL_SIZE, connectionPoolSize);
+        return p;
     }
 
     private static Logger logger = LoggerFactory.getLogger(TDClientConfig.class);
