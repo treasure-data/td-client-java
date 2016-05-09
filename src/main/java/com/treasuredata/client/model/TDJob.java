@@ -49,6 +49,7 @@ public class TDJob
             return type;
         }
 
+        @JsonCreator
         public static Type fromString(String typeName)
         {
             for (Type t : values()) {

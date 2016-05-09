@@ -41,6 +41,7 @@ import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
+import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDTable;
 import org.eclipse.jetty.http.HttpStatus;
 import org.json.JSONArray;
@@ -829,4 +830,16 @@ public class TestTDClient
             assertEquals(HttpStatus.UNAUTHORIZED_401, e.getStatusCode());
         }
     }
+
+    @Test
+    public void savedQuery()
+    {
+        List<TDSavedQuery> savedQueries = client.listSavedQueries();
+        assertTrue(savedQueries.size() > 0);
+        logger.info(Joiner.on(", ").join(savedQueries));
+
+
+    }
+
+
 }

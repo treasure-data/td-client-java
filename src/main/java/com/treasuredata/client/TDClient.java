@@ -38,6 +38,7 @@ import com.treasuredata.client.model.TDJobSubmitResult;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
+import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
@@ -632,6 +633,12 @@ public class TDClient
                     ImmutableMap.<String, String>of(),
                     TDScheduleRunResult.class);
         return result.getJobs().get(0).getJobId();
+    }
+
+    @Override
+    public List<TDSavedQuery> listSavedQueries()
+    {
+        return doGet(buildUrl("/v3/schedule/list"), TDSavedQuery.TDSavedQueryList.class).getSchedules();
     }
 
     @Override
