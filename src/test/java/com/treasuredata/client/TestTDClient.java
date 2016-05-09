@@ -41,6 +41,7 @@ import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
+import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDTable;
 import org.eclipse.jetty.http.HttpStatus;
@@ -544,7 +545,7 @@ public class TestTDClient
 
     private static String newTemporaryName(String prefix)
     {
-        String dateStr = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date());
+        String dateStr = new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date());
         return prefix + "_" + dateStr;
     }
 
@@ -832,14 +833,67 @@ public class TestTDClient
     }
 
     @Test
-    public void savedQuery()
+    public void listSavedQuery()
     {
         List<TDSavedQuery> savedQueries = client.listSavedQueries();
         assertTrue(savedQueries.size() > 0);
         logger.info(Joiner.on(", ").join(savedQueries));
-
-
     }
 
+    private Optional<TDSavedQuery> findSavedQuery(String name)
+    {
+        List<TDSavedQuery> savedQueries = client.listSavedQueries();
+        for (TDSavedQuery q : savedQueries) {
+            if (q.getName().equals(name)) {
+                return Optional.of(q);
+            }
+        }
+        return Optional.absent();
+    }
 
+    @Test
+    public void saveAndDeleteQuery()
+    {
+        String queryName = newTemporaryName("td_client_test");
+
+        TDSaveQueryRequest query =
+                new TDSaveQueryRequest(
+                        queryName,
+                        "0 * * * *",
+                        TDJob.Type.PRESTO,
+                        "select 1",
+                        "Asia/Tokyo",
+                        1,
+                        "testdb",
+                        -1,
+                        2,
+                        "mysql://testuser:pass@somemysql.address/somedb/sometable");
+        try {
+            TDSavedQuery result = client.saveQuery(query);
+            Optional<TDSavedQuery> q = findSavedQuery(queryName);
+            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+
+            assertEquals(query.getName(), result.getName());
+            assertEquals(query.getCron(), result.getCron());
+            assertEquals(query.getType(), result.getType());
+            assertEquals(query.getQuery(), result.getQuery());
+            assertEquals(query.getTimezone(), result.getTimezone());
+            assertEquals(query.getDelay(), result.getDelay());
+            assertEquals(query.getDatabase(), result.getDatabase());
+            assertEquals(query.getPriority(), result.getPriority());
+            assertEquals(query.getRetryLimit(), result.getRetryLimit());
+
+            assertTrue(result.getResult().startsWith("mysql://testuser:")); // password will be hidden
+            assertTrue(result.getResult().contains("@somemysql.address/somedb/sometable")); // password will be hidden
+        }
+        catch (TDClientException e) {
+            logger.error("failed", e);
+        }
+        finally {
+            client.deleteSavedQuery(queryName);
+        }
+
+        Optional<TDSavedQuery> q = findSavedQuery(queryName);
+        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+    }
 }

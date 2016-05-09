@@ -20,6 +20,7 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
@@ -38,6 +39,7 @@ public class TDJob
             this.type = type;
         }
 
+        @JsonValue
         public String getType()
         {
             return type;

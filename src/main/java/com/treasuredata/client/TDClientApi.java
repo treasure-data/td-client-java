@@ -29,6 +29,7 @@ import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
+import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDTable;
 
@@ -201,10 +202,10 @@ public interface TDClientApi<ClientImpl>
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
 
-
     /**
      * Saved query APIs
      */
+
     /**
      * Start a query saved on the cloud.
      *
@@ -216,6 +217,15 @@ public interface TDClientApi<ClientImpl>
 
     List<TDSavedQuery> listSavedQueries();
 
+    /**
+     * Save a query for scheduling
+     *
+     * @param query
+     * @return
+     */
+    TDSavedQuery saveQuery(TDSaveQueryRequest query);
+
+    TDSavedQuery deleteSavedQuery(String name);
 
     /**
      * Start a table export job.
