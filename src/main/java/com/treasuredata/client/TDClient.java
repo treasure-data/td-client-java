@@ -653,10 +653,9 @@ public class TDClient
         String json = null;
         try {
             json = httpClient.getObjectMapper().writeValueAsString(query);
-            logger.info(json);
         }
         catch (JsonProcessingException e) {
-            logger.error("Failed to save query", e);
+            logger.error("Failed to save the query", e);
             throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, String.format("Invalid save query request: %s", query));
         }
         TDSavedQuery result =
