@@ -864,7 +864,7 @@ public class TestTDClient
                         "select 1",
                         "Asia/Tokyo",
                         1,
-                        "testdb",
+                        SAMPLE_DB,
                         -1,
                         2,
                         "mysql://testuser:pass@somemysql.address/somedb/sometable");
