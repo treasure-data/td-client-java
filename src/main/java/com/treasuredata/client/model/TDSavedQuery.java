@@ -52,7 +52,7 @@ public class TDSavedQuery
         return new TDSavedQueryBuilder(name).setType(type).setQuery(query).setTimezone(timezone).setDatabase(database);
     }
 
-    public static TDSavedQueryBuilder newUpdateRequest(String name)
+    public static TDSavedQueryBuilder newUpdateRequestBuilder(String name)
     {
         return new TDSavedQueryBuilder(name);
     }
@@ -187,7 +187,7 @@ public class TDSavedQuery
      *
      * @return
      */
-    public TDSavedQueryBuilder newUpdateRequest()
+    public TDSavedQueryBuilder newUpdateRequestBuilder()
     {
         return new TDSavedQueryBuilder(this);
     }

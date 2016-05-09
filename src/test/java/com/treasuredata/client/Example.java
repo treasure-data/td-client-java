@@ -134,7 +134,7 @@ public class Example
 
         // Update a saved query
         TDSavedQueryBuilder updateRequest =
-                TDSavedQuery.newUpdateRequest("my_saved_query")
+                TDSavedQuery.newUpdateRequestBuilder("my_saved_query")
                         .setQuery("select 2")
                         .setDelay(3600);
         client.updateSavedQuery("my_saved_query", updateRequest);

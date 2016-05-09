@@ -893,7 +893,7 @@ public class TestTDClient
 
             // Update
             TDSavedQueryBuilder query2 =
-                    TDSavedQuery.newUpdateRequest(queryName)
+                    TDSavedQuery.newUpdateRequestBuilder(queryName)
                             .setCron("15 * * * *")
                             .setType(TDJob.Type.HIVE)
                             .setQuery("select 2")
