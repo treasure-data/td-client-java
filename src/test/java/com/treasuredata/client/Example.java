@@ -25,12 +25,15 @@ import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
+import com.treasuredata.client.model.TDSaveQueryRequest;
+import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDTable;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ArrayValue;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -101,5 +104,36 @@ public class Example
         finally {
             client.close();
         }
+    }
+
+    public static void saveQueryExample()
+    {
+        TDClient client = TDClient.newClient();
+
+        // Register a new scheduled query
+        TDSaveQueryRequest query =
+                new TDSaveQueryRequest(
+                        "my_saved_query", // saved query name
+                        "40 * * * *", // Run at 40 min of every hour
+                        TDJob.Type.PRESTO, // job type
+                        "select 1", // SQL
+                        "Asia/Tokyo", // Timezone
+                        0,   // Delay
+                        "testdb", // database name
+                        0,   // priority
+                        1,   // retry limit when a query failed for some reason
+                        "mysql://testuser:pass@somemysql.address/somedb/sometable" // result export string, or "" (empty string) if no result export is necessary
+                );
+        client.saveQuery(query);
+
+        // List saved queries
+        List<TDSavedQuery> savedQueries = client.listSavedQueries();
+
+        // Run a saved query
+        Date scheduledTime = new Date(System.currentTimeMillis());
+        client.startSavedQuery(query.getName(), scheduledTime);
+
+        // Delete a saved query
+        client.deleteSavedQuery(query.getName());
     }
 }

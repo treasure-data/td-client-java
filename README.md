@@ -92,6 +92,8 @@ If you need to access Web through proxy, add the following configuration to `$HO
 
 ### Example Code
 
+[Example.java](src/test/java/com/treasuredata/client/Example.java)
+
 ```java
 import com.treasuredata.client.*;
 import com.google.common.base.Function;

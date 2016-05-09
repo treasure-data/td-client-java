@@ -884,7 +884,7 @@ public class TestTDClient
             assertEquals(query.getRetryLimit(), result.getRetryLimit());
 
             assertTrue(result.getResult().startsWith("mysql://testuser:")); // password will be hidden
-            assertTrue(result.getResult().contains("@somemysql.address/somedb/sometable")); // password will be hidden
+            assertTrue(result.getResult().contains("@somemysql.address/somedb/sometable"));
         }
         catch (TDClientException e) {
             logger.error("failed", e);
