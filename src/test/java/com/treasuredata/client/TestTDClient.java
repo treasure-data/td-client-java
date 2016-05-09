@@ -43,6 +43,7 @@ import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryBuilder;
 import com.treasuredata.client.model.TDTable;
 import org.eclipse.jetty.http.HttpStatus;
 import org.json.JSONArray;
@@ -851,40 +852,63 @@ public class TestTDClient
         return Optional.absent();
     }
 
+    private void validateSavedQuery(TDSaveQueryRequest expected, TDSavedQuery target)
+    {
+        assertEquals(expected.getName(), target.getName());
+        assertEquals(expected.getCron(), target.getCron());
+        assertEquals(expected.getType(), target.getType());
+        assertEquals(expected.getQuery(), target.getQuery());
+        assertEquals(expected.getTimezone(), target.getTimezone());
+        assertEquals(expected.getDelay(), target.getDelay());
+        assertEquals(expected.getDatabase(), target.getDatabase());
+        assertEquals(expected.getPriority(), target.getPriority());
+        assertEquals(expected.getRetryLimit(), target.getRetryLimit());
+    }
+
     @Test
     public void saveAndDeleteQuery()
     {
         String queryName = newTemporaryName("td_client_test");
 
-        TDSaveQueryRequest query =
-                new TDSaveQueryRequest(
-                        queryName,
-                        "0 * * * *",
-                        TDJob.Type.PRESTO,
-                        "select 1",
-                        "Asia/Tokyo",
-                        1,
-                        SAMPLE_DB,
-                        -1,
-                        2,
-                        "mysql://testuser:pass@somemysql.address/somedb/sometable");
+        TDSaveQueryRequest query = TDSavedQuery.newBuilder(
+                queryName,
+                TDJob.Type.PRESTO,
+                SAMPLE_DB,
+                "select 1",
+                "Asia/Tokyo")
+                .setCron("0 * * * *")
+                .setPriority(-1)
+                .setRetryLimit(2)
+                .setResult("mysql://testuser:pass@somemysql.address/somedb/sometable")
+                .build();
+
         try {
             TDSavedQuery result = client.saveQuery(query);
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
             assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
 
-            assertEquals(query.getName(), result.getName());
-            assertEquals(query.getCron(), result.getCron());
-            assertEquals(query.getType(), result.getType());
-            assertEquals(query.getQuery(), result.getQuery());
-            assertEquals(query.getTimezone(), result.getTimezone());
-            assertEquals(query.getDelay(), result.getDelay());
-            assertEquals(query.getDatabase(), result.getDatabase());
-            assertEquals(query.getPriority(), result.getPriority());
-            assertEquals(query.getRetryLimit(), result.getRetryLimit());
-
+            validateSavedQuery(query, result);
             assertTrue(result.getResult().startsWith("mysql://testuser:")); // password will be hidden
             assertTrue(result.getResult().contains("@somemysql.address/somedb/sometable"));
+
+            // Update
+            TDSavedQueryBuilder query2 =
+                    TDSavedQuery.newUpdateRequest(queryName)
+                            .setCron("15 * * * *")
+                            .setType(TDJob.Type.HIVE)
+                            .setQuery("select 2")
+                            .setTimezone("UTC")
+                            .setDelay(20)
+                            .setDatabase(SAMPLE_DB)
+                            .setPriority(-1)
+                            .setRetryLimit(2)
+                            .setResult("mysql://testuser2:pass@somemysql.address/somedb2/sometable2");
+
+            TDSaveQueryRequest expected = query2.merge(result);
+            TDSavedQuery updated = client.updateSavedQuery(queryName, query2);
+            validateSavedQuery(expected, updated);
+            assertTrue(updated.getResult().startsWith("mysql://testuser2:")); // password will be hidden
+            assertTrue(updated.getResult().contains("@somemysql.address/somedb2/sometable2"));
         }
         catch (TDClientException e) {
             logger.error("failed", e);

@@ -41,6 +41,7 @@ import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryBuilder;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
@@ -647,20 +648,51 @@ public class TDClient
         return doGet(buildUrl("/v3/schedule/list"), TDSavedQuery.TDSavedQueryList.class).getSchedules();
     }
 
+    protected String toJson(Object any)
+    {
+        try {
+            return httpClient.getObjectMapper().writeValueAsString(any);
+        }
+        catch (JsonProcessingException e) {
+            logger.error("Failed to produce json", e);
+            throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, String.format("Failed to create JSON string from %s", any));
+        }
+    }
+
     @Override
     public TDSavedQuery saveQuery(TDSaveQueryRequest query)
     {
-        String json = null;
-        try {
-            json = httpClient.getObjectMapper().writeValueAsString(query);
-        }
-        catch (JsonProcessingException e) {
-            logger.error("Failed to save the query", e);
-            throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, String.format("Invalid save query request: %s", query));
-        }
+        String json = toJson(query);
         TDSavedQuery result =
                 doPost(
                         buildUrl("/v3/schedule/create", query.getName()),
+                        ImmutableMap.<String, String>of(),
+                        Optional.of(json),
+                        TDSavedQuery.class);
+        return result;
+    }
+
+    @Override
+    public TDSavedQuery updateSavedQuery(String name, TDSavedQueryBuilder request)
+    {
+        List<TDSavedQuery> savedQueries = listSavedQueries();
+        for (TDSavedQuery q : savedQueries) {
+            if (q.getName().equals(name)) {
+                TDSaveQueryRequest fullRequest = request.merge(q);
+                return updateSavedQuery(fullRequest);
+            }
+        }
+        // Imitate HTTP 404 error response for the compatibility with updateSavedQuery(TDSaveQueryRequest)
+        throw new TDClientHttpNotFoundException(String.format("Saved query %s is not found", name));
+    }
+
+    @Override
+    public TDSavedQuery updateSavedQuery(TDSaveQueryRequest request)
+    {
+        String json = toJson(request);
+        TDSavedQuery result =
+                doPost(
+                        buildUrl("/v3/schedule/update", request.getName()),
                         ImmutableMap.<String, String>of(),
                         Optional.of(json),
                         TDSavedQuery.class);

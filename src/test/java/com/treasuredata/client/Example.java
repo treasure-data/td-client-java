@@ -27,6 +27,7 @@ import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryBuilder;
 import com.treasuredata.client.model.TDTable;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -112,18 +113,16 @@ public class Example
 
         // Register a new scheduled query
         TDSaveQueryRequest query =
-                new TDSaveQueryRequest(
-                        "my_saved_query", // saved query name
-                        "40 * * * *", // Run at 40 min of every hour
-                        TDJob.Type.PRESTO, // job type
-                        "select 1", // SQL
-                        "Asia/Tokyo", // Timezone
-                        0,   // Delay
-                        "testdb", // database name
-                        0,   // priority
-                        1,   // retry limit when a query failed for some reason
-                        "mysql://testuser:pass@somemysql.address/somedb/sometable" // result export string, or "" (empty string) if no result export is necessary
-                );
+                TDSavedQuery.newBuilder(
+                        "my_saved_query",
+                        TDJob.Type.PRESTO,
+                        "testdb",
+                        "select 1",
+                        "Asia/Tokyo")
+                        .setCron("40 * * * *")
+                        .setResult("mysql://testuser:pass@somemysql.address/somedb/sometable")
+                        .build();
+
         client.saveQuery(query);
 
         // List saved queries
@@ -132,6 +131,13 @@ public class Example
         // Run a saved query
         Date scheduledTime = new Date(System.currentTimeMillis());
         client.startSavedQuery(query.getName(), scheduledTime);
+
+        // Update a saved query
+        TDSavedQueryBuilder updateRequest =
+                TDSavedQuery.newUpdateRequest("my_saved_query")
+                        .setQuery("select 2")
+                        .setDelay(3600);
+        client.updateSavedQuery("my_saved_query", updateRequest);
 
         // Delete a saved query
         client.deleteSavedQuery(query.getName());

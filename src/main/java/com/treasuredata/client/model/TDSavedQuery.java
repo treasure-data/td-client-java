@@ -42,6 +42,21 @@ public class TDSavedQuery
         }
     }
 
+    public static TDSavedQueryBuilder newBuilder(
+            String name,
+            TDJob.Type type,
+            String database,
+            String query,
+            String timezone)
+    {
+        return new TDSavedQueryBuilder(name).setType(type).setQuery(query).setTimezone(timezone).setDatabase(database);
+    }
+
+    public static TDSavedQueryBuilder newUpdateRequest(String name)
+    {
+        return new TDSavedQueryBuilder(name);
+    }
+
     private final String name;
     private final String cron;
     private final TDJob.Type type;
@@ -165,5 +180,15 @@ public class TDSavedQuery
                 ", result='" + result + '\'' +
                 ", nextTime='" + nextTime + '\'' +
                 '}';
+    }
+
+    /**
+     * Create a new update request object for this saved query
+     *
+     * @return
+     */
+    public TDSavedQueryBuilder newUpdateRequest()
+    {
+        return new TDSavedQueryBuilder(this);
     }
 }

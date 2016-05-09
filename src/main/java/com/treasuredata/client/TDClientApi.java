@@ -29,8 +29,9 @@ import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
-import com.treasuredata.client.model.TDSaveQueryRequest;
+import com.treasuredata.client.model.TDSavedQueryBuilder;
 import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDTable;
 
 import java.io.File;
@@ -224,6 +225,10 @@ public interface TDClientApi<ClientImpl>
      * @return
      */
     TDSavedQuery saveQuery(TDSaveQueryRequest query);
+
+    TDSavedQuery updateSavedQuery(String name, TDSavedQueryBuilder query);
+
+    TDSavedQuery updateSavedQuery(TDSaveQueryRequest request);
 
     TDSavedQuery deleteSavedQuery(String name);
 
