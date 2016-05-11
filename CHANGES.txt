@@ -1,3 +1,9 @@
+Release 0.7.13 - 2016-05-10
+  - Added saved query API
+    - [Usage examples](https://github.com/treasure-data/td-client-java/blob/2f6467242a92316b953ea37a594bbd4993adc044/src/test/java/com/treasuredata/client/Example.java#L110)
+  - Upgrade jackson to 2.6.2
+  - (alpha) Allow setting a scheduled time in job submission.
+
 Release 0.7.12 - 2016-03-20
   - [minor] Add TDClientConfig.Type enum to list the available config parameters
 
