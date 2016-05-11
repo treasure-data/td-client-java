@@ -41,7 +41,7 @@ public class TDSavedQueryUpdateRequestBuilder
     {
     }
 
-    public static <T> void checkPresence(Optional<T> opt, String errorMessage)
+    private static <T> void checkPresence(Optional<T> opt, String errorMessage)
     {
         if (!opt.isPresent()) {
             throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, errorMessage);
