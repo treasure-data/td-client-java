@@ -219,15 +219,32 @@ public interface TDClientApi<ClientImpl>
     List<TDSavedQuery> listSavedQueries();
 
     /**
-     * Save a query for scheduling
+     * Save a query for scheduling. Use {@link TDSavedQuery#newBuilder(String, TDJob.Type, String, String, String)}
+     * to create a TDSaveQueryRequest.
      *
      * @param request
      * @return
      */
     TDSavedQuery saveQuery(TDSaveQueryRequest request);
 
+    /**
+     * Update the saved query of the given name. To build an update request, use {@link TDSavedQuery#newUpdateRequestBuilder()}.
+     * <p>
+     * [NOTICE] If you update the same saved query simultaneously, the first update result
+     * might be overwritten by the second immediate update request. Updates to the same saved query should be performed one-by-one.
+     *
+     * @param name
+     * @param request
+     * @return
+     */
     TDSavedQuery updateSavedQuery(String name, TDSavedQueryUpdateRequest request);
 
+    /**
+     * Delete the saved query of the given name.
+     *
+     * @param name
+     * @return
+     */
     TDSavedQuery deleteSavedQuery(String name);
 
     /**
