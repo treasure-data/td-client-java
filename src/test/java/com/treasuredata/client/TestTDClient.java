@@ -52,6 +52,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessagePacker;
@@ -357,6 +358,7 @@ public class TestTDClient
         client.existsTable(SAMPLE_DB, "sample_output");
     }
 
+    @Ignore("Need to wait TD API update")
     @Test
     public void submitJobWithScheduledTime()
             throws Exception
