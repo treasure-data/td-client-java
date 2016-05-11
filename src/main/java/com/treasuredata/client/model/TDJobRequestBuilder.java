@@ -32,6 +32,7 @@ public class TDJobRequestBuilder
     private String poolName;
     private Optional<String> table = Optional.absent();
     private Optional<ObjectNode> config = Optional.absent();
+    private Optional<Long> scheduledTime = Optional.absent();
 
     public TDJobRequestBuilder setResultOutput(String result)
     {
@@ -39,10 +40,20 @@ public class TDJobRequestBuilder
         return this;
     }
 
+    public Optional<String> getResultOutput()
+    {
+        return Optional.fromNullable(result);
+    }
+
     public TDJobRequestBuilder setDatabase(String database)
     {
         this.database = database;
         return this;
+    }
+
+    public String getDatabase()
+    {
+        return database;
     }
 
     public TDJobRequestBuilder setType(TDJob.Type type)
@@ -57,10 +68,20 @@ public class TDJobRequestBuilder
         return this;
     }
 
+    public TDJob.Type getType()
+    {
+        return type;
+    }
+
     public TDJobRequestBuilder setQuery(String query)
     {
         this.query = query;
         return this;
+    }
+
+    public String getQuery()
+    {
+        return query;
     }
 
     public TDJobRequestBuilder setPriority(TDJob.Priority priority)
@@ -75,10 +96,20 @@ public class TDJobRequestBuilder
         return this;
     }
 
+    public TDJob.Priority getPriority()
+    {
+        return priority;
+    }
+
     public TDJobRequestBuilder setRetryLimit(int retryLimit)
     {
         this.retryLimit = Optional.of(retryLimit);
         return this;
+    }
+
+    public Optional<Integer> getRetryLimit()
+    {
+        return retryLimit;
     }
 
     public TDJobRequestBuilder setPoolName(String poolName)
@@ -87,10 +118,20 @@ public class TDJobRequestBuilder
         return this;
     }
 
+    public Optional<String> getPoolName()
+    {
+        return Optional.fromNullable(poolName);
+    }
+
     public TDJobRequestBuilder setTable(String table)
     {
         this.table = Optional.of(table);
         return this;
+    }
+
+    public Optional<String> getTable()
+    {
+        return table;
     }
 
     public TDJobRequestBuilder setConfig(ObjectNode config)
@@ -99,8 +140,29 @@ public class TDJobRequestBuilder
         return this;
     }
 
+    public Optional<ObjectNode> getConfig()
+    {
+        return config;
+    }
+
+    public TDJobRequestBuilder setScheduledTime(Long scheduledTime)
+    {
+        return setScheduledTime(Optional.fromNullable(scheduledTime));
+    }
+
+    public TDJobRequestBuilder setScheduledTime(Optional<Long> scheduledTime)
+    {
+        this.scheduledTime = scheduledTime;
+        return this;
+    }
+
+    public Optional<Long> getScheduledTime()
+    {
+        return scheduledTime;
+    }
+
     public TDJobRequest createTDJobRequest()
     {
-        return new TDJobRequest(database, type, query, priority, Optional.fromNullable(result), retryLimit, Optional.fromNullable(poolName), table, config);
+        return TDJobRequest.of(this);
     }
 }

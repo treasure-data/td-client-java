@@ -485,6 +485,9 @@ public class TDClient
         if (jobRequest.getTable().isPresent()) {
             queryParam.put("table", jobRequest.getTable().get());
         }
+        if (jobRequest.getScheduledTime().isPresent()) {
+            queryParam.put("scheduled_time", String.valueOf(jobRequest.getScheduledTime().get()));
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("submit job: " + jobRequest);

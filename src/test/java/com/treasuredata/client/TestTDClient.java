@@ -38,6 +38,7 @@ import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
+import com.treasuredata.client.model.TDJobRequestBuilder;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
@@ -354,6 +355,40 @@ public class TestTDClient
         String jobId = client.submit(TDJobRequest.newHiveQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
         TDJobSummary tdJob = waitJobCompletion(jobId);
         client.existsTable(SAMPLE_DB, "sample_output");
+    }
+
+    @Test
+    public void submitJobWithScheduledTime()
+            throws Exception
+    {
+        long scheduledTime = 1368080054;
+        TDJobRequest request = new TDJobRequestBuilder()
+                .setType(TDJob.Type.PRESTO)
+                .setDatabase("sample_datasets")
+                .setQuery("select TD_SCHEDULED_TIME()")
+                .setScheduledTime(scheduledTime)
+                .createTDJobRequest();
+        String jobId = client.submit(request);
+        waitJobCompletion(jobId);
+
+        JSONArray array = client.jobResult(jobId, TDResultFormat.JSON, new Function<InputStream, JSONArray>()
+        {
+            @Override
+            public JSONArray apply(InputStream input)
+            {
+                try {
+                    String result = new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8);
+                    logger.info("result:\n" + result);
+                    return new JSONArray(result);
+                }
+                catch (Exception e) {
+                    throw Throwables.propagate(e);
+                }
+            }
+        });
+
+        assertEquals(1, array.length());
+        assertEquals(scheduledTime, array.getLong(0));
     }
 
     @Test
