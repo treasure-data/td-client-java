@@ -229,9 +229,6 @@ public interface TDClientApi<ClientImpl>
 
     /**
      * Update the saved query of the given name. To build an update request, use {@link TDSavedQuery#newUpdateRequestBuilder()}.
-     * <p>
-     * [NOTICE] If you update the same saved query simultaneously, the first update result
-     * might be overwritten by the second immediate update request. Updates to the same saved query should be performed one-by-one.
      *
      * @param name
      * @param request
