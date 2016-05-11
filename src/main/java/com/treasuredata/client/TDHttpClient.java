@@ -67,6 +67,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.treasuredata.client.TDApiRequest.urlEncode;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
+import static com.treasuredata.client.TDClientException.ErrorType.INVALID_INPUT;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
 import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
@@ -120,6 +121,11 @@ public class TDHttpClient
             logger.error("Failed to initialize Jetty client", e);
             throw Throwables.propagate(e);
         }
+    }
+
+    ObjectMapper getObjectMapper()
+    {
+        return objectMapper;
     }
 
     public void close()
@@ -326,6 +332,8 @@ public class TDHttpClient
                     throw new TDClientHttpConflictException(errorMessage);
                 case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
                     throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code);
+                case HttpStatus.UNPROCESSABLE_ENTITY_422:
+                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code);
                 default:
                     throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code);
             }

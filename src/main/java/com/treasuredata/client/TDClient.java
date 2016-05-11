@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -38,6 +39,9 @@ import com.treasuredata.client.model.TDJobSubmitResult;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
+import com.treasuredata.client.model.TDSaveQueryRequest;
+import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
@@ -187,6 +191,12 @@ public class TDClient
             request.setPostJson(jsonBody.get());
         }
         return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
+    }
+
+    protected <ResultType> ResultType doPost(String path, Class<ResultType> resultTypeClass)
+            throws TDClientException
+    {
+        return this.<ResultType>doPost(path, ImmutableMap.<String, String>of(), Optional.<String>absent(), resultTypeClass);
     }
 
     protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
@@ -630,11 +640,61 @@ public class TDClient
     public String startSavedQuery(String name, Date scheduledTime)
     {
         TDScheduleRunResult result =
-            doPost(
-                    buildUrl("/v3/schedule/run", name, Long.toString(scheduledTime.getTime() / 1000)),
-                    ImmutableMap.<String, String>of(),
-                    TDScheduleRunResult.class);
+                doPost(buildUrl("/v3/schedule/run", name, Long.toString(scheduledTime.getTime() / 1000)),
+                        TDScheduleRunResult.class);
         return result.getJobs().get(0).getJobId();
+    }
+
+    @Override
+    public List<TDSavedQuery> listSavedQueries()
+    {
+        return doGet(buildUrl("/v3/schedule/list"), TDSavedQuery.TDSavedQueryList.class).getSchedules();
+    }
+
+    protected String toJson(Object any)
+    {
+        try {
+            return httpClient.getObjectMapper().writeValueAsString(any);
+        }
+        catch (JsonProcessingException e) {
+            logger.error("Failed to produce json", e);
+            throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, String.format("Failed to create JSON string from %s", any));
+        }
+    }
+
+    @Override
+    public TDSavedQuery saveQuery(TDSaveQueryRequest request)
+    {
+        String json = toJson(request);
+        TDSavedQuery result =
+                doPost(
+                        buildUrl("/v3/schedule/create", request.getName()),
+                        ImmutableMap.<String, String>of(),
+                        Optional.of(json),
+                        TDSavedQuery.class);
+        return result;
+    }
+
+    @Override
+    public TDSavedQuery updateSavedQuery(String name, TDSavedQueryUpdateRequest request)
+    {
+        String json = request.toJson();
+        TDSavedQuery result =
+                doPost(
+                        buildUrl("/v3/schedule/update", name),
+                        ImmutableMap.<String, String>of(),
+                        Optional.of(json),
+                        TDSavedQuery.class);
+        return result;
+    }
+
+    @Override
+    public TDSavedQuery deleteSavedQuery(String name)
+    {
+        TDSavedQuery result = doPost(
+                buildUrl("/v3/schedule/delete", name),
+                TDSavedQuery.class);
+        return result;
     }
 
     @Override

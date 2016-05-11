@@ -25,12 +25,16 @@ import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
+import com.treasuredata.client.model.TDSaveQueryRequest;
+import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
 import org.msgpack.value.ArrayValue;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -101,5 +105,42 @@ public class Example
         finally {
             client.close();
         }
+    }
+
+    public static void saveQueryExample()
+    {
+        TDClient client = TDClient.newClient();
+
+        // Register a new scheduled query
+        TDSaveQueryRequest query =
+                TDSavedQuery.newBuilder(
+                        "my_saved_query",
+                        TDJob.Type.PRESTO,
+                        "testdb",
+                        "select 1",
+                        "Asia/Tokyo")
+                        .setCron("40 * * * *")
+                        .setResult("mysql://testuser:pass@somemysql.address/somedb/sometable")
+                        .build();
+
+        client.saveQuery(query);
+
+        // List saved queries
+        List<TDSavedQuery> savedQueries = client.listSavedQueries();
+
+        // Run a saved query
+        Date scheduledTime = new Date(System.currentTimeMillis());
+        client.startSavedQuery(query.getName(), scheduledTime);
+
+        // Update a saved query
+        TDSavedQueryUpdateRequest updateRequest =
+                TDSavedQuery.newUpdateRequestBuilder()
+                        .setQuery("select 2")
+                        .setDelay(3600)
+                        .build();
+        client.updateSavedQuery("my_saved_query", updateRequest);
+
+        // Delete a saved query
+        client.deleteSavedQuery(query.getName());
     }
 }

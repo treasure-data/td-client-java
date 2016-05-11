@@ -29,6 +29,9 @@ import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
+import com.treasuredata.client.model.TDSaveQueryRequest;
+import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 
 import java.io.File;
@@ -201,6 +204,10 @@ public interface TDClientApi<ClientImpl>
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
 
     /**
+     * Saved query APIs
+     */
+
+    /**
      * Start a query saved on the cloud.
      *
      * @param name name of the saved query
@@ -208,6 +215,34 @@ public interface TDClientApi<ClientImpl>
      * @return job id
      */
     String startSavedQuery(String name, Date scheduledTime);
+
+    List<TDSavedQuery> listSavedQueries();
+
+    /**
+     * Save a query for scheduling. Use {@link TDSavedQuery#newBuilder(String, TDJob.Type, String, String, String)}
+     * to create a TDSaveQueryRequest.
+     *
+     * @param request
+     * @return
+     */
+    TDSavedQuery saveQuery(TDSaveQueryRequest request);
+
+    /**
+     * Update the saved query of the given name. To build an update request, use {@link TDSavedQuery#newUpdateRequestBuilder()}.
+     *
+     * @param name
+     * @param request
+     * @return
+     */
+    TDSavedQuery updateSavedQuery(String name, TDSavedQueryUpdateRequest request);
+
+    /**
+     * Delete the saved query of the given name.
+     *
+     * @param name
+     * @return
+     */
+    TDSavedQuery deleteSavedQuery(String name);
 
     /**
      * Start a table export job.
