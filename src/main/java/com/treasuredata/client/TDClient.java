@@ -41,7 +41,7 @@ import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
-import com.treasuredata.client.model.TDSavedQueryBuilder;
+import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
@@ -660,12 +660,12 @@ public class TDClient
     }
 
     @Override
-    public TDSavedQuery saveQuery(TDSaveQueryRequest query)
+    public TDSavedQuery saveQuery(TDSaveQueryRequest request)
     {
-        String json = toJson(query);
+        String json = toJson(request);
         TDSavedQuery result =
                 doPost(
-                        buildUrl("/v3/schedule/create", query.getName()),
+                        buildUrl("/v3/schedule/create", request.getName()),
                         ImmutableMap.<String, String>of(),
                         Optional.of(json),
                         TDSavedQuery.class);
@@ -673,11 +673,28 @@ public class TDClient
     }
 
     @Override
-    public TDSavedQuery updateSavedQuery(String name, TDSavedQueryBuilder request)
+    public TDSavedQuery updateSavedQuery(String name, TDSavedQueryUpdateRequest request)
     {
         List<TDSavedQuery> savedQueries = listSavedQueries();
         for (TDSavedQuery q : savedQueries) {
             if (q.getName().equals(name)) {
+                /**
+                 * NOTICE: Concurrent update request may overwrite the previous update result.
+                 *
+                 * For example,
+                 *
+                 * [process 1]
+                 * a. q1 = listSavedQueries.find(name = 'q1')
+                 * b. q1' = updateSavedQuery(q1.merge(update_request1))
+                 *
+                 * [process 2]
+                 * c. q1 = listSavedQueries.find(name = 'q1')
+                 * d. q1'' = updateSavedQuery(q1.merge(upaate_request2))
+                 *
+                 * Running the sequence of a -> c -> b -> d will discard the result of update_request1 (b).
+                 *
+                 * To avoid this race, TD API needs to support partial update of a scheduled query.
+                 */
                 TDSaveQueryRequest fullRequest = request.merge(q);
                 return updateSavedQuery(fullRequest);
             }
@@ -686,8 +703,7 @@ public class TDClient
         throw new TDClientHttpNotFoundException(String.format("Saved query %s is not found", name));
     }
 
-    @Override
-    public TDSavedQuery updateSavedQuery(TDSaveQueryRequest request)
+    protected TDSavedQuery updateSavedQuery(TDSaveQueryRequest request)
     {
         String json = toJson(request);
         TDSavedQuery result =

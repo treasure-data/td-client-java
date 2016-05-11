@@ -52,9 +52,25 @@ public class TDSavedQuery
         return new TDSavedQueryBuilder(name).setType(type).setQuery(query).setTimezone(timezone).setDatabase(database);
     }
 
-    public static TDSavedQueryBuilder newUpdateRequestBuilder(String name)
+    public static TDSavedQueryUpdateRequestBuilder newUpdateRequestBuilder()
     {
-        return new TDSavedQueryBuilder(name);
+        return new TDSavedQueryUpdateRequestBuilder();
+    }
+
+    public TDSavedQueryUpdateRequestBuilder toUpdateRequestBuilder()
+    {
+        TDSavedQueryUpdateRequestBuilder b = new TDSavedQueryUpdateRequestBuilder();
+        b.setName(name);
+        b.setCron(cron);
+        b.setType(type);
+        b.setQuery(query);
+        b.setTimezone(timezone);
+        b.setDelay(delay);
+        b.setDatabase(database);
+        b.setPriority(priority);
+        b.setRetryLimit(retryLimit);
+        b.setResult(result);
+        return b;
     }
 
     private final String name;
@@ -180,15 +196,5 @@ public class TDSavedQuery
                 ", result='" + result + '\'' +
                 ", nextTime='" + nextTime + '\'' +
                 '}';
-    }
-
-    /**
-     * Create a new update request object for this saved query
-     *
-     * @return
-     */
-    public TDSavedQueryBuilder newUpdateRequestBuilder()
-    {
-        return new TDSavedQueryBuilder(this);
     }
 }

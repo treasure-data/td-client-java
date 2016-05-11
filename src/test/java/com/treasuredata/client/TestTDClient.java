@@ -43,7 +43,7 @@ import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
-import com.treasuredata.client.model.TDSavedQueryBuilder;
+import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import org.eclipse.jetty.http.HttpStatus;
 import org.json.JSONArray;
@@ -892,8 +892,8 @@ public class TestTDClient
             assertTrue(result.getResult().contains("@somemysql.address/somedb/sometable"));
 
             // Update
-            TDSavedQueryBuilder query2 =
-                    TDSavedQuery.newUpdateRequestBuilder(queryName)
+            TDSavedQueryUpdateRequest query2 =
+                    TDSavedQuery.newUpdateRequestBuilder()
                             .setCron("15 * * * *")
                             .setType(TDJob.Type.HIVE)
                             .setQuery("select 2")
@@ -902,7 +902,8 @@ public class TestTDClient
                             .setDatabase(SAMPLE_DB)
                             .setPriority(-1)
                             .setRetryLimit(2)
-                            .setResult("mysql://testuser2:pass@somemysql.address/somedb2/sometable2");
+                            .setResult("mysql://testuser2:pass@somemysql.address/somedb2/sometable2")
+                            .build();
 
             TDSaveQueryRequest expected = query2.merge(result);
             TDSavedQuery updated = client.updateSavedQuery(queryName, query2);

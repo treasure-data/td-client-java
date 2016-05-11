@@ -27,7 +27,7 @@ import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
-import com.treasuredata.client.model.TDSavedQueryBuilder;
+import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
@@ -133,10 +133,11 @@ public class Example
         client.startSavedQuery(query.getName(), scheduledTime);
 
         // Update a saved query
-        TDSavedQueryBuilder updateRequest =
-                TDSavedQuery.newUpdateRequestBuilder("my_saved_query")
+        TDSavedQueryUpdateRequest updateRequest =
+                TDSavedQuery.newUpdateRequestBuilder()
                         .setQuery("select 2")
-                        .setDelay(3600);
+                        .setDelay(3600)
+                        .build();
         client.updateSavedQuery("my_saved_query", updateRequest);
 
         // Delete a saved query
