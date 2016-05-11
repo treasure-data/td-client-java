@@ -94,22 +94,7 @@ public class TDSavedQueryBuilder
         return this;
     }
 
-    public TDSaveQueryRequest merge(TDSavedQuery base)
-    {
-        return new TDSaveQueryRequest(
-                name.or(base.getName()),
-                cron.or(base.getCron()),
-                type.or(base.getType()),
-                query.or(base.getQuery()),
-                timezone.or(base.getTimezone()),
-                delay.or(base.getDelay()),
-                database.or(base.getDatabase()),
-                priority.or(base.getPriority()),
-                retryLimit.or(base.getRetryLimit()),
-                result.or(base.getResult()));
-    }
-
-    public static <T> void checkPresence(Optional<T> opt, String errorMessage)
+    private static <T> void checkPresence(Optional<T> opt, String errorMessage)
     {
         if (!opt.isPresent()) {
             throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, errorMessage);
@@ -141,19 +126,5 @@ public class TDSavedQueryBuilder
     protected TDSavedQueryBuilder(String name)
     {
         setName(name);
-    }
-
-    TDSavedQueryBuilder(TDSavedQuery query)
-    {
-        setName(query.getName());
-        setCron(query.getCron());
-        setType(query.getType());
-        setQuery(query.getQuery());
-        setTimezone(query.getTimezone());
-        setDelay(query.getDelay());
-        setDatabase(query.getDatabase());
-        setPriority(query.getPriority());
-        setRetryLimit(query.getRetryLimit());
-        setResult(query.getResult());
     }
 }

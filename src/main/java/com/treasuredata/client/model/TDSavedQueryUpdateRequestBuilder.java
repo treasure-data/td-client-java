@@ -19,7 +19,6 @@
 package com.treasuredata.client.model;
 
 import com.google.common.base.Optional;
-import com.treasuredata.client.TDClientException;
 
 /**
  *
@@ -39,13 +38,6 @@ public class TDSavedQueryUpdateRequestBuilder
 
     TDSavedQueryUpdateRequestBuilder()
     {
-    }
-
-    private static <T> void checkPresence(Optional<T> opt, String errorMessage)
-    {
-        if (!opt.isPresent()) {
-            throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, errorMessage);
-        }
     }
 
     public TDSavedQueryUpdateRequest build()
