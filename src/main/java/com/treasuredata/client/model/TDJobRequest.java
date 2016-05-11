@@ -35,9 +35,7 @@ public class TDJobRequest
     private final Optional<String> poolName;
     private final Optional<String> table;
     private final Optional<ObjectNode> config;
-    private final Optional<Long> scheduledTime;
 
-    @Deprecated
     public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, Optional<String> resultOutput, Optional<Integer> retryLimit, Optional<String> poolName, Optional<String> table, Optional<ObjectNode> config)
     {
         this.database = database;
@@ -49,21 +47,6 @@ public class TDJobRequest
         this.poolName = poolName;
         this.table = table;
         this.config = config;
-        this.scheduledTime = Optional.absent();
-    }
-
-    private TDJobRequest(TDJobRequestBuilder builder)
-    {
-        this.database = builder.getDatabase();
-        this.type = builder.getType();
-        this.query = builder.getQuery();
-        this.priority = builder.getPriority();
-        this.resultOutput = builder.getResultOutput();
-        this.retryLimit = builder.getRetryLimit();
-        this.poolName = builder.getPoolName();
-        this.table = builder.getTable();
-        this.config = builder.getConfig();
-        this.scheduledTime = builder.getScheduledTime();
     }
 
     public static TDJobRequest newPrestoQuery(String database, String query)
@@ -171,16 +154,6 @@ public class TDJobRequest
         return config;
     }
 
-    public Optional<Long> getScheduledTime()
-    {
-        return scheduledTime;
-    }
-
-    static TDJobRequest of(TDJobRequestBuilder builder)
-    {
-        return new TDJobRequest(builder);
-    }
-
     @Override
     public String toString()
     {
@@ -189,12 +162,9 @@ public class TDJobRequest
                 ", type=" + type +
                 ", query='" + query + '\'' +
                 ", priority=" + priority +
-                ", resultOutput=" + resultOutput +
                 ", retryLimit=" + retryLimit +
-                ", poolName=" + poolName +
                 ", table=" + table +
                 ", config=" + config +
-                ", scheduledTime=" + scheduledTime +
                 '}';
     }
 }
