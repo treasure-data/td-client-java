@@ -19,7 +19,6 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.google.common.base.Objects;
@@ -50,11 +49,7 @@ public class TDColumn implements Serializable
         this(name, type, name.getBytes(StandardCharsets.UTF_8));
     }
 
-    @JsonCreator
-    public TDColumn(
-            @JsonProperty("name") String name,
-            @JsonProperty("type") String type,
-            @JsonProperty("key") String key)
+    public TDColumn(String name, String type, String key)
     {
         this(name, TDColumnType.parseColumnType(type), key.getBytes(UTF_8));
     }
@@ -114,6 +109,7 @@ public class TDColumn implements Serializable
         }
     }
 
+    @JsonCreator
     public static TDColumn parseTuple(String[] tuple)
     {
         // TODO encode key in some ways
