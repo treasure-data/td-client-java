@@ -19,7 +19,8 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.google.common.base.Objects;
 import org.json.simple.JSONArray;
@@ -49,7 +50,11 @@ public class TDColumn implements Serializable
         this(name, type, name.getBytes(StandardCharsets.UTF_8));
     }
 
-    public TDColumn(String name, String type, String key)
+    @JsonCreator
+    public TDColumn(
+            @JsonProperty("name") String name,
+            @JsonProperty("type") String type,
+            @JsonProperty("key") String key)
     {
         this(name, TDColumnType.parseColumnType(type), key.getBytes(UTF_8));
     }
@@ -61,19 +66,28 @@ public class TDColumn implements Serializable
         this.key = Arrays.copyOf(checkNotNull(key, "key is null"), key.length);
     }
 
+    @JsonProperty
     public String getName()
     {
         return name;
     }
 
+    @JsonProperty
     public TDColumnType getType()
     {
         return type;
     }
 
+    @JsonIgnore
     public byte[] getKey()
     {
         return Arrays.copyOf(key, key.length);
+    }
+
+    @JsonProperty("key")
+    public String getKeyString()
+    {
+        return new String(key, StandardCharsets.UTF_8);
     }
 
     private static JSONArray castToArray(Object obj)
@@ -109,7 +123,6 @@ public class TDColumn implements Serializable
         }
     }
 
-    @JsonCreator
     public static TDColumn parseTuple(String[] tuple)
     {
         // TODO encode key in some ways
@@ -130,12 +143,13 @@ public class TDColumn implements Serializable
         throw new RuntimeJsonMappingException("Unexpected string tuple to deserialize TDColumn");
     }
 
+    @JsonIgnore
     public boolean isPartitionKey()
     {
         return Arrays.equals(LOG_TABLE_PUSHDOWN_KEY, getKey());
     }
 
-    @JsonValue
+    @JsonIgnore
     public String[] getTuple()
     {
         return new String[] {name, type.toString(), new String(key, StandardCharsets.UTF_8)};

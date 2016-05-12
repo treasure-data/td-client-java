@@ -243,27 +243,27 @@ public class TestTDColumn
     }
 
     private static void checkJsonSerDe(TDColumn column)
-            throws IOException
+                throws IOException
     {
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(column);
-        TDColumn value = mapper.readValue(json, TDColumn.class);
+         ObjectMapper mapper = new ObjectMapper();
+         String json = mapper.writeValueAsString(column);
+         TDColumn value = mapper.readValue(json, TDColumn.class);
 
-        assertEquals(value.getName(), column.getName());
-        assertEquals(value.getType(), column.getType());
-        assertTrue(Arrays.equals(value.getKey(), column.getKey()));
-    }
+         assertEquals(value.getName(), column.getName());
+         assertEquals(value.getType(), column.getType());
+         assertTrue(Arrays.equals(value.getKey(), column.getKey()));
+     }
 
-    @Test
-    public void jsonSerDeTest()
-            throws Exception
-    {
-        checkJsonSerDe(new TDColumn("int", TDColumnType.INT));
-        checkJsonSerDe(new TDColumn("str", TDColumnType.STRING, "hello".getBytes(StandardCharsets.UTF_8)));
-        checkJsonSerDe(new TDColumn("long", TDColumnType.LONG));
-        checkJsonSerDe(new TDColumn("double", TDColumnType.DOUBLE, "world".getBytes(StandardCharsets.UTF_8)));
-        checkJsonSerDe(new TDColumn("float", TDColumnType.FLOAT));
-        checkJsonSerDe(new TDColumn("array_string", newArrayType(TDColumnType.STRING)));
-        checkJsonSerDe(new TDColumn("map_string", newMapType(TDColumnType.INT, TDColumnType.STRING)));
-    }
+     @Test
+     public void jsonSerDeTest()
+             throws Exception
+     {
+         checkJsonSerDe(new TDColumn("int", TDColumnType.INT));
+         checkJsonSerDe(new TDColumn("str", TDColumnType.STRING, "hello".getBytes(StandardCharsets.UTF_8)));
+         checkJsonSerDe(new TDColumn("long", TDColumnType.LONG));
+         checkJsonSerDe(new TDColumn("double", TDColumnType.DOUBLE, "world".getBytes(StandardCharsets.UTF_8)));
+         checkJsonSerDe(new TDColumn("float", TDColumnType.FLOAT));
+         checkJsonSerDe(new TDColumn("array_string", newArrayType(TDColumnType.STRING)));
+         checkJsonSerDe(new TDColumn("map_string", newMapType(TDColumnType.INT, TDColumnType.STRING)));
+     }
 }
