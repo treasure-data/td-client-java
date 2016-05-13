@@ -459,7 +459,7 @@ public class TDClient
 
         ImmutableList.Builder<List<String>> builder = ImmutableList.<List<String>>builder();
         for (TDColumn newColumn : newSchema) {
-            builder.add(ImmutableList.of(newColumn.getName(), newColumn.getType().toString()));
+            builder.add(ImmutableList.of(newColumn.getKeyString(), newColumn.getType().toString(), newColumn.getName()));
         }
         String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build()));
         doPost(buildUrl("/v3/table/update-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
