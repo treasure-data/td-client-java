@@ -15,6 +15,9 @@ You can download a jar file (td-client-java-(version)-jar-with-dependencies.jar)
 
 For the information of the older versions, see <https://github.com/treasure-data/td-client-java/tree/0.5.x>.
 
+- [Release Notes](CHANGES.txt)
+
+
 ### For Maven Users
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.treasuredata.client/td-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.treasuredata.client/td-client/)
