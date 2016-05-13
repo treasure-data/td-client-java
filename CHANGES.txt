@@ -1,3 +1,6 @@
+Release 0.7.15 - 2016-05-13
+  - [minor] Fix TDColumn JSON format
+
 Release 0.7.14 - 2016-05-12
   - [minor] Fix TDColumn JSON serde
 
