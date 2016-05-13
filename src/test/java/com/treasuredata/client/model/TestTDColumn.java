@@ -76,9 +76,9 @@ public class TestTDColumn
     public void parseRenamedColumns()
     {
         TDColumn t = TDColumn.parseTuple(new String[] {"mycol", "string", "mycol_prev"});
-        assertEquals("mycol", t.getName());
+        assertEquals("mycol_prev", t.getName());
         assertEquals(TDColumnType.STRING, t.getType());
-        assertEquals("mycol_prev", new String(t.getKey(), StandardCharsets.UTF_8));
+        assertEquals("mycol", new String(t.getKey(), StandardCharsets.UTF_8));
     }
 
     @Test

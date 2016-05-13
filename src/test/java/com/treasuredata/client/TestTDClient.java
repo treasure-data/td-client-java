@@ -536,16 +536,17 @@ public class TestTDClient
                 assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
             }
 
+            byte[] keyName = "int_col_key_name".getBytes(StandardCharsets.UTF_8);
             // schema test
             TDTable targetTable = findTable(SAMPLE_DB, t).get();
             List<TDColumn> newSchema = ImmutableList.<TDColumn>builder()
                     .addAll(targetTable.getSchema())
-                    .add(new TDColumn("int_col", TDColumnType.INT))
+                    .add(new TDColumn("int_col", TDColumnType.INT, keyName))
                     .build();
             client.updateTableSchema(SAMPLE_DB, t, newSchema);
             TDTable updatedTable = findTable(SAMPLE_DB, t).get();
             logger.debug(updatedTable.toString());
-            assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("int_col", TDColumnType.INT)));
+            assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("int_col", TDColumnType.INT, keyName)));
 
             // rename
             client.deleteTableIfExists(SAMPLE_DB, newTableName);

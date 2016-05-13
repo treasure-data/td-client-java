@@ -128,16 +128,18 @@ public class TDColumn implements Serializable
         // TODO encode key in some ways
         if (tuple != null) {
             if (tuple.length == 2) {
+                // [ key, type ]
                 return new TDColumn(
                         tuple[0],
                         TDColumnType.parseColumnType(tuple[1]),
                         tuple[0].getBytes(StandardCharsets.UTF_8));
             }
             else if (tuple.length == 3) {
+                // [ key, type, name ]
                 return new TDColumn(
-                        tuple[0],
+                        tuple[2],
                         TDColumnType.parseColumnType(tuple[1]),
-                        tuple[2].getBytes(StandardCharsets.UTF_8));
+                        tuple[0].getBytes(StandardCharsets.UTF_8));
             }
         }
         throw new RuntimeJsonMappingException("Unexpected string tuple to deserialize TDColumn");
@@ -152,7 +154,7 @@ public class TDColumn implements Serializable
     @JsonIgnore
     public String[] getTuple()
     {
-        return new String[] {name, type.toString(), new String(key, StandardCharsets.UTF_8)};
+        return new String[] {getKeyString(), type.toString(), name};
     }
 
     @Override
