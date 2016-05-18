@@ -30,6 +30,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDColumnType;
 import com.treasuredata.client.model.TDDatabase;
@@ -46,6 +47,9 @@ import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.eclipse.jetty.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,8 +88,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -100,11 +106,14 @@ public class TestTDClient
 
     private TDClient client;
 
+    private MockWebServer server;
+
     @Before
     public void setUp()
             throws Exception
     {
         client = TDClient.newClient();
+        server = new MockWebServer();
     }
 
     @After
@@ -112,6 +121,7 @@ public class TestTDClient
             throws Exception
     {
         client.close();
+        server.shutdown();
     }
 
     @Test
@@ -958,5 +968,58 @@ public class TestTDClient
 
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
         assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+    }
+
+    @Test
+    public void startBulkLoadSessionJob()
+            throws Exception
+    {
+        client = mockClient();
+
+        String sessionName = "foobar";
+        String expectedJobId = "4711";
+        String expectedPath = "/v3/bulk_loads/" + sessionName + "/jobs";
+        String expectedPayload = "{}";
+
+        server.enqueue(new MockResponse().setBody("{\"job_id\":\"4711\"}"));
+
+        TDBulkLoadSessionStartResult result = client.startBulkLoadSession(sessionName);
+        assertThat(result.getJobId(), is(expectedJobId));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getBody().readUtf8(), is(expectedPayload));
+        assertThat(recordedRequest.getPath(), is(expectedPath));
+    }
+
+    @Test
+    public void startBulkLoadSessionJobWithScheduledTime()
+            throws Exception
+    {
+        client = mockClient();
+
+        String sessionName = "foobar";
+        String expectedJobId = "4711";
+        String expectedPath = "/v3/bulk_loads/" + sessionName + "/jobs";
+        long scheduledTime = 123456789L;
+        String expectedPayload = "{\"scheduled_time\":" + scheduledTime + "}";
+
+        server.enqueue(new MockResponse().setBody("{\"job_id\":\"4711\"}"));
+
+        TDBulkLoadSessionStartResult result = client.startBulkLoadSession(sessionName, scheduledTime);
+        assertThat(result.getJobId(), is(expectedJobId));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        String body = recordedRequest.getBody().readUtf8();
+        assertThat(body, is(expectedPayload));
+        assertThat(recordedRequest.getPath(), is(expectedPath));
+    }
+
+    private TDClient mockClient()
+    {
+        return TDClient.newBuilder(false)
+                .setUseSSL(false)
+                .setEndpoint(server.getHostName())
+                .setPort(server.getPort())
+                .build();
     }
 }

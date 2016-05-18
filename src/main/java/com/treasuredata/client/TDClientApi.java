@@ -20,6 +20,8 @@ package com.treasuredata.client;
 
 import com.google.common.base.Function;
 import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
+import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
@@ -251,4 +253,30 @@ public interface TDClientApi<ClientImpl>
      * @return job id
      */
     String submitExportJob(TDExportJobRequest jobRequest);
+
+    /*
+     * Data Connector Bulk Loading Session APIs
+     */
+
+    /**
+     * Start a Data Connector Bulk Loading Session Job.
+     * @param name The name of the Data Connector Bulk Loading Session.
+     * @return job id
+     */
+    TDBulkLoadSessionStartResult startBulkLoadSession(String name);
+
+    /**
+     * Start a Data Connector Bulk Loading Session Job.
+     * @param name The name of the Data Connector Bulk Loading Session.
+     * @param scheduledTime The unix epoch to use as the scheduled time of the job.
+     * @return job id
+     */
+    TDBulkLoadSessionStartResult startBulkLoadSession(String name, long scheduledTime);
+
+    /**
+     * Start a Data Connector Bulk Loading Session Job.
+     * @param request
+     * @return job id
+     */
+    TDBulkLoadSessionStartResult startBulkLoadSession(String name, TDBulkLoadSessionStartRequest request);
 }

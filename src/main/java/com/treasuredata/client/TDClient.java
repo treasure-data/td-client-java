@@ -23,12 +23,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportParts;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkImportSessionList;
+import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
+import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
@@ -725,5 +729,38 @@ public class TDClient
                         queryParam,
                         TDJobSubmitResult.class);
         return result.getJobId();
+    }
+
+    @Override
+    public TDBulkLoadSessionStartResult startBulkLoadSession(String name)
+    {
+        TDBulkLoadSessionStartRequest request = TDBulkLoadSessionStartRequest.builder()
+                .build();
+        return startBulkLoadSession(name, request);
+    }
+
+    @Override
+    public TDBulkLoadSessionStartResult startBulkLoadSession(String name, long scheduledTime)
+    {
+        TDBulkLoadSessionStartRequest request = TDBulkLoadSessionStartRequest.builder()
+                .setScheduledTime(scheduledTime)
+                .build();
+        return startBulkLoadSession(name, request);
+    }
+
+    @Override
+    public TDBulkLoadSessionStartResult startBulkLoadSession(String name, TDBulkLoadSessionStartRequest request)
+    {
+        Map<String, String> queryParams = ImmutableMap.of();
+        String payload = null;
+        try {
+            payload = ObjectMappers.compactMapper().writeValueAsString(request);
+        }
+        catch (JsonProcessingException e) {
+            throw Throwables.propagate(e);
+        }
+        return doPost(buildUrl("/v3/bulk_loads", name, "jobs"),
+                queryParams, Optional.of(payload),
+                TDBulkLoadSessionStartResult.class);
     }
 }
