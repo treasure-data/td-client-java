@@ -1,3 +1,6 @@
+Release 0.7.17 - 2016-05-19
+  - Fix starting a Data Connector Bulk Load Session Job with a specified scheduled time
+
 Release 0.7.16 - 2016-05-19
   - Add methods for starting a Data Connector Bulk Load Session Job
 
