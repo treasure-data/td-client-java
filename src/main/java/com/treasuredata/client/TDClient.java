@@ -743,7 +743,7 @@ public class TDClient
     public TDBulkLoadSessionStartResult startBulkLoadSession(String name, long scheduledTime)
     {
         TDBulkLoadSessionStartRequest request = TDBulkLoadSessionStartRequest.builder()
-                .setScheduledTime(scheduledTime)
+                .setScheduledTime(String.valueOf(scheduledTime))
                 .build();
         return startBulkLoadSession(name, request);
     }
