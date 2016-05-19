@@ -169,6 +169,15 @@ TDBulkImportSession session = client.createBulkImportSession("session_name", "da
 client.uploadBulkImportPart(session.getName(), "session_part01", f);
 ```
 
+### Data Connector Bulk Loading
+
+```java
+// Create a new TD client by using configurations in $HOME/.td/td.conf
+TDClient client = TDClient.newClient();
+
+client.startBulkLoadSession("session_name");
+```
+
 ### Configuring TDClient
 
 To configure TDClient, use `TDClient.newBuilder()`:
