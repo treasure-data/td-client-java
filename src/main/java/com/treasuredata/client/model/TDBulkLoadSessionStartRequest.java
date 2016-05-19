@@ -6,10 +6,10 @@ import com.google.common.base.Optional;
 
 public class TDBulkLoadSessionStartRequest
 {
-    private final Long scheduledTime;
+    private final String scheduledTime;
 
     @JsonCreator
-    TDBulkLoadSessionStartRequest(@JsonProperty("scheduled_time") Long scheduledTime)
+    TDBulkLoadSessionStartRequest(@JsonProperty("scheduled_time") String scheduledTime)
     {
         this.scheduledTime = scheduledTime;
     }
@@ -20,7 +20,7 @@ public class TDBulkLoadSessionStartRequest
     }
 
     @JsonProperty("scheduled_time")
-    public Optional<Long> getScheduledTime()
+    public Optional<String> getScheduledTime()
     {
         return Optional.fromNullable(scheduledTime);
     }

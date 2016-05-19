@@ -14,7 +14,7 @@ public class TDBulkLoadSessionStartRequestTest
     public void defaultValues()
             throws Exception
     {
-        assertThat(TDBulkLoadSessionStartRequest.builder().build().getScheduledTime(), is(Optional.<Long>absent()));
+        assertThat(TDBulkLoadSessionStartRequest.builder().build().getScheduledTime(), is(Optional.<String>absent()));
     }
 
     @Test
@@ -24,21 +24,21 @@ public class TDBulkLoadSessionStartRequestTest
         assertThat(TDBulkLoadSessionStartRequest.of(), is(TDBulkLoadSessionStartRequest.builder().build()));
 
         assertThat(TDBulkLoadSessionStartRequest.of(), is(not(TDBulkLoadSessionStartRequest.builder()
-                .setScheduledTime(17L)
+                .setScheduledTime("17")
                 .build())));
 
         assertThat(TDBulkLoadSessionStartRequest.builder()
-                        .setScheduledTime(17L)
+                        .setScheduledTime("17")
                         .build(),
                 is(TDBulkLoadSessionStartRequest.builder()
-                        .setScheduledTime(17L)
+                        .setScheduledTime("17")
                         .build()));
 
         assertThat(TDBulkLoadSessionStartRequest.builder()
-                        .setScheduledTime(18L)
+                        .setScheduledTime("18")
                         .build(),
                 is(not(TDBulkLoadSessionStartRequest.builder()
-                        .setScheduledTime(17L)
+                        .setScheduledTime("17")
                         .build())));
     }
 
@@ -47,6 +47,6 @@ public class TDBulkLoadSessionStartRequestTest
             throws Exception
     {
         assertThat(compactMapper().writeValueAsString(TDBulkLoadSessionStartRequest.of()), is("{}"));
-        assertThat(compactMapper().writeValueAsString(TDBulkLoadSessionStartRequest.builder().setScheduledTime(17L).build()), is("{\"scheduled_time\":17}"));
+        assertThat(compactMapper().writeValueAsString(TDBulkLoadSessionStartRequest.builder().setScheduledTime("17").build()), is("{\"scheduled_time\":\"17\"}"));
     }
 }

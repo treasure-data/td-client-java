@@ -4,24 +4,29 @@ import com.google.common.base.Optional;
 
 public class TDBulkLoadSessionStartRequestBuilder
 {
-    private Long scheduledTime;
+    private String scheduledTime;
 
     TDBulkLoadSessionStartRequestBuilder()
     {
     }
 
-    public Optional<Long> getScheduledTime()
+    public Optional<String> getScheduledTime()
     {
         return Optional.fromNullable(scheduledTime);
     }
 
-    public TDBulkLoadSessionStartRequestBuilder setScheduledTime(Long scheduledTime)
+    public TDBulkLoadSessionStartRequestBuilder setScheduledTime(String scheduledTime)
     {
         this.scheduledTime = scheduledTime;
         return this;
     }
 
-    public TDBulkLoadSessionStartRequestBuilder setScheduledTime(Optional<Long> scheduledTime)
+    public TDBulkLoadSessionStartRequestBuilder setScheduledTime(long scheduledTime)
+    {
+        return setScheduledTime(String.valueOf(scheduledTime));
+    }
+
+    public TDBulkLoadSessionStartRequestBuilder setScheduledTime(Optional<String> scheduledTime)
     {
         this.scheduledTime = scheduledTime.orNull();
         return this;

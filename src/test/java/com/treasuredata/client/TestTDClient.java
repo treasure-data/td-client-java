@@ -999,7 +999,7 @@ public class TestTDClient
         String expectedJobId = "4711";
         String expectedPath = "/v3/bulk_loads/" + sessionName + "/jobs";
         long scheduledTime = 123456789L;
-        String expectedPayload = "{\"scheduled_time\":" + scheduledTime + "}";
+        String expectedPayload = "{\"scheduled_time\":\"" + scheduledTime + "\"}";
 
         server.enqueue(new MockResponse().setBody("{\"job_id\":\"4711\"}"));
 
