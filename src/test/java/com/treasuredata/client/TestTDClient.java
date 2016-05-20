@@ -32,6 +32,7 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDColumnType;
@@ -1100,6 +1101,33 @@ public class TestTDClient
         server.enqueue(new MockResponse().setBody("{\"job_id\":\"4711\"}"));
 
         TDBulkLoadSessionStartResult result = client.startBulkLoadSession(sessionName, scheduledTime);
+        assertThat(result.getJobId(), is(expectedJobId));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        String body = recordedRequest.getBody().readUtf8();
+        assertThat(body, is(expectedPayload));
+        assertThat(recordedRequest.getPath(), is(expectedPath));
+    }
+
+    @Test
+    public void startBulkLoadSessionJobWithDomainKey()
+            throws Exception
+    {
+        client = mockClient();
+
+        String sessionName = "foobar";
+        String expectedJobId = "4711";
+        String expectedPath = "/v3/bulk_loads/" + sessionName + "/jobs";
+        String domainKey = randomDomainKey();
+        String expectedPayload = "{\"domain_key\":\"" + domainKey + "\"}";
+
+        TDBulkLoadSessionStartRequest request = TDBulkLoadSessionStartRequest.builder()
+                .setDomainKey(domainKey)
+                .build();
+
+        server.enqueue(new MockResponse().setBody("{\"job_id\":\"4711\"}"));
+
+        TDBulkLoadSessionStartResult result = client.startBulkLoadSession(sessionName, request);
         assertThat(result.getJobId(), is(expectedJobId));
 
         RecordedRequest recordedRequest = server.takeRequest();

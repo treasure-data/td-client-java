@@ -7,22 +7,34 @@ import com.google.common.base.Optional;
 public class TDBulkLoadSessionStartRequest
 {
     private final String scheduledTime;
+    private final String domainKey;
 
     @JsonCreator
-    TDBulkLoadSessionStartRequest(@JsonProperty("scheduled_time") String scheduledTime)
+    TDBulkLoadSessionStartRequest(
+            @JsonProperty("scheduled_time") String scheduledTime,
+            @JsonProperty("domain_key") String domainKey
+            )
     {
         this.scheduledTime = scheduledTime;
+        this.domainKey = domainKey;
     }
 
     TDBulkLoadSessionStartRequest(TDBulkLoadSessionStartRequestBuilder builder)
     {
         this.scheduledTime = builder.getScheduledTime().orNull();
+        this.domainKey = builder.getDomainKey().orNull();
     }
 
     @JsonProperty("scheduled_time")
     public Optional<String> getScheduledTime()
     {
         return Optional.fromNullable(scheduledTime);
+    }
+
+    @JsonProperty("domain_key")
+    public Optional<String> getDomainKey()
+    {
+        return Optional.fromNullable(domainKey);
     }
 
     @Override
@@ -50,7 +62,8 @@ public class TDBulkLoadSessionStartRequest
     public String toString()
     {
         return "TDBulkLoadSessionStartRequest{" +
-                "scheduledTime=" + scheduledTime +
+                "scheduledTime='" + scheduledTime + '\'' +
+                ", domainKey='" + domainKey + '\'' +
                 '}';
     }
 

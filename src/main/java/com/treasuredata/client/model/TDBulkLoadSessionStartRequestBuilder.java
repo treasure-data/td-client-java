@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 public class TDBulkLoadSessionStartRequestBuilder
 {
     private String scheduledTime;
+    private String domainKey;
 
     TDBulkLoadSessionStartRequestBuilder()
     {
@@ -30,6 +31,22 @@ public class TDBulkLoadSessionStartRequestBuilder
     {
         this.scheduledTime = scheduledTime.orNull();
         return this;
+    }
+
+    public Optional<String> getDomainKey()
+    {
+        return Optional.fromNullable(domainKey);
+    }
+
+    public TDBulkLoadSessionStartRequestBuilder setDomainKey(String domainKey)
+    {
+        this.domainKey = domainKey;
+        return this;
+    }
+
+    public TDBulkLoadSessionStartRequestBuilder setDomainKey(Optional<String> domainKey)
+    {
+        return setDomainKey(domainKey.orNull());
     }
 
     public TDBulkLoadSessionStartRequest build()
