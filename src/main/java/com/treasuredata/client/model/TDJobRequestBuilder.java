@@ -33,6 +33,7 @@ public class TDJobRequestBuilder
     private Optional<String> table = Optional.absent();
     private Optional<ObjectNode> config = Optional.absent();
     private Optional<Long> scheduledTime = Optional.absent();
+    private Optional<String> domainKey = Optional.absent();
 
     public TDJobRequestBuilder setResultOutput(String result)
     {
@@ -159,6 +160,22 @@ public class TDJobRequestBuilder
     public Optional<Long> getScheduledTime()
     {
         return scheduledTime;
+    }
+
+    public Optional<String> getDomainKey()
+    {
+        return domainKey;
+    }
+
+    public TDJobRequestBuilder setDomainKey(Optional<String> domainKey)
+    {
+        this.domainKey = domainKey;
+        return this;
+    }
+
+    public TDJobRequestBuilder setDomainKey(String domainKey)
+    {
+        return setDomainKey(Optional.fromNullable(domainKey));
     }
 
     public TDJobRequest createTDJobRequest()

@@ -492,6 +492,9 @@ public class TDClient
         if (jobRequest.getScheduledTime().isPresent()) {
             queryParam.put("scheduled_time", String.valueOf(jobRequest.getScheduledTime().get()));
         }
+        if (jobRequest.getDomainKey().isPresent()) {
+            queryParam.put("domain_key", jobRequest.getDomainKey().get());
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("submit job: " + jobRequest);
