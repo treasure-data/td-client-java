@@ -45,6 +45,7 @@ import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
@@ -653,6 +654,27 @@ public class TDClient
     public List<TDSavedQuery> listSavedQueries()
     {
         return doGet(buildUrl("/v3/schedule/list"), TDSavedQuery.TDSavedQueryList.class).getSchedules();
+    }
+
+    @Override
+    public TDSavedQueryHistory getSavedQueryHistory(String name)
+    {
+        return getSavedQueryHistory(name, 0L, 20L);
+    }
+
+    @Override
+    public TDSavedQueryHistory getSavedQueryHistory(String name, Long from, Long to)
+    {
+        TDApiRequest.Builder builder = TDApiRequest.Builder
+                .GET(buildUrl("/v3/schedule/history", name));
+        if (from != null) {
+            builder.addQueryParam("from", String.valueOf(from));
+        }
+        if (to != null) {
+            builder.addQueryParam("to", String.valueOf(to));
+        }
+        TDApiRequest request = builder.build();
+        return httpClient.call(request, apiKeyCache, TDSavedQueryHistory.class);
     }
 
     protected String toJson(Object any)
