@@ -429,8 +429,13 @@ public class TestTDClient
                 .setDomainKey(domainKey)
                 .createTDJobRequest();
 
-        exception.expect(TDClientHttpConflictException.class);
-        client.submit(request2);
+        try {
+            client.submit(request2);
+            fail("Expected " + TDClientHttpConflictException.class.getName());
+        }
+        catch (TDClientHttpConflictException e) {
+            assertThat(e.getConflictsWith(), is(Optional.of(jobId)));
+        }
     }
 
     @Test

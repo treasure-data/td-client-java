@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.base.Optional;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -26,8 +27,22 @@ import org.eclipse.jetty.http.HttpStatus;
 public class TDClientHttpConflictException
         extends TDClientHttpException
 {
+    private final String conflictsWith;
+
     public TDClientHttpConflictException(String errorMessage)
     {
+        this(errorMessage, null);
+    }
+
+    public TDClientHttpConflictException(String errorMessage, String conflictsWith)
+    {
         super(ErrorType.TARGET_ALREADY_EXISTS, errorMessage, HttpStatus.CONFLICT_409);
+
+        this.conflictsWith = conflictsWith;
+    }
+
+    public Optional<String> getConflictsWith()
+    {
+        return Optional.fromNullable(conflictsWith);
     }
 }
