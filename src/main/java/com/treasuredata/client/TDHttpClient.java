@@ -329,7 +329,8 @@ public class TDHttpClient
                 case HttpStatus.NOT_FOUND_404:
                     throw new TDClientHttpNotFoundException(errorMessage);
                 case HttpStatus.CONFLICT_409:
-                    throw new TDClientHttpConflictException(errorMessage);
+                    String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
+                    throw new TDClientHttpConflictException(errorMessage, conflictsWith);
                 case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
                     throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code);
                 case HttpStatus.UNPROCESSABLE_ENTITY_422:
@@ -346,6 +347,19 @@ public class TDHttpClient
         else {
             throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code);
         }
+    }
+
+    private String parseConflictsWith(TDApiErrorMessage errorResponse)
+    {
+        Map<String, Object> details = errorResponse.getDetails();
+        if (details == null) {
+            return null;
+        }
+        Object conflictsWith = details.get("conflicts_with");
+        if (conflictsWith == null) {
+            return null;
+        }
+        return String.valueOf(conflictsWith);
     }
 
     protected static Optional<HttpResponseException> findHttpResponseException(Throwable e)

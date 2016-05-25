@@ -20,6 +20,9 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
 
 /**
  *
@@ -29,16 +32,27 @@ public class TDApiErrorMessage
     private final String error;
     private final String text;
     private final String severity;
+    private final Map<String, Object> details;
+
+    public TDApiErrorMessage(
+            String error,
+            String text,
+            String severity)
+    {
+        this(error, text, severity, ImmutableMap.<String, Object>of());
+    }
 
     @JsonCreator
     public TDApiErrorMessage(
             @JsonProperty("error") String error,
             @JsonProperty("text") String text,
-            @JsonProperty("severity") String severity)
+            @JsonProperty("severity") String severity,
+            @JsonProperty("details") Map<String, Object> details)
     {
         this.error = error;
         this.text = text;
         this.severity = severity;
+        this.details = details;
     }
 
     public String getError()
@@ -54,6 +68,11 @@ public class TDApiErrorMessage
     public String getSeverity()
     {
         return severity;
+    }
+
+    public Map<String, Object> getDetails()
+    {
+        return details;
     }
 
     @Override

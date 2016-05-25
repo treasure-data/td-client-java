@@ -36,6 +36,7 @@ public class TDJobRequest
     private final Optional<String> table;
     private final Optional<ObjectNode> config;
     private final Optional<Long> scheduledTime;
+    private final Optional<String> domainKey;
 
     @Deprecated
     public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, Optional<String> resultOutput, Optional<Integer> retryLimit, Optional<String> poolName, Optional<String> table, Optional<ObjectNode> config)
@@ -50,6 +51,7 @@ public class TDJobRequest
         this.table = table;
         this.config = config;
         this.scheduledTime = Optional.absent();
+        this.domainKey = Optional.absent();
     }
 
     private TDJobRequest(TDJobRequestBuilder builder)
@@ -64,6 +66,7 @@ public class TDJobRequest
         this.table = builder.getTable();
         this.config = builder.getConfig();
         this.scheduledTime = builder.getScheduledTime();
+        this.domainKey = builder.getDomainKey();
     }
 
     public static TDJobRequest newPrestoQuery(String database, String query)
@@ -176,6 +179,11 @@ public class TDJobRequest
         return scheduledTime;
     }
 
+    public Optional<String> getDomainKey()
+    {
+        return domainKey;
+    }
+
     static TDJobRequest of(TDJobRequestBuilder builder)
     {
         return new TDJobRequest(builder);
@@ -195,6 +203,7 @@ public class TDJobRequest
                 ", table=" + table +
                 ", config=" + config +
                 ", scheduledTime=" + scheduledTime +
+                ", domainKey=" + domainKey +
                 '}';
     }
 }

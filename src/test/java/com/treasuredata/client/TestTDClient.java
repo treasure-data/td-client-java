@@ -56,7 +56,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
@@ -83,6 +85,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -99,6 +102,9 @@ import static org.junit.Assert.fail;
  */
 public class TestTDClient
 {
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
     private static final Logger logger = LoggerFactory.getLogger(TestTDClient.class);
 
     private static final String SAMPLE_DB = "_tdclient_test";
@@ -399,6 +405,37 @@ public class TestTDClient
 
         assertEquals(1, array.length());
         assertEquals(scheduledTime, array.getLong(0));
+    }
+
+    @Test
+    public void submitJobWithDomainKey()
+            throws Exception
+    {
+        String domainKey = randomDomainKey();
+
+        TDJobRequest request1 = new TDJobRequestBuilder()
+                .setType(TDJob.Type.PRESTO)
+                .setDatabase("sample_datasets")
+                .setQuery("select 1")
+                .setDomainKey(domainKey)
+                .createTDJobRequest();
+        String jobId = client.submit(request1);
+        waitJobCompletion(jobId);
+
+        TDJobRequest request2 = new TDJobRequestBuilder()
+                .setType(TDJob.Type.PRESTO)
+                .setDatabase("sample_datasets")
+                .setQuery("select 1")
+                .setDomainKey(domainKey)
+                .createTDJobRequest();
+
+        try {
+            client.submit(request2);
+            fail("Expected " + TDClientHttpConflictException.class.getName());
+        }
+        catch (TDClientHttpConflictException e) {
+            assertThat(e.getConflictsWith(), is(Optional.of(jobId)));
+        }
     }
 
     @Test
@@ -1019,5 +1056,10 @@ public class TestTDClient
                 .setEndpoint(server.getHostName())
                 .setPort(server.getPort())
                 .build();
+    }
+
+    private String randomDomainKey()
+    {
+        return "td-client-java-test-" + UUID.randomUUID();
     }
 }
