@@ -69,7 +69,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.treasuredata.client.TDApiRequest.urlEncode;
+import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
 
 /**
  *
@@ -164,7 +164,7 @@ public class TDClient
         s.append(urlPrefix);
         for (String a : args) {
             s.append("/");
-            s.append(urlEncode(a));
+            s.append(urlPathSegmentEscaper().escape(a));
         }
         return s.toString();
     }
