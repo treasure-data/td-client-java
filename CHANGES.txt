@@ -1,5 +1,6 @@
 Release 0.7.18 - 2016-05-26
   - Add method to fetch saved/scheduled query job history.
+  - Add support for domain keys in job submission. Domain keys can be used to implement idempotent job submission and retries.
   - Fix HTTP request path segment escaping.
 
 Release 0.7.17 - 2016-05-19
