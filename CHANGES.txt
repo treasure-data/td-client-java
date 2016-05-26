@@ -1,3 +1,7 @@
+Release 0.7.18 - 2016-05-26
+  - Add method to fetch saved/scheduled query job history.
+  - Fix HTTP request path segment escaping.
+
 Release 0.7.17 - 2016-05-19
   - Fix starting a Data Connector Bulk Load Session Job with a specified scheduled time
 
