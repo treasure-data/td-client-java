@@ -27,6 +27,7 @@ import com.treasuredata.client.model.TDJobSummary;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import org.msgpack.core.MessagePack;
@@ -131,6 +132,18 @@ public class Example
         // Run a saved query
         Date scheduledTime = new Date(System.currentTimeMillis());
         client.startSavedQuery(query.getName(), scheduledTime);
+
+        // Get saved query job history (first page)
+        TDSavedQueryHistory firstPage = client.getSavedQueryHistory(query.getName());
+
+        // Get second page
+        long from = firstPage.getTo().get();
+        long to = from + 20;
+        TDSavedQueryHistory secondPage = client.getSavedQueryHistory(query.getName(), from, to);
+
+        // Get result of last job
+        TDJob lastJob = firstPage.getHistory().get(0);
+        System.out.println("Last job:" + lastJob);
 
         // Update a saved query
         TDSavedQueryUpdateRequest updateRequest =

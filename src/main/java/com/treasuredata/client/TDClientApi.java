@@ -33,6 +33,7 @@ import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 
@@ -219,6 +220,25 @@ public interface TDClientApi<ClientImpl>
     String startSavedQuery(String name, Date scheduledTime);
 
     List<TDSavedQuery> listSavedQueries();
+
+    /**
+     * Get the saved query job history. Note that this will only fetch the the 20 latest jobs (at most) in the history.
+     * To fetch more jobs, use {@link #getSavedQueryHistory(String, Long, Long)}.
+     *
+     * @param name The name of the saved query
+     * @return The job history
+     */
+    TDSavedQueryHistory getSavedQueryHistory(String name);
+
+    /**
+     * Get a specific range of the saved query job history.
+     *
+     * @param name The name of the saved query
+     * @param from The first job index to get (inclusive).
+     * @param to The last job index to get (exclusive).
+     * @return
+     */
+    TDSavedQueryHistory getSavedQueryHistory(String name, Long from, Long to);
 
     /**
      * Save a query for scheduling. Use {@link TDSavedQuery#newBuilder(String, TDJob.Type, String, String, String)}

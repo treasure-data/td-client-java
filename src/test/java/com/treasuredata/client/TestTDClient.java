@@ -25,6 +25,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
@@ -45,6 +46,7 @@ import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
+import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import okhttp3.mockwebserver.MockResponse;
@@ -922,6 +924,22 @@ public class TestTDClient
         List<TDSavedQuery> savedQueries = client.listSavedQueries();
         assertTrue(savedQueries.size() > 0);
         logger.info(Joiner.on(", ").join(savedQueries));
+    }
+
+    @Test
+    public void getSavedQueryHistory()
+    {
+        List<TDSavedQuery> allQueries = client.listSavedQueries();
+        List<TDSavedQuery> queries = FluentIterable.from(allQueries)
+                .limit(10)
+                .toList();
+
+        for (TDSavedQuery query : queries) {
+            TDSavedQueryHistory firstPage = client.getSavedQueryHistory(query.getName());
+            logger.info("count: {}, from: {}, to: {}, jobs: {}", firstPage.getCount(), firstPage.getFrom(), firstPage.getTo(), firstPage.getHistory().size());
+            TDSavedQueryHistory secondPage = client.getSavedQueryHistory(query.getName(), firstPage.getTo().get(), firstPage.getTo().get() + 20L);
+            logger.info("count: {}, from: {}, to: {}, jobs: {}", secondPage.getCount(), secondPage.getFrom(), secondPage.getTo(), secondPage.getHistory().size());
+        }
     }
 
     private Optional<TDSavedQuery> findSavedQuery(String name)
