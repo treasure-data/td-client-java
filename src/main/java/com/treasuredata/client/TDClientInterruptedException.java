@@ -28,4 +28,9 @@ public class TDClientInterruptedException
     {
         super(ErrorType.INTERRUPTED, cause);
     }
+
+    public TDClientInterruptedException(String message, Exception cause)
+    {
+        super(ErrorType.INTERRUPTED, message, cause);
+    }
 }

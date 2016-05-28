@@ -35,6 +35,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -42,6 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -54,17 +56,24 @@ public class TestServerFailures
     ServerConnector http;
     int port;
 
+    private void prepareServer(int port)
+            throws Exception
+    {
+        server = new Server();
+
+        http = new ServerConnector(server);
+        http.setHost("localhost");
+        http.setPort(port);
+        server.addConnector(http);
+    }
+
     @Before
     public void setUp()
             throws Exception
     {
         // NOTICE. This jetty server does not accept SSL connection. So use http in TDClient
-        server = new Server();
         port = TestProxyAccess.findAvailablePort();
-        http = new ServerConnector(server);
-        http.setHost("localhost");
-        http.setPort(port);
-        server.addConnector(http);
+        prepareServer(port);
     }
 
     private void startServer()
@@ -164,6 +173,51 @@ public class TestServerFailures
         catch (TDClientHttpException e) {
             assertEquals(TDClientException.ErrorType.SERVER_ERROR, e.getErrorType());
             assertEquals(1 + retryLimit, accessCount.get());
+        }
+    }
+
+    @Test
+    public void handleEOFException()
+            throws Exception
+    {
+        logger.warn("Start request retry tests on connection interruption");
+        final AtomicInteger accessCount = new AtomicInteger(0);
+        server.setHandler(new AbstractHandler()
+        {
+            @Override
+            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+                    throws IOException, ServletException
+            {
+                logger.debug("request: " + request);
+                accessCount.incrementAndGet();
+                response.setStatus(HttpStatus.OK_200);
+                response.getWriter().write("{\"server\": "); // write intermediate result
+                try {
+                    // Shutdown the connection
+                    server.stop();
+                }
+                catch (Throwable e) {
+                }
+            }
+        });
+        startServer();
+
+        TDClient client = TDClient
+                .newBuilder()
+                .setEndpoint("localhost")
+                .setUseSSL(false)
+                .setPort(port)
+                .setRetryLimit(0)
+                .build();
+        try {
+            client.serverStatus();
+            fail("cannot reach here");
+        }
+        catch (TDClientException e) {
+            assertEquals(TDClientException.ErrorType.INTERRUPTED, e.getErrorType());
+            logger.info(e.getMessage());
+            assertTrue(e.getRootCause().get() instanceof EOFException);
+            assertEquals(1, accessCount.get());
         }
     }
 
