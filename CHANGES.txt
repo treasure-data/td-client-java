@@ -1,5 +1,5 @@
 Release 0.7.19 - 2016-05-27
-  - Add request retry on EOFException on connection interruption.
+  - Add request retry on EOFException (connection interruption)
 
 Release 0.7.18 - 2016-05-26
   - Add method to fetch saved/scheduled query job history.
