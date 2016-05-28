@@ -50,6 +50,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -295,7 +296,13 @@ public class TDHttpClient
                         throw handleHttpResponseError(apiRequest.getPath(), code, new byte[] {});
                     }
                     else {
-                        throw new TDClientProcessingException(e);
+                        if (e.getCause() instanceof EOFException) {
+                            // Jetty returns EOFException when the connection was interrupted
+                            rootCause = Optional.<TDClientException>of(new TDClientInterruptedException("connection failure (EOFException)", (EOFException) e.getCause()));
+                        }
+                        else {
+                            throw new TDClientProcessingException(e);
+                        }
                     }
                 }
                 catch (TimeoutException e) {
@@ -341,7 +348,7 @@ public class TDHttpClient
         }
         logger.warn(errorMessage);
         if (HttpStatus.isServerError(code)) {
-            // 5xx errors
+            // Just returns exception info for 5xx errors
             return new TDClientHttpException(SERVER_ERROR, errorMessage, code);
         }
         else {
