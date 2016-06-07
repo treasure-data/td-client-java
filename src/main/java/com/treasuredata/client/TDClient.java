@@ -51,6 +51,7 @@ import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
+import com.treasuredata.client.model.TDUser;
 import com.treasuredata.client.model.impl.TDDatabaseList;
 import com.treasuredata.client.model.impl.TDScheduleRunResult;
 import org.eclipse.jetty.http.HttpStatus;
@@ -234,6 +235,12 @@ public class TDClient
     {
         TDAuthenticationResult authResult = doPost("/v3/user/authenticate", ImmutableMap.of("user", email, "password", password), TDAuthenticationResult.class);
         return withApiKey(authResult.getApikey());
+    }
+
+    @Override
+    public TDUser getUser()
+    {
+        return doGet("/v3/user/show", TDUser.class);
     }
 
     @Override

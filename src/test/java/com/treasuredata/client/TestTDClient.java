@@ -49,6 +49,7 @@ import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
+import com.treasuredata.client.model.TDUser;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -916,6 +917,26 @@ public class TestTDClient
             // OK
             assertEquals(HttpStatus.UNAUTHORIZED_401, e.getStatusCode());
         }
+    }
+
+    @Test
+    public void getUser()
+            throws Exception
+    {
+        String name = "foo";
+        String email = "bar@baz.com";
+
+        client = mockClient();
+
+        server.enqueue(new MockResponse().setBody("{\"name\":\"foo\", \"email\":\"bar@baz.com\"}"));
+
+        TDUser user = client.getUser();
+
+        assertThat(user.getName(), is(name));
+        assertThat(user.getEmail(), is(email));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getPath(), is("/v3/user/show"));
     }
 
     @Test
