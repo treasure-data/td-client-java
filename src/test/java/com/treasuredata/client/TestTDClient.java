@@ -927,19 +927,7 @@ public class TestTDClient
     {
         client = mockClient();
 
-        String expectedUserJson = ObjectMappers.compactMapper().writeValueAsString(ImmutableMap.<String, Object>builder()
-                .put("id", "test-id")
-                .put("name", "test-name")
-                .put("first_name", "test-first_name")
-                .put("last_name", "test-last_name")
-                .put("email", "test-email")
-                .put("phone", "test-phone")
-                .put("gravatar_url", "test-gravatar_url")
-                .put("administrator", true)
-                .put("created_at", "test-created_at")
-                .put("updated_at", "test-updated_at")
-                .put("account_owner", true)
-                .build());
+        String expectedUserJson = "{\"id\":\"298\",\"first_name\":\"Muhammad\",\"last_name\":\"Bruen\",\"email\":\"1elroy_vonrueden@example.net\",\"phone\":\"(650) 469-3644\",\"gravatar_url\":\"https://secure.gravatar.com/avatar/0e66e45a5283c2fff6373f0a34c734ae?size=80\",\"administrator\":true,\"created_at\":\"2016-06-08T05:22:56Z\",\"updated_at\":\"2016-06-08T05:22:56Z\",\"name\":\"Muhammad Bruen\",\"account_owner\":true}";
 
         TDUser expectedUser = ObjectMappers.compactMapper().readValue(expectedUserJson, TDUser.class);
 
