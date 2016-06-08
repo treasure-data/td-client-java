@@ -27,9 +27,11 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
+import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
@@ -923,17 +925,29 @@ public class TestTDClient
     public void getUser()
             throws Exception
     {
-        String name = "foo";
-        String email = "bar@baz.com";
-
         client = mockClient();
 
-        server.enqueue(new MockResponse().setBody("{\"name\":\"foo\", \"email\":\"bar@baz.com\"}"));
+        String expectedUserJson = ObjectMappers.compactMapper().writeValueAsString(ImmutableMap.<String, Object>builder()
+                .put("id", "test-id")
+                .put("name", "test-name")
+                .put("first_name", "test-first_name")
+                .put("last_name", "test-last_name")
+                .put("email", "test-email")
+                .put("phone", "test-phone")
+                .put("gravatar_url", "test-gravatar_url")
+                .put("administrator", true)
+                .put("created_at", "test-created_at")
+                .put("updated_at", "test-updated_at")
+                .put("account_owner", true)
+                .build());
+
+        TDUser expectedUser = ObjectMappers.compactMapper().readValue(expectedUserJson, TDUser.class);
+
+        server.enqueue(new MockResponse().setBody(expectedUserJson));
 
         TDUser user = client.getUser();
 
-        assertThat(user.getName(), is(name));
-        assertThat(user.getEmail(), is(email));
+        assertThat(user, is(expectedUser));
 
         RecordedRequest recordedRequest = server.takeRequest();
         assertThat(recordedRequest.getPath(), is("/v3/user/show"));
