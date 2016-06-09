@@ -1,6 +1,5 @@
 package com.treasuredata.client.model;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
