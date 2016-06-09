@@ -3,6 +3,7 @@ package com.treasuredata.client.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Optional;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -13,10 +14,10 @@ public abstract class TDUser
 {
     @JsonSerialize(using = StringToNumberSerializer.class) @JsonProperty("id") public abstract String getId();
     @JsonProperty("name") public abstract String getName();
-    @JsonProperty("first_name") public abstract String getFirstName();
-    @JsonProperty("last_name") public abstract String getLastName();
+    @JsonProperty("first_name") public abstract Optional<String> getFirstName();
+    @JsonProperty("last_name") public abstract Optional<String> getLastName();
     @JsonProperty("email") public abstract String getEmail();
-    @JsonProperty("phone") public abstract String getPhone();
+    @JsonProperty("phone") public abstract Optional<String> getPhone();
     @JsonProperty("gravatar_url") public abstract String getGravatarUrl();
     @JsonProperty("administrator") public abstract boolean isAdministrator();
     @JsonProperty("created_at") public abstract String getCreatedAt();
