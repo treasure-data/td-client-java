@@ -18,6 +18,6 @@ class StringToNumberSerializer
     public void serialize(String s, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
             throws IOException
     {
-        jsonGenerator.writeNumber(Integer.valueOf(s));
+        jsonGenerator.writeNumber(Integer.parseInt(s));
     }
 }
