@@ -27,7 +27,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -927,7 +926,7 @@ public class TestTDClient
     {
         client = mockClient();
 
-        String expectedUserJson = "{\"id\":\"298\",\"first_name\":\"Muhammad\",\"last_name\":\"Bruen\",\"email\":\"1elroy_vonrueden@example.net\",\"phone\":\"(650) 469-3644\",\"gravatar_url\":\"https://secure.gravatar.com/avatar/0e66e45a5283c2fff6373f0a34c734ae?size=80\",\"administrator\":true,\"created_at\":\"2016-06-08T05:22:56Z\",\"updated_at\":\"2016-06-08T05:22:56Z\",\"name\":\"Muhammad Bruen\",\"account_owner\":true}";
+        String expectedUserJson = "{\"id\":300,\"first_name\":\"Freda\",\"last_name\":\"Schuster\",\"email\":\"1elvie.hackett@example.com\",\"phone\":\"(650) 469-3644\",\"gravatar_url\":\"https://secure.gravatar.com/avatar/0e36aa63098c5a05b4dde8ac867eb116?size=80\",\"administrator\":true,\"created_at\":\"2016-06-09T01:34:59Z\",\"updated_at\":\"2016-06-09T01:34:59Z\",\"name\":\"Freda Schuster\",\"account_owner\":true}";
 
         TDUser expectedUser = ObjectMappers.compactMapper().readValue(expectedUserJson, TDUser.class);
 
