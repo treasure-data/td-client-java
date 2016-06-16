@@ -921,7 +921,7 @@ public class TestTDClient
     }
 
     @Test
-    public void getUser()
+    public void getUserMocked()
             throws Exception
     {
         client = mockClient();
@@ -938,6 +938,14 @@ public class TestTDClient
 
         RecordedRequest recordedRequest = server.takeRequest();
         assertThat(recordedRequest.getPath(), is("/v3/user/show"));
+    }
+
+    @Test
+    public void getUser()
+            throws Exception
+    {
+        TDUser user = client.getUser();
+        logger.info("user: {}", user);
     }
 
     @Test
