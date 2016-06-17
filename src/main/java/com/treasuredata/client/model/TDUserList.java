@@ -1,8 +1,7 @@
-package com.treasuredata.client;
+package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.treasuredata.client.model.TDUser;
 
 import java.util.List;
 

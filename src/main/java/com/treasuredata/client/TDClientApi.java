@@ -37,6 +37,7 @@ import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDUser;
+import com.treasuredata.client.model.TDUserList;
 
 import java.io.File;
 import java.io.InputStream;

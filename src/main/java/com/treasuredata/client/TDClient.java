@@ -52,6 +52,7 @@ import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
 import com.treasuredata.client.model.TDUser;
+import com.treasuredata.client.model.TDUserList;
 import com.treasuredata.client.model.impl.TDDatabaseList;
 import com.treasuredata.client.model.impl.TDScheduleRunResult;
 import org.eclipse.jetty.http.HttpStatus;
