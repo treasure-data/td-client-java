@@ -152,6 +152,13 @@
       <version>1.7.12</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.immutables</groupId>
+      <artifactId>value</artifactId>
+      <version>2.2.4</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- ==================== -->
     <!-- Testing dependencies -->
     <!-- ==================== -->

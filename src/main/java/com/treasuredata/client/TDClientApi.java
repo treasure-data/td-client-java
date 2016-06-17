@@ -36,6 +36,7 @@ import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
+import com.treasuredata.client.model.TDUser;
 
 import java.io.File;
 import java.io.InputStream;
@@ -66,6 +67,12 @@ public interface TDClientApi<ClientImpl>
      * @return
      */
     ClientImpl authenticate(String email, String password);
+
+    /**
+     * Return information about the current user.
+     * @return A {@link TDUser} instance.
+     */
+    TDUser getUser();
 
     String serverStatus();
 

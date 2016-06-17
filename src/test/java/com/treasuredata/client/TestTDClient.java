@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
+import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
@@ -49,6 +50,7 @@ import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
+import com.treasuredata.client.model.TDUser;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -916,6 +918,34 @@ public class TestTDClient
             // OK
             assertEquals(HttpStatus.UNAUTHORIZED_401, e.getStatusCode());
         }
+    }
+
+    @Test
+    public void getUserMocked()
+            throws Exception
+    {
+        client = mockClient();
+
+        String expectedUserJson = "{\"id\":300,\"first_name\":\"Freda\",\"last_name\":\"Schuster\",\"email\":\"1elvie.hackett@example.com\",\"phone\":\"(650) 469-3644\",\"gravatar_url\":\"https://secure.gravatar.com/avatar/0e36aa63098c5a05b4dde8ac867eb116?size=80\",\"administrator\":true,\"created_at\":\"2016-06-09T01:34:59Z\",\"updated_at\":\"2016-06-09T01:34:59Z\",\"name\":\"Freda Schuster\",\"account_owner\":true}";
+
+        TDUser expectedUser = ObjectMappers.compactMapper().readValue(expectedUserJson, TDUser.class);
+
+        server.enqueue(new MockResponse().setBody(expectedUserJson));
+
+        TDUser user = client.getUser();
+
+        assertThat(user, is(expectedUser));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getPath(), is("/v3/user/show"));
+    }
+
+    @Test
+    public void getUser()
+            throws Exception
+    {
+        TDUser user = client.getUser();
+        logger.info("user: {}", user);
     }
 
     @Test
