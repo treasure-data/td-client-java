@@ -1,3 +1,8 @@
+Release 0.7.20 - 2016-06-17
+  - Add method to get current user
+  - Add method to list users in current account
+  - Add domain key to data connection sessions
+
 Release 0.7.19 - 2016-05-27
   - Add request retry on EOFException (connection interruption)
 
