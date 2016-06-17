@@ -244,6 +244,12 @@ public class TDClient
     }
 
     @Override
+    public TDUserList listUsers()
+    {
+        return doGet("/v3/user/list", TDUserList.class);
+    }
+
+    @Override
     public String serverStatus()
     {
         // No API key is requried for server_status
