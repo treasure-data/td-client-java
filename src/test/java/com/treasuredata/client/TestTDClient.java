@@ -949,6 +949,17 @@ public class TestTDClient
     }
 
     @Test
+    public void listUsers()
+            throws Exception
+    {
+        TDUserList userList = client.listUsers();
+        for (TDUser user : userList.getUsers()) {
+            logger.info("user: {}", user);
+        }
+        logger.info("{} user(s)", userList.getUsers().size());
+    }
+
+    @Test
     public void listSavedQuery()
     {
         List<TDSavedQuery> savedQueries = client.listSavedQueries();

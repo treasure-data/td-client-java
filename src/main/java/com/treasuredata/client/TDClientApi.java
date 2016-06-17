@@ -74,6 +74,12 @@ public interface TDClientApi<ClientImpl>
      */
     TDUser getUser();
 
+    /**
+     * List the users in the current account.
+     * @return A {@link TDUserList}.
+     */
+    TDUserList listUsers();
+
     String serverStatus();
 
     // Database operations
