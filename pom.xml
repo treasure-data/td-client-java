@@ -434,6 +434,7 @@
               <goal>check</goal>
             </goals>
             <configuration>
+              <sourceDirectories>src/main/java</sourceDirectories>
               <failOnViolation>true</failOnViolation>
               <consoleOutput>true</consoleOutput>
               <includeTestSourceDirectory>true</includeTestSourceDirectory>
