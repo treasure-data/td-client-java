@@ -434,7 +434,7 @@
               <goal>check</goal>
             </goals>
             <configuration>
-              <sourceDirectories>src/main/java</sourceDirectories>
+              <excludes>**/Immutable*.java</excludes>
               <failOnViolation>true</failOnViolation>
               <consoleOutput>true</consoleOutput>
               <includeTestSourceDirectory>true</includeTestSourceDirectory>
