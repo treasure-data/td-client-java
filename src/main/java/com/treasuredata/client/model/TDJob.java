@@ -31,7 +31,7 @@ public class TDJob
 {
     public static enum Type
     {
-        HIVE("hive"), MAPRED("mapred"), PRESTO("presto"), BULKLOAD("bulkload"), EXPORT("export"), UNKNOWN("none");
+        HIVE("hive"), MAPRED("mapred"), PRESTO("presto"), PIG("pig"), BULKLOAD("bulkload"), EXPORT("export"), UNKNOWN("none");
         private final String type;
 
         private Type(String type)
