@@ -118,6 +118,36 @@ public class TDJobRequest
                 .createTDJobRequest();
     }
 
+    public static TDJobRequest newPigQuery(String database, String query)
+    {
+        return new TDJobRequestBuilder()
+                .setType(TDJob.Type.PIG)
+                .setDatabase(database)
+                .setQuery(query)
+                .createTDJobRequest();
+    }
+
+    public static TDJobRequest newPigQuery(String database, String query, String resultOutput)
+    {
+        return new TDJobRequestBuilder()
+                .setType(TDJob.Type.PIG)
+                .setDatabase(database)
+                .setQuery(query)
+                .setResultOutput(resultOutput)
+                .createTDJobRequest();
+    }
+
+    public static TDJobRequest newPigQuery(String database, String query, String resultOutput, String poolName)
+    {
+        return new TDJobRequestBuilder()
+                .setType(TDJob.Type.PIG)
+                .setDatabase(database)
+                .setQuery(query)
+                .setResultOutput(resultOutput)
+                .setPoolName(poolName)
+                .createTDJobRequest();
+    }
+
     public static TDJobRequest newBulkLoad(String database, String table, ObjectNode config)
     {
         return new TDJobRequestBuilder()
