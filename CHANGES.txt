@@ -1,3 +1,6 @@
+Release 0.7.21 - 2016-06-20
+  - Add pig job support
+
 Release 0.7.20 - 2016-06-17
   - Add method to get current user
   - Add method to list users in current account
