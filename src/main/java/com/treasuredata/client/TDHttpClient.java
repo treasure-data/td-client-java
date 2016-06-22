@@ -300,6 +300,9 @@ public class TDHttpClient
                             // Jetty returns EOFException when the connection was interrupted
                             rootCause = Optional.<TDClientException>of(new TDClientInterruptedException("connection failure (EOFException)", (EOFException) e.getCause()));
                         }
+                        else if (e.getCause() instanceof TimeoutException) {
+                            rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
+                        }
                         else {
                             throw new TDClientProcessingException(e);
                         }
