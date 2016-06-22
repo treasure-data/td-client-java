@@ -177,6 +177,48 @@ public class TestServerFailures
     }
 
     @Test
+    public void handleTimeoutTest()
+            throws Exception
+    {
+        logger.warn("Start request retry tests on timeout exception");
+        final AtomicInteger accessCount = new AtomicInteger(0);
+
+        server.setHandler(new AbstractHandler()
+        {
+            @Override
+            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+                    throws IOException, ServletException
+            {
+                logger.debug("request: " + request);
+                int count = accessCount.incrementAndGet();
+                if (count == 1) {
+                    try {
+                        Thread.sleep(1000); // 1 sec
+                    }
+                    catch (InterruptedException e) {
+                    }
+                }
+                response.setStatus(HttpStatus.OK_200);
+                response.getWriter().write("{\"server\":\"ok\"}"); // write intermediate result
+                baseRequest.setHandled(true);
+            }
+        });
+        startServer();
+
+        TDClient client = TDClient
+                .newBuilder()
+                .setEndpoint("localhost")
+                .setUseSSL(false)
+                .setPort(port)
+                .setIdleTimeoutMillis(100)
+                .setRetryLimit(1)
+                .build();
+
+        client.serverStatus();
+        assertEquals(2, accessCount.get());
+    }
+
+    @Test
     public void handleEOFException()
             throws Exception
     {
