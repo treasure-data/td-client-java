@@ -19,10 +19,10 @@
 package com.treasuredata.client;
 
 public class TDClientBuilder
-        extends AbstractTDClientBuilder<TDClient>
+        extends AbstractTDClientBuilder<TDClient, TDClientBuilder>
 {
     /**
-     * Create a new TDClinent builder whose configuration is initialized with System Properties and $HOME/.td/td.conf values.
+     * Create a new {@link TDClient} builder whose configuration is initialized with System Properties and $HOME/.td/td.conf values.
      * Precedence of properties is the following order:
      * <ol>
      * <li>System Properties</li>
@@ -35,6 +35,12 @@ public class TDClientBuilder
     public TDClientBuilder(boolean loadTDConf)
     {
         super(loadTDConf);
+    }
+
+    @Override
+    protected TDClientBuilder self()
+    {
+        return this;
     }
 
     @Override

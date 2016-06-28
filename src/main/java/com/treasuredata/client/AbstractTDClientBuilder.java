@@ -46,7 +46,7 @@ import static com.treasuredata.client.TDClientConfig.getTDConfProperties;
 /**
  *
  */
-public abstract class AbstractTDClientBuilder<ClientImpl>
+public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends AbstractTDClientBuilder<ClientImpl, BuilderImpl>>
 {
     protected Optional<String> endpoint = Optional.absent();
     protected Optional<Integer> port = Optional.absent();
@@ -138,7 +138,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
      * @param p
      * @return
      */
-    public AbstractTDClientBuilder<ClientImpl> setProperties(Properties p)
+    public BuilderImpl setProperties(Properties p)
     {
         this.endpoint = getConfigProperty(p, API_ENDPOINT).or(endpoint);
         this.port = getConfigPropertyInt(p, API_PORT).or(port);
@@ -201,91 +201,91 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
         this.idleTimeoutMillis = getConfigPropertyInt(p, IDLE_TIMEOUT_MILLIS).or(idleTimeoutMillis);
         this.connectionPoolSize = getConfigPropertyInt(p, CONNECTION_POOL_SIZE).or(connectionPoolSize);
 
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setEndpoint(String endpoint)
+    public BuilderImpl setEndpoint(String endpoint)
     {
         this.endpoint = Optional.of(endpoint);
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setPort(int port)
+    public BuilderImpl setPort(int port)
     {
         this.port = Optional.of(port);
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setUseSSL(boolean useSSL)
+    public BuilderImpl setUseSSL(boolean useSSL)
     {
         this.useSSL = useSSL;
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setApiKey(String apiKey)
+    public BuilderImpl setApiKey(String apiKey)
     {
         this.apiKey = Optional.of(apiKey);
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setUser(String user)
+    public BuilderImpl setUser(String user)
     {
         this.user = Optional.of(user);
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setPassword(String password)
+    public BuilderImpl setPassword(String password)
     {
         this.password = Optional.of(password);
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setProxy(ProxyConfig proxyConfig)
+    public BuilderImpl setProxy(ProxyConfig proxyConfig)
     {
         this.proxy = Optional.of(proxyConfig);
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setRetryLimit(int retryLimit)
+    public BuilderImpl setRetryLimit(int retryLimit)
     {
         this.retryLimit = retryLimit;
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setRetryInitialIntervalMillis(int retryInitialIntervalMillis)
+    public BuilderImpl setRetryInitialIntervalMillis(int retryInitialIntervalMillis)
     {
         this.retryInitialIntervalMillis = retryInitialIntervalMillis;
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setRetryMaxIntervalMillis(int retryMaxIntervalMillis)
+    public BuilderImpl setRetryMaxIntervalMillis(int retryMaxIntervalMillis)
     {
         this.retryMaxIntervalMillis = retryMaxIntervalMillis;
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setRetryMultiplier(double retryMultiplier)
+    public BuilderImpl setRetryMultiplier(double retryMultiplier)
     {
         this.retryMultiplier = retryMultiplier;
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setConnectTimeoutMillis(int connectTimeoutMillis)
+    public BuilderImpl setConnectTimeoutMillis(int connectTimeoutMillis)
     {
         this.connectTimeoutMillis = connectTimeoutMillis;
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setIdleTimeoutMillis(int idleTimeoutMillis)
+    public BuilderImpl setIdleTimeoutMillis(int idleTimeoutMillis)
     {
         this.idleTimeoutMillis = idleTimeoutMillis;
-        return this;
+        return self();
     }
 
-    public AbstractTDClientBuilder<ClientImpl> setConnectionPoolSize(int connectionPoolSize)
+    public BuilderImpl setConnectionPoolSize(int connectionPoolSize)
     {
         this.connectionPoolSize = connectionPoolSize;
-        return this;
+        return self();
     }
 
     /**
@@ -311,6 +311,8 @@ public abstract class AbstractTDClientBuilder<ClientImpl>
                 connectionPoolSize
         );
     }
+
+    protected abstract BuilderImpl self();
 
     public abstract ClientImpl build();
 }
