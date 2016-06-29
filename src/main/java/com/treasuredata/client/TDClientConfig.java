@@ -83,7 +83,7 @@ public class TDClientConfig
     }
 
     /**
-     * endpoint URL (e.g., api.treasuredata.com, ybi.jp-east.idcfcloud.com)
+     * endpoint URL (e.g., api.treasuredata.com, api.ybi.idcfcloud.net)
      */
     public final String endpoint;
     public final Optional<Integer> port;
