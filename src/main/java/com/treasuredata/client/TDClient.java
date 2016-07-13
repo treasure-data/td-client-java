@@ -764,6 +764,11 @@ public class TDClient
             queryParam.put("pool_name", jobRequest.getPoolName().get());
         }
 
+        Optional<String> domainKey = jobRequest.getDomainKey();
+        if (domainKey.isPresent()) {
+            queryParam.put("domain_key", domainKey.get());
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("submit job: " + jobRequest);
         }

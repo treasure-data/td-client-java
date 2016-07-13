@@ -500,6 +500,39 @@ public class TestTDClient
     }
 
     @Test
+    public void submitExportJobWithDomainKey()
+            throws Exception
+    {
+        String domainKey = randomDomainKey();
+
+        TDExportJobRequest jobRequest = TDExportJobRequest.builder()
+                .database(SAMPLE_DB)
+                .table("sample_output")
+                .from(new Date(0L))
+                .to(new Date(1456522300L * 1000))
+                .fileFormat(TDExportFileFormatType.JSONL_GZ)
+                .accessKeyId("access key id")
+                .secretAccessKey("secret access key")
+                .bucketName("bucket")
+                .filePrefix("prefix/")
+                .domainKey(domainKey)
+                .build();
+
+        client.createDatabaseIfNotExists(SAMPLE_DB);
+        client.createTableIfNotExists(SAMPLE_DB, "sample_output");
+        String jobId = client.submitExportJob(jobRequest);
+
+        // Attempt to submit the job again and verify that we get a domain key conflict
+        try {
+            client.submitExportJob(jobRequest);
+            fail("Expected " + TDClientHttpConflictException.class.getName());
+        }
+        catch (TDClientHttpConflictException e) {
+            assertThat(e.getConflictsWith(), is(Optional.of(jobId)));
+        }
+    }
+
+    @Test
     public void killJob()
             throws Exception
     {

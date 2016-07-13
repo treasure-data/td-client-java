@@ -18,12 +18,16 @@
  */
 package com.treasuredata.client.model;
 
-import java.util.Date;
 import com.google.common.base.Optional;
+import org.immutables.builder.Builder;
+import org.immutables.value.Value;
+
+import java.util.Date;
 
 /**
  *
  */
+@Value.Style(typeBuilder = "TDExportJobRequestBuilder")
 public class TDExportJobRequest
 {
     private final String database;
@@ -36,7 +40,12 @@ public class TDExportJobRequest
     private final String bucketName;
     private final String filePrefix;
     private final Optional<String> poolName;
+    private final Optional<String> domainKey;
 
+    /**
+     * @deprecated Use {@link #builder()} instead.
+     */
+    @Deprecated
     public TDExportJobRequest(
             String database,
             String table,
@@ -59,6 +68,22 @@ public class TDExportJobRequest
         this.bucketName = bucketName;
         this.filePrefix = filePrefix;
         this.poolName = poolName;
+        this.domainKey = Optional.absent();
+    }
+
+    private TDExportJobRequest(String database, String table, Date from, Date to, TDExportFileFormatType fileFormat, String accessKeyId, String secretAccessKey, String bucketName, String filePrefix, Optional<String> poolName, Optional<String> domainKey)
+    {
+        this.database = database;
+        this.table = table;
+        this.from = from;
+        this.to = to;
+        this.fileFormat = fileFormat;
+        this.accessKeyId = accessKeyId;
+        this.secretAccessKey = secretAccessKey;
+        this.bucketName = bucketName;
+        this.filePrefix = filePrefix;
+        this.poolName = poolName;
+        this.domainKey = domainKey;
     }
 
     public String getDatabase()
@@ -111,6 +136,22 @@ public class TDExportJobRequest
     public Optional<String> getPoolName()
     {
         return poolName;
+    }
+
+    public Optional<String> getDomainKey()
+    {
+        return domainKey;
+    }
+
+    @Builder.Factory
+    static TDExportJobRequest of(String database, String table, Date from, Date to, TDExportFileFormatType fileFormat, String accessKeyId, String secretAccessKey, String bucketName, String filePrefix, Optional<String> poolName, Optional<String> domainKey)
+    {
+        return new TDExportJobRequest(database, table, from, to, fileFormat, accessKeyId, secretAccessKey, bucketName, filePrefix, poolName, domainKey);
+    }
+
+    public static TDExportJobRequestBuilder builder()
+    {
+        return new TDExportJobRequestBuilder();
     }
 
     @Override
