@@ -34,6 +34,7 @@ import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDSavedQueryHistory;
+import com.treasuredata.client.model.TDSavedQueryStartRequest;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDUser;
@@ -234,6 +235,13 @@ public interface TDClientApi<ClientImpl>
      * @return job id
      */
     String startSavedQuery(String name, Date scheduledTime);
+
+    /**
+     * Start a query saved on the cloud.
+     *
+     * @return job id
+     */
+    String startSavedQuery(TDSavedQueryStartRequest request);
 
     List<TDSavedQuery> listSavedQueries();
 

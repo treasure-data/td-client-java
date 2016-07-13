@@ -49,6 +49,7 @@ import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDSavedQueryHistory;
+import com.treasuredata.client.model.TDSavedQueryStartRequest;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDUser;
@@ -474,6 +475,59 @@ public class TestTDClient
         }
         catch (TDClientHttpNotFoundException e) {
             // OK
+        }
+    }
+
+    @Test
+    public void startSavedQueryWithDomainKey()
+            throws Exception
+    {
+        String domainKey = randomDomainKey();
+
+        String queryName = newTemporaryName("td_client_test");
+
+        TDSaveQueryRequest query = TDSavedQuery.newBuilder(
+                queryName,
+                TDJob.Type.PRESTO,
+                SAMPLE_DB,
+                "select 1",
+                "Asia/Tokyo")
+                .setCron("0 * * * *")
+                .setPriority(-1)
+                .setRetryLimit(2)
+                .setResult("mysql://testuser:pass@somemysql.address/somedb/sometable")
+                .build();
+
+        try {
+            client.saveQuery(query);
+
+            int epoch1 = 1457046001;
+            int epoch2 = epoch1 + 1;
+
+            // Claim the domain key
+            TDSavedQueryStartRequest request1 = TDSavedQueryStartRequest.builder()
+                    .name(queryName)
+                    .scheduledTime(new Date(epoch1 * 1000L))
+                    .domainKey(domainKey)
+                    .build();
+            String jobId = client.startSavedQuery(request1);
+
+            // Attempt to use the same domain key again and verify that we get a conflict
+            TDSavedQueryStartRequest request2 = TDSavedQueryStartRequest.builder()
+                    .name(queryName)
+                    .scheduledTime(new Date(epoch2 * 1000L))
+                    .domainKey(domainKey)
+                    .build();
+            try {
+                client.startSavedQuery(request2);
+                fail("Expected " + TDClientHttpConflictException.class.getName());
+            }
+            catch (TDClientHttpConflictException e) {
+                assertThat(e.getConflictsWith(), is(Optional.of(jobId)));
+            }
+        }
+        finally {
+            client.deleteSavedQuery(queryName);
         }
     }
 
