@@ -180,6 +180,8 @@ public interface TDClientApi<ClientImpl>
 
     TDJobSummary jobStatus(String jobId);
 
+    TDJobSummary jobStatusByDomainKey(String domainKey);
+
     TDJob jobInfo(String jobId);
 
     /**

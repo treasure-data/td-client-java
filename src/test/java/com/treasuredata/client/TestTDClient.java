@@ -442,6 +442,9 @@ public class TestTDClient
         catch (TDClientHttpConflictException e) {
             assertThat(e.getConflictsWith(), is(Optional.of(jobId)));
         }
+
+        TDJobSummary statusByDomainKey = client.jobStatusByDomainKey(domainKey);
+        assertThat(statusByDomainKey.getJobId(), is(jobId));
     }
 
     @Test

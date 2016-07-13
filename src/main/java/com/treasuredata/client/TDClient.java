@@ -561,6 +561,12 @@ public class TDClient
     }
 
     @Override
+    public TDJobSummary jobStatusByDomainKey(String domainKey)
+    {
+        return doGet(buildUrl("/v3/job/status_by_domain_key", domainKey), TDJobSummary.class);
+    }
+
+    @Override
     public TDJob jobInfo(String jobId)
             throws TDClientException
     {
