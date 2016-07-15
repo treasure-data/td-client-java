@@ -142,6 +142,7 @@ public class TDJob
 
     private final String jobId;
     private final Status status;
+    private final Type type;
     private final String query;
     private final String createdAt;
     private final String startAt;
@@ -160,6 +161,7 @@ public class TDJob
     static TDJob createTDJobV3(
             @JsonProperty("job_id") String jobId,
             @JsonProperty("status") Status status,
+            @JsonProperty("type") Type type,
             @JsonProperty("query") TDQuery query,
             @JsonProperty("created_at") String createdAt,
             @JsonProperty("start_at") String startAt,
@@ -174,11 +176,12 @@ public class TDJob
             @JsonProperty("result_size") long resultSize,
             @JsonProperty("debug") Optional<Debug> debug)
     {
-        return new TDJob(jobId, status, query.getQuery(), createdAt, startAt, updatedAt, endAt, resultSchema, database, result, url, userName, duration, resultSize, debug);
+        return new TDJob(jobId, status, type, query.getQuery(), createdAt, startAt, updatedAt, endAt, resultSchema, database, result, url, userName, duration, resultSize, debug);
     }
 
     public TDJob(String jobId,
             Status status,
+            Type type,
             String query,
             String createdAt,
             String startAt,
@@ -196,6 +199,7 @@ public class TDJob
     {
         this.jobId = jobId;
         this.status = status;
+        this.type = type;
         this.query = query;
         this.createdAt = createdAt;
         this.startAt = startAt;
@@ -219,6 +223,11 @@ public class TDJob
     public Status getStatus()
     {
         return status;
+    }
+
+    public Type getType()
+    {
+        return type;
     }
 
     public String getQuery()
@@ -321,6 +330,7 @@ public class TDJob
         return "TDJob{" +
                 "jobId='" + jobId + '\'' +
                 ", status=" + status +
+                ", type=" + type +
                 ", query=" + query +
                 ", createdAt='" + createdAt + '\'' +
                 ", startAt='" + startAt + '\'' +
