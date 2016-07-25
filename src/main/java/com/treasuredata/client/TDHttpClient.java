@@ -63,6 +63,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLKeyException;
+import javax.net.ssl.SSLPeerUnverifiedException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -302,6 +306,17 @@ public class TDHttpClient
                         }
                         else if (e.getCause() instanceof TimeoutException) {
                             rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
+                        }
+                        else if (e.getCause() instanceof SSLException) {
+                            SSLException cause = (SSLException) e.getCause();
+                            if (cause instanceof SSLHandshakeException || cause instanceof SSLKeyException || cause instanceof SSLPeerUnverifiedException) {
+                                // deterministic SSL exceptions
+                                throw new TDClientSSLException(cause);
+                            }
+                            else {
+                                // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
+                                rootCause = Optional.<TDClientException>of(new TDClientSSLException(cause));
+                            }
                         }
                         else {
                             throw new TDClientProcessingException(e);
