@@ -47,6 +47,7 @@ public class TDClientException
         // Request handling error
         INTERRUPTED,
         REQUEST_TIMEOUT,
+        SSL_ERROR,
         EXECUTION_FAILURE,
         UNEXPECTED_RESPONSE_CODE,
         INVALID_JSON_RESPONSE;
