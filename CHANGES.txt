@@ -1,3 +1,8 @@
+Release 0.7.24 - 2016-07-27
+  - Handle SSLException and retry if it is uncategorized or protocol error
+  - Add type property to TDJob model class
+  - Upgrade msgpack-core to 0.8.8
+
 Release 0.7.23 - 2016-07-19
   - Fix TDClientBuilder setter return types
   - Upgrade jackson to 2.6.7
