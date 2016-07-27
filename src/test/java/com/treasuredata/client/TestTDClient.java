@@ -96,6 +96,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import static com.treasuredata.client.TDClientConfig.ENV_TD_CLIENT_APIKEY;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -1138,6 +1139,60 @@ public class TestTDClient
         String body = recordedRequest.getBody().readUtf8();
         assertThat(body, is(expectedPayload));
         assertThat(recordedRequest.getPath(), is(expectedPath));
+    }
+
+    @Test
+    public void arbitraryAuthorizationHeaderMocked()
+            throws Exception
+    {
+        String authorization = "Bearer badf00d";
+        client = mockClient().withApiKey(authorization);
+
+        server.enqueue(new MockResponse());
+
+        client.killJob("4711");
+
+        assertThat(server.getRequestCount(), is(1));
+        RecordedRequest recordedRequest = server.takeRequest();
+
+        assertThat(recordedRequest.getPath(), is("/v3/job/kill/4711"));
+        assertThat(recordedRequest.getHeader("Authorization"), is(authorization));
+    }
+
+    @Test
+    public void arbitraryAuthorizationHeader()
+            throws Exception
+    {
+        String authorization = "TD1 " + apikey();
+        client = client.withApiKey(authorization);
+
+        // Verify that the client can submit a job with this apikey configuration
+        submitJob();
+    }
+
+    private static String apikey()
+    {
+        Properties props;
+        String apikey;
+
+        props = TDClientConfig.readTDConf();
+        apikey = props.getProperty("td.client.apikey", props.getProperty("apikey"));
+        if (apikey != null) {
+            return apikey;
+        }
+
+        props = System.getProperties();
+        apikey = props.getProperty("td.client.apikey", props.getProperty("apikey"));
+        if (apikey != null) {
+            return apikey;
+        }
+
+        apikey = System.getenv(ENV_TD_CLIENT_APIKEY);
+        if (apikey != null) {
+            return apikey;
+        }
+
+        throw new AssertionError("No apikey found");
     }
 
     private TDClient mockClient()
