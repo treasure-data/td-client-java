@@ -273,7 +273,7 @@ public class TDHttpClient
         return request;
     }
 
-    private boolean isNakedTD1Key(String s)
+    private static boolean isNakedTD1Key(String s)
     {
         return NAKED_TD1_KEY_PATTERN.matcher(s).matches();
     }
