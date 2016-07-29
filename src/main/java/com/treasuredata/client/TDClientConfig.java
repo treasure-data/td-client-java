@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
@@ -235,10 +237,55 @@ public class TDClientConfig
             }
             String props = extracted.toString();
             p.load(new StringReader(props));
+
+            // Parse endpoint url if necessary
+            if (p.containsKey("endpoint")) {
+                parseEndpoint(p);
+            }
             return p;
         }
         catch (IOException e) {
             throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, String.format("Failed to read config file: %s", file), e);
+        }
+    }
+
+    private static void parseEndpoint(Properties p)
+    {
+        String endpoint = p.getProperty("endpoint");
+        URI uri;
+        try {
+            uri = new URI(endpoint);
+        }
+        catch (URISyntaxException ignore) {
+            // The endpoint was not a URL, let it be as is
+            return;
+        }
+
+        int defaultPort;
+        boolean useSsl;
+
+        switch (uri.getScheme()) {
+            case "http":
+                defaultPort = 80;
+                useSsl = false;
+                break;
+            case "https":
+                defaultPort = 443;
+                useSsl = true;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid endpoint scheme: " + uri.getScheme());
+        }
+
+        p.setProperty("endpoint", uri.getHost());
+
+        if (!p.containsKey("port")) {
+            int port = (uri.getPort() == -1) ? defaultPort : uri.getPort();
+            p.setProperty("port", Integer.toString(port));
+        }
+
+        if (!p.contains("usessl")) {
+            p.setProperty("usessl", Boolean.toString(useSsl));
         }
     }
 }

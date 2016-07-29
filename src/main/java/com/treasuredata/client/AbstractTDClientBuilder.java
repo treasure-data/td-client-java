@@ -75,13 +75,39 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
 
     private static Optional<Integer> getConfigPropertyInt(Properties p, TDClientConfig.Type key)
     {
-        String v = p.getProperty(key.key);
+        return getConfigPropertyInt(p, key.key);
+    }
+
+    private static Optional<Integer> getConfigPropertyInt(Properties p, String key)
+    {
+        String v = p.getProperty(key);
         if (v != null) {
             try {
                 return Optional.of(Integer.parseInt(v));
             }
             catch (NumberFormatException e) {
                 throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, String.format("[%s] cannot cast %s to integer", key, v));
+            }
+        }
+        else {
+            return Optional.absent();
+        }
+    }
+
+    private static Optional<Boolean> getConfigPropertyBoolean(Properties p, TDClientConfig.Type key)
+    {
+        return getConfigPropertyBoolean(p, key.key);
+    }
+
+    private static Optional<Boolean> getConfigPropertyBoolean(Properties p, String key)
+    {
+        String v = p.getProperty(key);
+        if (v != null) {
+            try {
+                return Optional.of(Boolean.parseBoolean(v));
+            }
+            catch (NumberFormatException e) {
+                throw new TDClientException(TDClientException.ErrorType.INVALID_CONFIGURATION, String.format("[%s] cannot cast %s to boolean", key, v));
             }
         }
         else {
@@ -126,7 +152,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         // load system properties
         setProperties(System.getProperties());
 
-        // We also read $HOME/.td/td.conf file for apikey, user, and password values
+        // We also read $HOME/.td/td.conf file for endpoint, port, usessl, apikey, user, and password values
         if (loadTDConf) {
             setProperties(getTDConfProperties());
         }
@@ -140,11 +166,15 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
      */
     public BuilderImpl setProperties(Properties p)
     {
-        this.endpoint = getConfigProperty(p, API_ENDPOINT).or(endpoint);
-        this.port = getConfigPropertyInt(p, API_PORT).or(port);
-        if (p.containsKey(USESSL.key)) {
-            setUseSSL(Boolean.parseBoolean(p.getProperty(USESSL.key)));
-        }
+        this.endpoint = getConfigProperty(p, API_ENDPOINT)
+                .or(getConfigProperty(p, "endpoint"))
+                .or(endpoint);
+        this.port = getConfigPropertyInt(p, API_PORT)
+                .or(getConfigPropertyInt(p, "port"))
+                .or(port);
+        this.useSSL = getConfigPropertyBoolean(p, USESSL)
+                .or(getConfigPropertyBoolean(p, "usessl"))
+                .or(useSSL);
         this.apiKey = getConfigProperty(p, APIKEY)
                 .or(getConfigProperty(p, "apikey"))
                 .or(apiKey);

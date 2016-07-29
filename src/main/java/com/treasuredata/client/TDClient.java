@@ -46,6 +46,7 @@ import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDSavedQueryHistory;
+import com.treasuredata.client.model.TDSavedQueryStartRequest;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
@@ -667,9 +668,32 @@ public class TDClient
     @Override
     public String startSavedQuery(String name, Date scheduledTime)
     {
+        return startSavedQuery(TDSavedQueryStartRequest.builder()
+                .name(name)
+                .scheduledTime(scheduledTime)
+                .build());
+    }
+
+    @Override
+    public String startSavedQuery(TDSavedQueryStartRequest request)
+    {
+        Map<String, String> queryParams = new HashMap<>();
+
+        Optional<Integer> num = request.num();
+        if (num.isPresent()) {
+            queryParams.put("num", Integer.toString(num.get()));
+        }
+
+        Optional<String> domainKey = request.domainKey();
+        if (domainKey.isPresent()) {
+            queryParams.put("domain_key", domainKey.get());
+        }
+
         TDScheduleRunResult result =
-                doPost(buildUrl("/v3/schedule/run", name, Long.toString(scheduledTime.getTime() / 1000)),
+                doPost(buildUrl("/v3/schedule/run", request.name(), Long.toString(request.scheduledTime().getTime() / 1000)),
+                        queryParams,
                         TDScheduleRunResult.class);
+
         return result.getJobs().get(0).getJobId();
     }
 
@@ -762,6 +786,11 @@ public class TDClient
 
         if (jobRequest.getPoolName().isPresent()) {
             queryParam.put("pool_name", jobRequest.getPoolName().get());
+        }
+
+        Optional<String> domainKey = jobRequest.getDomainKey();
+        if (domainKey.isPresent()) {
+            queryParam.put("domain_key", domainKey.get());
         }
 
         if (logger.isDebugEnabled()) {
