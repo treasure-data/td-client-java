@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLKeyException;
@@ -85,6 +86,10 @@ public class TDHttpClient
         implements AutoCloseable
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
+
+    // A regex pattern that matches a TD1 apikey without the "TD1 " prefix.
+    private static final Pattern NAKED_TD1_KEY_PATTERN = Pattern.compile("^[1-9][0-9]*/[a-f0-9]{40}$");
+
     protected final TDClientConfig config;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -225,7 +230,14 @@ public class TDHttpClient
         // Set API Key
         Optional<String> apiKey = apiKeyCache.or(config.apiKey);
         if (apiKey.isPresent()) {
-            request.header(HttpHeader.AUTHORIZATION, "TD1 " + apiKey.get());
+            String auth;
+            if (isNakedTD1Key(apiKey.get())) {
+                auth = "TD1 " + apiKey.get();
+            }
+            else {
+                auth = apiKey.get();
+            }
+            request.header(HttpHeader.AUTHORIZATION, auth);
         }
 
         // Set other headers
@@ -259,6 +271,11 @@ public class TDHttpClient
                 break;
         }
         return request;
+    }
+
+    private static boolean isNakedTD1Key(String s)
+    {
+        return NAKED_TD1_KEY_PATTERN.matcher(s).matches();
     }
 
     public <ResponseType extends Response, Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Handler<ResponseType, Result> handler)
