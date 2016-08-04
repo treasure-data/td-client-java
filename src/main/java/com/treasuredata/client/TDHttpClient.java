@@ -270,6 +270,13 @@ public class TDHttpClient
                 }
                 break;
         }
+
+        // Configure redirect (302) following
+        Optional<Boolean> followRedirects = apiRequest.getFollowRedirects();
+        if (followRedirects.isPresent()) {
+            request.followRedirects(followRedirects.get());
+        }
+
         return request;
     }
 
