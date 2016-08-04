@@ -439,14 +439,26 @@ public class TDClient
     public TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to)
             throws TDClientException
     {
+        return partialDelete(databaseName, tableName, from, to, null);
+    }
+
+    @Override
+    public TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to, String domainKey)
+            throws TDClientException
+    {
         if ((from % 3600 != 0) || (to % 3600 != 0)) {
             throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, String.format("from/to value must be a multiple of 3600: [%s, %s)", from, to));
         }
 
-        Map<String, String> queryParams = ImmutableMap.of(
-                "from", Long.toString(from),
-                "to", Long.toString(to));
-        TDPartialDeleteJob job = doPost(buildUrl("/v3/table/partialdelete", databaseName, tableName), queryParams, TDPartialDeleteJob.class);
+        ImmutableMap.Builder<String, String> queryParams = ImmutableMap.<String, String>builder()
+                .put("from", Long.toString(from))
+                .put("to", Long.toString(to));
+
+        if (domainKey != null) {
+            queryParams.put("domain_key", domainKey);
+        }
+
+        TDPartialDeleteJob job = doPost(buildUrl("/v3/table/partialdelete", databaseName, tableName), queryParams.build(), TDPartialDeleteJob.class);
         return job;
     }
 

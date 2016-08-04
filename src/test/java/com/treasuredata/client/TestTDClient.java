@@ -777,6 +777,39 @@ public class TestTDClient
     }
 
     @Test
+    public void partialDeleteWithDomainKeyTest()
+            throws Exception
+    {
+        String domainKey = randomDomainKey();
+
+        String t = newTemporaryName("td_client_test");
+        try {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+
+            String jobId = client.submit(TDJobRequest.newPrestoQuery(SAMPLE_DB,
+                    String.format("CREATE TABLE %s AS SELECT * FROM (VALUES TD_TIME_PARSE('2015-01-01', 'UTC'), TD_TIME_PARSE('2015-02-01', 'UTC')) as sample(time)", t, t)));
+
+            waitJobCompletion(jobId);
+
+            int from = 1420070400;
+            int to = from + 3600;
+
+            TDPartialDeleteJob deleteJob = client.partialDelete(SAMPLE_DB, t, from, to, domainKey);
+
+            try {
+                client.partialDelete(SAMPLE_DB, t, from, to, domainKey);
+                fail("Expected " + TDClientHttpConflictException.class.getName());
+            }
+            catch (TDClientHttpConflictException e) {
+                assertThat(e.getConflictsWith(), is(Optional.of(deleteJob.getJobId())));
+            }
+        }
+        finally {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+        }
+    }
+
+    @Test
     public void swapTest()
             throws Exception
     {

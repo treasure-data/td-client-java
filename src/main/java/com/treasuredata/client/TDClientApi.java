@@ -159,6 +159,8 @@ public interface TDClientApi<ClientImpl>
 
     TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to);
 
+    TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to, String domainKey);
+
     void swapTables(String databaseName, String tableName1, String tableName2);
 
     // schema API
