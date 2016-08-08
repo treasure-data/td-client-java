@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/treasure-data/td-client-java/tree/master.svg?style=svg&circle-token=cf534b7f736cc552c29e905ed0fec0ef5a29fa47)](https://circleci.com/gh/treasure-data/td-client-java/tree/master)
+
 # td-client for java
 
 A java client for accessing [Treasure Data API](http://docs.treasuredata.com/articles/rest-api).
