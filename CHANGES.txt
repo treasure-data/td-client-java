@@ -1,3 +1,9 @@
+Release 0.7.25 - 2016-08-8
+  - Add domain key support for export jobs and saved queries
+  - Load endpoint, port and usessl from td.conf
+  - Allow setting arbitrary `Authorization` HTTP header.
+  - Customizable HTTP request success classification.
+
 Release 0.7.24 - 2016-07-27
   - Handle SSLException and retry if it is uncategorized or protocol error
   - Add type property to TDJob model class
