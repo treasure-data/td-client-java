@@ -270,6 +270,13 @@ public class TDHttpClient
                 }
                 break;
         }
+
+        // Configure redirect (302) following
+        Optional<Boolean> followRedirects = apiRequest.getFollowRedirects();
+        if (followRedirects.isPresent()) {
+            request.followRedirects(followRedirects.get());
+        }
+
         return request;
     }
 
@@ -297,7 +304,7 @@ public class TDHttpClient
                     Request request = prepareRequest(apiRequest, apiKeyCache);
                     response = handler.submit(request);
                     int code = response.getStatus();
-                    if (HttpStatus.isSuccess(code)) {
+                    if (handler.isSuccess(response)) {
                         // 2xx success
                         logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), apiRequest.getPath()));
                         return handler.onSuccess(response);
@@ -482,6 +489,8 @@ public class TDHttpClient
          * @return returned content
          */
         byte[] onError(ResponseType response);
+
+        boolean isSuccess(ResponseType response);
     }
 
     class ContentStreamHandler
@@ -514,6 +523,12 @@ public class TDHttpClient
                 throw new TDClientException(INVALID_JSON_RESPONSE, e);
             }
         }
+
+        @Override
+        public boolean isSuccess(Response response)
+        {
+            return HttpStatus.isSuccess(response.getStatus());
+        }
     }
 
     public static class DefaultContentHandler
@@ -536,6 +551,12 @@ public class TDHttpClient
         public byte[] onError(ContentResponse response)
         {
             return response.getContent();
+        }
+
+        @Override
+        public boolean isSuccess(ContentResponse response)
+        {
+            return HttpStatus.isSuccess(response.getStatus());
         }
     }
 }

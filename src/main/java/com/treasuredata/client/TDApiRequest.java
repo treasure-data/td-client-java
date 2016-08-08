@@ -47,6 +47,7 @@ public class TDApiRequest
     private final Map<String, String> headerParams;
     private final Optional<String> postJson;
     private final Optional<File> putFile;
+    private final Optional<Boolean> followRedirects;
 
     TDApiRequest(
             HttpMethod method,
@@ -54,7 +55,8 @@ public class TDApiRequest
             Map<String, String> queryParams,
             Map<String, String> headerParams,
             Optional<String> postJson,
-            Optional<File> putFile
+            Optional<File> putFile,
+            Optional<Boolean> followRedirects
     )
     {
         this.method = checkNotNull(method, "method is null");
@@ -63,6 +65,7 @@ public class TDApiRequest
         this.headerParams = checkNotNull(headerParams, "headerParams is null");
         this.postJson = checkNotNull(postJson, "postJson is null");
         this.putFile = checkNotNull(putFile, "putFile is null");
+        this.followRedirects = checkNotNull(followRedirects, "followRedirects is null");
     }
 
     public String getPath()
@@ -95,6 +98,11 @@ public class TDApiRequest
         return putFile;
     }
 
+    public Optional<Boolean> getFollowRedirects()
+    {
+        return followRedirects;
+    }
+
     public static class Builder
     {
         private static final Map<String, String> EMPTY_MAP = ImmutableMap.of();
@@ -104,6 +112,7 @@ public class TDApiRequest
         private Map<String, String> headerParams;
         private Optional<String> postJson = Optional.absent();
         private Optional<File> file = Optional.absent();
+        private Optional<Boolean> followRedirects = Optional.absent();
 
         Builder(HttpMethod method, String path)
         {
@@ -161,6 +170,12 @@ public class TDApiRequest
             return this;
         }
 
+        public Builder setFollowRedirects(boolean followRedirects)
+        {
+            this.followRedirects = Optional.of(followRedirects);
+            return this;
+        }
+
         public TDApiRequest build()
         {
             return new TDApiRequest(
@@ -169,7 +184,8 @@ public class TDApiRequest
                     queryParams != null ? queryParams : EMPTY_MAP,
                     headerParams != null ? headerParams : EMPTY_MAP,
                     postJson,
-                    file
+                    file,
+                    followRedirects
             );
         }
     }
