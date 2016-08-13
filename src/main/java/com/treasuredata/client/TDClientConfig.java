@@ -48,7 +48,7 @@ public class TDClientConfig
     {
         APIKEY("td.client.apikey", "API key to access Treasure Data."),
         USER("td.client.user", "Account e-mail address (unnecessary if apikey is set)"),
-        PASSOWRD("td.client.password", "Account apssword (unnecessary if apikey is set"),
+        PASSOWRD("td.client.password", "Account password (unnecessary if apikey is set"),
         USESSL("td.client.usessl", "Use SSL encryption"),
         API_ENDPOINT("td.client.endpoint", "TD API end point (e.g., api.treasuredata.com"),
         API_PORT("td.client.port", "TD API port number"),
