@@ -1,4 +1,7 @@
-Release 0.7.25 - 2016-08-8
+Release 0.7.26 - 2016-08-19
+  - Add domain key support to partial delete jobs.
+
+Release 0.7.25 - 2016-08-08
   - Add domain key support for export jobs and saved queries
   - Load endpoint, port and usessl from td.conf
   - Allow setting arbitrary `Authorization` HTTP header.
