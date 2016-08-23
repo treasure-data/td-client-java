@@ -47,6 +47,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.util.HttpCookieStore;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +102,11 @@ public class TDHttpClient
         httpClient.setConnectTimeout(config.connectTimeoutMillis);
         httpClient.setIdleTimeout(config.idleTimeoutMillis);
         httpClient.setTCPNoDelay(true);
-        httpClient.setExecutor(new QueuedThreadPool(config.connectionPoolSize, 2));
+        QueuedThreadPool executor = new QueuedThreadPool(config.connectionPoolSize, 2);
+        executor.setDaemon(true);
+        executor.setName("td-client-java");
+        httpClient.setExecutor(executor);
+        httpClient.setScheduler(new ScheduledExecutorScheduler("td-client-java-scheduler", true));
         httpClient.setCookieStore(new HttpCookieStore.Empty());
         httpClient.setUserAgentField(new HttpField(HttpHeader.USER_AGENT, "td-client-java-" + TDClient.getVersion()));
 
