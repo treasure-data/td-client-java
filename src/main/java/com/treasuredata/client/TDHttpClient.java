@@ -104,9 +104,9 @@ public class TDHttpClient
         httpClient.setTCPNoDelay(true);
         QueuedThreadPool executor = new QueuedThreadPool(config.connectionPoolSize, 2);
         executor.setDaemon(true);
-        executor.setName("td-client-java");
+        executor.setName("td-client");
         httpClient.setExecutor(executor);
-        httpClient.setScheduler(new ScheduledExecutorScheduler("td-client-java-scheduler", true));
+        httpClient.setScheduler(new ScheduledExecutorScheduler("td-client-scheduler", true));
         httpClient.setCookieStore(new HttpCookieStore.Empty());
         httpClient.setUserAgentField(new HttpField(HttpHeader.USER_AGENT, "td-client-java-" + TDClient.getVersion()));
 
