@@ -21,6 +21,7 @@ package com.treasuredata.client;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,8 @@ public class TDClientConfig
         CONNECT_TIMEOUT_MILLIS("td.client.connect-timeout", "connection timeout before reaching the API"),
         IDLE_TIMEOUT_MILLIS("td.client.idle-timeout", "idle connection timeout when no data is coming from API"),
         CONNECTION_POOL_SIZE("td.client.connection-pool-size", "connection pool size"),
+        REQUEST_BUFFER_SIZE("td.client.request-buffer-size", "request buffer size"),
+        RESPONSE_BUFFER_SIZE("td.client.response-buffer-size", "response buffer size"),
         PROXY_HOST("td.client.proxy.host", "Proxy host (e.g., myproxy.com)"),
         PROXY_PORT("td.client.proxy.port", "Proxy port number"),
         PROXY_USER("td.client.proxy.user", "Proxy user name"),
@@ -101,6 +104,9 @@ public class TDClientConfig
     public final int connectTimeoutMillis;
     public final int idleTimeoutMillis;
     public final int connectionPoolSize;
+    public final Multimap<String, String> headers;
+    public final Optional<Integer> requestBufferSize;
+    public final Optional<Integer> responseBufferSize;
 
     @JsonCreator
     public TDClientConfig(
@@ -117,8 +123,10 @@ public class TDClientConfig
             double retryMultiplier,
             int connectTimeoutMillis,
             int idleTimeoutMillis,
-            int connectionPoolSize
-    )
+            int connectionPoolSize,
+            Multimap<String, String> headers,
+            Optional<Integer> requestBufferSize,
+            Optional<Integer> responseBufferSize)
     {
         this.endpoint = endpoint.or("api.treasuredata.com");
         this.port = port;
@@ -134,6 +142,9 @@ public class TDClientConfig
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.idleTimeoutMillis = idleTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
+        this.headers = headers;
+        this.requestBufferSize = requestBufferSize;
+        this.responseBufferSize = responseBufferSize;
     }
 
     private static <V> void saveProperty(Properties p, Type config, V value)
@@ -182,6 +193,8 @@ public class TDClientConfig
         saveProperty(p, Type.RETRY_MULTIPLIER, retryMultiplier);
         saveProperty(p, Type.CONNECT_TIMEOUT_MILLIS, connectTimeoutMillis);
         saveProperty(p, Type.CONNECTION_POOL_SIZE, connectionPoolSize);
+        saveProperty(p, Type.REQUEST_BUFFER_SIZE, requestBufferSize);
+        saveProperty(p, Type.RESPONSE_BUFFER_SIZE, responseBufferSize);
         return p;
     }
 

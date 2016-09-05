@@ -19,6 +19,8 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Multimap;
+
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
@@ -59,6 +61,15 @@ public interface TDClientApi<ClientImpl>
      * @return
      */
     ClientImpl withApiKey(String newApiKey);
+
+    /**
+     * Return a TDClientApi implementation that uses the provided headers when making api requests.
+     * This instance will share the same internal http client, so closing the returned client will invalidate the current instance.
+     *
+     * @param headers
+     * @return
+     */
+    ClientImpl withHeaders(Multimap<String, String> headers);
 
     /**
      * Perform user email and password based authentication and return a new client that will use apikey based authentication.

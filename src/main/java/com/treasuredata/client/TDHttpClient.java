@@ -28,6 +28,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.treasuredata.client.impl.ProxyAuthResult;
 import com.treasuredata.client.model.TDApiErrorMessage;
@@ -51,6 +53,11 @@ import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLKeyException;
+import javax.net.ssl.SSLPeerUnverifiedException;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,10 +72,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLKeyException;
-import javax.net.ssl.SSLPeerUnverifiedException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -95,10 +98,14 @@ public class TDHttpClient
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
+    @VisibleForTesting
+    final Multimap<String, String> headers;
+
     public TDHttpClient(TDClientConfig config)
     {
         this.config = config;
         this.httpClient = config.useSSL ? new HttpClient(new SslContextFactory()) : new HttpClient();
+        this.headers = config.headers;
         httpClient.setConnectTimeout(config.connectTimeoutMillis);
         httpClient.setIdleTimeout(config.idleTimeoutMillis);
         httpClient.setTCPNoDelay(true);
@@ -109,6 +116,12 @@ public class TDHttpClient
         httpClient.setScheduler(new ScheduledExecutorScheduler("td-client-scheduler", true));
         httpClient.setCookieStore(new HttpCookieStore.Empty());
         httpClient.setUserAgentField(new HttpField(HttpHeader.USER_AGENT, "td-client-java-" + TDClient.getVersion()));
+        if (config.requestBufferSize.isPresent()) {
+            httpClient.setRequestBufferSize(config.requestBufferSize.get());
+        }
+        if (config.responseBufferSize.isPresent()) {
+            httpClient.setResponseBufferSize(config.responseBufferSize.get());
+        }
 
         // Proxy configuration
         if (config.proxy.isPresent()) {
@@ -136,6 +149,29 @@ public class TDHttpClient
             logger.error("Failed to initialize Jetty client", e);
             throw Throwables.propagate(e);
         }
+    }
+
+    private TDHttpClient(TDClientConfig config, HttpClient httpClient, ObjectMapper objectMapper, Multimap<String, String> headers)
+    {
+        this.config = config;
+        this.httpClient = httpClient;
+        this.objectMapper = objectMapper;
+        this.headers = headers;
+    }
+
+    /**
+     * Get a {@link TDHttpClient} that uses the specified headers for each request. Reuses the same
+     * underlying http client so closing the returned instance will return this instance as well.
+     * @param headers
+     * @return
+     */
+    TDHttpClient withHeaders(Multimap<String, String> headers)
+    {
+        Multimap<String, String> mergedHeaders = ImmutableMultimap.<String, String>builder()
+                .putAll(this.headers)
+                .putAll(headers)
+                .build();
+        return new TDHttpClient(config, httpClient, objectMapper, mergedHeaders);
     }
 
     ObjectMapper getObjectMapper()
@@ -246,7 +282,10 @@ public class TDHttpClient
         }
 
         // Set other headers
-        for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entrySet()) {
+        for (Map.Entry<String, String> entry : headers.entries()) {
+            request.header(entry.getKey(), entry.getValue());
+        }
+        for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entries()) {
             request.header(entry.getKey(), entry.getValue());
         }
 

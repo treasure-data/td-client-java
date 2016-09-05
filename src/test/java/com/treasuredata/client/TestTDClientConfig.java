@@ -19,6 +19,12 @@
 package com.treasuredata.client;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 
 import java.io.File;
@@ -26,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import static com.treasuredata.client.TDClientConfig.Type.API_ENDPOINT;
 import static com.treasuredata.client.TDClientConfig.Type.API_PORT;
@@ -44,8 +51,10 @@ import static com.treasuredata.client.TDClientConfig.Type.RETRY_MAX_INTERVAL_MIL
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_MULTIPLIER;
 import static com.treasuredata.client.TDClientConfig.Type.USER;
 import static com.treasuredata.client.TDClientConfig.Type.USESSL;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -198,5 +207,63 @@ public class TestTDClientConfig
         TDClientConfig newConfig = TDClient.newBuilder(false).setProperties(p1).buildConfig();
         Properties p2 = newConfig.toProperties();
         assertEquals(p1, p2);
+    }
+
+    @Test
+    public void customHeaders()
+            throws Exception
+    {
+        Multimap<String, String> noHeaders = ImmutableMultimap.of();
+        Multimap<String, String> headers = ImmutableMultimap.of(
+                "k1", "v1a",
+                "k2", "v2");
+        Multimap<String, String> extraHeaders = ImmutableMultimap.of(
+                "k1", "v1b",
+                "k3", "v3");
+        Multimap<String, String> combinedHeaders = ImmutableMultimap.<String, String>builder()
+                .putAll(headers)
+                .putAll(extraHeaders)
+                .build();
+
+        TDClient clientWithNoHeaders1 = TDClient.newBuilder(false).build();
+        TDClient clientWithNoHeaders2 = TDClient.newBuilder(false).setHeaders(noHeaders).build();
+        TDClient clientWithHeaders = TDClient.newBuilder(false).setHeaders(headers).build();
+
+        assertThat(clientWithNoHeaders1.httpClient.headers, is(equalTo(noHeaders)));
+        assertThat(clientWithNoHeaders2.httpClient.headers, is(equalTo(noHeaders)));
+        assertThat(clientWithHeaders.httpClient.headers, is(equalTo(headers)));
+        assertThat(clientWithNoHeaders1.withHeaders(extraHeaders).httpClient.headers, is(equalTo(extraHeaders)));
+        assertThat(clientWithNoHeaders1.withHeaders(extraHeaders).withHeaders(headers).httpClient.headers, is(equalTo(combinedHeaders)));
+        assertThat(clientWithNoHeaders2.withHeaders(extraHeaders).httpClient.headers, is(equalTo(extraHeaders)));
+        assertThat(clientWithNoHeaders2.withHeaders(extraHeaders).withHeaders(headers).httpClient.headers, is(equalTo(combinedHeaders)));
+        assertThat(clientWithHeaders.withHeaders(extraHeaders).httpClient.headers, is(equalTo(combinedHeaders)));
+
+        assertThat(clientWithNoHeaders1.httpClient.headers, is(noHeaders));
+        assertThat(clientWithNoHeaders2.httpClient.headers, is(noHeaders));
+        assertThat(clientWithHeaders.httpClient.headers, is(headers));
+    }
+
+    private Matcher<Multimap<String, String>> equalTo(final Multimap<String, String> multimap)
+    {
+        return new BaseMatcher<Multimap<String, String>>()
+        {
+            @Override
+            public boolean matches(Object item)
+            {
+                if (!(item instanceof Multimap)) {
+                    return false;
+                }
+                Multimap<String, String> other = (Multimap<String, String>) item;
+                Set<Map.Entry<String, String>> entries = ImmutableSet.copyOf(multimap.entries());
+                Set<Map.Entry<String, String>> otherEntries = ImmutableSet.copyOf(other.entries());
+                return entries.equals(otherEntries);
+            }
+
+            @Override
+            public void describeTo(Description description)
+            {
+                description.appendValue(multimap.entries());
+            }
+        };
     }
 }
