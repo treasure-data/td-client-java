@@ -19,6 +19,8 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 
 import java.util.Properties;
 
@@ -62,6 +64,9 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected int connectTimeoutMillis = 15000;
     protected int idleTimeoutMillis = 60000;
     protected int connectionPoolSize = 64;
+    protected Multimap<String, String> headers = ImmutableMultimap.of();
+    protected Optional<Integer> requestBufferSize = Optional.absent();
+    protected Optional<Integer> responseBufferSize = Optional.absent();
 
     private static Optional<String> getConfigProperty(Properties p, TDClientConfig.Type key)
     {
@@ -318,6 +323,24 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         return self();
     }
 
+    public BuilderImpl setHeaders(Multimap<String, String> headers)
+    {
+        this.headers = ImmutableMultimap.copyOf(headers);
+        return self();
+    }
+
+    public BuilderImpl setRequestBufferSize(int requestBufferSize)
+    {
+        this.requestBufferSize = Optional.of(requestBufferSize);
+        return self();
+    }
+
+    public BuilderImpl setResponseBufferSize(int responseBufferSize)
+    {
+        this.responseBufferSize = Optional.of(responseBufferSize);
+        return self();
+    }
+
     /**
      * Build a config object.
      * @return
@@ -338,8 +361,10 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
                 retryMultiplier,
                 connectTimeoutMillis,
                 idleTimeoutMillis,
-                connectionPoolSize
-        );
+                connectionPoolSize,
+                headers,
+                requestBufferSize,
+                responseBufferSize);
     }
 
     protected abstract BuilderImpl self();

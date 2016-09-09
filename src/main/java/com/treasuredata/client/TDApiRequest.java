@@ -21,6 +21,9 @@ package com.treasuredata.client;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+
 import org.eclipse.jetty.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +47,7 @@ public class TDApiRequest
     private final HttpMethod method;
     private final String path;
     private final Map<String, String> queryParams;
-    private final Map<String, String> headerParams;
+    private final Multimap<String, String> headerParams;
     private final Optional<String> postJson;
     private final Optional<File> putFile;
     private final Optional<Boolean> followRedirects;
@@ -53,7 +56,7 @@ public class TDApiRequest
             HttpMethod method,
             String path,
             Map<String, String> queryParams,
-            Map<String, String> headerParams,
+            Multimap<String, String> headerParams,
             Optional<String> postJson,
             Optional<File> putFile,
             Optional<Boolean> followRedirects
@@ -83,7 +86,7 @@ public class TDApiRequest
         return queryParams;
     }
 
-    public Map<String, String> getHeaderParams()
+    public Multimap<String, String> getHeaderParams()
     {
         return headerParams;
     }
@@ -106,10 +109,11 @@ public class TDApiRequest
     public static class Builder
     {
         private static final Map<String, String> EMPTY_MAP = ImmutableMap.of();
+        private static final Multimap<String, String> EMPTY_HEADERS = ImmutableMultimap.of();
         private HttpMethod method;
         private String path;
         private Map<String, String> queryParams;
-        private Map<String, String> headerParams;
+        private ImmutableMultimap.Builder<String, String> headerParams;
         private Optional<String> postJson = Optional.absent();
         private Optional<File> file = Optional.absent();
         private Optional<Boolean> followRedirects = Optional.absent();
@@ -143,9 +147,18 @@ public class TDApiRequest
         public Builder addHeader(String key, String value)
         {
             if (headerParams == null) {
-                headerParams = new HashMap<>();
+                headerParams = ImmutableMultimap.builder();
             }
             headerParams.put(key, value);
+            return this;
+        }
+
+        public Builder addHeaders(Multimap<String, String> headers)
+        {
+            if (headerParams == null) {
+                headerParams = ImmutableMultimap.builder();
+            }
+            headerParams.putAll(headers);
             return this;
         }
 
@@ -182,7 +195,7 @@ public class TDApiRequest
                     method,
                     path,
                     queryParams != null ? queryParams : EMPTY_MAP,
-                    headerParams != null ? headerParams : EMPTY_MAP,
+                    headerParams != null ? headerParams.build() : EMPTY_HEADERS,
                     postJson,
                     file,
                     followRedirects

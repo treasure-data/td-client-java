@@ -27,7 +27,9 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.ObjectMappers;
@@ -98,6 +100,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static com.treasuredata.client.TDClientConfig.ENV_TD_CLIENT_APIKEY;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -1288,6 +1291,55 @@ public class TestTDClient
 
         // Verify that the client can submit a job with this apikey configuration
         submitJob();
+    }
+
+    @Test
+    public void customHeaders()
+            throws InterruptedException
+    {
+        Multimap<String, String> headers0 = ImmutableMultimap.of(
+                "k0", "v0");
+        Multimap<String, String> headers1 = ImmutableMultimap.of(
+                "k1", "v1a",
+                "k1", "v1b",
+                "k2", "v2");
+        Multimap<String, String> headers2 = ImmutableMultimap.of(
+                "k3", "v3",
+                "k4", "v4");
+
+        client = TDClient.newBuilder(false)
+                .setUseSSL(false)
+                .setEndpoint(server.getHostName())
+                .setPort(server.getPort())
+                .setHeaders(headers0)
+                .build();
+
+        server.enqueue(new MockResponse());
+        server.enqueue(new MockResponse());
+        server.enqueue(new MockResponse());
+
+        client.killJob("0");
+        client.withHeaders(headers1).killJob("1");
+        client.withHeaders(headers1).withHeaders(headers2).killJob("2");
+
+        RecordedRequest request0 = server.takeRequest();
+        RecordedRequest request1 = server.takeRequest();
+        RecordedRequest request2 = server.takeRequest();
+
+        assertThat(request0.getPath(), is("/v3/job/kill/0"));
+        assertThat(request0.getHeaders().toMultimap().get("k0"), containsInAnyOrder("v0"));
+
+        assertThat(request1.getPath(), is("/v3/job/kill/1"));
+        assertThat(request1.getHeaders().toMultimap().get("k0"), containsInAnyOrder("v0"));
+        assertThat(request1.getHeaders().toMultimap().get("k1"), containsInAnyOrder("v1a", "v1b"));
+        assertThat(request1.getHeaders().toMultimap().get("k2"), containsInAnyOrder("v2"));
+
+        assertThat(request2.getPath(), is("/v3/job/kill/2"));
+        assertThat(request2.getHeaders().toMultimap().get("k0"), containsInAnyOrder("v0"));
+        assertThat(request2.getHeaders().toMultimap().get("k1"), containsInAnyOrder("v1a", "v1b"));
+        assertThat(request2.getHeaders().toMultimap().get("k2"), containsInAnyOrder("v2"));
+        assertThat(request2.getHeaders().toMultimap().get("k3"), containsInAnyOrder("v3"));
+        assertThat(request2.getHeaders().toMultimap().get("k4"), containsInAnyOrder("v4"));
     }
 
     private static String apikey()

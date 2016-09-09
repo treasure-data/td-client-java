@@ -26,6 +26,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportParts;
@@ -137,6 +138,12 @@ public class TDClient
     public TDClient withApiKey(String newApiKey)
     {
         return new TDClient(config, httpClient, Optional.of(newApiKey));
+    }
+
+    @Override
+    public TDClient withHeaders(Multimap<String, String> headers)
+    {
+        return new TDClient(config, httpClient.withHeaders(headers), apiKeyCache);
     }
 
     @VisibleForTesting
