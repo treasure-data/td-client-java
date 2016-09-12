@@ -1,3 +1,6 @@
+Release 0.7.28 - 2016-09-12
+  - Method visibility fixes.
+
 Release 0.7.27 - 2016-09-09
   - Make request and response buffer sizes configurable.
   - Make request headers configurable.
