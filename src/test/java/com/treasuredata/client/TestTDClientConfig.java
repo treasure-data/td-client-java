@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -241,6 +242,20 @@ public class TestTDClientConfig
         assertThat(clientWithNoHeaders1.httpClient.headers, is(noHeaders));
         assertThat(clientWithNoHeaders2.httpClient.headers, is(noHeaders));
         assertThat(clientWithHeaders.httpClient.headers, is(headers));
+    }
+
+    @Test
+    public void apikeyWither()
+            throws Exception
+    {
+        TDClientConfig config = TDClient.newBuilder().buildConfig();
+
+        assertThat(config.withApiKey("foo").apiKey, is(Optional.of("foo")));
+        assertThat(config.withApiKey(Optional.of("foo")).apiKey, is(Optional.of("foo")));
+        assertThat(config.withApiKey(Optional.<String>absent()).apiKey, is(Optional.<String>absent()));
+        assertThat(config.withApiKey("foo").withApiKey("bar").apiKey, is(Optional.of("bar")));
+        assertThat(config.withApiKey("foo").withApiKey(Optional.<String>absent()).apiKey, is(Optional.<String>absent()));
+        assertThat(config.withApiKey(Optional.<String>absent()).withApiKey("bar").apiKey, is(Optional.of("bar")));
     }
 
     private Matcher<Multimap<String, String>> equalTo(final Multimap<String, String> multimap)

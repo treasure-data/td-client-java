@@ -165,7 +165,7 @@ public class TDHttpClient
      * @param headers
      * @return
      */
-    TDHttpClient withHeaders(Multimap<String, String> headers)
+    public TDHttpClient withHeaders(Multimap<String, String> headers)
     {
         Multimap<String, String> mergedHeaders = ImmutableMultimap.<String, String>builder()
                 .putAll(this.headers)
