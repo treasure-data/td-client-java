@@ -109,7 +109,7 @@ public class TDClientConfig
     public final Optional<Integer> responseBufferSize;
 
     @JsonCreator
-    public TDClientConfig(
+    TDClientConfig(
             Optional<String> endpoint,
             Optional<Integer> port,
             boolean useSSL,
@@ -145,6 +145,34 @@ public class TDClientConfig
         this.headers = headers;
         this.requestBufferSize = requestBufferSize;
         this.responseBufferSize = responseBufferSize;
+    }
+
+    public TDClientConfig withApiKey(String apikey)
+    {
+        return withApiKey(Optional.of(apikey));
+    }
+
+    public TDClientConfig withApiKey(Optional<String> apikey)
+    {
+        return new TDClientConfig(
+                Optional.of(endpoint),
+                port,
+                useSSL,
+                apikey,
+                user,
+                password,
+                proxy,
+                retryLimit,
+                retryInitialIntervalMillis,
+                retryMaxIntervalMillis,
+                retryMultiplier,
+                connectTimeoutMillis,
+                idleTimeoutMillis,
+                connectionPoolSize,
+                headers,
+                requestBufferSize,
+                responseBufferSize
+        );
     }
 
     private static <V> void saveProperty(Properties p, Type config, V value)
