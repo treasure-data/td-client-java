@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
@@ -1262,6 +1263,25 @@ public class TestTDClient
         String body = recordedRequest.getBody().readUtf8();
         assertThat(body, is(expectedPayload));
         assertThat(recordedRequest.getPath(), is(expectedPath));
+    }
+
+    @Test
+    public void legacyApikeyMocked()
+            throws Exception
+    {
+        String apikey = Strings.repeat("a", 40);
+        client = mockClient().withApiKey(apikey);
+
+        server.enqueue(new MockResponse());
+
+        client.killJob("4711");
+
+        assertThat(server.getRequestCount(), is(1));
+        RecordedRequest recordedRequest = server.takeRequest();
+
+        assertThat(recordedRequest.getPath(), is("/v3/job/kill/4711"));
+        assertThat(recordedRequest.getHeader("Authorization"), is("TD1 " + apikey));
+
     }
 
     @Test
