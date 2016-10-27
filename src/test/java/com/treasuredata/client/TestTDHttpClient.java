@@ -19,8 +19,14 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.treasuredata.client.model.TDApiErrorMessage;
+import org.eclipse.jetty.client.HttpContentResponse;
+import org.eclipse.jetty.client.HttpResponse;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,8 +34,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -76,6 +91,129 @@ public class TestTDHttpClient
         }
         catch (TDClientHttpException e) {
             logger.warn("error", e);
+        }
+    }
+
+    @Test
+    public void retryOn429()
+            throws Exception
+    {
+        // Configure an artificially low retry interval so we can measure with some confidence that Retry-After is respected
+        client = TDClient.newBuilder()
+                .setRetryMaxIntervalMillis(100)
+                .setRetryLimit(1000)
+                .build()
+                .httpClient;
+
+        final AtomicLong firstRequestNanos = new AtomicLong();
+        final AtomicLong secondRequestNanos = new AtomicLong();
+        final AtomicInteger requests = new AtomicInteger();
+
+        final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
+        final byte[] body = "foobar".getBytes("UTF-8");
+        final long retryAfterSeconds = 5;
+
+        ContentResponse resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler()
+        {
+            @Override
+            public ContentResponse submit(Request request)
+                    throws InterruptedException, ExecutionException, TimeoutException
+            {
+                List<Response.ResponseListener> listeners = ImmutableList.of();
+                switch (requests.incrementAndGet()) {
+                    case 1: {
+                        firstRequestNanos.set(System.nanoTime());
+                        HttpResponse response = new HttpResponse(request, listeners)
+                                .status(429);
+                        response.getHeaders().add("Retry-After", Long.toString(retryAfterSeconds));
+                        return new HttpContentResponse(response, new byte[] {}, "", "");
+                    }
+                    case 2: {
+                        secondRequestNanos.set(System.nanoTime());
+                        HttpResponse response = new HttpResponse(request, listeners)
+                                .status(200);
+                        return new HttpContentResponse(response, body, "plain/text", "UTF-8");
+                    }
+                    default:
+                        throw new AssertionError();
+                }
+            }
+        });
+
+        assertThat(requests.get(), is(2));
+        assertThat(resp.getStatus(), is(200));
+        assertThat(resp.getContent(), is(body));
+
+        long delayNanos = secondRequestNanos.get() - firstRequestNanos.get();
+        assertThat(delayNanos, Matchers.greaterThanOrEqualTo(SECONDS.toNanos(retryAfterSeconds)));
+    }
+
+    @Test
+    public void failOn429_TimeLimitExceeded()
+            throws Exception
+    {
+        client = TDClient.newBuilder()
+                .setRetryMaxIntervalMillis(1000)
+                .setRetryLimit(3)
+                .build()
+                .httpClient;
+
+        final long retryAfterSeconds = 4711;
+        final AtomicInteger requests = new AtomicInteger();
+
+        failWith429(retryAfterSeconds, requests);
+
+        // Verify that only one attempt was made
+        assertThat(requests.get(), is(1));
+    }
+
+    @Test
+    public void failOn429_RetryLimitExceeded()
+            throws Exception
+    {
+        client = TDClient.newBuilder()
+                .setRetryMaxIntervalMillis(Integer.MAX_VALUE)
+                .setRetryLimit(3)
+                .build()
+                .httpClient;
+
+        final long retryAfterSeconds = 1;
+        final AtomicInteger requests = new AtomicInteger();
+
+        failWith429(retryAfterSeconds, requests);
+
+        // Verify that 4 attempts were made (original request + three retries)
+        assertThat(requests.get(), is(4));
+    }
+
+    private void failWith429(final long retryAfterSeconds, final AtomicInteger requests)
+    {
+        final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
+
+        try {
+            ContentResponse resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler()
+            {
+                @Override
+                public ContentResponse submit(Request request)
+                        throws InterruptedException, ExecutionException, TimeoutException
+                {
+                    requests.incrementAndGet();
+                    List<Response.ResponseListener> listeners = ImmutableList.of();
+                    HttpResponse response = new HttpResponse(request, listeners)
+                            .status(429);
+                    response.getHeaders().add("Retry-After", Long.toString(retryAfterSeconds));
+                    return new HttpContentResponse(response, new byte[] {}, "", "");
+                }
+            });
+
+            fail();
+        }
+        catch (TDClientException e) {
+            if (!(e instanceof TDClientHttpTooManyRequestsException)) {
+                fail("Expected " + TDClientHttpTooManyRequestsException.class + ", got " + e.getClass());
+            }
+            TDClientHttpTooManyRequestsException tooManyRequestsException = (TDClientHttpTooManyRequestsException) e;
+            assertThat(tooManyRequestsException.getRetryAfterSeconds(), is(Optional.of(retryAfterSeconds)));
         }
     }
 }

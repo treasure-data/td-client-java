@@ -82,6 +82,8 @@ import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_R
 import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
+import static com.treasuredata.client.TDClientHttpTooManyRequestsException.TOO_MANY_REQUESTS_429;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * An extension of Jetty HttpClient with request retry handler
@@ -338,7 +340,7 @@ public class TDHttpClient
             final int retryLimit = config.retryLimit;
             for (int retryCount = 0; retryCount <= retryLimit; ++retryCount) {
                 if (retryCount > 0) {
-                    int waitTimeMillis = backoff.nextWaitTimeMillis();
+                    long waitTimeMillis = calculateWaitTimeMillis(backoff, rootCause);
                     logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", apiRequest.getPath(), backoff.getExecutionCount(), retryLimit, waitTimeMillis / 1000.0));
                     Thread.sleep(waitTimeMillis);
                 }
@@ -355,7 +357,7 @@ public class TDHttpClient
                     }
                     else {
                         byte[] returnedContent = handler.onError(response);
-                        rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent));
+                        rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent, response));
                     }
                 }
                 catch (ExecutionException e) {
@@ -365,7 +367,7 @@ public class TDHttpClient
                     if (responseError.isPresent()) {
                         HttpResponseException re = responseError.get();
                         int code = re.getResponse().getStatus();
-                        throw handleHttpResponseError(apiRequest.getPath(), code, new byte[] {});
+                        throw handleHttpResponseError(apiRequest.getPath(), code, new byte[] {}, response);
                     }
                     else {
                         if (e.getCause() instanceof EOFException) {
@@ -408,15 +410,38 @@ public class TDHttpClient
         throw rootCause.get();
     }
 
-    protected TDClientException handleHttpResponseError(String apiRequestPath, int code, byte[] returnedContent)
+    private long calculateWaitTimeMillis(ExponentialBackOff backoff, Optional<TDClientException> rootCause)
+    {
+        long waitTimeMillis = backoff.nextWaitTimeMillis();
+        if (rootCause.isPresent() && rootCause.get() instanceof TDClientHttpTooManyRequestsException) {
+            TDClientHttpTooManyRequestsException tooManyRequestsException = (TDClientHttpTooManyRequestsException) rootCause.get();
+            Optional<Long> retryAfterSeconds = tooManyRequestsException.getRetryAfterSeconds();
+            if (retryAfterSeconds.isPresent()) {
+                long maxWaitMillis = config.retryLimit * config.retryMaxIntervalMillis;
+                long retryAfterMillis = SECONDS.toMillis(retryAfterSeconds.get());
+                // Bound the wait so we do not end up sleeping forever just because the server told us to.
+                if (retryAfterMillis > maxWaitMillis) {
+                    throw tooManyRequestsException;
+                }
+                waitTimeMillis = Math.max(waitTimeMillis, retryAfterMillis);
+            }
+        }
+        return waitTimeMillis;
+    }
+
+    private TDClientException handleHttpResponseError(String apiRequestPath, int code, byte[] returnedContent, Response response)
     {
         Optional<TDApiErrorMessage> errorResponse = parseErrorResponse(returnedContent);
         String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
         String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequestPath, responseErrorText);
         if (HttpStatus.isClientError(code)) {
             logger.debug(errorMessage);
-            // 4xx error. We do not retry the execution on this type of error
             switch (code) {
+                // Soft 4xx errors. These we retry.
+                case TOO_MANY_REQUESTS_429:
+                    return new TDClientHttpTooManyRequestsException(errorMessage, parseRetryAfter(response));
+
+                // Hard 4xx error. We do not retry the execution on this type of error
                 case HttpStatus.UNAUTHORIZED_401:
                     throw new TDClientHttpUnauthorizedException(errorMessage);
                 case HttpStatus.NOT_FOUND_404:
@@ -440,6 +465,23 @@ public class TDHttpClient
         else {
             throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code);
         }
+    }
+
+    private static Optional<Long> parseRetryAfter(Response response)
+    {
+        String retryAfter = response.getHeaders().get("Retry-After");
+        if (retryAfter == null) {
+            return Optional.absent();
+        }
+        long retryAfterSeconds;
+        try {
+            retryAfterSeconds = Long.parseLong(retryAfter);
+        }
+        catch (NumberFormatException e) {
+            logger.warn("Failed to parse Retry-After header: '" + retryAfter + "'", e);
+            return Optional.absent();
+        }
+        return Optional.of(retryAfterSeconds);
     }
 
     private String parseConflictsWith(TDApiErrorMessage errorResponse)
