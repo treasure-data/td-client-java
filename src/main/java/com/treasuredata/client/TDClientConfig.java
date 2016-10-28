@@ -59,6 +59,7 @@ public class TDClientConfig
         RETRY_MULTIPLIER("td.client.retry.multiplier", "retry interval multiplier"),
         CONNECT_TIMEOUT_MILLIS("td.client.connect-timeout", "connection timeout before reaching the API"),
         IDLE_TIMEOUT_MILLIS("td.client.idle-timeout", "idle connection timeout when no data is coming from API"),
+        REQUEST_TIMEOUT_MILLIS("td.client.request-timeout", "timeout during executing a request"),
         CONNECTION_POOL_SIZE("td.client.connection-pool-size", "connection pool size"),
         REQUEST_BUFFER_SIZE("td.client.request-buffer-size", "request buffer size"),
         RESPONSE_BUFFER_SIZE("td.client.response-buffer-size", "response buffer size"),
@@ -103,6 +104,7 @@ public class TDClientConfig
     public final double retryMultiplier;
     public final int connectTimeoutMillis;
     public final int idleTimeoutMillis;
+    public final int requestTimeoutMillis;
     public final int connectionPoolSize;
     public final Multimap<String, String> headers;
     public final Optional<Integer> requestBufferSize;
@@ -123,6 +125,7 @@ public class TDClientConfig
             double retryMultiplier,
             int connectTimeoutMillis,
             int idleTimeoutMillis,
+            int requestTimeoutMillis,
             int connectionPoolSize,
             Multimap<String, String> headers,
             Optional<Integer> requestBufferSize,
@@ -141,6 +144,7 @@ public class TDClientConfig
         this.retryMultiplier = retryMultiplier;
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.idleTimeoutMillis = idleTimeoutMillis;
+        this.requestTimeoutMillis = requestTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
         this.headers = headers;
         this.requestBufferSize = requestBufferSize;
@@ -168,6 +172,7 @@ public class TDClientConfig
                 retryMultiplier,
                 connectTimeoutMillis,
                 idleTimeoutMillis,
+                requestTimeoutMillis,
                 connectionPoolSize,
                 headers,
                 requestBufferSize,
@@ -220,6 +225,7 @@ public class TDClientConfig
         saveProperty(p, Type.RETRY_MAX_INTERVAL_MILLIS, retryMaxIntervalMillis);
         saveProperty(p, Type.RETRY_MULTIPLIER, retryMultiplier);
         saveProperty(p, Type.CONNECT_TIMEOUT_MILLIS, connectTimeoutMillis);
+        saveProperty(p, Type.REQUEST_TIMEOUT_MILLIS, requestTimeoutMillis);
         saveProperty(p, Type.CONNECTION_POOL_SIZE, connectionPoolSize);
         saveProperty(p, Type.REQUEST_BUFFER_SIZE, requestBufferSize);
         saveProperty(p, Type.RESPONSE_BUFFER_SIZE, responseBufferSize);

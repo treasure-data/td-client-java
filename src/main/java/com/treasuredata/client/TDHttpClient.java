@@ -264,7 +264,8 @@ public class TDHttpClient
                 .agent(getClientName())
                 .scheme(config.useSSL ? "https" : "http")
                 .method(apiRequest.getMethod())
-                .header(HttpHeader.DATE, dateHeader);
+                .header(HttpHeader.DATE, dateHeader)
+                .timeout(config.requestTimeoutMillis, TimeUnit.MILLISECONDS);
 
         request = setTDAuthHeaders(request, dateHeader);
 
