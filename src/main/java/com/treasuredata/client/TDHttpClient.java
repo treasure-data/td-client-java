@@ -84,7 +84,6 @@ import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTI
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
 import static com.treasuredata.client.TDClientHttpTooManyRequestsException.TOO_MANY_REQUESTS_429;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * An extension of Jetty HttpClient with request retry handler
