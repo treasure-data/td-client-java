@@ -377,7 +377,7 @@ public class TDHttpClient
                     if (responseError.isPresent()) {
                         HttpResponseException re = responseError.get();
                         int code = re.getResponse().getStatus();
-                        throw handleHttpResponseError(apiRequest.getPath(), code, new byte[] {}, response);
+                        throw handleHttpResponseError(apiRequest.getPath(), code, new byte[] {}, re.getResponse());
                     }
                     else {
                         if (e.getCause() instanceof EOFException) {
