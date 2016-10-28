@@ -36,7 +36,7 @@ public class TDClientHttpConflictException
 
     public TDClientHttpConflictException(String errorMessage, String conflictsWith)
     {
-        super(ErrorType.TARGET_ALREADY_EXISTS, errorMessage, HttpStatus.CONFLICT_409);
+        super(ErrorType.TARGET_ALREADY_EXISTS, errorMessage, HttpStatus.CONFLICT_409, null);
 
         this.conflictsWith = conflictsWith;
     }

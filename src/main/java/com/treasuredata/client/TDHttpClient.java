@@ -62,6 +62,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -92,6 +93,16 @@ public class TDHttpClient
         implements AutoCloseable
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
+
+    @VisibleForTesting
+    static final ThreadLocal<SimpleDateFormat> HTTP_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>()
+    {
+        @Override
+        protected SimpleDateFormat initialValue()
+        {
+            return new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+        }
+    };
 
     // A regex pattern that matches a TD1 apikey without the "TD1 " prefix.
     private static final Pattern NAKED_TD1_KEY_PATTERN = Pattern.compile("^[1-9][0-9]*/[a-f0-9]{40}$");
@@ -413,15 +424,16 @@ public class TDHttpClient
     private long calculateWaitTimeMillis(ExponentialBackOff backoff, Optional<TDClientException> rootCause)
     {
         long waitTimeMillis = backoff.nextWaitTimeMillis();
-        if (rootCause.isPresent() && rootCause.get() instanceof TDClientHttpTooManyRequestsException) {
-            TDClientHttpTooManyRequestsException tooManyRequestsException = (TDClientHttpTooManyRequestsException) rootCause.get();
-            Optional<Long> retryAfterSeconds = tooManyRequestsException.getRetryAfterSeconds();
-            if (retryAfterSeconds.isPresent()) {
+        if (rootCause.isPresent() && rootCause.get() instanceof TDClientHttpException) {
+            TDClientHttpException httpException = (TDClientHttpException) rootCause.get();
+            Optional<Date> retryAfter = httpException.getRetryAfter();
+            if (retryAfter.isPresent()) {
                 long maxWaitMillis = config.retryLimit * config.retryMaxIntervalMillis;
-                long retryAfterMillis = SECONDS.toMillis(retryAfterSeconds.get());
+                long now = System.currentTimeMillis();
+                long retryAfterMillis = retryAfter.get().getTime() - now;
                 // Bound the wait so we do not end up sleeping forever just because the server told us to.
                 if (retryAfterMillis > maxWaitMillis) {
-                    throw tooManyRequestsException;
+                    throw httpException;
                 }
                 waitTimeMillis = Math.max(waitTimeMillis, retryAfterMillis);
             }
@@ -431,6 +443,8 @@ public class TDHttpClient
 
     private TDClientException handleHttpResponseError(String apiRequestPath, int code, byte[] returnedContent, Response response)
     {
+        long now = System.currentTimeMillis();
+        Date retryAfter = parseRetryAfter(now, response);
         Optional<TDApiErrorMessage> errorResponse = parseErrorResponse(returnedContent);
         String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
         String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequestPath, responseErrorText);
@@ -439,7 +453,7 @@ public class TDHttpClient
             switch (code) {
                 // Soft 4xx errors. These we retry.
                 case TOO_MANY_REQUESTS_429:
-                    return new TDClientHttpTooManyRequestsException(errorMessage, parseRetryAfter(response));
+                    return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
 
                 // Hard 4xx error. We do not retry the execution on this type of error
                 case HttpStatus.UNAUTHORIZED_401:
@@ -450,38 +464,48 @@ public class TDHttpClient
                     String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
                     throw new TDClientHttpConflictException(errorMessage, conflictsWith);
                 case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
-                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code);
+                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter);
                 case HttpStatus.UNPROCESSABLE_ENTITY_422:
-                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code);
+                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter);
                 default:
-                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code);
+                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter);
             }
         }
         logger.warn(errorMessage);
         if (HttpStatus.isServerError(code)) {
             // Just returns exception info for 5xx errors
-            return new TDClientHttpException(SERVER_ERROR, errorMessage, code);
+            return new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter);
         }
         else {
-            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code);
+            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter);
         }
     }
 
-    private static Optional<Long> parseRetryAfter(Response response)
+    /**
+     * https://tools.ietf.org/html/rfc7231#section-7.1.3
+     */
+    @VisibleForTesting
+    static Date parseRetryAfter(long now, Response response)
     {
         String retryAfter = response.getHeaders().get("Retry-After");
         if (retryAfter == null) {
-            return Optional.absent();
+            return null;
         }
-        long retryAfterSeconds;
+        // Try parsing as a number of seconds first
         try {
-            retryAfterSeconds = Long.parseLong(retryAfter);
+            long retryAfterSeconds = Long.parseLong(retryAfter);
+            return new Date(now + TimeUnit.SECONDS.toMillis(retryAfterSeconds));
         }
         catch (NumberFormatException e) {
-            logger.warn("Failed to parse Retry-After header: '" + retryAfter + "'", e);
-            return Optional.absent();
+            // Then try parsing
+            try {
+                return HTTP_DATE_FORMAT.get().parse(retryAfter);
+            }
+            catch (ParseException ignore) {
+                logger.warn("Failed to parse Retry-After header: '" + retryAfter + "'");
+                return null;
+            }
         }
-        return Optional.of(retryAfterSeconds);
     }
 
     private String parseConflictsWith(TDApiErrorMessage errorResponse)

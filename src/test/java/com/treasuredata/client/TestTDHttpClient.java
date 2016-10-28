@@ -26,7 +26,15 @@ import org.eclipse.jetty.client.HttpResponse;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
+import org.eclipse.jetty.http.HttpFields;
+import org.exparity.hamcrest.date.DateMatchers;
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Instant;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -41,10 +50,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -158,7 +170,7 @@ public class TestTDHttpClient
                 .build()
                 .httpClient;
 
-        int requests = failWith429(Optional.<String>absent(), Optional.<Long>absent());
+        int requests = failWith429(Optional.<String>absent(), Optional.<Matcher<Date>>absent());
 
         assertThat(requests, is(4));
     }
@@ -173,13 +185,13 @@ public class TestTDHttpClient
                 .build()
                 .httpClient;
 
-        int requests = failWith429(Optional.of("foobar"), Optional.<Long>absent());
+        int requests = failWith429(Optional.of("foobar"), Optional.<Matcher<Date>>absent());
 
         assertThat(requests, is(4));
     }
 
     @Test
-    public void failOn429_TimeLimitExceeded()
+    public void failOn429_TimeLimitExceeded_Seconds()
             throws Exception
     {
         client = TDClient.newBuilder()
@@ -190,9 +202,37 @@ public class TestTDHttpClient
 
         // A high Retry-After value to verify that the exception is propagated without any retries when
         // the Retry-After value exceeds the configured retryLimit * retryMaxInterval
-        final long retryAfterSeconds = 4711;
+        long retryAfterSeconds = 4711;
 
-        int requests = failWith429(Optional.of(Long.toString(retryAfterSeconds)), Optional.of(retryAfterSeconds));
+        Date expectedRetryAfter = new Date(System.currentTimeMillis() + SECONDS.toMillis(retryAfterSeconds));
+
+        int requests = failWith429(
+                Optional.of(Long.toString(retryAfterSeconds)),
+                Optional.of(within(5, SECONDS, expectedRetryAfter)));
+
+        // Verify that only one attempt was made
+        assertThat(requests, is(1));
+    }
+
+    @Test
+    public void failOn429_TimeLimitExceeded_Date()
+            throws Exception
+    {
+        client = TDClient.newBuilder()
+                .setRetryMaxIntervalMillis(1000)
+                .setRetryLimit(3)
+                .build()
+                .httpClient;
+
+        // A late Retry-After value to verify that the exception is propagated without any retries when
+        // the Retry-After value exceeds the configured retryLimit * retryMaxInterval
+        DateTime retryAfter = new DateTime().plusSeconds(4711);
+        DateTimeFormatter httpDateFormatter = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss zzz");
+        String retryAfterString = retryAfter.toString(httpDateFormatter);
+
+        int requests = failWith429(
+                Optional.of(retryAfterString),
+                Optional.of(DateMatchers.within(30, SECONDS, retryAfter.toDate())));
 
         // Verify that only one attempt was made
         assertThat(requests, is(1));
@@ -210,13 +250,17 @@ public class TestTDHttpClient
 
         long retryAfterSeconds = 1;
 
-        int requests = failWith429(Optional.of(Long.toString(retryAfterSeconds)), Optional.of(retryAfterSeconds));
+        Date expectedRetryAfter = new Date(System.currentTimeMillis() + SECONDS.toMillis(retryAfterSeconds));
+
+        int requests = failWith429(
+                Optional.of(Long.toString(retryAfterSeconds)),
+                Optional.of(within(5, SECONDS, expectedRetryAfter)));
 
         // Verify that 4 attempts were made (original request + three retries)
         assertThat(requests, is(4));
     }
 
-    private int failWith429(final Optional<String> retryAfterSeconds, final Optional<Long> expectedRetryAfterSeconds)
+    private int failWith429(final Optional<String> retryAfterValue, final Optional<Matcher<Date>> retryAfterMatcher)
     {
         final AtomicInteger requests = new AtomicInteger();
 
@@ -233,8 +277,8 @@ public class TestTDHttpClient
                     List<Response.ResponseListener> listeners = ImmutableList.of();
                     HttpResponse response = new HttpResponse(request, listeners)
                             .status(429);
-                    if (retryAfterSeconds.isPresent()) {
-                        response.getHeaders().add("Retry-After", retryAfterSeconds.get());
+                    if (retryAfterValue.isPresent()) {
+                        response.getHeaders().add("Retry-After", retryAfterValue.get());
                     }
                     return new HttpContentResponse(response, new byte[] {}, "", "");
                 }
@@ -247,9 +291,44 @@ public class TestTDHttpClient
                 fail("Expected " + TDClientHttpTooManyRequestsException.class + ", got " + e.getClass());
             }
             TDClientHttpTooManyRequestsException tooManyRequestsException = (TDClientHttpTooManyRequestsException) e;
-            assertThat(tooManyRequestsException.getRetryAfterSeconds(), is(expectedRetryAfterSeconds));
+            if (retryAfterMatcher.isPresent()) {
+                assertThat(tooManyRequestsException.getRetryAfter().orNull(), retryAfterMatcher.get());
+            }
         }
 
         return requests.get();
+    }
+
+    @Test
+    public void testParseRetryAfterHttpDate()
+            throws Exception
+    {
+        Response response = mock(Response.class);
+        HttpFields headers = new HttpFields();
+        headers.add("Retry-After", "Fri, 31 Dec 1999 23:59:59 GMT");
+        when(response.getHeaders()).thenReturn(headers);
+
+        long now = System.currentTimeMillis();
+        Date d = TDHttpClient.parseRetryAfter(now, response);
+        Instant retryAfter = new Instant(d);
+        Instant expected = new DateTime(1999, 12, 31, 23, 59, 59, DateTimeZone.UTC).toInstant();
+        assertThat(retryAfter, is(expected));
+    }
+
+    @Test
+    public void testParseRetryAfterSeconds()
+            throws Exception
+    {
+        Response response = mock(Response.class);
+        HttpFields headers = new HttpFields();
+        headers.add("Retry-After", "120");
+        when(response.getHeaders()).thenReturn(headers);
+
+        long now = System.currentTimeMillis();
+
+        Date d = TDHttpClient.parseRetryAfter(now, response);
+        Instant retryAfter = new Instant(d);
+        Instant expected = new DateTime(now).plusSeconds(120).toInstant();
+        assertThat(retryAfter, is(expected));
     }
 }

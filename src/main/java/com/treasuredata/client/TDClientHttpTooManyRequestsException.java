@@ -1,6 +1,6 @@
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
+import java.util.Date;
 
 /**
  * 429 Too Many Requests error (i.e., rate limited).
@@ -11,16 +11,8 @@ public class TDClientHttpTooManyRequestsException
 {
     public static final int TOO_MANY_REQUESTS_429 = 429;
 
-    private final Optional<Long> retryAfterSeconds;
-
-    public TDClientHttpTooManyRequestsException(String errorMessage, Optional<Long> retryAfterSeconds)
+    public TDClientHttpTooManyRequestsException(String errorMessage, Date retryAfter)
     {
-        super(ErrorType.CLIENT_ERROR, errorMessage, TOO_MANY_REQUESTS_429);
-        this.retryAfterSeconds = retryAfterSeconds;
-    }
-
-    public Optional<Long> getRetryAfterSeconds()
-    {
-        return retryAfterSeconds;
+        super(ErrorType.CLIENT_ERROR, errorMessage, TOO_MANY_REQUESTS_429, retryAfter);
     }
 }

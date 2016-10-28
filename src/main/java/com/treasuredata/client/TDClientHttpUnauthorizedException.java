@@ -26,6 +26,6 @@ public class TDClientHttpUnauthorizedException
 {
     public TDClientHttpUnauthorizedException(String errorMessage)
     {
-        super(ErrorType.AUTHENTICATION_FAILURE, errorMessage, 401);
+        super(ErrorType.AUTHENTICATION_FAILURE, errorMessage, 401, null);
     }
 }
