@@ -149,6 +149,36 @@ public class TestTDHttpClient
     }
 
     @Test
+    public void retryOn429WithoutRetryAfter()
+            throws Exception
+    {
+        client = TDClient.newBuilder()
+                .setRetryMaxIntervalMillis(100)
+                .setRetryLimit(3)
+                .build()
+                .httpClient;
+
+        int requests = failWith429(Optional.<String>absent(), Optional.<Long>absent());
+
+        assertThat(requests, is(4));
+    }
+
+    @Test
+    public void retryOn429WithInvalidRetryAfter()
+            throws Exception
+    {
+        client = TDClient.newBuilder()
+                .setRetryMaxIntervalMillis(100)
+                .setRetryLimit(3)
+                .build()
+                .httpClient;
+
+        int requests = failWith429(Optional.of("foobar"), Optional.<Long>absent());
+
+        assertThat(requests, is(4));
+    }
+
+    @Test
     public void failOn429_TimeLimitExceeded()
             throws Exception
     {
@@ -158,13 +188,14 @@ public class TestTDHttpClient
                 .build()
                 .httpClient;
 
+        // A high Retry-After value to verify that the exception is propagated without any retries when
+        // the Retry-After value exceeds the configured retryLimit * retryMaxInterval
         final long retryAfterSeconds = 4711;
-        final AtomicInteger requests = new AtomicInteger();
 
-        failWith429(retryAfterSeconds, requests);
+        int requests = failWith429(Optional.of(Long.toString(retryAfterSeconds)), Optional.of(retryAfterSeconds));
 
         // Verify that only one attempt was made
-        assertThat(requests.get(), is(1));
+        assertThat(requests, is(1));
     }
 
     @Test
@@ -177,21 +208,22 @@ public class TestTDHttpClient
                 .build()
                 .httpClient;
 
-        final long retryAfterSeconds = 1;
-        final AtomicInteger requests = new AtomicInteger();
+        long retryAfterSeconds = 1;
 
-        failWith429(retryAfterSeconds, requests);
+        int requests = failWith429(Optional.of(Long.toString(retryAfterSeconds)), Optional.of(retryAfterSeconds));
 
         // Verify that 4 attempts were made (original request + three retries)
-        assertThat(requests.get(), is(4));
+        assertThat(requests, is(4));
     }
 
-    private void failWith429(final long retryAfterSeconds, final AtomicInteger requests)
+    private int failWith429(final Optional<String> retryAfterSeconds, final Optional<Long> expectedRetryAfterSeconds)
     {
+        final AtomicInteger requests = new AtomicInteger();
+
         final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
 
         try {
-            ContentResponse resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler()
+            client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler()
             {
                 @Override
                 public ContentResponse submit(Request request)
@@ -201,7 +233,9 @@ public class TestTDHttpClient
                     List<Response.ResponseListener> listeners = ImmutableList.of();
                     HttpResponse response = new HttpResponse(request, listeners)
                             .status(429);
-                    response.getHeaders().add("Retry-After", Long.toString(retryAfterSeconds));
+                    if (retryAfterSeconds.isPresent()) {
+                        response.getHeaders().add("Retry-After", retryAfterSeconds.get());
+                    }
                     return new HttpContentResponse(response, new byte[] {}, "", "");
                 }
             });
@@ -213,7 +247,9 @@ public class TestTDHttpClient
                 fail("Expected " + TDClientHttpTooManyRequestsException.class + ", got " + e.getClass());
             }
             TDClientHttpTooManyRequestsException tooManyRequestsException = (TDClientHttpTooManyRequestsException) e;
-            assertThat(tooManyRequestsException.getRetryAfterSeconds(), is(Optional.of(retryAfterSeconds)));
+            assertThat(tooManyRequestsException.getRetryAfterSeconds(), is(expectedRetryAfterSeconds));
         }
+
+        return requests.get();
     }
 }
