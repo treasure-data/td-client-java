@@ -1,3 +1,6 @@
+Release 0.7.29 - 2016-10-30
+  - Add request timeout configuration.
+
 Release 0.7.28 - 2016-09-12
   - Method visibility fixes.
 
