@@ -177,10 +177,41 @@ public class TestServerFailures
     }
 
     @Test
-    public void handleTimeoutTest()
+    public void handleIdleTimeoutTest()
             throws Exception
     {
-        logger.warn("Start request retry tests on timeout exception");
+        logger.warn("Start request retry tests on idle timeout exception");
+        handleTimeoutTest(TDClient
+                .newBuilder()
+                .setEndpoint("localhost")
+                .setUseSSL(false)
+                .setPort(port)
+                .setIdleTimeoutMillis(100)
+                .setRetryLimit(1)
+                .buildConfig()
+        );
+
+    }
+
+    @Test
+    public void handleRequestTimeoutTest()
+            throws Exception
+    {
+        logger.warn("Start request retry tests on request timeout exception");
+        handleTimeoutTest(TDClient
+                .newBuilder()
+                .setEndpoint("localhost")
+                .setUseSSL(false)
+                .setPort(port)
+                .setRequestTimeoutMillis(100)
+                .setRetryLimit(1)
+                .buildConfig()
+        );
+    }
+
+    private void handleTimeoutTest(TDClientConfig config)
+        throws Exception
+    {
         final AtomicInteger accessCount = new AtomicInteger(0);
 
         server.setHandler(new AbstractHandler()
@@ -205,15 +236,7 @@ public class TestServerFailures
         });
         startServer();
 
-        TDClient client = TDClient
-                .newBuilder()
-                .setEndpoint("localhost")
-                .setUseSSL(false)
-                .setPort(port)
-                .setIdleTimeoutMillis(100)
-                .setRetryLimit(1)
-                .build();
-
+        TDClient client = new TDClient(config);
         client.serverStatus();
         assertEquals(2, accessCount.get());
     }
