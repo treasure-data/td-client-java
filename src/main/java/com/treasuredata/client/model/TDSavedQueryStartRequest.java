@@ -14,6 +14,7 @@ import java.util.Date;
 public abstract class TDSavedQueryStartRequest
 {
     public abstract String name();
+    public abstract Optional<Long> id();
     public abstract Date scheduledTime();
     public abstract Optional<Integer> num();
     public abstract Optional<String> domainKey();
@@ -21,6 +22,7 @@ public abstract class TDSavedQueryStartRequest
     public interface Builder
     {
         Builder name(String name);
+        Builder id(long id);
         Builder scheduledTime(Date scheduledTime);
         Builder num(Optional<Integer> num);
         Builder num(int num);

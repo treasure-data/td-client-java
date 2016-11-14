@@ -48,6 +48,8 @@ import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
 import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryStartRequest;
+import com.treasuredata.client.model.TDSavedQueryStartRequestV4;
+import com.treasuredata.client.model.TDSavedQueryStartResultV4;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableList;
@@ -694,7 +696,42 @@ public class TDClient
     }
 
     @Override
+    public String startSavedQuery(long id, Date scheduledTime)
+    {
+        return startSavedQueryV4(TDSavedQueryStartRequest.builder()
+                .name("")
+                .id(id)
+                .scheduledTime(scheduledTime)
+                .build());
+    }
+
+    @Override
     public String startSavedQuery(TDSavedQueryStartRequest request)
+    {
+        if (request.id().isPresent()) {
+            return startSavedQueryV4(request);
+        }
+        else {
+            return startSavedQueryV3(request);
+        }
+    }
+
+    private String startSavedQueryV4(TDSavedQueryStartRequest request)
+    {
+        if (request.num().isPresent() && request.num().get() != 1) {
+            throw new UnsupportedOperationException("num must be 1");
+        }
+
+        TDSavedQueryStartResultV4 result =
+                doPost(buildUrl("/v4/queries", Long.toString(request.id().get()), "jobs"),
+                        ImmutableMap.<String, String>of(),
+                        Optional.of(toJson(TDSavedQueryStartRequestV4.from(request))),
+                        TDSavedQueryStartResultV4.class);
+
+        return result.getId();
+    }
+
+    private String startSavedQueryV3(TDSavedQueryStartRequest request)
     {
         Map<String, String> queryParams = new HashMap<>();
 

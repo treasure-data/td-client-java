@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
@@ -89,11 +90,15 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
@@ -124,6 +129,8 @@ public class TestTDClient
 
     private MockWebServer server;
 
+    private List<String> savedQueries = new ArrayList<>();
+
     @Before
     public void setUp()
             throws Exception
@@ -136,6 +143,15 @@ public class TestTDClient
     public void tearDown()
             throws Exception
     {
+        for (String name : savedQueries) {
+            try {
+                client.deleteSavedQuery(name);
+            }
+            catch (Exception e) {
+                logger.error("Failed to delete query: {}", name, e);
+            }
+        }
+
         client.close();
         server.shutdown();
     }
@@ -480,6 +496,29 @@ public class TestTDClient
         catch (TDClientHttpNotFoundException e) {
             // OK
         }
+    }
+
+    @Test
+    public void startSavedQueryByIdMocked()
+            throws Exception
+    {
+        client = mockClient();
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+        Calendar scheduledTime = GregorianCalendar.getInstance(utc);
+        scheduledTime.set(2016, 1, 3, 4, 5, 6);
+
+        server.enqueue(new MockResponse().setBody("{\"id\":\"17\"}"));
+
+        String startedJobId = client.startSavedQuery(4711, scheduledTime.getTime());
+
+        assertThat(startedJobId, is("17"));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getPath(), is("/v4/queries/4711/jobs"));
+        JsonNode requestBody = ObjectMappers.compactMapper().readTree(recordedRequest.getBody().readUtf8());
+
+        assertThat(requestBody.get("scheduled_time").asText(), is("2016-02-03T04:05:06Z"));
     }
 
     @Test
