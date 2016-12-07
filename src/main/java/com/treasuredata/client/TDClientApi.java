@@ -252,6 +252,15 @@ public interface TDClientApi<ClientImpl>
     /**
      * Start a query saved on the cloud.
      *
+     * @param id The id of the saved query
+     * @param scheduledTime the return time of TD_SCHEDULED_TIME
+     * @return job id
+     */
+    String startSavedQuery(long id, Date scheduledTime);
+
+    /**
+     * Start a query saved on the cloud.
+     *
      * @return job id
      */
     String startSavedQuery(TDSavedQueryStartRequest request);
