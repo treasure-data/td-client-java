@@ -62,6 +62,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,6 +83,7 @@ import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_R
 import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
+import static com.treasuredata.client.TDClientHttpTooManyRequestsException.TOO_MANY_REQUESTS_429;
 
 /**
  * An extension of Jetty HttpClient with request retry handler
@@ -90,6 +92,16 @@ public class TDHttpClient
         implements AutoCloseable
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
+
+    @VisibleForTesting
+    static final ThreadLocal<SimpleDateFormat> HTTP_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>()
+    {
+        @Override
+        protected SimpleDateFormat initialValue()
+        {
+            return new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+        }
+    };
 
     // A regex pattern that matches a TD1 apikey without the "TD1 " prefix.
     private static final Pattern NAKED_TD1_KEY_PATTERN = Pattern.compile("^(?:[1-9][0-9]*/)?[a-f0-9]{40}$");
@@ -339,7 +351,7 @@ public class TDHttpClient
             final int retryLimit = config.retryLimit;
             for (int retryCount = 0; retryCount <= retryLimit; ++retryCount) {
                 if (retryCount > 0) {
-                    int waitTimeMillis = backoff.nextWaitTimeMillis();
+                    long waitTimeMillis = calculateWaitTimeMillis(backoff, rootCause);
                     logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", apiRequest.getPath(), backoff.getExecutionCount(), retryLimit, waitTimeMillis / 1000.0));
                     Thread.sleep(waitTimeMillis);
                 }
@@ -356,7 +368,7 @@ public class TDHttpClient
                     }
                     else {
                         byte[] returnedContent = handler.onError(response);
-                        rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent));
+                        rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent, response));
                     }
                 }
                 catch (ExecutionException e) {
@@ -366,7 +378,7 @@ public class TDHttpClient
                     if (responseError.isPresent()) {
                         HttpResponseException re = responseError.get();
                         int code = re.getResponse().getStatus();
-                        throw handleHttpResponseError(apiRequest.getPath(), code, new byte[] {});
+                        throw handleHttpResponseError(apiRequest.getPath(), code, new byte[] {}, re.getResponse());
                     }
                     else {
                         if (e.getCause() instanceof EOFException) {
@@ -409,15 +421,41 @@ public class TDHttpClient
         throw rootCause.get();
     }
 
-    protected TDClientException handleHttpResponseError(String apiRequestPath, int code, byte[] returnedContent)
+    private long calculateWaitTimeMillis(ExponentialBackOff backoff, Optional<TDClientException> rootCause)
     {
+        long waitTimeMillis = backoff.nextWaitTimeMillis();
+        if (rootCause.isPresent() && rootCause.get() instanceof TDClientHttpException) {
+            TDClientHttpException httpException = (TDClientHttpException) rootCause.get();
+            Optional<Date> retryAfter = httpException.getRetryAfter();
+            if (retryAfter.isPresent()) {
+                long maxWaitMillis = config.retryLimit * config.retryMaxIntervalMillis;
+                long now = System.currentTimeMillis();
+                long retryAfterMillis = retryAfter.get().getTime() - now;
+                // Bound the wait so we do not end up sleeping forever just because the server told us to.
+                if (retryAfterMillis > maxWaitMillis) {
+                    throw httpException;
+                }
+                waitTimeMillis = Math.max(waitTimeMillis, retryAfterMillis);
+            }
+        }
+        return waitTimeMillis;
+    }
+
+    private TDClientException handleHttpResponseError(String apiRequestPath, int code, byte[] returnedContent, Response response)
+    {
+        long now = System.currentTimeMillis();
+        Date retryAfter = parseRetryAfter(now, response);
         Optional<TDApiErrorMessage> errorResponse = parseErrorResponse(returnedContent);
         String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
         String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequestPath, responseErrorText);
         if (HttpStatus.isClientError(code)) {
             logger.debug(errorMessage);
-            // 4xx error. We do not retry the execution on this type of error
             switch (code) {
+                // Soft 4xx errors. These we retry.
+                case TOO_MANY_REQUESTS_429:
+                    return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
+
+                // Hard 4xx error. We do not retry the execution on this type of error
                 case HttpStatus.UNAUTHORIZED_401:
                     throw new TDClientHttpUnauthorizedException(errorMessage);
                 case HttpStatus.NOT_FOUND_404:
@@ -426,20 +464,47 @@ public class TDHttpClient
                     String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
                     throw new TDClientHttpConflictException(errorMessage, conflictsWith);
                 case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
-                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code);
+                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter);
                 case HttpStatus.UNPROCESSABLE_ENTITY_422:
-                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code);
+                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter);
                 default:
-                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code);
+                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter);
             }
         }
         logger.warn(errorMessage);
         if (HttpStatus.isServerError(code)) {
             // Just returns exception info for 5xx errors
-            return new TDClientHttpException(SERVER_ERROR, errorMessage, code);
+            return new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter);
         }
         else {
-            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code);
+            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter);
+        }
+    }
+
+    /**
+     * https://tools.ietf.org/html/rfc7231#section-7.1.3
+     */
+    @VisibleForTesting
+    static Date parseRetryAfter(long now, Response response)
+    {
+        String retryAfter = response.getHeaders().get("Retry-After");
+        if (retryAfter == null) {
+            return null;
+        }
+        // Try parsing as a number of seconds first
+        try {
+            long retryAfterSeconds = Long.parseLong(retryAfter);
+            return new Date(now + TimeUnit.SECONDS.toMillis(retryAfterSeconds));
+        }
+        catch (NumberFormatException e) {
+            // Then try parsing as a HTTP-date
+            try {
+                return HTTP_DATE_FORMAT.get().parse(retryAfter);
+            }
+            catch (ParseException ignore) {
+                logger.warn("Failed to parse Retry-After header: '" + retryAfter + "'");
+                return null;
+            }
         }
     }
 

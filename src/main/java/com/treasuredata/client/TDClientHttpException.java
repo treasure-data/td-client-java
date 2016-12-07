@@ -18,6 +18,10 @@
  */
 package com.treasuredata.client;
 
+import com.google.common.base.Optional;
+
+import java.util.Date;
+
 /**
  * Exception class for reporting http server status code
  */
@@ -26,14 +30,27 @@ public class TDClientHttpException
 {
     private final int statusCode;
 
-    public TDClientHttpException(ErrorType errorType, String message, int statusCode)
+    private final long retryAfter;
+
+    public TDClientHttpException(ErrorType errorType, String message, int statusCode, Date retryAfter)
     {
         super(errorType, message);
         this.statusCode = statusCode;
+        this.retryAfter = retryAfter == null ? -1 : retryAfter.getTime();
     }
 
     public int getStatusCode()
     {
         return statusCode;
+    }
+
+    public Optional<Date> getRetryAfter()
+    {
+        if (retryAfter == -1) {
+            return Optional.absent();
+        }
+        else {
+            return Optional.of(new Date(retryAfter));
+        }
     }
 }

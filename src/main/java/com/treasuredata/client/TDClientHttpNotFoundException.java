@@ -28,6 +28,6 @@ public class TDClientHttpNotFoundException
 {
     public TDClientHttpNotFoundException(String message)
     {
-        super(ErrorType.TARGET_NOT_FOUND, message, HttpStatus.NOT_FOUND_404);
+        super(ErrorType.TARGET_NOT_FOUND, message, HttpStatus.NOT_FOUND_404, null);
     }
 }
