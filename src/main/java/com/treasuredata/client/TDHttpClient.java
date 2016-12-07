@@ -496,7 +496,7 @@ public class TDHttpClient
             return new Date(now + TimeUnit.SECONDS.toMillis(retryAfterSeconds));
         }
         catch (NumberFormatException e) {
-            // Then try parsing
+            // Then try parsing as a HTTP-date
             try {
                 return HTTP_DATE_FORMAT.get().parse(retryAfter);
             }
