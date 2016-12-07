@@ -1,3 +1,8 @@
+Release 0.7.30 - 2016-12-07
+  - Add method to start saved queries by id.
+  - Fix legacy apikey format support.
+  - Respect `Retry-After` response headers.
+
 Release 0.7.29 - 2016-10-30
   - Add request timeout configuration.
 
