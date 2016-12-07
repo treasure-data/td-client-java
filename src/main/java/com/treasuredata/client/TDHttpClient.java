@@ -92,7 +92,7 @@ public class TDHttpClient
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
 
     // A regex pattern that matches a TD1 apikey without the "TD1 " prefix.
-    private static final Pattern NAKED_TD1_KEY_PATTERN = Pattern.compile("^[1-9][0-9]*/[a-f0-9]{40}$");
+    private static final Pattern NAKED_TD1_KEY_PATTERN = Pattern.compile("^(?:[1-9][0-9]*/)?[a-f0-9]{40}$");
 
     protected final TDClientConfig config;
     private final HttpClient httpClient;
