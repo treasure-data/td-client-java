@@ -26,6 +26,8 @@ import org.eclipse.jetty.client.HttpResponse;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
+import org.eclipse.jetty.client.api.Response.ResponseListener;
+import org.eclipse.jetty.client.util.FutureResponseListener;
 import org.eclipse.jetty.http.HttpFields;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.Matcher;
@@ -42,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -52,6 +55,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -258,6 +262,59 @@ public class TestTDHttpClient
 
         // Verify that 4 attempts were made (original request + three retries)
         assertThat(requests, is(4));
+    }
+
+    @Test(expected = TDClientProcessingException.class)
+    public void failWithMaxLength()
+            throws Exception
+    {
+        final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
+        final byte[] body = new byte[3 * 1024 * 1024]; // jetty's default is 2 * 1024 * 1024
+        Arrays.fill(body, (byte) 100);
+
+        client.submitRequest(req, Optional.<String>absent(), new TestDefaultContentHandler(Optional.<Integer>absent(), body));
+    }
+
+    @Test
+    public void successWithMaxLength()
+            throws Exception
+    {
+        final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
+        final byte[] body = new byte[3 * 1024 * 1024]; // jetty's default is 2 * 1024 * 1024
+        Arrays.fill(body, (byte) 100);
+
+        ContentResponse res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultContentHandler(Optional.of(body.length), body));
+        assertEquals(body, res.getContent());
+    }
+
+    private static class TestDefaultContentHandler
+            extends TDHttpClient.DefaultContentHandler
+    {
+        private final byte[] body;
+
+        public TestDefaultContentHandler(Optional<Integer> maxContent, byte[] body)
+        {
+            super(maxContent);
+            this.body = body;
+        }
+
+        @Override
+        public ContentResponse submit(Request request)
+                throws InterruptedException, ExecutionException, TimeoutException
+        {
+            HttpResponse response = new HttpResponse(request, ImmutableList.<ResponseListener>of())
+                    .status(200);
+            response.getHeaders().add("Content-Length", String.valueOf(body.length));
+            ContentResponse content = new HttpContentResponse(response, body, "plain/text", "UTF-8");
+
+            FutureResponseListener listener = maxContentLength.isPresent() ? new FutureResponseListener(request, maxContentLength.get()) : new FutureResponseListener(request);
+            listener.onHeaders(content);
+
+            if (request.getAbortCause() != null) {
+                throw new ExecutionException(request.getAbortCause());
+            }
+            return content;
+        }
     }
 
     private int failWith429(final Optional<String> retryAfterValue, final Optional<Matcher<Date>> retryAfterMatcher)

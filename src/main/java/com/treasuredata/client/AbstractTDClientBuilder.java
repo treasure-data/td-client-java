@@ -69,6 +69,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected Multimap<String, String> headers = ImmutableMultimap.of();
     protected Optional<Integer> requestBufferSize = Optional.absent();
     protected Optional<Integer> responseBufferSize = Optional.absent();
+    protected Optional<Integer> maxContentLength = Optional.absent();
 
     private static Optional<String> getConfigProperty(Properties p, TDClientConfig.Type key)
     {
@@ -350,6 +351,12 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         return self();
     }
 
+    public BuilderImpl setMaxContentLength(int maxContentLength)
+    {
+        this.maxContentLength = Optional.of(maxContentLength);
+        return self();
+    }
+
     /**
      * Build a config object.
      * @return
@@ -374,7 +381,8 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
                 connectionPoolSize,
                 headers,
                 requestBufferSize,
-                responseBufferSize);
+                responseBufferSize,
+                maxContentLength);
     }
 
     protected abstract BuilderImpl self();
