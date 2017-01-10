@@ -40,6 +40,7 @@ import org.eclipse.jetty.client.Origin;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
+import org.eclipse.jetty.client.util.FutureResponseListener;
 import org.eclipse.jetty.client.util.InputStreamResponseListener;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpField;
@@ -538,7 +539,7 @@ public class TDHttpClient
 
     public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
-        ContentResponse response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
+        ContentResponse response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler(config.maxContentLength));
         String content = response.getContentAsString();
         if (logger.isTraceEnabled()) {
             logger.trace("response:\n{}", content);
@@ -566,7 +567,7 @@ public class TDHttpClient
             throws TDClientException
     {
         try {
-            ContentResponse response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
+            ContentResponse response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler(config.maxContentLength));
             byte[] content = response.getContent();
             if (logger.isTraceEnabled()) {
                 logger.trace("response:\n{}", new String(content, StandardCharsets.UTF_8));
@@ -644,11 +645,38 @@ public class TDHttpClient
     public static class DefaultContentHandler
             implements Handler<ContentResponse, ContentResponse>
     {
+        protected final Optional<Integer> maxContentLength;
+
+        public DefaultContentHandler()
+        {
+            this(Optional.<Integer>absent());
+        }
+
+        public DefaultContentHandler(Optional<Integer> maxContentLength)
+        {
+            this.maxContentLength = maxContentLength;
+        }
+
         @Override
         public ContentResponse submit(Request request)
                 throws InterruptedException, ExecutionException, TimeoutException
         {
-            return request.send();
+            FutureResponseListener listener = maxContentLength.isPresent() ? new FutureResponseListener(request, maxContentLength.get()) : new FutureResponseListener(request);
+            request.send(listener);
+
+            try {
+                long timeout = request.getTimeout();
+                if (timeout <= 0) {
+                    return listener.get();
+                }
+                return listener.get(timeout, TimeUnit.MILLISECONDS);
+            }
+            catch (Throwable throwable) {
+                // Differently from the Future, the semantic of this method is that if
+                // the send() is interrupted or times out, we abort the request.
+                request.abort(throwable);
+                throw throwable;
+            }
         }
 
         @Override
