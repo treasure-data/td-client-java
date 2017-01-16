@@ -108,6 +108,8 @@ import java.util.zip.GZIPOutputStream;
 import static com.treasuredata.client.TDClientConfig.ENV_TD_CLIENT_APIKEY;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -1195,6 +1197,7 @@ public class TestTDClient
 
         try {
             TDSavedQuery result = client.saveQuery(query);
+            assertThat(result.getId(), not(isEmptyOrNullString()));
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
             assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
 
@@ -1218,6 +1221,7 @@ public class TestTDClient
 
             TDSaveQueryRequest expected = query2.merge(result);
             TDSavedQuery updated = client.updateSavedQuery(queryName, query2);
+            assertThat(updated.getId(), is(result.getId()));
             validateSavedQuery(expected, updated);
             assertTrue(updated.getResult().startsWith("mysql://testuser2:")); // password will be hidden
             assertTrue(updated.getResult().contains("@somemysql.address/somedb2/sometable2"));
