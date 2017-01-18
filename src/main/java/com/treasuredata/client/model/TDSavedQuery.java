@@ -73,6 +73,7 @@ public class TDSavedQuery
         return b;
     }
 
+    private final String id;
     private final String name;
     private final String cron;
     private final TDJob.Type type;
@@ -87,6 +88,7 @@ public class TDSavedQuery
     private final String nextTime;
 
     public TDSavedQuery(
+            @JsonProperty("id") String id,
             @JsonProperty("name") String name,
             @JsonProperty("cron") String cron,
             @JsonProperty("type") TDJob.Type type,
@@ -100,6 +102,7 @@ public class TDSavedQuery
             @JsonProperty("result") String result,
             @JsonProperty("next_time") String nextTime)
     {
+        this.id = id;
         this.name = name;
         this.cron = cron;
         this.type = type;
@@ -112,6 +115,11 @@ public class TDSavedQuery
         this.retryLimit = retryLimit;
         this.result = result;
         this.nextTime = nextTime;
+    }
+
+    public String getId()
+    {
+        return id;
     }
 
     public String getName()
