@@ -1,3 +1,6 @@
+Release 0.7.32 - 2017-01-18
+  - Add `id` field to `TDSavedQuery`.
+
 Release 0.7.31 - 2017-01-10
   - Allow configuring http request body max-content-length
 
