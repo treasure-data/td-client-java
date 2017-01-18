@@ -188,7 +188,7 @@ To configure TDClient, use `TDClient.newBuilder()`:
 TDClient client = TDClient
     .newBuider()
     .setApiKey("(your api key)")
-    .setEndPoint("api.ybi.idcfcloud.net")   // For using a non-default endpoint
+    .setEndpoint("api.ybi.idcfcloud.net")   // For using a non-default endpoint
     .build()
 ```
 
