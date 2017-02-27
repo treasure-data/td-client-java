@@ -19,6 +19,8 @@
 package com.treasuredata.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -31,7 +33,6 @@ import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportParts;
 import com.treasuredata.client.model.TDBulkImportSession;
-import com.treasuredata.client.model.TDBulkImportSessionList;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
@@ -57,7 +58,6 @@ import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
 import com.treasuredata.client.model.TDUser;
 import com.treasuredata.client.model.TDUserList;
-import com.treasuredata.client.model.impl.TDDatabaseList;
 import com.treasuredata.client.model.impl.TDScheduleRunResult;
 import org.eclipse.jetty.http.HttpStatus;
 import org.json.simple.JSONObject;
@@ -192,6 +192,26 @@ public class TDClient
         return httpClient.call(request, apiKeyCache, resultTypeClass);
     }
 
+    protected <ResultType> ResultType doGet(String path, TypeReference<ResultType> resultTypeReference)
+            throws TDClientException
+    {
+        checkNotNull(path, "path is null");
+        checkNotNull(resultTypeReference, "resultTypeReference is null");
+
+        TDApiRequest request = TDApiRequest.Builder.GET(path).build();
+        return httpClient.call(request, apiKeyCache, resultTypeReference);
+    }
+
+    protected <ResultType> ResultType doGet(String path, JavaType resultType)
+            throws TDClientException
+    {
+        checkNotNull(path, "path is null");
+        checkNotNull(resultType, "resultType is null");
+
+        TDApiRequest request = TDApiRequest.Builder.GET(path).build();
+        return httpClient.call(request, apiKeyCache, resultType);
+    }
+
     protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Optional<String> jsonBody, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
@@ -282,8 +302,7 @@ public class TDClient
     public List<TDDatabase> listDatabases()
             throws TDClientException
     {
-        TDDatabaseList result = doGet("/v3/database/list", TDDatabaseList.class);
-        return result.getDatabases();
+        return doGet("/v3/database/list", new TypeReference<List<TDDatabase>>() {});
     }
 
     private static Pattern acceptableNamePattern = Pattern.compile("^([a-z0-9_]+)$");
@@ -609,7 +628,7 @@ public class TDClient
     @Override
     public List<TDBulkImportSession> listBulkImportSessions()
     {
-        return doGet(buildUrl("/v3/bulk_import/list"), TDBulkImportSessionList.class).getSessions();
+        return doGet(buildUrl("/v3/bulk_import/list"), new TypeReference<List<TDBulkImportSession>>() {});
     }
 
     @Override
@@ -756,7 +775,7 @@ public class TDClient
     @Override
     public List<TDSavedQuery> listSavedQueries()
     {
-        return doGet(buildUrl("/v3/schedule/list"), TDSavedQuery.TDSavedQueryList.class).getSchedules();
+        return doGet(buildUrl("/v3/schedule/list"), new TypeReference<List<TDSavedQuery>>() {});
     }
 
     @Override

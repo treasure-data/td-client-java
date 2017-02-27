@@ -18,9 +18,13 @@
  */
 package com.treasuredata.client;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.annotations.VisibleForTesting;
@@ -153,6 +157,7 @@ public class TDHttpClient
         this.objectMapper = new ObjectMapper()
                 .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
                 .registerModule(new GuavaModule())   // for mapping to Guava Optional class
+                .configure(DeserializationFeature.UNWRAP_ROOT_VALUE, false)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
@@ -566,17 +571,50 @@ public class TDHttpClient
     public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final Class<Result> resultType)
             throws TDClientException
     {
+        return call(apiRequest, apiKeyCache, objectMapper.getTypeFactory().constructType(resultType));
+    }
+
+    /**
+     * Submit an API request, and bind the returned JSON data into an object of the given result type reference.
+     * For mapping it uses Jackson object mapper.
+     *
+     * @param apiRequest
+     * @param resultType
+     * @param <Result>
+     * @return
+     * @throws TDClientException
+     */
+    public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final TypeReference<Result> resultType)
+            throws TDClientException
+    {
+        return call(apiRequest, apiKeyCache, objectMapper.getTypeFactory().constructType(resultType));
+    }
+
+    /**
+     * Submit an API request, and bind the returned JSON data into an object of the given result jackson JavaType.
+     * For mapping it uses Jackson object mapper.
+     *
+     * @param apiRequest
+     * @param resultType
+     * @param <Result>
+     * @return
+     * @throws TDClientException
+     */
+    @SuppressWarnings(value = "unchecked cast")
+    public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final JavaType resultType)
+            throws TDClientException
+    {
         try {
             ContentResponse response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler(config.maxContentLength));
             byte[] content = response.getContent();
             if (logger.isTraceEnabled()) {
                 logger.trace("response:\n{}", new String(content, StandardCharsets.UTF_8));
             }
-            if (resultType == String.class) {
-                return resultType.cast(new String(content, StandardCharsets.UTF_8));
+            if (resultType.getRawClass() == String.class) {
+                return (Result) new String(content, StandardCharsets.UTF_8);
             }
             else {
-                return objectMapper.readValue(content, resultType);
+                return getJsonReader(resultType).readValue(content);
             }
         }
         catch (JsonMappingException e) {
@@ -586,6 +624,18 @@ public class TDHttpClient
         catch (IOException e) {
             throw new TDClientException(INVALID_JSON_RESPONSE, e);
         }
+    }
+
+    private ObjectReader getJsonReader(final JavaType type)
+    {
+        ObjectReader reader = objectMapper.readerFor(type);
+        if (type.getContentType() != null) {
+            JsonRootName rootName = type.getContentType().getRawClass().getAnnotation(JsonRootName.class);
+            if (rootName != null) {
+                reader = reader.withRootName(rootName.value());
+            }
+        }
+        return reader;
     }
 
     public static interface Handler<ResponseType extends Response, Result>
