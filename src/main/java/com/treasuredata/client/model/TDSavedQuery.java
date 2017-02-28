@@ -19,29 +19,14 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonRootName;
 
 /**
  *
  */
+@JsonRootName(value = "schedules")
 public class TDSavedQuery
 {
-    public static class TDSavedQueryList
-    {
-        private final List<TDSavedQuery> schedules;
-
-        public TDSavedQueryList(@JsonProperty("schedules") List<TDSavedQuery> schedules)
-        {
-            this.schedules = schedules;
-        }
-
-        public List<TDSavedQuery> getSchedules()
-        {
-            return schedules;
-        }
-    }
-
     public static TDSavedQueryBuilder newBuilder(
             String name,
             TDJob.Type type,
