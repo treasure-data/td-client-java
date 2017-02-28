@@ -20,9 +20,8 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRootName;
 
-@JsonRootName(value = "bulk_imports")
+@JsonCollectionRootName(value = "bulk_imports")
 public class TDBulkImportSession
 {
     public static enum ImportStatus

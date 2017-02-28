@@ -496,20 +496,6 @@ public class TDClient
         doPost(buildUrl("/v3/table/swap", databaseName, tableName1, tableName2));
     }
 
-    private TDTable getTable(String databaseName, String tableName)
-    {
-        checkNotNull(databaseName, "databaseName is null");
-        checkNotNull(tableName, "tableName is null");
-
-        // TODO This should be improved via v4 api
-        for (TDTable table : listTables(databaseName)) {
-            if (table.getName().equals(tableName)) {
-                return table;
-            }
-        }
-        throw new TDClientException(TDClientException.ErrorType.TARGET_NOT_FOUND, String.format("Table %s is not found", tableName));
-    }
-
     @Override
     public void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema)
     {

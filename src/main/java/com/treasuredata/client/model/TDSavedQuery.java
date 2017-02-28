@@ -19,12 +19,11 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRootName;
 
 /**
  *
  */
-@JsonRootName(value = "schedules")
+@JsonCollectionRootName(value = "schedules")
 public class TDSavedQuery
 {
     public static TDSavedQueryBuilder newBuilder(
