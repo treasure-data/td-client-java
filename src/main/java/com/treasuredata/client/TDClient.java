@@ -36,6 +36,7 @@ import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
+import com.treasuredata.client.model.TDConnectionLookupResult;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDJob;
@@ -551,6 +552,12 @@ public class TDClient
         if (jobRequest.getDomainKey().isPresent()) {
             queryParam.put("domain_key", jobRequest.getDomainKey().get());
         }
+        if (jobRequest.getResultConnectionId().isPresent()) {
+            queryParam.put("result_connection_id", String.valueOf(jobRequest.getResultConnectionId().get()));
+        }
+        if (jobRequest.getResultConnectionSettings().isPresent()) {
+            queryParam.put("result_connection_settings", jobRequest.getResultConnectionSettings().get());
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("submit job: " + jobRequest);
@@ -911,5 +918,11 @@ public class TDClient
         return doPost(buildUrl("/v3/bulk_loads", name, "jobs"),
                 queryParams, Optional.of(payload),
                 TDBulkLoadSessionStartResult.class);
+    }
+
+    @Override
+    public long lookupConnection(String name)
+    {
+        return doGet(buildUrl("/v3/connections/lookup?name=" + urlPathSegmentEscaper().escape(name)), TDConnectionLookupResult.class).getId();
     }
 }

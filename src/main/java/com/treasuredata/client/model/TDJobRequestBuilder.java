@@ -34,6 +34,8 @@ public class TDJobRequestBuilder
     private Optional<ObjectNode> config = Optional.absent();
     private Optional<Long> scheduledTime = Optional.absent();
     private Optional<String> domainKey = Optional.absent();
+    private Optional<Long> resultConnectionId = Optional.absent();
+    private Optional<String> resultConnectionSettings = Optional.absent();
 
     public TDJobRequestBuilder setResultOutput(String result)
     {
@@ -176,6 +178,38 @@ public class TDJobRequestBuilder
     public TDJobRequestBuilder setDomainKey(String domainKey)
     {
         return setDomainKey(Optional.fromNullable(domainKey));
+    }
+
+    public Optional<Long> getResultConnectionId()
+    {
+        return resultConnectionId;
+    }
+
+    public TDJobRequestBuilder setResultConnectionId(Optional<Long> resultConnectionId)
+    {
+        this.resultConnectionId = resultConnectionId;
+        return this;
+    }
+
+    public TDJobRequestBuilder setResultConnectionId(long resultConnectionId)
+    {
+        return setResultConnectionId(Optional.of(resultConnectionId));
+    }
+
+    public Optional<String> getResultConnectionSettings()
+    {
+        return resultConnectionSettings;
+    }
+
+    public TDJobRequestBuilder setResultConnectionSettings(Optional<String> resultConnectionSettings)
+    {
+        this.resultConnectionSettings = resultConnectionSettings;
+        return this;
+    }
+
+    public TDJobRequestBuilder setResultConnectionSettings(String resultConnectionSettings)
+    {
+        return setResultConnectionSettings(Optional.fromNullable(resultConnectionSettings));
     }
 
     public TDJobRequest createTDJobRequest()
