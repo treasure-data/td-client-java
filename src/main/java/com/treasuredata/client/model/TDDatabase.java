@@ -20,11 +20,10 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRootName;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
-@JsonRootName(value = "databases")
+@JsonCollectionRootName(value = "databases")
 public class TDDatabase
 {
     private final String name;

@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.treasuredata.client.impl.ProxyAuthResult;
+import com.treasuredata.client.model.JsonCollectionRootName;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
@@ -630,7 +631,13 @@ public class TDHttpClient
     {
         ObjectReader reader = objectMapper.readerFor(type);
         if (type.getContentType() != null) {
-            JsonRootName rootName = type.getContentType().getRawClass().getAnnotation(JsonRootName.class);
+            JsonCollectionRootName rootName = type.getContentType().getRawClass().getAnnotation(JsonCollectionRootName.class);
+            if (rootName != null) {
+                reader = reader.withRootName(rootName.value());
+            }
+        }
+        else {
+            JsonRootName rootName = type.getRawClass().getAnnotation(JsonRootName.class);
             if (rootName != null) {
                 reader = reader.withRootName(rootName.value());
             }
