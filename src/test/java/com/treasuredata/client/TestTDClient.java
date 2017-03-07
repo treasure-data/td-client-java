@@ -88,6 +88,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -107,6 +108,7 @@ import java.util.zip.GZIPOutputStream;
 
 import static com.treasuredata.client.TDClientConfig.ENV_TD_CLIENT_APIKEY;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
@@ -469,6 +471,54 @@ public class TestTDClient
 
         TDJobSummary statusByDomainKey = client.jobStatusByDomainKey(domainKey);
         assertThat(statusByDomainKey.getJobId(), is(jobId));
+    }
+
+    @Test
+    public void submitJobWithResultConnectionId()
+            throws Exception
+    {
+        client = mockClient();
+
+        long connectionId = 9321;
+
+        server.enqueue(new MockResponse().setBody("{\"job_id\":\"17\"}"));
+
+        TDJobRequest request = new TDJobRequestBuilder()
+                .setType(TDJob.Type.PRESTO)
+                .setDatabase("sample_datasets")
+                .setQuery("select 1")
+                .setResultConnectionId(connectionId)
+                .createTDJobRequest();
+        String jobId = client.submit(request);
+        assertThat(jobId, is("17"));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        String body = URLDecoder.decode(recordedRequest.getBody().readUtf8(), "UTF-8");
+        assertThat(body, containsString("result_connection_id=" + connectionId));
+    }
+
+    @Test
+    public void submitJobWithResultConnectionSettings()
+            throws Exception
+    {
+        client = mockClient();
+
+        String connectionSettings = "{\"type\":\"null\"}";
+
+        server.enqueue(new MockResponse().setBody("{\"job_id\":\"17\"}"));
+
+        TDJobRequest request = new TDJobRequestBuilder()
+                .setType(TDJob.Type.PRESTO)
+                .setDatabase("sample_datasets")
+                .setQuery("select 1")
+                .setResultConnectionSettings(connectionSettings)
+                .createTDJobRequest();
+        String jobId = client.submit(request);
+        assertThat(jobId, is("17"));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        String body = URLDecoder.decode(recordedRequest.getBody().readUtf8(), "UTF-8");
+        assertThat(body, containsString("result_connection_settings=" + connectionSettings));
     }
 
     @Test
@@ -1306,6 +1356,34 @@ public class TestTDClient
         String body = recordedRequest.getBody().readUtf8();
         assertThat(body, is(expectedPayload));
         assertThat(recordedRequest.getPath(), is(expectedPath));
+    }
+
+    @Test
+    public void lookupConnectionTest()
+            throws Exception
+    {
+        client = mockClient();
+
+        server.enqueue(new MockResponse().setBody("{\"id\":4711}"));
+
+        long id = client.lookupConnection("Please Lookup This!?");
+        assertThat(id, is(4711L));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getPath(), is("/v3/connections/lookup?name=Please%20Lookup%20This!%3F"));
+    }
+
+    @Test
+    public void lookupConnectionNotFoundTest()
+            throws Exception
+    {
+        try {
+            client.lookupConnection("No such connection test");
+        }
+        catch (TDClientHttpNotFoundException e) {
+            // OK
+            assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
+        }
     }
 
     @Test

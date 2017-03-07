@@ -345,4 +345,6 @@ public interface TDClientApi<ClientImpl>
      * @return job id
      */
     TDBulkLoadSessionStartResult startBulkLoadSession(String name, TDBulkLoadSessionStartRequest request);
+
+    long lookupConnection(String name);
 }

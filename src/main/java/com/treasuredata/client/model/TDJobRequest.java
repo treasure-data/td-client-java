@@ -37,6 +37,8 @@ public class TDJobRequest
     private final Optional<ObjectNode> config;
     private final Optional<Long> scheduledTime;
     private final Optional<String> domainKey;
+    private final Optional<Long> resultConnectionId;
+    private final Optional<String> resultConnectionSettings;
 
     @Deprecated
     public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, Optional<String> resultOutput, Optional<Integer> retryLimit, Optional<String> poolName, Optional<String> table, Optional<ObjectNode> config)
@@ -52,6 +54,8 @@ public class TDJobRequest
         this.config = config;
         this.scheduledTime = Optional.absent();
         this.domainKey = Optional.absent();
+        this.resultConnectionId = Optional.absent();
+        this.resultConnectionSettings = Optional.absent();
     }
 
     private TDJobRequest(TDJobRequestBuilder builder)
@@ -67,6 +71,8 @@ public class TDJobRequest
         this.config = builder.getConfig();
         this.scheduledTime = builder.getScheduledTime();
         this.domainKey = builder.getDomainKey();
+        this.resultConnectionId = builder.getResultConnectionId();
+        this.resultConnectionSettings = builder.getResultConnectionSettings();
     }
 
     public static TDJobRequest newPrestoQuery(String database, String query)
@@ -214,6 +220,16 @@ public class TDJobRequest
         return domainKey;
     }
 
+    public Optional<Long> getResultConnectionId()
+    {
+        return resultConnectionId;
+    }
+
+    public Optional<String> getResultConnectionSettings()
+    {
+        return resultConnectionSettings;
+    }
+
     static TDJobRequest of(TDJobRequestBuilder builder)
     {
         return new TDJobRequest(builder);
@@ -234,6 +250,8 @@ public class TDJobRequest
                 ", config=" + config +
                 ", scheduledTime=" + scheduledTime +
                 ", domainKey=" + domainKey +
+                ", resultConnectionId=" + resultConnectionId +
+                ", resultConnectionSettings=" + resultConnectionSettings +
                 '}';
     }
 }
