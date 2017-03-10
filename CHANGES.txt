@@ -1,3 +1,7 @@
+Release 0.7.34 - 2017-03-10
+  - Add result_connection_id and result_connection_settings parameters to Presto and Hive jobs.
+  - Add lookupConnection method to the API.
+
 Release 0.7.33 - 2017-02-26
   - Support various jackson mapping type
 
