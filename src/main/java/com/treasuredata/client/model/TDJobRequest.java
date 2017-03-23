@@ -94,6 +94,17 @@ public class TDJobRequest
                 .createTDJobRequest();
     }
 
+    public static TDJobRequest newPrestoQuery(String database, String query, String resultOutput, String poolName)
+    {
+        return new TDJobRequestBuilder()
+                .setType(TDJob.Type.PRESTO)
+                .setDatabase(database)
+                .setQuery(query)
+                .setResultOutput(resultOutput)
+                .setPoolName(poolName)
+                .createTDJobRequest();
+    }
+
     public static TDJobRequest newHiveQuery(String database, String query)
     {
         return new TDJobRequestBuilder()
