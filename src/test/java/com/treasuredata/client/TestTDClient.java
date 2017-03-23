@@ -406,6 +406,31 @@ public class TestTDClient
     }
 
     @Test
+    public void submitPrestoJobWithPoolName()
+            throws Exception
+    {
+        client.deleteTableIfExists(SAMPLE_DB, "sample_output");
+        String poolName = "hadoop2";
+        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
+        TDJobSummary tdJob = waitJobCompletion(jobId);
+        client.existsTable(SAMPLE_DB, "sample_output");
+    }
+
+    @Test
+    public void submitPrestoJobWithInvalidPoolName()
+            throws Exception
+    {
+        exception.expect(TDClientHttpException.class);
+        exception.expectMessage("Resource pool with name 'no_such_pool' does not exist");
+
+        client.deleteTableIfExists(SAMPLE_DB, "sample_output");
+        String poolName = "no_such_pool";
+        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
+        TDJobSummary tdJob = waitJobCompletion(jobId);
+        client.existsTable(SAMPLE_DB, "sample_output");
+    }
+
+    @Test
     public void submitJobWithScheduledTime()
             throws Exception
     {
