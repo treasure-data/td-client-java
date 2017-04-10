@@ -115,7 +115,7 @@ try {
 List<TDDatabase> databaseNames = client.listDatabases();
 for(TDDatabase db : databaseNames) {
    System.out.println("database: " + db.getName());
-   for(TDTable table : client.listTables(db.getName(0)) {
+   for(TDTable table : client.listTables(db.getName())) {
       System.out.println(" table: " + table);
    }
 }
@@ -127,7 +127,7 @@ String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "sel
 ExponentialBackOff backoff = new ExponentialBackOff();
 TDJobSummary job = client.jobStatus(jobId);
 while(!job.getStatus().isFinished()) {
-  Thread.sleep(backOff.nextWaitTimeMillis());
+  Thread.sleep(backoff.nextWaitTimeMillis());
   job = client.jobStatus(jobId);
 }
 
