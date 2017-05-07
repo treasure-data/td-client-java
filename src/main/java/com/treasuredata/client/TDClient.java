@@ -373,6 +373,12 @@ public class TDClient
     }
 
     @Override
+    public TDTable showTable(String databaseName, String tableName)
+    {
+        return doGet(buildUrl("/v3/table/show", databaseName, tableName), TDTable.class);
+    }
+
+    @Override
     public List<TDTable> listTables(String databaseName)
             throws TDClientException
     {
