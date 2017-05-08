@@ -27,7 +27,7 @@ public enum TDExportFileFormatType
     TSV_GZ("tsv.gz"),
     JSONL_GZ("jsonl.gz"),
     JSON_GZ("json.gz"),
-    JSON_LINE_GZ("json-line.gz");
+    LINE_JSON_GZ("line-json.gz");
 
     private String name;
 
@@ -48,8 +48,8 @@ public enum TDExportFileFormatType
         else if ("json.gz".equals(name)) {
             return JSON_GZ;
         }
-        else if ("json-line.gz".equals(name)) {
-            return JSON_LINE_GZ;
+        else if ("line-json.gz".equals(name)) {
+            return LINE_JSON_GZ;
         }
         throw new RuntimeJsonMappingException("Unexpected export file format type");
     }
