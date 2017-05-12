@@ -228,6 +228,21 @@ public class TestTDClient
     }
 
     @Test
+    public void showTables()
+            throws Exception
+    {
+        TDTable table;
+
+        // nasdaq
+        table = client.showTable("sample_datasets", "nasdaq");
+        assertTrue(table.getColumns().size() == 6);
+
+        // www_access
+        table = client.showTable("sample_datasets", "www_access");
+        assertTrue(table.getColumns().size() == 8);
+    }
+
+    @Test
     public void listTables()
             throws Exception
     {

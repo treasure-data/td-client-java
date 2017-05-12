@@ -136,6 +136,14 @@ public interface TDClientApi<ClientImpl>
     // Table operations
 
     /**
+     * Get a specified table.
+     * @param databaseName
+     * @param table
+     * @return TDClientException
+     */
+    TDTable showTable(String databaseName, String table);
+
+    /**
      * Get the list of the tables in the specified database
      *
      * @param databaseName
