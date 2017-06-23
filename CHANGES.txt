@@ -1,3 +1,6 @@
+Release 0.7.37 - 2017-06-23
+  - Add TDClient#showTable to get a table information
+
 Release 0.7.36 - 2017-05-08
   - Fix TDExportFileFormatType.JSON_LINE_GZ.
 
