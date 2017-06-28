@@ -506,16 +506,27 @@ public class TDClient
     @Override
     public void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema)
     {
+        changeTableSchema(databaseName, tableName, newSchema, "/v3/table/update-schema");
+    }
+
+    @Override
+    public void appendTableSchema(String databaseName, String tableName, List<TDColumn> appendedSchema)
+    {
+        changeTableSchema(databaseName, tableName, appendedSchema, "/v3/table/append-schema");
+    }
+
+    private void changeTableSchema(String databaseName, String tableName, List<TDColumn> newSchema, String path)
+    {
         checkNotNull(databaseName, "databaseName is null");
         checkNotNull(tableName, "tableName is null");
         checkNotNull(newSchema, "newSchema is null");
 
-        ImmutableList.Builder<List<String>> builder = ImmutableList.<List<String>>builder();
+        ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
         for (TDColumn newColumn : newSchema) {
             builder.add(ImmutableList.of(newColumn.getKeyString(), newColumn.getType().toString(), newColumn.getName()));
         }
         String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build()));
-        doPost(buildUrl("/v3/table/update-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
+        doPost(buildUrl(path, databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
     }
 
     @Override
