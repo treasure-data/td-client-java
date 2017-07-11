@@ -50,7 +50,8 @@ public class TDClientException
         SSL_ERROR,
         EXECUTION_FAILURE,
         UNEXPECTED_RESPONSE_CODE,
-        INVALID_JSON_RESPONSE;
+        INVALID_JSON_RESPONSE,
+        SOCKET_ERROR;
     }
 
     private final ErrorType errorType;

@@ -67,6 +67,11 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.BindException;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.PortUnreachableException;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -394,6 +399,20 @@ public class TDHttpClient
                         }
                         else if (e.getCause() instanceof TimeoutException) {
                             rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
+                        }
+                        else if (e.getCause() instanceof SocketException) {
+                            final SocketException causeSocket = (SocketException) e.getCause();
+                            if (causeSocket instanceof BindException ||
+                                causeSocket instanceof ConnectException ||
+                                causeSocket instanceof NoRouteToHostException ||
+                                causeSocket instanceof PortUnreachableException) {
+                                // All known SocketException are retryable.
+                                rootCause = Optional.<TDClientException>of(new TDClientSocketException(causeSocket));
+                            }
+                            else {
+                                // Other unknown SocketException are considered non-retryable.
+                                throw new TDClientSocketException(causeSocket);
+                            }
                         }
                         else if (e.getCause() instanceof SSLException) {
                             SSLException cause = (SSLException) e.getCause();
