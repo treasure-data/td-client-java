@@ -21,7 +21,7 @@ package com.treasuredata.client;
 import java.net.SocketException;
 
 /**
- * Thrown when SSL error happens
+ * Thrown when socket error happens
  */
 public class TDClientSocketException
         extends TDClientException
