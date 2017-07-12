@@ -1,3 +1,6 @@
+Release 0.7.39 - 2017-07-12
+  - Catch and retry for most SocketException while requesting to TD API.
+
 Release 0.7.38 - 2017-06-28
   - Add TDClient#appendTableSchema and TDClient#changeTableSchema
 
