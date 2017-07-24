@@ -140,7 +140,7 @@ public class TestTDClient
     public void setUp()
             throws Exception
     {
-        client = TDClient.newBuilder(true).setMaxContentLength(10 * 1024 * 1024).build();
+        client = TDClient.newClient();
         server = new MockWebServer();
     }
 
@@ -436,7 +436,7 @@ public class TestTDClient
             throws Exception
     {
         exception.expect(TDClientHttpException.class);
-        exception.expectMessage("Presto resource pool with name 'no_such_pool' does not exist");
+        exception.expectMessage("Resource pool with name 'no_such_pool' does not exist");
 
         client.deleteTableIfExists(SAMPLE_DB, "sample_output");
         String poolName = "no_such_pool";
