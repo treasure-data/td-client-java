@@ -1,4 +1,4 @@
-Release 0.7.39 - 2017-07-12
+Release 0.7.39 - 2017-07-27
   - Catch and retry for most SocketException while requesting to TD API.
 
 Release 0.7.38 - 2017-06-28
