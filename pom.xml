@@ -69,6 +69,7 @@
     <project.check.fail-dependency-version-check>${project.check.fail-all}</project.check.fail-dependency-version-check>
     <project.check.fail-findbugs>${project.check.fail-all}</project.check.fail-findbugs>
 
+    <jetty.version>9.2.22.v20170606</jetty.version>
   </properties>
 
   <repositories>
@@ -95,7 +96,7 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-client</artifactId>
-      <version>9.2.2.v20140723</version>
+      <version>${jetty.version}</version>
     </dependency>
 
     <dependency>
@@ -213,7 +214,7 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
-      <version>9.2.2.v20140723</version>
+      <version>${jetty.version}</version>
       <scope>test</scope>
     </dependency>
 
