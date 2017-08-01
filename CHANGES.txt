@@ -1,3 +1,6 @@
+Release 0.7.40 - 2017-08-01
+  - Upgrade `jetty-client` to 9.2.22.v20170606
+
 Release 0.7.39 - 2017-07-27
   - Catch and retry for most SocketException while requesting to TD API.
 
