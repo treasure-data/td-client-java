@@ -506,27 +506,34 @@ public class TDClient
     @Override
     public void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema)
     {
-        changeTableSchema(databaseName, tableName, newSchema, "/v3/table/update-schema");
-    }
-
-    @Override
-    public void appendTableSchema(String databaseName, String tableName, List<TDColumn> appendedSchema)
-    {
-        changeTableSchema(databaseName, tableName, appendedSchema, "/v3/table/append-schema");
-    }
-
-    private void changeTableSchema(String databaseName, String tableName, List<TDColumn> newSchema, String path)
-    {
         checkNotNull(databaseName, "databaseName is null");
         checkNotNull(tableName, "tableName is null");
         checkNotNull(newSchema, "newSchema is null");
 
         ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
         for (TDColumn newColumn : newSchema) {
+            // TODO: Schema should be array of [name, type, key], not [key, type, name]. Kept for backward compatibility for now...
             builder.add(ImmutableList.of(newColumn.getKeyString(), newColumn.getType().toString(), newColumn.getName()));
         }
         String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build()));
-        doPost(buildUrl(path, databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
+        doPost(buildUrl("/v3/table/update-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
+    }
+
+    @Override
+    public void appendTableSchema(String databaseName, String tableName, List<TDColumn> appendedSchema)
+    {
+        checkNotNull(databaseName, "databaseName is null");
+        checkNotNull(tableName, "tableName is null");
+        checkNotNull(appendedSchema, "appendedSchema is null");
+
+        ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
+        for (TDColumn appendedColumn : appendedSchema) {
+            // Unlike update-schema API, append-schema API can generate alias for column name.
+            // So we should not pass `appendedColumn.getKeyString()` here.
+            builder.add(ImmutableList.of(appendedColumn.getName(), appendedColumn.getType().toString()));
+        }
+        String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build()));
+        doPost(buildUrl("/v3/table/append-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
     }
 
     @Override
