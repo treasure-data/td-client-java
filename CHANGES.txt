@@ -1,3 +1,6 @@
+Release 0.7.41 - 2017-08-04
+  - Change TDClient#appendTableSchema to not send column alias for append-schema API [#97](https://github.com/treasure-data/td-client-java/pull/97)
+
 Release 0.7.40 - 2017-08-01
   - Upgrade `jetty-client` to 9.2.22.v20170606
 
