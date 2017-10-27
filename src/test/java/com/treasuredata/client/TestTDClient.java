@@ -103,6 +103,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -298,14 +299,11 @@ public class TestTDClient
         assertTrue(jobsInAnIDRange.getJobs().size() > 0);
 
         // Check getters
-        Iterable<Method> getters = Iterables.filter(ImmutableList.copyOf(TDJob.class.getDeclaredMethods()), new Predicate<Method>()
-        {
-            @Override
-            public boolean apply(Method input)
-            {
-                return input.getName().startsWith("get");
-            }
-        });
+        List<Method> getters = ImmutableList.copyOf(TDJob.class.getDeclaredMethods())
+            .stream()
+            .filter((Method method) -> method.getName().startsWith("get"))
+            .collect(Collectors.toList());
+
         // Call getters
         for (TDJob job : jobs.getJobs()) {
             for (Method m : getters) {
