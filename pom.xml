@@ -253,7 +253,7 @@
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
+        <version>3.7.0</version>
         <configuration>
           <source>${project.build.targetJdk}</source>
           <target>${project.build.targetJdk}</target>
