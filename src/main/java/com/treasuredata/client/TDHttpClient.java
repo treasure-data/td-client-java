@@ -31,31 +31,18 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.io.ByteStreams;
-import com.treasuredata.client.impl.ProxyAuthResult;
+import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
 import com.treasuredata.client.model.TDApiErrorMessage;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.HttpProxy;
-import org.eclipse.jetty.client.HttpResponseException;
-import org.eclipse.jetty.client.Origin;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.api.Response;
-import org.eclipse.jetty.client.util.FutureResponseListener;
-import org.eclipse.jetty.client.util.InputStreamResponseListener;
-import org.eclipse.jetty.client.util.StringContentProvider;
-import org.eclipse.jetty.http.HttpField;
-import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.util.HttpCookieStore;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
+import okhttp3.ConnectionPool;
+import okhttp3.JavaNetCookieJar;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,8 +56,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.BindException;
 import java.net.ConnectException;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.net.PortUnreachableException;
+import java.net.Proxy;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -80,12 +71,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.treasuredata.client.TDApiRequest.urlEncode;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
@@ -118,64 +107,55 @@ public class TDHttpClient
     private static final Pattern NAKED_TD1_KEY_PATTERN = Pattern.compile("^(?:[1-9][0-9]*/)?[a-f0-9]{40}$");
 
     protected final TDClientConfig config;
-    private final HttpClient httpClient;
+    private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    @VisibleForTesting
-    final Multimap<String, String> headers;
+    @VisibleForTesting final Multimap<String, String> headers;
 
     public TDHttpClient(TDClientConfig config)
     {
         this.config = config;
-        this.httpClient = config.useSSL ? new HttpClient(new SslContextFactory()) : new HttpClient();
-        this.headers = config.headers;
-        httpClient.setConnectTimeout(config.connectTimeoutMillis);
-        httpClient.setIdleTimeout(config.idleTimeoutMillis);
-        httpClient.setTCPNoDelay(true);
-        QueuedThreadPool executor = new QueuedThreadPool(config.connectionPoolSize, 2);
-        executor.setDaemon(true);
-        executor.setName("td-client");
-        httpClient.setExecutor(executor);
-        httpClient.setScheduler(new ScheduledExecutorScheduler("td-client-scheduler", true));
-        httpClient.setCookieStore(new HttpCookieStore.Empty());
-        httpClient.setUserAgentField(new HttpField(HttpHeader.USER_AGENT, "td-client-java-" + TDClient.getVersion()));
-        if (config.requestBufferSize.isPresent()) {
-            httpClient.setRequestBufferSize(config.requestBufferSize.get());
-        }
-        if (config.responseBufferSize.isPresent()) {
-            httpClient.setResponseBufferSize(config.responseBufferSize.get());
-        }
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectTimeout(config.connectTimeoutMillis, TimeUnit.MILLISECONDS);
+        builder.readTimeout(config.readTimeoutMillis, TimeUnit.MILLISECONDS);
+        CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER);
+        builder.cookieJar(new JavaNetCookieJar(cookieManager));
 
         // Proxy configuration
         if (config.proxy.isPresent()) {
             final ProxyConfig proxyConfig = config.proxy.get();
             logger.trace("proxy configuration: " + proxyConfig);
-            HttpProxy httpProxy = new HttpProxy(new Origin.Address(proxyConfig.getHost(), proxyConfig.getPort()), proxyConfig.useSSL());
+            // TODO Support https proxy
+            builder.proxy(new Proxy(Proxy.Type.HTTP, InetSocketAddress.createUnresolved(proxyConfig.getHost(), proxyConfig.getPort())));
 
-            // Do not proxy requests for the proxy server
-            httpProxy.getExcludedAddresses().add(proxyConfig.getHost() + ":" + proxyConfig.getPort());
-            httpClient.getProxyConfiguration().getProxies().add(httpProxy);
             if (proxyConfig.requireAuthentication()) {
-                httpClient.getAuthenticationStore().addAuthenticationResult(new ProxyAuthResult(proxyConfig));
+                builder.proxyAuthenticator(new ProxyAuthenticator(proxyConfig));
             }
         }
+        // connection pool
+        ConnectionPool connectionPool = new ConnectionPool(config.connectionPoolSize, 5, TimeUnit.MINUTES);
+        builder.connectionPool(connectionPool);
+
+        // Build OkHttpClient
+        this.httpClient = builder.build();
+        this.headers = ImmutableMultimap.copyOf(config.headers);
+
+//        if (config.requestBufferSize.isPresent()) {
+//            httpClient.setRequestBufferSize(config.requestBufferSize.get());
+//        }
+//        if (config.responseBufferSize.isPresent()) {
+//            httpClient.setResponseBufferSize(config.responseBufferSize.get());
+//        }
+
         // Prepare jackson json-object mapper
         this.objectMapper = new ObjectMapper()
                 .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
                 .registerModule(new GuavaModule())   // for mapping to Guava Optional class
                 .configure(DeserializationFeature.UNWRAP_ROOT_VALUE, false)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        try {
-            httpClient.start();
-        }
-        catch (Exception e) {
-            logger.error("Failed to initialize Jetty client", e);
-            throw Throwables.propagate(e);
-        }
     }
 
-    private TDHttpClient(TDClientConfig config, HttpClient httpClient, ObjectMapper objectMapper, Multimap<String, String> headers)
+    private TDHttpClient(TDClientConfig config, OkHttpClient httpClient, ObjectMapper objectMapper, Multimap<String, String> headers)
     {
         this.config = config;
         this.httpClient = httpClient;
@@ -186,6 +166,7 @@ public class TDHttpClient
     /**
      * Get a {@link TDHttpClient} that uses the specified headers for each request. Reuses the same
      * underlying http client so closing the returned instance will return this instance as well.
+     *
      * @param headers
      * @return
      */
@@ -205,15 +186,7 @@ public class TDHttpClient
 
     public void close()
     {
-        synchronized (this) {
-            try {
-                httpClient.stop();
-            }
-            catch (Exception e) {
-                logger.error("Failed to terminate Jetty client", e);
-                throw Throwables.propagate(e);
-            }
-        }
+        // No need to close OkHttp client
     }
 
     @VisibleForTesting
@@ -246,16 +219,25 @@ public class TDHttpClient
                 }
             };
 
-    protected Request setTDAuthHeaders(Request request, String dateHeader)
+    protected Request.Builder setTDAuthHeaders(Request.Builder request, String dateHeader)
     {
         // Do nothing
         return request;
     }
 
+    /**
+     * Making this protected to allow overiding this value
+     *
+     * @return
+     */
     protected String getClientName()
     {
         return "td-client-java " + TDClient.getVersion();
     }
+
+    private static MediaType mediaTypeJson = MediaType.parse("application/json");
+    private static MediaType mediaTypeXwwwFormUrlencoded = MediaType.parse("application/x-www-form-urlencoded");
+    private static MediaType mediaTypeOctetStream = MediaType.parse("application/octet-stream");
 
     public Request prepareRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
@@ -276,20 +258,19 @@ public class TDHttpClient
                 queryParamList.add(String.format("%s=%s", urlEncode(queryParam.getKey()), urlEncode(queryParam.getValue())));
             }
             queryStr = Joiner.on("&").join(queryParamList);
-            if (apiRequest.getMethod() == HttpMethod.GET ||
-                    (apiRequest.getMethod() == HttpMethod.POST && apiRequest.getPostJson().isPresent())) {
+            if (apiRequest.getMethod() == TDHttpMethod.GET ||
+                    (apiRequest.getMethod() == TDHttpMethod.POST && apiRequest.getPostJson().isPresent())) {
                 requestUri += "?" + queryStr;
             }
         }
 
         logger.debug("Sending API request to {}", requestUri);
         String dateHeader = RFC2822_FORMAT.get().format(new Date());
-        Request request = httpClient.newRequest(requestUri)
-                .agent(getClientName())
-                .scheme(config.useSSL ? "https" : "http")
-                .method(apiRequest.getMethod())
-                .header(HttpHeader.DATE, dateHeader)
-                .timeout(config.requestTimeoutMillis, TimeUnit.MILLISECONDS);
+        Request.Builder request =
+                new Request.Builder()
+                        .url(requestUri)
+                        .header("User-Agent", getClientName())
+                        .header("Date", dateHeader);
 
         request = setTDAuthHeaders(request, dateHeader);
 
@@ -303,7 +284,7 @@ public class TDHttpClient
             else {
                 auth = apiKey.get();
             }
-            request.header(HttpHeader.AUTHORIZATION, auth);
+            request.header("Authorization", auth);
         }
 
         // Set other headers
@@ -316,37 +297,37 @@ public class TDHttpClient
 
         // Submit method specific headers
         switch (apiRequest.getMethod()) {
+            case GET:
+                request = request.get();
+            case DELETE:
+                request = request.delete();
             case POST:
                 if (apiRequest.getPostJson().isPresent()) {
-                    request.content(new StringContentProvider(apiRequest.getPostJson().get()), "application/json");
+                    request = request.post(RequestBody.create(mediaTypeJson, apiRequest.getPostJson().get()));
                 }
                 else if (queryStr.length() > 0) {
-                    request.content(new StringContentProvider(queryStr), "application/x-www-form-urlencoded");
+                    request = request.post(RequestBody.create(mediaTypeXwwwFormUrlencoded, queryStr));
                 }
                 else {
                     // We should set content-length explicitly for an empty post
-                    request.header("Content-Length", "0");
+                    request = request.header("Content-Length", "0");
                 }
                 break;
             case PUT:
                 if (apiRequest.getPutFile().isPresent()) {
                     try {
-                        request.file(apiRequest.getPutFile().get().toPath(), "application/octet-stream");
+                        request = request.put(RequestBody.create(mediaTypeOctetStream, apiRequest.getPutFile().get()));
                     }
-                    catch (IOException e) {
+                    catch (NullPointerException e) {
                         throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, "Failed to read input file: " + apiRequest.getPutFile().get());
                     }
                 }
                 break;
         }
 
-        // Configure redirect (302) following
-        Optional<Boolean> followRedirects = apiRequest.getFollowRedirects();
-        if (followRedirects.isPresent()) {
-            request.followRedirects(followRedirects.get());
-        }
+        // OkHttp will follow redirect (302)
 
-        return request;
+        return request.build();
     }
 
     private static boolean isNakedTD1Key(String s)
@@ -371,8 +352,8 @@ public class TDHttpClient
                 ResponseType response = null;
                 try {
                     Request request = prepareRequest(apiRequest, apiKeyCache);
-                    response = handler.submit(request);
-                    int code = response.getStatus();
+                    response = handler.submit(httpClient, request);
+                    int code = response.code();
                     if (handler.isSuccess(response)) {
                         // 2xx success
                         logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), apiRequest.getPath()));
@@ -383,56 +364,47 @@ public class TDHttpClient
                         rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent, response));
                     }
                 }
-                catch (ExecutionException e) {
+                catch (IOException e) {
                     logger.warn("API request failed", e);
-                    // Jetty client + jersey may return ProcessingException for 401 errors
-                    Optional<HttpResponseException> responseError = findHttpResponseException(e);
-                    if (responseError.isPresent()) {
-                        HttpResponseException re = responseError.get();
-                        int code = re.getResponse().getStatus();
-                        throw handleHttpResponseError(apiRequest.getPath(), code, new byte[] {}, re.getResponse());
+                    if (e.getCause() instanceof EOFException) {
+                        // Jetty returns EOFException when the connection was interrupted
+                        rootCause = Optional.<TDClientException>of(new TDClientInterruptedException("connection failure (EOFException)", (EOFException) e.getCause()));
                     }
-                    else {
-                        if (e.getCause() instanceof EOFException) {
-                            // Jetty returns EOFException when the connection was interrupted
-                            rootCause = Optional.<TDClientException>of(new TDClientInterruptedException("connection failure (EOFException)", (EOFException) e.getCause()));
-                        }
-                        else if (e.getCause() instanceof TimeoutException) {
-                            rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
-                        }
-                        else if (e.getCause() instanceof SocketException) {
-                            final SocketException causeSocket = (SocketException) e.getCause();
-                            if (causeSocket instanceof BindException ||
+                    else if (e.getCause() instanceof TimeoutException) {
+                        rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
+                    }
+                    else if (e.getCause() instanceof SocketException) {
+                        final SocketException causeSocket = (SocketException) e.getCause();
+                        if (causeSocket instanceof BindException ||
                                 causeSocket instanceof ConnectException ||
                                 causeSocket instanceof NoRouteToHostException ||
                                 causeSocket instanceof PortUnreachableException) {
-                                // All known SocketException are retryable.
-                                rootCause = Optional.<TDClientException>of(new TDClientSocketException(causeSocket));
-                            }
-                            else {
-                                // Other unknown SocketException are considered non-retryable.
-                                throw new TDClientSocketException(causeSocket);
-                            }
-                        }
-                        else if (e.getCause() instanceof SSLException) {
-                            SSLException cause = (SSLException) e.getCause();
-                            if (cause instanceof SSLHandshakeException || cause instanceof SSLKeyException || cause instanceof SSLPeerUnverifiedException) {
-                                // deterministic SSL exceptions
-                                throw new TDClientSSLException(cause);
-                            }
-                            else {
-                                // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
-                                rootCause = Optional.<TDClientException>of(new TDClientSSLException(cause));
-                            }
+                            // All known SocketException are retryable.
+                            rootCause = Optional.<TDClientException>of(new TDClientSocketException(causeSocket));
                         }
                         else {
-                            throw new TDClientProcessingException(e);
+                            // Other unknown SocketException are considered non-retryable.
+                            throw new TDClientSocketException(causeSocket);
                         }
                     }
-                }
-                catch (TimeoutException e) {
-                    logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
-                    rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
+                    else if (e.getCause() instanceof SSLException) {
+                        SSLException cause = (SSLException) e.getCause();
+                        if (cause instanceof SSLHandshakeException || cause instanceof SSLKeyException || cause instanceof SSLPeerUnverifiedException) {
+                            // deterministic SSL exceptions
+                            throw new TDClientSSLException(cause);
+                        }
+                        else {
+                            // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
+                            rootCause = Optional.<TDClientException>of(new TDClientSSLException(cause));
+                        }
+                    }
+                    else if (e.getCause() instanceof TimeoutException) {
+                        logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
+                        rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
+                    }
+                    else {
+                        throw new TDClientProcessingException(e);
+                    }
                 }
             }
         }
@@ -513,7 +485,7 @@ public class TDHttpClient
     @VisibleForTesting
     static Date parseRetryAfter(long now, Response response)
     {
-        String retryAfter = response.getHeaders().get("Retry-After");
+        String retryAfter = response.header("Retry-After");
         if (retryAfter == null) {
             return null;
         }
@@ -547,35 +519,25 @@ public class TDHttpClient
         return String.valueOf(conflictsWith);
     }
 
-    protected static Optional<HttpResponseException> findHttpResponseException(Throwable e)
-    {
-        if (e == null) {
-            return Optional.absent();
-        }
-        else {
-            if (HttpResponseException.class.isAssignableFrom(e.getClass())) {
-                return Optional.of((HttpResponseException) e);
-            }
-            else {
-                return findHttpResponseException(e.getCause());
-            }
-        }
-    }
-
     public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
-        ContentResponse response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler(config.maxContentLength));
-        String content = response.getContentAsString();
-        if (logger.isTraceEnabled()) {
-            logger.trace("response:\n{}", content);
+        Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler(config.maxContentLength));
+        try {
+            String content = response.body().string();
+            if (logger.isTraceEnabled()) {
+                logger.trace("response:\n{}", content);
+            }
+            return content;
         }
-        return content;
+        catch (IOException e) {
+            throw new TDClientException(INVALID_JSON_RESPONSE, e);
+        }
     }
 
     public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final Function<InputStream, Result> contentStreamHandler)
     {
-        InputStream input = submitRequest(apiRequest, apiKeyCache, new ContentStreamHandler());
-        return contentStreamHandler.apply(input);
+        Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
+        return contentStreamHandler.apply(response.body().byteStream());
     }
 
     /**
@@ -625,8 +587,8 @@ public class TDHttpClient
             throws TDClientException
     {
         try {
-            ContentResponse response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler(config.maxContentLength));
-            byte[] content = response.getContent();
+            Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler(config.maxContentLength));
+            byte[] content = response.body().bytes();
             if (logger.isTraceEnabled()) {
                 logger.trace("response:\n{}", new String(content, StandardCharsets.UTF_8));
             }
@@ -666,8 +628,8 @@ public class TDHttpClient
 
     public static interface Handler<ResponseType extends Response, Result>
     {
-        ResponseType submit(Request request)
-                throws InterruptedException, ExecutionException, TimeoutException;
+        ResponseType submit(OkHttpClient client, Request request)
+                throws IOException;
 
         Result onSuccess(ResponseType response);
 
@@ -680,46 +642,8 @@ public class TDHttpClient
         boolean isSuccess(ResponseType response);
     }
 
-    class ContentStreamHandler
-            implements Handler<Response, InputStream>
-    {
-        private InputStreamResponseListener listner = null;
-
-        public Response submit(Request request)
-                throws InterruptedException, ExecutionException, TimeoutException
-        {
-            listner = new InputStreamResponseListener();
-            request.send(listner);
-            long timeout = httpClient.getIdleTimeout();
-            return listner.get(timeout, TimeUnit.MILLISECONDS);
-        }
-
-        public InputStream onSuccess(Response response)
-        {
-            checkNotNull(listner, "listener is null");
-            return listner.getInputStream();
-        }
-
-        public byte[] onError(Response response)
-        {
-            try (InputStream in = listner.getInputStream()) {
-                byte[] errorResponse = ByteStreams.toByteArray(in);
-                return errorResponse;
-            }
-            catch (IOException e) {
-                throw new TDClientException(INVALID_JSON_RESPONSE, e);
-            }
-        }
-
-        @Override
-        public boolean isSuccess(Response response)
-        {
-            return HttpStatus.isSuccess(response.getStatus());
-        }
-    }
-
     public static class DefaultContentHandler
-            implements Handler<ContentResponse, ContentResponse>
+            implements Handler<Response, Response>
     {
         protected final Optional<Integer> maxContentLength;
 
@@ -734,43 +658,33 @@ public class TDHttpClient
         }
 
         @Override
-        public ContentResponse submit(Request request)
-                throws InterruptedException, ExecutionException, TimeoutException
+        public Response submit(OkHttpClient client, Request request)
+                throws IOException
         {
-            FutureResponseListener listener = maxContentLength.isPresent() ? new FutureResponseListener(request, maxContentLength.get()) : new FutureResponseListener(request);
-            request.send(listener);
-
-            try {
-                long timeout = request.getTimeout();
-                if (timeout <= 0) {
-                    return listener.get();
-                }
-                return listener.get(timeout, TimeUnit.MILLISECONDS);
-            }
-            catch (Throwable throwable) {
-                // Differently from the Future, the semantic of this method is that if
-                // the send() is interrupted or times out, we abort the request.
-                request.abort(throwable);
-                throw throwable;
-            }
+            return client.newCall(request).execute();
         }
 
         @Override
-        public ContentResponse onSuccess(ContentResponse response)
+        public Response onSuccess(Response response)
         {
             return response;
         }
 
         @Override
-        public byte[] onError(ContentResponse response)
+        public byte[] onError(Response response)
         {
-            return response.getContent();
+            try {
+                return response.body().bytes();
+            }
+            catch (IOException e) {
+                throw new TDClientException(INVALID_JSON_RESPONSE, e);
+            }
         }
 
         @Override
-        public boolean isSuccess(ContentResponse response)
+        public boolean isSuccess(Response response)
         {
-            return HttpStatus.isSuccess(response.getStatus());
+            return HttpStatus.isSuccess(response.code());
         }
     }
 }

@@ -20,44 +20,43 @@ package com.treasuredata.client.impl;
 
 import com.google.common.base.Optional;
 import com.treasuredata.client.ProxyConfig;
-import org.eclipse.jetty.client.api.Authentication;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.util.B64Code;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 
 /**
  *
  */
-public class ProxyAuthResult
-        implements Authentication.Result
+public class ProxyAuthenticator
+        implements Authenticator
 {
-    private final Logger logger = LoggerFactory.getLogger(ProxyAuthResult.class);
+    private final Logger logger = LoggerFactory.getLogger(ProxyAuthenticator.class);
     private final ProxyConfig proxyConfig;
     private Optional<String> proxyAuthCache = Optional.absent();
 
-    public ProxyAuthResult(ProxyConfig proxyConfig)
+    public ProxyAuthenticator(ProxyConfig proxyConfig)
     {
         this.proxyConfig = proxyConfig;
     }
 
     @Override
-    public URI getURI()
+    public Request authenticate(Route route, Response response)
+            throws IOException
     {
-        return proxyConfig.getUri();
-    }
-
-    @Override
-    public void apply(Request request)
-    {
-        logger.debug("Proxy authorization requested for " + request.getPath());
+        logger.debug("Proxy authorization requested for " + route.address());
         if (!proxyAuthCache.isPresent()) {
-            proxyAuthCache = Optional.of("Basic " + B64Code.encode(proxyConfig.getUser().or("") + ":" + proxyConfig.getPassword().or(""), StandardCharsets.ISO_8859_1));
+            proxyAuthCache = Optional.of(
+                    Credentials.basic(proxyConfig.getUser().or(""), proxyConfig.getPassword().or(""))
+            );
         }
-        request.header(HttpHeader.PROXY_AUTHORIZATION, proxyAuthCache.get());
+        return response.request().newBuilder()
+                .header("Proxy-Authrization", proxyAuthCache.get())
+                .build();
     }
 }

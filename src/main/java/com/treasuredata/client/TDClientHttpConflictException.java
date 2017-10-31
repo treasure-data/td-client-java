@@ -19,7 +19,6 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Optional;
-import org.eclipse.jetty.http.HttpStatus;
 
 /**
  * On 409 conflict error (e.g., database already exists)

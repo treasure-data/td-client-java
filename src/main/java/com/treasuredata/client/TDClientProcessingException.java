@@ -18,7 +18,7 @@
  */
 package com.treasuredata.client;
 
-import java.util.concurrent.ExecutionException;
+import java.io.IOException;
 
 /**
  * Thrown when processing API request has failed
@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 public class TDClientProcessingException
         extends TDClientException
 {
-    public TDClientProcessingException(ExecutionException cause)
+    public TDClientProcessingException(IOException cause)
     {
         super(ErrorType.EXECUTION_FAILURE, cause);
     }

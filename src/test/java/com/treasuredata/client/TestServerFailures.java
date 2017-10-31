@@ -186,7 +186,7 @@ public class TestServerFailures
                 .setEndpoint("localhost")
                 .setUseSSL(false)
                 .setPort(port)
-                .setIdleTimeoutMillis(100)
+                .setReadTimeoutMillis(100)
                 .setRetryLimit(1)
                 .buildConfig()
         );

@@ -58,7 +58,7 @@ public class TDClientConfig
         RETRY_MAX_INTERVAL_MILLIS("td.client.retry.max-interval", "max retry interval"),
         RETRY_MULTIPLIER("td.client.retry.multiplier", "retry interval multiplier"),
         CONNECT_TIMEOUT_MILLIS("td.client.connect-timeout", "connection timeout before reaching the API"),
-        IDLE_TIMEOUT_MILLIS("td.client.idle-timeout", "idle connection timeout when no data is coming from API"),
+        READ_TIMEOUT_MILLIS("td.client.read-timeout", "connection read timeout from API"),
         REQUEST_TIMEOUT_MILLIS("td.client.request-timeout", "timeout during executing a request"),
         CONNECTION_POOL_SIZE("td.client.connection-pool-size", "connection pool size"),
         REQUEST_BUFFER_SIZE("td.client.request-buffer-size", "request buffer size"),
@@ -104,7 +104,7 @@ public class TDClientConfig
     public final int retryMaxIntervalMillis;
     public final double retryMultiplier;
     public final int connectTimeoutMillis;
-    public final int idleTimeoutMillis;
+    public final int readTimeoutMillis;
     public final int requestTimeoutMillis;
     public final int connectionPoolSize;
     public final Multimap<String, String> headers;
@@ -126,7 +126,7 @@ public class TDClientConfig
             int retryMaxIntervalMillis,
             double retryMultiplier,
             int connectTimeoutMillis,
-            int idleTimeoutMillis,
+            int readTimeoutMillis,
             int requestTimeoutMillis,
             int connectionPoolSize,
             Multimap<String, String> headers,
@@ -146,7 +146,7 @@ public class TDClientConfig
         this.retryMaxIntervalMillis = retryMaxIntervalMillis;
         this.retryMultiplier = retryMultiplier;
         this.connectTimeoutMillis = connectTimeoutMillis;
-        this.idleTimeoutMillis = idleTimeoutMillis;
+        this.readTimeoutMillis = readTimeoutMillis;
         this.requestTimeoutMillis = requestTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
         this.headers = headers;
@@ -175,7 +175,7 @@ public class TDClientConfig
                 retryMaxIntervalMillis,
                 retryMultiplier,
                 connectTimeoutMillis,
-                idleTimeoutMillis,
+                readTimeoutMillis,
                 requestTimeoutMillis,
                 connectionPoolSize,
                 headers,

@@ -122,7 +122,7 @@ public class TestTDClientConfig
         b.setUseSSL(Boolean.parseBoolean(m.get(USESSL).toString()));
         b.setConnectTimeoutMillis(Integer.parseInt(m.get(CONNECT_TIMEOUT_MILLIS).toString()));
         b.setConnectionPoolSize(Integer.parseInt(m.get(CONNECTION_POOL_SIZE).toString()));
-        b.setIdleTimeoutMillis(Integer.parseInt(m.get(IDLE_TIMEOUT_MILLIS).toString()));
+        b.setReadTimeoutMillis(Integer.parseInt(m.get(IDLE_TIMEOUT_MILLIS).toString()));
         b.setRetryInitialIntervalMillis(Integer.parseInt(m.get(RETRY_INITIAL_INTERVAL_MILLIS).toString()));
         b.setRetryMaxIntervalMillis(Integer.parseInt(m.get(RETRY_MAX_INTERVAL_MILLIS).toString()));
         b.setRetryMultiplier(Double.parseDouble(m.get(RETRY_MULTIPLIER).toString()));
