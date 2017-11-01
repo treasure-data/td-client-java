@@ -107,6 +107,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static com.treasuredata.client.TDClientConfig.ENV_TD_CLIENT_APIKEY;
+
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -432,9 +433,13 @@ public class TestTDClient
     {
         client.deleteTableIfExists(SAMPLE_DB, "sample_output");
         String poolName = "hadoop2";
-        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
-        TDJobSummary tdJob = waitJobCompletion(jobId);
-        client.existsTable(SAMPLE_DB, "sample_output");
+        try {
+            String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
+            fail("should not reach here");
+        }
+        catch (TDClientHttpException e) {
+            assertEquals(400, e.getStatusCode());
+        }
     }
 
     @Test
@@ -1461,7 +1466,6 @@ public class TestTDClient
 
         assertThat(recordedRequest.getPath(), is("/v3/job/kill/4711"));
         assertThat(recordedRequest.getHeader("Authorization"), is("TD1 " + apikey));
-
     }
 
     @Test

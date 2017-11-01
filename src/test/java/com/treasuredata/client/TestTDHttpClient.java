@@ -51,12 +51,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  *
@@ -294,7 +291,7 @@ public class TestTDHttpClient
         Arrays.fill(body, (byte) 100);
 
         byte[] res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultHandler(Optional.of(body.length), body));
-        assertEquals(body, res);
+        assertThat(res, is(body));
     }
 
     private static class TestDefaultHandler
@@ -383,9 +380,13 @@ public class TestTDHttpClient
     public void testParseRetryAfterHttpDate()
             throws Exception
     {
-        Response response = mock(Response.class);
-        Headers headers = Headers.of("Retry-After", "Fri, 31 Dec 1999 23:59:59 GMT");
-        when(response.headers()).thenReturn(headers);
+        Response response = new Response.Builder()
+                .request(new Request.Builder().url("https://api.treasuredata.com/v3/server_status").build())
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("")
+                .headers(Headers.of("Retry-After", "Fri, 31 Dec 1999 23:59:59 GMT"))
+                .build();
 
         long now = System.currentTimeMillis();
         Date d = TDHttpClient.parseRetryAfter(now, response);
@@ -398,9 +399,13 @@ public class TestTDHttpClient
     public void testParseRetryAfterSeconds()
             throws Exception
     {
-        Response response = mock(Response.class);
-        Headers headers = Headers.of("Retry-After", "120");
-        when(response.headers()).thenReturn(headers);
+        Response response = new Response.Builder()
+                .request(new Request.Builder().url("https://api.treasuredata.com/v3/server_status").build())
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("")
+                .headers(Headers.of("Retry-After", "120"))
+                .build();
 
         long now = System.currentTimeMillis();
 
