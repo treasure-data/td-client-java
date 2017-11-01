@@ -61,6 +61,7 @@ import java.net.CookiePolicy;
 import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.net.PortUnreachableException;
+import java.net.ProtocolException;
 import java.net.Proxy;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -360,6 +361,72 @@ public class TDHttpClient
         }
     }
 
+    protected Optional<TDClientException> handleError(Throwable e)
+            throws TDClientException
+    {
+        if (e instanceof Exception) {
+            return handleException((Exception) e);
+        }
+        else {
+            throw new TDClientProcessingException(new RuntimeException(e));
+        }
+    }
+
+    /**
+     * @return If the error type is retryable, return the exception. If not, throw it as TDClientException
+     * @throws TDClientException
+     */
+    protected Optional<TDClientException> handleException(Exception e)
+            throws TDClientException
+    {
+        if (e instanceof TDClientException) {
+            // If the error is known error, we should throw it as is
+            throw (TDClientException) e;
+        }
+        else if (e instanceof ProtocolException || e instanceof ConnectException || e instanceof EOFException) {
+            // OkHttp throws ProtocolException the content length is insufficient
+            // ConnectionException can be throw if server is shutting down
+            // EOFException can be thrown when the connection was interrupted
+            return Optional.<TDClientException>of(new TDClientInterruptedException("connection failure", e));
+        }
+        else if (e instanceof TimeoutException || e instanceof SocketTimeoutException) {
+            // OkHttp throws SocketTimeoutException
+            return Optional.<TDClientException>of(new TDClientTimeoutException(e));
+        }
+        else if (e instanceof SocketException) {
+            final SocketException causeSocket = (SocketException) e.getCause();
+            if (causeSocket instanceof BindException ||
+                    causeSocket instanceof ConnectException ||
+                    causeSocket instanceof NoRouteToHostException ||
+                    causeSocket instanceof PortUnreachableException) {
+                // All known SocketException are retryable.
+                return Optional.<TDClientException>of(new TDClientSocketException(causeSocket));
+            }
+            else {
+                // Other unknown SocketException are considered non-retryable.
+                throw new TDClientSocketException(causeSocket);
+            }
+        }
+        else if (e instanceof SSLException) {
+            SSLException cause = (SSLException) e.getCause();
+            if (cause instanceof SSLHandshakeException || cause instanceof SSLKeyException || cause instanceof SSLPeerUnverifiedException) {
+                // deterministic SSL exceptions
+                throw new TDClientSSLException(cause);
+            }
+            else {
+                // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
+                return Optional.<TDClientException>of(new TDClientSSLException(cause));
+            }
+        }
+        else if (e.getCause() != null && e.getCause() instanceof Exception) {
+            return handleError((Exception) e.getCause());
+        }
+        else {
+            logger.warn("unknown type exception: " + e.getClass(), e);
+            throw new TDClientProcessingException(e);
+        }
+    }
+
     protected <Result> Result submitRequest(RequestContext context, Handler<Result> handler)
             throws TDClientException, InterruptedException
     {
@@ -403,54 +470,9 @@ public class TDHttpClient
                 }
             }
             catch (Exception e) {
-                logger.warn("API request failed", e);
-                if (e instanceof TDClientException) {
-                    throw (TDClientException) e;
-                }
-                else if (e.getCause() instanceof TDClientException) {
-                    throw (TDClientException) e.getCause();
-                }
-                else if (e.getCause() instanceof EOFException) {
-                    // Jetty returns EOFException when the connection was interrupted
-                    context.rootCause = Optional.<TDClientException>of(new TDClientInterruptedException("connection failure (EOFException)", (EOFException) e.getCause()));
-                }
-                else if (e.getCause() instanceof TimeoutException) {
-                    logger.warn(String.format("API request to %s has timed out", context.apiRequest.getPath()), e);
-                    context.rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
-                }
-                else if (e.getCause() instanceof SocketTimeoutException) {
-                    // OkHttp throws SocketTimeoutException
-                    context.rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
-                }
-                else if (e.getCause() instanceof SocketException) {
-                    final SocketException causeSocket = (SocketException) e.getCause();
-                    if (causeSocket instanceof BindException ||
-                            causeSocket instanceof ConnectException ||
-                            causeSocket instanceof NoRouteToHostException ||
-                            causeSocket instanceof PortUnreachableException) {
-                        // All known SocketException are retryable.
-                        context.rootCause = Optional.<TDClientException>of(new TDClientSocketException(causeSocket));
-                    }
-                    else {
-                        // Other unknown SocketException are considered non-retryable.
-                        throw new TDClientSocketException(causeSocket);
-                    }
-                }
-                else if (e.getCause() instanceof SSLException) {
-                    SSLException cause = (SSLException) e.getCause();
-                    if (cause instanceof SSLHandshakeException || cause instanceof SSLKeyException || cause instanceof SSLPeerUnverifiedException) {
-                        // deterministic SSL exceptions
-                        throw new TDClientSSLException(cause);
-                    }
-                    else {
-                        // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
-                        context.rootCause = Optional.<TDClientException>of(new TDClientSSLException(cause));
-                    }
-                }
-                else {
-                    logger.warn("unknown type exception", e);
-                    throw new TDClientProcessingException(e);
-                }
+                logger.warn(String.format("API request to %s failed: %s, cause: %s", context.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()), e);
+                // This may throw TDClientException if the error is not recoverable
+                context.rootCause = handleError(e);
             }
             context.retryCount += 1;
             return submitRequest(context, handler);
