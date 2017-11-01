@@ -20,6 +20,9 @@ package com.treasuredata.client.impl;
 
 import com.google.common.base.Optional;
 import com.treasuredata.client.ProxyConfig;
+import com.treasuredata.client.TDClientException;
+import com.treasuredata.client.TDClientHttpException;
+import com.treasuredata.client.TDHttpClient;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Request;
@@ -49,20 +52,20 @@ public class ProxyAuthenticator
     public Request authenticate(Route route, Response response)
             throws IOException
     {
-        if (response.code() == 407) {
-            // Proxy authentication is required
-            if (!proxyAuthCache.isPresent()) {
-                logger.debug("Proxy authorization requested for " + route.address());
-                proxyAuthCache = Optional.of(
-                        Credentials.basic(proxyConfig.getUser().or(""), proxyConfig.getPassword().or(""))
-                );
-            }
-            return response.request().newBuilder()
-                    .addHeader("Proxy-Authorization", proxyAuthCache.get())
-                    .build();
+        if (response.request().header("Proxy-Authorization") != null)
+        {
+            throw new IOException(new TDClientHttpException(TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE, "Proxy authentication failure", 407, null));
         }
-        else {
-            return null;
+
+        // Proxy authentication is required
+        if (!proxyAuthCache.isPresent()) {
+            logger.debug("Proxy authorization requested for " + route.address());
+            proxyAuthCache = Optional.of(
+                    Credentials.basic(proxyConfig.getUser().or(""), proxyConfig.getPassword().or(""))
+            );
         }
+        return response.request().newBuilder()
+                .addHeader("Proxy-Authorization", proxyAuthCache.get())
+                .build();
     }
 }
