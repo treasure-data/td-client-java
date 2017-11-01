@@ -298,10 +298,16 @@ public class TestTDClient
         assertTrue(jobsInAnIDRange.getJobs().size() > 0);
 
         // Check getters
-        Iterable<Method> getters = Iterables.filter(ImmutableList.copyOf(TDJob.class.getDeclaredMethods()), new Predicate<Method>()
+        Iterable<Method> getters = FluentIterable.from(TDJob.class.getDeclaredMethods()).filter(new Predicate<Method>()
         {
             @Override
             public boolean apply(Method input)
+            {
+                return test(input);
+            }
+
+            @Override
+            public boolean test(Method input)
             {
                 return input.getName().startsWith("get");
             }
@@ -996,6 +1002,12 @@ public class TestTDClient
                 @Override
                 public boolean apply(TDBulkImportSession input)
                 {
+                    return test(input);
+                }
+
+                @Override
+                public boolean test(TDBulkImportSession input)
+                {
                     return input.getName().equals(session);
                 }
             });
@@ -1128,6 +1140,12 @@ public class TestTDClient
             {
                 @Override
                 public boolean apply(TDTable input)
+                {
+                    return test(input);
+                }
+
+                @Override
+                public boolean test(TDTable input)
                 {
                     return input.getName().equals(bulkImportTable);
                 }

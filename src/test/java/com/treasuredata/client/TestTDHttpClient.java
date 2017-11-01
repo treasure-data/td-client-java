@@ -19,16 +19,13 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.treasuredata.client.model.TDApiErrorMessage;
-import org.eclipse.jetty.client.HttpContentResponse;
-import org.eclipse.jetty.client.HttpResponse;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.api.Response;
-import org.eclipse.jetty.client.api.Response.ResponseListener;
-import org.eclipse.jetty.client.util.FutureResponseListener;
-import org.eclipse.jetty.http.HttpFields;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -43,12 +40,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -129,26 +124,27 @@ public class TestTDHttpClient
         final byte[] body = "foobar".getBytes("UTF-8");
         final long retryAfterSeconds = 5;
 
-        ContentResponse resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler()
+        Response resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler()
         {
             @Override
-            public ContentResponse submit(Request request)
-                    throws InterruptedException, ExecutionException, TimeoutException
+            public Response submit(OkHttpClient client, Request request)
+                    throws IOException
             {
-                List<Response.ResponseListener> listeners = ImmutableList.of();
                 switch (requests.incrementAndGet()) {
                     case 1: {
                         firstRequestNanos.set(System.nanoTime());
-                        HttpResponse response = new HttpResponse(request, listeners)
-                                .status(429);
-                        response.getHeaders().add("Retry-After", Long.toString(retryAfterSeconds));
-                        return new HttpContentResponse(response, new byte[] {}, "", "");
+                        return new Response.Builder()
+                                .code(429)
+                                .header("Retry-After", Long.toString(retryAfterSeconds))
+                                .body(ResponseBody.create(null, ""))
+                                .build();
                     }
                     case 2: {
                         secondRequestNanos.set(System.nanoTime());
-                        HttpResponse response = new HttpResponse(request, listeners)
-                                .status(200);
-                        return new HttpContentResponse(response, body, "plain/text", "UTF-8");
+                        return new Response.Builder()
+                                .code(200)
+                                .body(ResponseBody.create(MediaType.parse("plain/text"), body))
+                                .build();
                     }
                     default:
                         throw new AssertionError();
@@ -157,8 +153,8 @@ public class TestTDHttpClient
         });
 
         assertThat(requests.get(), is(2));
-        assertThat(resp.getStatus(), is(200));
-        assertThat(resp.getContent(), is(body));
+        assertThat(resp.code(), is(200));
+        assertThat(resp.body().bytes(), is(body));
 
         long delayNanos = secondRequestNanos.get() - firstRequestNanos.get();
         assertThat(delayNanos, Matchers.greaterThanOrEqualTo(SECONDS.toNanos(retryAfterSeconds)));
@@ -283,8 +279,8 @@ public class TestTDHttpClient
         final byte[] body = new byte[3 * 1024 * 1024]; // jetty's default is 2 * 1024 * 1024
         Arrays.fill(body, (byte) 100);
 
-        ContentResponse res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultContentHandler(Optional.of(body.length), body));
-        assertEquals(body, res.getContent());
+        Response res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultContentHandler(Optional.of(body.length), body));
+        assertEquals(body, res.body().bytes());
     }
 
     private static class TestDefaultContentHandler
@@ -294,26 +290,21 @@ public class TestTDHttpClient
 
         public TestDefaultContentHandler(Optional<Integer> maxContent, byte[] body)
         {
-            super(maxContent);
             this.body = body;
         }
 
         @Override
-        public ContentResponse submit(Request request)
-                throws InterruptedException, ExecutionException, TimeoutException
+        public Response submit(OkHttpClient client, Request request)
+                throws IOException
         {
-            HttpResponse response = new HttpResponse(request, ImmutableList.<ResponseListener>of())
-                    .status(200);
-            response.getHeaders().add("Content-Length", String.valueOf(body.length));
-            ContentResponse content = new HttpContentResponse(response, body, "plain/text", "UTF-8");
+            Response response =
+                    new Response.Builder()
+                            .code(200)
+                            .header("Content-Length", String.valueOf(body.length))
+                            .body(ResponseBody.create(MediaType.parse("plain/text"), body))
+                            .build();
 
-            FutureResponseListener listener = maxContentLength.isPresent() ? new FutureResponseListener(request, maxContentLength.get()) : new FutureResponseListener(request);
-            listener.onHeaders(content);
-
-            if (request.getAbortCause() != null) {
-                throw new ExecutionException(request.getAbortCause());
-            }
-            return content;
+            return response;
         }
     }
 
@@ -327,17 +318,17 @@ public class TestTDHttpClient
             client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler()
             {
                 @Override
-                public ContentResponse submit(Request request)
-                        throws InterruptedException, ExecutionException, TimeoutException
+                public Response submit(OkHttpClient client, Request request)
+                        throws IOException
                 {
                     requests.incrementAndGet();
-                    List<Response.ResponseListener> listeners = ImmutableList.of();
-                    HttpResponse response = new HttpResponse(request, listeners)
-                            .status(429);
+                    Response.Builder builder = new Response.Builder()
+                            .code(429);
+
                     if (retryAfterValue.isPresent()) {
-                        response.getHeaders().add("Retry-After", retryAfterValue.get());
+                        builder.header("Retry-After", retryAfterValue.get());
                     }
-                    return new HttpContentResponse(response, new byte[] {}, "", "");
+                    return builder.build();
                 }
             });
 
@@ -361,9 +352,8 @@ public class TestTDHttpClient
             throws Exception
     {
         Response response = mock(Response.class);
-        HttpFields headers = new HttpFields();
-        headers.add("Retry-After", "Fri, 31 Dec 1999 23:59:59 GMT");
-        when(response.getHeaders()).thenReturn(headers);
+        Headers headers = Headers.of("Retry-After", "Fri, 31 Dec 1999 23:59:59 GMT");
+        when(response.headers()).thenReturn(headers);
 
         long now = System.currentTimeMillis();
         Date d = TDHttpClient.parseRetryAfter(now, response);
@@ -377,9 +367,8 @@ public class TestTDHttpClient
             throws Exception
     {
         Response response = mock(Response.class);
-        HttpFields headers = new HttpFields();
-        headers.add("Retry-After", "120");
-        when(response.getHeaders()).thenReturn(headers);
+        Headers headers = Headers.of("Retry-After", "120");
+        when(response.headers()).thenReturn(headers);
 
         long now = System.currentTimeMillis();
 

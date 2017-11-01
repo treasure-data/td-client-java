@@ -49,8 +49,8 @@ public class ProxyAuthenticator
     public Request authenticate(Route route, Response response)
             throws IOException
     {
-        logger.debug("Proxy authorization requested for " + route.address());
         if (!proxyAuthCache.isPresent()) {
+            logger.debug("Proxy authorization requested for " + route.address());
             proxyAuthCache = Optional.of(
                     Credentials.basic(proxyConfig.getUser().or(""), proxyConfig.getPassword().or(""))
             );

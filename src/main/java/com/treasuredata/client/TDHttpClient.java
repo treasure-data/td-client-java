@@ -521,7 +521,7 @@ public class TDHttpClient
 
     public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
-        Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler(config.maxContentLength));
+        Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
         try {
             String content = response.body().string();
             if (logger.isTraceEnabled()) {
@@ -587,7 +587,7 @@ public class TDHttpClient
             throws TDClientException
     {
         try {
-            Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler(config.maxContentLength));
+            Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
             byte[] content = response.body().bytes();
             if (logger.isTraceEnabled()) {
                 logger.trace("response:\n{}", new String(content, StandardCharsets.UTF_8));
@@ -645,16 +645,8 @@ public class TDHttpClient
     public static class DefaultContentHandler
             implements Handler<Response, Response>
     {
-        protected final Optional<Integer> maxContentLength;
-
         public DefaultContentHandler()
         {
-            this(Optional.<Integer>absent());
-        }
-
-        public DefaultContentHandler(Optional<Integer> maxContentLength)
-        {
-            this.maxContentLength = maxContentLength;
         }
 
         @Override
