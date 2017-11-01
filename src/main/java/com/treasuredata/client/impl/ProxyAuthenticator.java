@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static com.google.common.net.HttpHeaders.PROXY_AUTHORIZATION;
+
 /**
  *
  */
@@ -51,7 +53,8 @@ public class ProxyAuthenticator
     public Request authenticate(Route route, Response response)
             throws IOException
     {
-        if (response.request().header("Proxy-Authorization") != null) {
+        if (response.request().header(PROXY_AUTHORIZATION) != null) {
+            // If Proxy-Authrization is set, it means OkHttp client has already tried the authentication and failed
             throw new IOException(new TDClientHttpException(TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE, "Proxy authentication failure", 407, null));
         }
 
@@ -63,7 +66,7 @@ public class ProxyAuthenticator
             );
         }
         return response.request().newBuilder()
-                .addHeader("Proxy-Authorization", proxyAuthCache.get())
+                .addHeader(PROXY_AUTHORIZATION, proxyAuthCache.get())
                 .build();
     }
 }

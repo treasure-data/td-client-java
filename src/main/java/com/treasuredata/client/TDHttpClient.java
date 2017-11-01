@@ -78,7 +78,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.net.HttpHeaders.AUTHORIZATION;
+import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
+import static com.google.common.net.HttpHeaders.DATE;
 import static com.google.common.net.HttpHeaders.LOCATION;
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
+import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDApiRequest.urlEncode;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_INPUT;
@@ -274,8 +279,8 @@ public class TDHttpClient
         Request.Builder request =
                 new Request.Builder()
                         .url(requestUri)
-                        .header("User-Agent", getClientName())
-                        .header("Date", dateHeader);
+                        .header(USER_AGENT, getClientName())
+                        .header(DATE, dateHeader);
 
         request = setTDAuthHeaders(request, dateHeader);
 
@@ -289,7 +294,7 @@ public class TDHttpClient
             else {
                 auth = apiKey.get();
             }
-            request = request.header("Authorization", auth);
+            request = request.header(AUTHORIZATION, auth);
         }
 
         // Set other headers
@@ -318,7 +323,7 @@ public class TDHttpClient
                 else {
                     // We should set content-length explicitly for an empty post
                     request = request
-                            .header("Content-Length", "0")
+                            .header(CONTENT_LENGTH, "0")
                             .post(RequestBody.create(null, ""));
                 }
                 break;
@@ -559,7 +564,7 @@ public class TDHttpClient
     @VisibleForTesting
     static Date parseRetryAfter(long now, Response response)
     {
-        String retryAfter = response.header("Retry-After");
+        String retryAfter = response.header(RETRY_AFTER);
         if (retryAfter == null) {
             return null;
         }
