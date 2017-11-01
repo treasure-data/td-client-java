@@ -76,6 +76,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.net.HttpHeaders.LOCATION;
 import static com.treasuredata.client.TDApiRequest.urlEncode;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_INPUT;
@@ -339,90 +340,127 @@ public class TDHttpClient
         return NAKED_TD1_KEY_PATTERN.matcher(s).matches();
     }
 
-    public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Handler<Result> handler)
-            throws TDClientException
+    private class RequestContext
     {
-        ExponentialBackOff backoff = new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);
-        Optional<TDClientException> rootCause = Optional.absent();
-        try {
-            final int retryLimit = config.retryLimit;
-            for (int retryCount = 0; retryCount <= retryLimit; ++retryCount) {
-                if (retryCount > 0) {
-                    long waitTimeMillis = calculateWaitTimeMillis(backoff, rootCause);
-                    logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", apiRequest.getPath(), backoff.getExecutionCount(), retryLimit, waitTimeMillis / 1000.0));
-                    Thread.sleep(waitTimeMillis);
-                }
+        public final TDApiRequest apiRequest;
+        public Request request;
 
-                Request request = prepareRequest(apiRequest, apiKeyCache);
-                try {
-                    // Close the response object when finishing the request handling
-                    try (Response response = httpClient.newCall(request).execute()) {
-                        int code = response.code();
-                        if (handler.isSuccess(response)) {
-                            // 2xx success
-                            logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), apiRequest.getPath()));
-                            return handler.onSuccess(response);
-                        }
-                        else {
-                            // on error
-                            byte[] returnedContent = handler.onError(response);
-                            rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent, response));
-                        }
-                    }
-                }
-                catch (Exception e) {
-                    logger.warn("API request failed", e);
-                    if (e.getCause() instanceof EOFException) {
-                        // Jetty returns EOFException when the connection was interrupted
-                        rootCause = Optional.<TDClientException>of(new TDClientInterruptedException("connection failure (EOFException)", (EOFException) e.getCause()));
-                    }
-                    else if (e.getCause() instanceof TimeoutException) {
-                        rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
-                    }
-                    else if (e.getCause() instanceof SocketException) {
-                        final SocketException causeSocket = (SocketException) e.getCause();
-                        if (causeSocket instanceof BindException ||
-                                causeSocket instanceof ConnectException ||
-                                causeSocket instanceof NoRouteToHostException ||
-                                causeSocket instanceof PortUnreachableException) {
-                            // All known SocketException are retryable.
-                            rootCause = Optional.<TDClientException>of(new TDClientSocketException(causeSocket));
-                        }
-                        else {
-                            // Other unknown SocketException are considered non-retryable.
-                            throw new TDClientSocketException(causeSocket);
-                        }
-                    }
-                    else if (e.getCause() instanceof SSLException) {
-                        SSLException cause = (SSLException) e.getCause();
-                        if (cause instanceof SSLHandshakeException || cause instanceof SSLKeyException || cause instanceof SSLPeerUnverifiedException) {
-                            // deterministic SSL exceptions
-                            throw new TDClientSSLException(cause);
-                        }
-                        else {
-                            // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
-                            rootCause = Optional.<TDClientException>of(new TDClientSSLException(cause));
+        private final ExponentialBackOff backoff = new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);
+        public int retryCount = 0;
+
+        public Optional<TDClientException> rootCause = Optional.absent();
+
+        public RequestContext(TDApiRequest apiRequest, Request request)
+        {
+            this.apiRequest = apiRequest;
+            this.request = request;
+        }
+    }
+
+    protected <Result> Result submitRequest(RequestContext context, Handler<Result> handler)
+            throws TDClientException, InterruptedException
+    {
+        if (context.retryCount > config.retryLimit) {
+            logger.warn("API request retry limit exceeded: ({}/{})", config.retryLimit, config.retryLimit);
+
+            checkState(context.rootCause.isPresent(), "rootCause must be present here");
+            // Throw the last seen error
+            throw context.rootCause.get();
+        }
+        else {
+            if (context.retryCount > 0) {
+                long waitTimeMillis = calculateWaitTimeMillis(context.backoff, context.rootCause);
+                logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", context.apiRequest.getPath(), context.backoff.getExecutionCount(), config.retryLimit, waitTimeMillis / 1000.0));
+                // Sleeping for a while. This may throw InterruptedException
+                Thread.sleep(waitTimeMillis);
+            }
+
+            try {
+                try (Response response = handler.send(httpClient, context.request)) {
+                    int code = response.code();
+                    // Retry upon proxy authentication request
+                    if (code == 307 || code == 308) {
+                        String location = response.header(LOCATION);
+                        if (location != null) {
+                            context.request = context.request.newBuilder().url(location).build();
+                            return submitRequest(context, handler);
                         }
                     }
-                    else if (e.getCause() instanceof TimeoutException) {
-                        logger.warn(String.format("API request to %s has timed out", apiRequest.getPath()), e);
-                        rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
+                    if (handler.isSuccess(response)) {
+                        // 2xx success
+                        logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), context.apiRequest.getPath()));
+                        return handler.onSuccess(response);
                     }
                     else {
-                        throw new TDClientProcessingException(e);
+                        // on error
+                        byte[] returnedContent = handler.onError(response);
+                        context.rootCause = Optional.of(handleHttpResponseError(context.apiRequest.getPath(), code, returnedContent, response));
                     }
                 }
             }
+            catch (Exception e) {
+                logger.warn("API request failed", e);
+                if(e instanceof TDClientException) {
+                    throw (TDClientException) e;
+                }
+                else if (e.getCause() instanceof EOFException) {
+                    // Jetty returns EOFException when the connection was interrupted
+                    context.rootCause = Optional.<TDClientException>of(new TDClientInterruptedException("connection failure (EOFException)", (EOFException) e.getCause()));
+                }
+                else if (e.getCause() instanceof TimeoutException) {
+                    context.rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
+                }
+                else if (e.getCause() instanceof SocketException) {
+                    final SocketException causeSocket = (SocketException) e.getCause();
+                    if (causeSocket instanceof BindException ||
+                            causeSocket instanceof ConnectException ||
+                            causeSocket instanceof NoRouteToHostException ||
+                            causeSocket instanceof PortUnreachableException) {
+                        // All known SocketException are retryable.
+                        context.rootCause = Optional.<TDClientException>of(new TDClientSocketException(causeSocket));
+                    }
+                    else {
+                        // Other unknown SocketException are considered non-retryable.
+                        throw new TDClientSocketException(causeSocket);
+                    }
+                }
+                else if (e.getCause() instanceof SSLException) {
+                    SSLException cause = (SSLException) e.getCause();
+                    if (cause instanceof SSLHandshakeException || cause instanceof SSLKeyException || cause instanceof SSLPeerUnverifiedException) {
+                        // deterministic SSL exceptions
+                        throw new TDClientSSLException(cause);
+                    }
+                    else {
+                        // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
+                        context.rootCause = Optional.<TDClientException>of(new TDClientSSLException(cause));
+                    }
+                }
+                else if (e.getCause() instanceof TimeoutException) {
+                    logger.warn(String.format("API request to %s has timed out", context.apiRequest.getPath()), e);
+                    context.rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
+                }
+                else {
+                    throw new TDClientProcessingException(e);
+                }
+            }
+            context.retryCount += 1;
+            return submitRequest(context, handler);
+        }
+    }
+
+    public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Handler<Result> handler)
+            throws TDClientException
+    {
+        Request request = prepareRequest(apiRequest, apiKeyCache);
+        request = handler.prepareRequest(request);
+        RequestContext requestContext = new RequestContext(apiRequest, request);
+        try {
+            return submitRequest(requestContext, handler);
         }
         catch (InterruptedException e) {
             logger.warn("API request interrupted", e);
             throw new TDClientInterruptedException(e);
         }
-        logger.warn("API request retry limit exceeded: ({}/{})", config.retryLimit, config.retryLimit);
-
-        checkState(rootCause.isPresent(), "rootCause must be present here");
-        // Throw the last seen error
-        throw rootCause.get();
     }
 
     private long calculateWaitTimeMillis(ExponentialBackOff backoff, Optional<TDClientException> rootCause)
@@ -458,7 +496,6 @@ public class TDHttpClient
                 // Soft 4xx errors. These we retry.
                 case TOO_MANY_REQUESTS_429:
                     return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
-
                 // Hard 4xx error. We do not retry the execution on this type of error
                 case HttpStatus.UNAUTHORIZED_401:
                     throw new TDClientHttpUnauthorizedException(errorMessage);
@@ -662,12 +699,11 @@ public class TDHttpClient
          * @param request
          * @return
          */
-        Request.Builder prepareRequest(Request.Builder request);
+        Request prepareRequest(Request request);
 
         boolean isSuccess(Response response);
 
-        Response beforeHandle(Response response)
-                throws Exception;
+        Response send(OkHttpClient httpClient, Request request) throws IOException;
 
         Result onSuccess(Response response)
                 throws Exception;
@@ -686,18 +722,16 @@ public class TDHttpClient
         {
         }
 
-        @Override
-        public Request.Builder prepareRequest(Request.Builder request)
+        public Request prepareRequest(Request request)
         {
             return request;
         }
 
         @Override
-        public Response beforeHandle(Response response)
-                throws Exception
+        public Response send(OkHttpClient httpClient, Request request)
+                throws IOException
         {
-            // Just return as is by default
-            return response;
+            return httpClient.newCall(request).execute();
         }
 
         @Override
@@ -719,44 +753,14 @@ public class TDHttpClient
     }
 
     public static class StringContentHandler
-            implements Handler<String>
+            extends DefaultHandler<String>
     {
-        @Override
-        public Request.Builder prepareRequest(Request.Builder request)
-        {
-            return request;
-        }
-
-        @Override
-        public Response beforeHandle(Response response)
-                throws Exception
-        {
-            // Just return as is by default
-            return response;
-        }
 
         @Override
         public String onSuccess(Response response)
                 throws Exception
         {
             return response.body().string();
-        }
-
-        @Override
-        public boolean isSuccess(Response response)
-        {
-            return HttpStatus.isSuccess(response.code());
-        }
-
-        @Override
-        public byte[] onError(Response response)
-        {
-            try {
-                return response.body().bytes();
-            }
-            catch (IOException e) {
-                throw new TDClientException(INVALID_JSON_RESPONSE, e);
-            }
         }
     }
 }

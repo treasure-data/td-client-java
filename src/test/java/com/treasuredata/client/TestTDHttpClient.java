@@ -22,6 +22,9 @@ import com.google.common.base.Optional;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.Headers;
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.exparity.hamcrest.date.DateMatchers;
@@ -38,6 +41,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
@@ -124,13 +128,16 @@ public class TestTDHttpClient
         byte[] result = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultHandler<byte[]>()
         {
             @Override
-            public Response beforeHandle(Response response)
-                    throws Exception
+            public Response send(OkHttpClient httpClient, Request request)
+                    throws IOException
             {
                 switch (requests.incrementAndGet()) {
                     case 1: {
                         firstRequestNanos.set(System.nanoTime());
                         return new Response.Builder()
+                                .request(request)
+                                .protocol(Protocol.HTTP_1_1)
+                                .message("")
                                 .code(429)
                                 .header("Retry-After", Long.toString(retryAfterSeconds))
                                 .body(ResponseBody.create(null, ""))
@@ -139,6 +146,9 @@ public class TestTDHttpClient
                     case 2: {
                         secondRequestNanos.set(System.nanoTime());
                         return new Response.Builder()
+                                .request(request)
+                                .protocol(Protocol.HTTP_1_1)
+                                .message("")
                                 .code(200)
                                 .body(ResponseBody.create(MediaType.parse("plain/text"), body))
                                 .build();
@@ -298,10 +308,11 @@ public class TestTDHttpClient
         }
 
         @Override
-        public Response beforeHandle(Response response)
-                throws Exception
+        public Response send(OkHttpClient httpClient, Request request)
+                throws IOException
         {
             return new Response.Builder()
+                    .request(request)
                     .code(200)
                     .header("Content-Length", String.valueOf(body.length))
                     .body(ResponseBody.create(MediaType.parse("plain/text"), body))
@@ -326,11 +337,15 @@ public class TestTDHttpClient
             client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultHandler<byte[]>()
             {
                 @Override
-                public Response beforeHandle(Response response)
-                        throws Exception
+                public Response send(OkHttpClient httpClient, Request request)
+                        throws IOException
                 {
                     requests.incrementAndGet();
                     Response.Builder builder = new Response.Builder()
+                            .request(request)
+                            .protocol(Protocol.HTTP_1_1)
+                            .message("")
+                            .body(ResponseBody.create(null, ""))
                             .code(429);
 
                     if (retryAfterValue.isPresent()) {
@@ -351,7 +366,7 @@ public class TestTDHttpClient
         }
         catch (TDClientException e) {
             if (!(e instanceof TDClientHttpTooManyRequestsException)) {
-                fail("Expected " + TDClientHttpTooManyRequestsException.class + ", got " + e.getClass());
+                fail("Expected " + TDClientHttpTooManyRequestsException.class + ", got " + e.getClass() + ": " + e.getMessage());
             }
             TDClientHttpTooManyRequestsException tooManyRequestsException = (TDClientHttpTooManyRequestsException) e;
             if (retryAfterMatcher.isPresent()) {

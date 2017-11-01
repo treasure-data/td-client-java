@@ -1176,6 +1176,7 @@ public class TestTDClient
             throws Exception
     {
         // authenticate() method should retrieve apikey, and set it to the TDClient
+        // [NOTE] To pass this you need to add password config to ~/.td/td.conf
         Properties p = TDClientConfig.readTDConf();
         TDClient client = new TDClientBuilder(false).build(); // Set no API key
         String user = firstNonNull(p.getProperty("user"), System.getenv("TD_USER"));
