@@ -37,7 +37,6 @@ import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.ConnectionPool;
-import okhttp3.JavaNetAuthenticator;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -55,14 +54,12 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Authenticator;
 import java.net.BindException;
 import java.net.ConnectException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
-import java.net.PasswordAuthentication;
 import java.net.PortUnreachableException;
 import java.net.Proxy;
 import java.net.SocketException;
@@ -342,7 +339,7 @@ public class TDHttpClient
         return NAKED_TD1_KEY_PATTERN.matcher(s).matches();
     }
 
-    public <ResponseType extends Response, Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Handler<ResponseType, Result> handler)
+    public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Handler<Result> handler)
             throws TDClientException
     {
         ExponentialBackOff backoff = new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);
@@ -356,22 +353,24 @@ public class TDHttpClient
                     Thread.sleep(waitTimeMillis);
                 }
 
-                ResponseType response = null;
+                Request request = prepareRequest(apiRequest, apiKeyCache);
                 try {
-                    Request request = prepareRequest(apiRequest, apiKeyCache);
-                    response = handler.submit(httpClient, request);
-                    int code = response.code();
-                    if (handler.isSuccess(response)) {
-                        // 2xx success
-                        logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), apiRequest.getPath()));
-                        return handler.onSuccess(response);
-                    }
-                    else {
-                        byte[] returnedContent = handler.onError(response);
-                        rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent, response));
+                    // Close the response object when finishing the request handling
+                    try (Response response = httpClient.newCall(request).execute()) {
+                        int code = response.code();
+                        if (handler.isSuccess(response)) {
+                            // 2xx success
+                            logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), apiRequest.getPath()));
+                            return handler.onSuccess(response);
+                        }
+                        else {
+                            // on error
+                            byte[] returnedContent = handler.onError(response);
+                            rootCause = Optional.of(handleHttpResponseError(apiRequest.getPath(), code, returnedContent, response));
+                        }
                     }
                 }
-                catch (IOException e) {
+                catch (Exception e) {
                     logger.warn("API request failed", e);
                     if (e.getCause() instanceof EOFException) {
                         // Jetty returns EOFException when the connection was interrupted
@@ -528,23 +527,38 @@ public class TDHttpClient
 
     public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
-        Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
         try {
-            String content = response.body().string();
+            String content = submitRequest(apiRequest, apiKeyCache, new DefaultHandler<String>()
+            {
+                @Override
+                public String onSuccess(Response response)
+                        throws Exception
+                {
+                    return response.body().string();
+                }
+            });
             if (logger.isTraceEnabled()) {
                 logger.trace("response:\n{}", content);
             }
             return content;
         }
-        catch (IOException e) {
+        catch (Exception e) {
             throw new TDClientException(INVALID_JSON_RESPONSE, e);
         }
     }
 
     public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final Function<InputStream, Result> contentStreamHandler)
     {
-        Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
-        return contentStreamHandler.apply(response.body().byteStream());
+        Result result = submitRequest(apiRequest, apiKeyCache, new DefaultHandler<Result>()
+        {
+            @Override
+            public Result onSuccess(Response response)
+                    throws Exception
+            {
+                return contentStreamHandler.apply(response.body().byteStream());
+            }
+        });
+        return result;
     }
 
     /**
@@ -594,8 +608,15 @@ public class TDHttpClient
             throws TDClientException
     {
         try {
-            Response response = submitRequest(apiRequest, apiKeyCache, new DefaultContentHandler());
-            byte[] content = response.body().bytes();
+            byte[] content = submitRequest(apiRequest, apiKeyCache, new DefaultHandler<byte[]>()
+            {
+                @Override
+                public byte[] onSuccess(Response response)
+                        throws Exception
+                {
+                    return response.body().bytes();
+                }
+            });
             if (logger.isTraceEnabled()) {
                 logger.trace("response:\n{}", new String(content, StandardCharsets.UTF_8));
             }
@@ -633,40 +654,56 @@ public class TDHttpClient
         return reader;
     }
 
-    public static interface Handler<ResponseType extends Response, Result>
+    public static interface Handler<Result>
     {
-        ResponseType submit(OkHttpClient client, Request request)
-                throws IOException;
+        /**
+         * Set additinal request parameters here
+         *
+         * @param request
+         * @return
+         */
+        Request.Builder prepareRequest(Request.Builder request);
 
-        Result onSuccess(ResponseType response);
+        boolean isSuccess(Response response);
+
+        Response beforeHandle(Response response)
+                throws Exception;
+
+        Result onSuccess(Response response)
+                throws Exception;
 
         /**
          * @param response
          * @return returned content
          */
-        byte[] onError(ResponseType response);
-
-        boolean isSuccess(ResponseType response);
+        byte[] onError(Response response);
     }
 
-    public static class DefaultContentHandler
-            implements Handler<Response, Response>
+    public abstract static class DefaultHandler<Result>
+            implements Handler<Result>
     {
-        public DefaultContentHandler()
+        public DefaultHandler()
         {
         }
 
         @Override
-        public Response submit(OkHttpClient client, Request request)
-                throws IOException
+        public Request.Builder prepareRequest(Request.Builder request)
         {
-            return client.newCall(request).execute();
+            return request;
         }
 
         @Override
-        public Response onSuccess(Response response)
+        public Response beforeHandle(Response response)
+                throws Exception
         {
+            // Just return as is by default
             return response;
+        }
+
+        @Override
+        public boolean isSuccess(Response response)
+        {
+            return HttpStatus.isSuccess(response.code());
         }
 
         @Override
@@ -679,11 +716,47 @@ public class TDHttpClient
                 throw new TDClientException(INVALID_JSON_RESPONSE, e);
             }
         }
+    }
+
+    public static class StringContentHandler
+            implements Handler<String>
+    {
+        @Override
+        public Request.Builder prepareRequest(Request.Builder request)
+        {
+            return request;
+        }
+
+        @Override
+        public Response beforeHandle(Response response)
+                throws Exception
+        {
+            // Just return as is by default
+            return response;
+        }
+
+        @Override
+        public String onSuccess(Response response)
+                throws Exception
+        {
+            return response.body().string();
+        }
 
         @Override
         public boolean isSuccess(Response response)
         {
             return HttpStatus.isSuccess(response.code());
+        }
+
+        @Override
+        public byte[] onError(Response response)
+        {
+            try {
+                return response.body().bytes();
+            }
+            catch (IOException e) {
+                throw new TDClientException(INVALID_JSON_RESPONSE, e);
+            }
         }
     }
 }

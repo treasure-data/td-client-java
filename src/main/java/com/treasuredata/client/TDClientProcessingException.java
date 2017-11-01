@@ -18,15 +18,13 @@
  */
 package com.treasuredata.client;
 
-import java.io.IOException;
-
 /**
  * Thrown when processing API request has failed
  */
 public class TDClientProcessingException
         extends TDClientException
 {
-    public TDClientProcessingException(IOException cause)
+    public TDClientProcessingException(Exception cause)
     {
         super(ErrorType.EXECUTION_FAILURE, cause);
     }

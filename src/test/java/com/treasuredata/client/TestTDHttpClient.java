@@ -22,8 +22,6 @@ import com.google.common.base.Optional;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.Headers;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.exparity.hamcrest.date.DateMatchers;
@@ -40,7 +38,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
@@ -90,7 +87,7 @@ public class TestTDHttpClient
     public void addHttpRequestHeader()
     {
         TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").addHeader("TEST_HEADER", "hello td-client-java").build();
-        Response resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler());
+        String resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.StringContentHandler());
     }
 
     @Test
@@ -98,7 +95,7 @@ public class TestTDHttpClient
     {
         try {
             TDApiRequest req = TDApiRequest.Builder.DELETE("/v3/dummy_endpoint").build();
-            Response resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler());
+            String resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.StringContentHandler());
         }
         catch (TDClientHttpException e) {
             logger.warn("error", e);
@@ -124,11 +121,11 @@ public class TestTDHttpClient
         final byte[] body = "foobar".getBytes("UTF-8");
         final long retryAfterSeconds = 5;
 
-        Response resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler()
+        byte[] result = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultHandler<byte[]>()
         {
             @Override
-            public Response submit(OkHttpClient client, Request request)
-                    throws IOException
+            public Response beforeHandle(Response response)
+                    throws Exception
             {
                 switch (requests.incrementAndGet()) {
                     case 1: {
@@ -150,11 +147,18 @@ public class TestTDHttpClient
                         throw new AssertionError();
                 }
             }
+
+            @Override
+            public byte[] onSuccess(Response response)
+                    throws Exception
+            {
+                assertThat(response.code(), is(200));
+                return response.body().bytes();
+            }
         });
 
         assertThat(requests.get(), is(2));
-        assertThat(resp.code(), is(200));
-        assertThat(resp.body().bytes(), is(body));
+        assertThat(result, is(body));
 
         long delayNanos = secondRequestNanos.get() - firstRequestNanos.get();
         assertThat(delayNanos, Matchers.greaterThanOrEqualTo(SECONDS.toNanos(retryAfterSeconds)));
@@ -268,7 +272,7 @@ public class TestTDHttpClient
         final byte[] body = new byte[3 * 1024 * 1024]; // jetty's default is 2 * 1024 * 1024
         Arrays.fill(body, (byte) 100);
 
-        client.submitRequest(req, Optional.<String>absent(), new TestDefaultContentHandler(Optional.<Integer>absent(), body));
+        client.submitRequest(req, Optional.<String>absent(), new TestDefaultHandler(Optional.<Integer>absent(), body));
     }
 
     @Test
@@ -279,32 +283,36 @@ public class TestTDHttpClient
         final byte[] body = new byte[3 * 1024 * 1024]; // jetty's default is 2 * 1024 * 1024
         Arrays.fill(body, (byte) 100);
 
-        Response res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultContentHandler(Optional.of(body.length), body));
-        assertEquals(body, res.body().bytes());
+        byte[] res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultHandler(Optional.of(body.length), body));
+        assertEquals(body, res);
     }
 
-    private static class TestDefaultContentHandler
-            extends TDHttpClient.DefaultContentHandler
+    private static class TestDefaultHandler
+            extends TDHttpClient.DefaultHandler<byte[]>
     {
         private final byte[] body;
 
-        public TestDefaultContentHandler(Optional<Integer> maxContent, byte[] body)
+        public TestDefaultHandler(Optional<Integer> maxContent, byte[] body)
         {
             this.body = body;
         }
 
         @Override
-        public Response submit(OkHttpClient client, Request request)
-                throws IOException
+        public Response beforeHandle(Response response)
+                throws Exception
         {
-            Response response =
-                    new Response.Builder()
-                            .code(200)
-                            .header("Content-Length", String.valueOf(body.length))
-                            .body(ResponseBody.create(MediaType.parse("plain/text"), body))
-                            .build();
+            return new Response.Builder()
+                    .code(200)
+                    .header("Content-Length", String.valueOf(body.length))
+                    .body(ResponseBody.create(MediaType.parse("plain/text"), body))
+                    .build();
+        }
 
-            return response;
+        @Override
+        public byte[] onSuccess(Response response)
+                throws Exception
+        {
+            return response.body().bytes();
         }
     }
 
@@ -315,20 +323,27 @@ public class TestTDHttpClient
         final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
 
         try {
-            client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultContentHandler()
+            client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultHandler<byte[]>()
             {
                 @Override
-                public Response submit(OkHttpClient client, Request request)
-                        throws IOException
+                public Response beforeHandle(Response response)
+                        throws Exception
                 {
                     requests.incrementAndGet();
                     Response.Builder builder = new Response.Builder()
                             .code(429);
 
                     if (retryAfterValue.isPresent()) {
-                        builder.header("Retry-After", retryAfterValue.get());
+                        builder = builder.header("Retry-After", retryAfterValue.get());
                     }
                     return builder.build();
+                }
+
+                @Override
+                public byte[] onSuccess(Response response)
+                        throws Exception
+                {
+                    return response.body().bytes();
                 }
             });
 
