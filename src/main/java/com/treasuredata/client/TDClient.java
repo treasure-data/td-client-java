@@ -405,8 +405,7 @@ public class TDClient
             return false;
         }
         catch (TDClientHttpException e) {
-            // NOT_FOUND error
-            if (e.getStatusCode() == 404) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND_404) {
                 return false;
             }
             else {
