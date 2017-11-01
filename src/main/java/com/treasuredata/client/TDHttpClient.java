@@ -402,7 +402,7 @@ public class TDHttpClient
             }
             catch (Exception e) {
                 logger.warn("API request failed", e);
-                if(e instanceof TDClientException) {
+                if (e instanceof TDClientException) {
                     throw (TDClientException) e;
                 }
                 else if (e.getCause() instanceof TDClientException) {
@@ -715,12 +715,14 @@ public class TDHttpClient
 
         /**
          * Send the request through the given client.
+         *
          * @param httpClient
          * @param request
          * @return
          * @throws IOException
          */
-        Response send(OkHttpClient httpClient, Request request) throws IOException;
+        Response send(OkHttpClient httpClient, Request request)
+                throws IOException;
 
         Result onSuccess(Response response)
                 throws Exception;
@@ -772,7 +774,6 @@ public class TDHttpClient
     public static class StringContentHandler
             extends DefaultHandler<String>
     {
-
         @Override
         public String onSuccess(Response response)
                 throws Exception

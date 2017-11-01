@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
@@ -35,7 +34,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
@@ -191,7 +189,6 @@ public class TestServerFailures
                 .setRetryLimit(1)
                 .buildConfig()
         );
-
     }
 
     @Test
@@ -211,7 +208,7 @@ public class TestServerFailures
     }
 
     private void handleTimeoutTest(TDClientConfig config)
-        throws Exception
+            throws Exception
     {
         final AtomicInteger accessCount = new AtomicInteger(0);
 

@@ -138,14 +138,14 @@ public class TestProxyAccess
 
         try {
             Authenticator.setDefault(auth);
-            try (InputStream in = new URL("https://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
+            // Non SSL access
+            try (InputStream in = new URL("http://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
                 String ret = CharStreams.toString(new InputStreamReader(in));
                 logger.info(ret);
             }
             assertEquals(1, proxyAccessCount.get());
 
-            // Non SSL access
-            try (InputStream in = new URL("http://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
+            try (InputStream in = new URL("https://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
                 String ret = CharStreams.toString(new InputStreamReader(in));
                 logger.info(ret);
             }

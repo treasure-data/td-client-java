@@ -22,7 +22,6 @@ import com.google.common.base.Optional;
 import com.treasuredata.client.ProxyConfig;
 import com.treasuredata.client.TDClientException;
 import com.treasuredata.client.TDClientHttpException;
-import com.treasuredata.client.TDHttpClient;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Request;
@@ -52,8 +51,7 @@ public class ProxyAuthenticator
     public Request authenticate(Route route, Response response)
             throws IOException
     {
-        if (response.request().header("Proxy-Authorization") != null)
-        {
+        if (response.request().header("Proxy-Authorization") != null) {
             throw new IOException(new TDClientHttpException(TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE, "Proxy authentication failure", 407, null));
         }
 
