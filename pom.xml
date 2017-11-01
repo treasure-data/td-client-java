@@ -55,7 +55,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.build.targetJdk>1.7</project.build.targetJdk>
+    <project.build.targetJdk>1.8</project.build.targetJdk>
     <project.build.jvmsize>512m</project.build.jvmsize>
     <project.test.fork-mode>once</project.test.fork-mode>
 
