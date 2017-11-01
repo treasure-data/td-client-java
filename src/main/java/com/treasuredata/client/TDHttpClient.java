@@ -37,6 +37,7 @@ import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.ConnectionPool;
+import okhttp3.JavaNetAuthenticator;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -54,12 +55,14 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Authenticator;
 import java.net.BindException;
 import java.net.ConnectException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
+import java.net.PasswordAuthentication;
 import java.net.PortUnreachableException;
 import java.net.Proxy;
 import java.net.SocketException;
@@ -126,7 +129,7 @@ public class TDHttpClient
             final ProxyConfig proxyConfig = config.proxy.get();
             logger.trace("proxy configuration: " + proxyConfig);
             // TODO Support https proxy
-            builder.proxy(new Proxy(Proxy.Type.HTTP, InetSocketAddress.createUnresolved(proxyConfig.getHost(), proxyConfig.getPort())));
+            builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyConfig.getHost(), proxyConfig.getPort())));
 
             if (proxyConfig.requireAuthentication()) {
                 builder.proxyAuthenticator(new ProxyAuthenticator(proxyConfig));
@@ -284,23 +287,25 @@ public class TDHttpClient
             else {
                 auth = apiKey.get();
             }
-            request.header("Authorization", auth);
+            request = request.header("Authorization", auth);
         }
 
         // Set other headers
         for (Map.Entry<String, String> entry : headers.entries()) {
-            request.header(entry.getKey(), entry.getValue());
+            request = request.addHeader(entry.getKey(), entry.getValue());
         }
         for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entries()) {
-            request.header(entry.getKey(), entry.getValue());
+            request = request.addHeader(entry.getKey(), entry.getValue());
         }
 
         // Submit method specific headers
         switch (apiRequest.getMethod()) {
             case GET:
                 request = request.get();
+                break;
             case DELETE:
                 request = request.delete();
+                break;
             case POST:
                 if (apiRequest.getPostJson().isPresent()) {
                     request = request.post(RequestBody.create(mediaTypeJson, apiRequest.getPostJson().get()));
@@ -310,7 +315,9 @@ public class TDHttpClient
                 }
                 else {
                     // We should set content-length explicitly for an empty post
-                    request = request.header("Content-Length", "0");
+                    request = request
+                            .header("Content-Length", "0")
+                            .post(RequestBody.create(null, ""));
                 }
                 break;
             case PUT:

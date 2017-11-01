@@ -21,7 +21,9 @@ package com.treasuredata.client.impl;
 import com.google.common.base.Optional;
 import com.treasuredata.client.ProxyConfig;
 import okhttp3.Authenticator;
+import okhttp3.Challenge;
 import okhttp3.Credentials;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
@@ -29,6 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.util.List;
 
 /**
  *
@@ -49,14 +55,20 @@ public class ProxyAuthenticator
     public Request authenticate(Route route, Response response)
             throws IOException
     {
-        if (!proxyAuthCache.isPresent()) {
-            logger.debug("Proxy authorization requested for " + route.address());
-            proxyAuthCache = Optional.of(
-                    Credentials.basic(proxyConfig.getUser().or(""), proxyConfig.getPassword().or(""))
-            );
+        if(response.code() == 407) {
+            // Proxy authentication is required
+            if (!proxyAuthCache.isPresent()) {
+                logger.debug("Proxy authorization requested for " + route.address());
+                proxyAuthCache = Optional.of(
+                        Credentials.basic(proxyConfig.getUser().or(""), proxyConfig.getPassword().or(""))
+                );
+            }
+            return response.request().newBuilder()
+                    .header("Proxy-Authorization", proxyAuthCache.get())
+                    .build();
         }
-        return response.request().newBuilder()
-                .header("Proxy-Authrization", proxyAuthCache.get())
-                .build();
+        else {
+            return null;
+        }
     }
 }
