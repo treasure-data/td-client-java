@@ -63,6 +63,7 @@ import java.net.NoRouteToHostException;
 import java.net.PortUnreachableException;
 import java.net.Proxy;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -394,6 +395,7 @@ public class TDHttpClient
                     else {
                         // on error
                         byte[] returnedContent = handler.onError(response);
+                        // This may directly throw an TDClientException if we know this is unrecoverable error.
                         context.rootCause = Optional.of(handleHttpResponseError(context.apiRequest.getPath(), code, returnedContent, response));
                     }
                 }
@@ -409,6 +411,10 @@ public class TDHttpClient
                 }
                 else if (e.getCause() instanceof TimeoutException) {
                     context.rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
+                }
+                else if (e.getCause() instanceof SocketTimeoutException) {
+                    // OkHttp throws SocketTimeoutException
+                    context.rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
                 }
                 else if (e.getCause() instanceof SocketException) {
                     final SocketException causeSocket = (SocketException) e.getCause();
@@ -579,6 +585,9 @@ public class TDHttpClient
             }
             return content;
         }
+        catch (TDClientException e) {
+            throw e;
+        }
         catch (Exception e) {
             throw new TDClientException(INVALID_JSON_RESPONSE, e);
         }
@@ -703,6 +712,13 @@ public class TDHttpClient
 
         boolean isSuccess(Response response);
 
+        /**
+         * Send the request through the given client.
+         * @param httpClient
+         * @param request
+         * @return
+         * @throws IOException
+         */
         Response send(OkHttpClient httpClient, Request request) throws IOException;
 
         Result onSuccess(Response response)
