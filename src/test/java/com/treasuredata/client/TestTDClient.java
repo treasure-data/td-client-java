@@ -1230,7 +1230,7 @@ public class TestTDClient
             throws Exception
     {
         TDUser user = client.getUser();
-        logger.info("user: {}", user);
+        logger.trace("user: {}", user);
     }
 
     @Test
@@ -1239,9 +1239,9 @@ public class TestTDClient
     {
         TDUserList userList = client.listUsers();
         for (TDUser user : userList.getUsers()) {
-            logger.info("user: {}", user);
+            logger.trace("user: {}", user);
         }
-        logger.info("{} user(s)", userList.getUsers().size());
+        logger.trace("{} user(s)", userList.getUsers().size());
     }
 
     @Test

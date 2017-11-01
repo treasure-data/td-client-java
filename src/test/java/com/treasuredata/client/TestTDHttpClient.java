@@ -271,26 +271,15 @@ public class TestTDHttpClient
         assertThat(requests, is(4));
     }
 
-    @Test(expected = TDClientProcessingException.class)
-    public void failWithMaxLength()
-            throws Exception
-    {
-        final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
-        final byte[] body = new byte[3 * 1024 * 1024]; // jetty's default is 2 * 1024 * 1024
-        Arrays.fill(body, (byte) 100);
-
-        client.submitRequest(req, Optional.<String>absent(), new TestDefaultHandler(Optional.<Integer>absent(), body));
-    }
-
     @Test
-    public void successWithMaxLength()
+    public void readBodyAsBytes()
             throws Exception
     {
         final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
-        final byte[] body = new byte[3 * 1024 * 1024]; // jetty's default is 2 * 1024 * 1024
+        final byte[] body = new byte[3 * 1024 * 1024];
         Arrays.fill(body, (byte) 100);
 
-        byte[] res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultHandler(Optional.of(body.length), body));
+        byte[] res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultHandler(body));
         assertThat(res, is(body));
     }
 
@@ -299,7 +288,7 @@ public class TestTDHttpClient
     {
         private final byte[] body;
 
-        public TestDefaultHandler(Optional<Integer> maxContent, byte[] body)
+        public TestDefaultHandler(byte[] body)
         {
             this.body = body;
         }
@@ -308,6 +297,7 @@ public class TestTDHttpClient
         public Response send(OkHttpClient httpClient, Request request)
                 throws IOException
         {
+            // Return a dummy response
             return new Response.Builder()
                     .request(request)
                     .code(200)

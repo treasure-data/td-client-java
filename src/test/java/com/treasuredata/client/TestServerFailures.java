@@ -34,6 +34,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
@@ -41,7 +42,10 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -277,9 +281,14 @@ public class TestServerFailures
             fail("cannot reach here");
         }
         catch (TDClientException e) {
-            assertEquals(TDClientException.ErrorType.SOCKET_ERROR, e.getErrorType());
-            logger.info(e.getMessage());
-            assertTrue(e.getRootCause().get() instanceof ConnectException);
+            logger.debug(e.getMessage());
+            if (e.getErrorType() == TDClientException.ErrorType.INTERRUPTED) {
+                assertThat(e.getRootCause().get(), anyOf(instanceOf(InterruptedException.class), instanceOf(EOFException.class)));
+            }
+            else {
+                assertEquals(TDClientException.ErrorType.SOCKET_ERROR, e.getErrorType());
+                assertTrue(e.getRootCause().get() instanceof ConnectException);
+            }
             assertEquals(1, accessCount.get());
         }
     }
