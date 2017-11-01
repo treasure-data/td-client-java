@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -279,9 +280,9 @@ public class TestServerFailures
             fail("cannot reach here");
         }
         catch (TDClientException e) {
-            assertEquals(TDClientException.ErrorType.INTERRUPTED, e.getErrorType());
+            assertEquals(TDClientException.ErrorType.SOCKET_ERROR, e.getErrorType());
             logger.info(e.getMessage());
-            assertTrue(e.getRootCause().get() instanceof EOFException);
+            assertTrue(e.getRootCause().get() instanceof ConnectException);
             assertEquals(1, accessCount.get());
         }
     }
