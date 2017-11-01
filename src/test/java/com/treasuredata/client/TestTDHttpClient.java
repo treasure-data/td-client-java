@@ -314,6 +314,8 @@ public class TestTDHttpClient
             return new Response.Builder()
                     .request(request)
                     .code(200)
+                    .message("")
+                    .protocol(Protocol.HTTP_1_1)
                     .header("Content-Length", String.valueOf(body.length))
                     .body(ResponseBody.create(MediaType.parse("plain/text"), body))
                     .build();
