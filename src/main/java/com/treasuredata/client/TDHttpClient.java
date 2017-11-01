@@ -188,7 +188,9 @@ public class TDHttpClient
 
     public void close()
     {
-        // No need to close OkHttp client
+        // Cleanup the internal thread manager and connections
+        httpClient.dispatcher().executorService().shutdown();
+        httpClient.connectionPool().evictAll();
     }
 
     @VisibleForTesting
