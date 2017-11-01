@@ -399,28 +399,28 @@ public class TDHttpClient
             return Optional.<TDClientException>of(new TDClientTimeoutException(e));
         }
         else if (e instanceof SocketException) {
-            final SocketException causeSocket = (SocketException) e.getCause();
-            if (causeSocket instanceof BindException ||
-                    causeSocket instanceof ConnectException ||
-                    causeSocket instanceof NoRouteToHostException ||
-                    causeSocket instanceof PortUnreachableException) {
+            final SocketException socketException = (SocketException) e;
+            if (socketException instanceof BindException ||
+                    socketException instanceof ConnectException ||
+                    socketException instanceof NoRouteToHostException ||
+                    socketException instanceof PortUnreachableException) {
                 // All known SocketException are retryable.
-                return Optional.<TDClientException>of(new TDClientSocketException(causeSocket));
+                return Optional.<TDClientException>of(new TDClientSocketException(socketException));
             }
             else {
                 // Other unknown SocketException are considered non-retryable.
-                throw new TDClientSocketException(causeSocket);
+                throw new TDClientSocketException(socketException);
             }
         }
         else if (e instanceof SSLException) {
-            SSLException cause = (SSLException) e.getCause();
-            if (cause instanceof SSLHandshakeException || cause instanceof SSLKeyException || cause instanceof SSLPeerUnverifiedException) {
+            SSLException sslException = (SSLException) e;
+            if (sslException instanceof SSLHandshakeException || sslException instanceof SSLKeyException || sslException instanceof SSLPeerUnverifiedException) {
                 // deterministic SSL exceptions
-                throw new TDClientSSLException(cause);
+                throw new TDClientSSLException(sslException);
             }
             else {
                 // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
-                return Optional.<TDClientException>of(new TDClientSSLException(cause));
+                return Optional.<TDClientException>of(new TDClientSSLException(sslException));
             }
         }
         else if (e.getCause() != null && e.getCause() instanceof Exception) {
