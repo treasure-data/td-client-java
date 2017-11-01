@@ -92,7 +92,7 @@ public class TestServerFailures
                     server.join();
                 }
                 catch (Throwable e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         }).start();
@@ -204,7 +204,7 @@ public class TestServerFailures
                 .setEndpoint("localhost")
                 .setUseSSL(false)
                 .setPort(port)
-                .setRequestTimeoutMillis(100)
+                .setReadTimeoutMillis(100)
                 .setRetryLimit(1)
                 .buildConfig()
         );

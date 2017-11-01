@@ -380,7 +380,7 @@ public class TDHttpClient
                 try (Response response = handler.send(httpClient, context.request)) {
                     int code = response.code();
                     // Retry upon proxy authentication request
-                    if (code == 307 || code == 308) {
+                    if (code == HttpStatus.TEMPORARY_REDIRECT_307 || code == 308) {
                         String location = response.header(LOCATION);
                         if (location != null) {
                             context.request = context.request.newBuilder().url(location).build();
@@ -410,6 +410,7 @@ public class TDHttpClient
                     context.rootCause = Optional.<TDClientException>of(new TDClientInterruptedException("connection failure (EOFException)", (EOFException) e.getCause()));
                 }
                 else if (e.getCause() instanceof TimeoutException) {
+                    logger.warn(String.format("API request to %s has timed out", context.apiRequest.getPath()), e);
                     context.rootCause = Optional.<TDClientException>of(new TDClientTimeoutException((TimeoutException) e.getCause()));
                 }
                 else if (e.getCause() instanceof SocketTimeoutException) {
@@ -441,11 +442,8 @@ public class TDHttpClient
                         context.rootCause = Optional.<TDClientException>of(new TDClientSSLException(cause));
                     }
                 }
-                else if (e.getCause() instanceof TimeoutException) {
-                    logger.warn(String.format("API request to %s has timed out", context.apiRequest.getPath()), e);
-                    context.rootCause = Optional.<TDClientException>of(new TDClientTimeoutException(e));
-                }
                 else {
+                    logger.warn("unknown type exception", e);
                     throw new TDClientProcessingException(e);
                 }
             }

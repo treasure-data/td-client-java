@@ -58,7 +58,7 @@ public class ProxyAuthenticator
                 );
             }
             return response.request().newBuilder()
-                    .header("Proxy-Authorization", proxyAuthCache.get())
+                    .addHeader("Proxy-Authorization", proxyAuthCache.get())
                     .build();
         }
         else {

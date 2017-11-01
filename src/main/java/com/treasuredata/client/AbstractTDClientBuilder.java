@@ -37,7 +37,6 @@ import static com.treasuredata.client.TDClientConfig.Type.PROXY_PASSWORD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_USER;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_USESSL;
-import static com.treasuredata.client.TDClientConfig.Type.REQUEST_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_INITIAL_INTERVAL_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_LIMIT;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_MAX_INTERVAL_MILLIS;
@@ -64,7 +63,6 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected double retryMultiplier = 2.0;
     protected int connectTimeoutMillis = 15000;
     protected int readTimeoutMillis = 60000;
-    protected int requestTimeoutMillis = 0;
     protected int connectionPoolSize = 64;
     protected Multimap<String, String> headers = ImmutableMultimap.of();
     protected Optional<Integer> requestBufferSize = Optional.absent();
@@ -237,7 +235,6 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         this.retryMultiplier = getConfigPropertyDouble(p, RETRY_MULTIPLIER).or(retryMultiplier);
         this.connectTimeoutMillis = getConfigPropertyInt(p, CONNECT_TIMEOUT_MILLIS).or(connectTimeoutMillis);
         this.readTimeoutMillis = getConfigPropertyInt(p, READ_TIMEOUT_MILLIS).or(readTimeoutMillis);
-        this.requestTimeoutMillis = getConfigPropertyInt(p, REQUEST_TIMEOUT_MILLIS).or(requestTimeoutMillis);
         this.connectionPoolSize = getConfigPropertyInt(p, CONNECTION_POOL_SIZE).or(connectionPoolSize);
 
         return self();
@@ -321,12 +318,6 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         return self();
     }
 
-    public BuilderImpl setRequestTimeoutMillis(int requestTimeoutMillis)
-    {
-        this.requestTimeoutMillis = requestTimeoutMillis;
-        return self();
-    }
-
     public BuilderImpl setConnectionPoolSize(int connectionPoolSize)
     {
         this.connectionPoolSize = connectionPoolSize;
@@ -376,8 +367,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
                 retryMaxIntervalMillis,
                 retryMultiplier,
                 connectTimeoutMillis,
-            readTimeoutMillis,
-                requestTimeoutMillis,
+                readTimeoutMillis,
                 connectionPoolSize,
                 headers,
                 requestBufferSize,
