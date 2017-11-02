@@ -21,7 +21,6 @@ import java.net.PortUnreachableException;
 import java.net.ProtocolException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -107,7 +106,7 @@ public class TDRequestErrorHandler
     public static TDClientException defaultErrorResolver(Throwable e)
             throws TDClientException
     {
-        if (Exception.class.isAssignableFrom(e.getClass())) {
+        if (e instanceof Exception) {
             return defaultExceptionResolver((Exception) e);
         }
         else {
@@ -213,27 +212,26 @@ public class TDRequestErrorHandler
     @VisibleForTesting
     public static Optional<TDApiErrorMessage> extractErrorResponse(Response response)
     {
-        byte[] content = null;
+        Optional<String> content = Optional.absent();
         try {
             try {
-                content = response.body().bytes();
+                content = Optional.of(response.body().string());
             }
             catch (IOException e) {
                 throw new TDClientException(INVALID_JSON_RESPONSE, e);
             }
 
-            if (content.length > 0 && content[0] == '{') {
+            if (content.isPresent() && content.get().charAt(0) == '{') {
                 // Error message from TD API
-                return Optional.of(TDHttpClient.defaultObjectMapper.readValue(content, TDApiErrorMessage.class));
+                return Optional.of(TDHttpClient.defaultObjectMapper.readValue(content.get(), TDApiErrorMessage.class));
             }
             else {
                 // Error message from Proxy server etc.
-                String contentStr = new String(content, StandardCharsets.UTF_8);
-                return Optional.of(new TDApiErrorMessage("error", contentStr, "error"));
+                return Optional.of(new TDApiErrorMessage("error", content.or("[empty]"), "error"));
             }
         }
         catch (IOException e) {
-            logger.warn("Failed to parse the error response {}: {}\n{}", response.request().url(), new String(content, StandardCharsets.UTF_8), e.getMessage());
+            logger.warn("Failed to parse the error response {}: {}\n{}", response.request().url(), content.or("[empty]"), e.getMessage());
         }
         return Optional.absent();
     }
