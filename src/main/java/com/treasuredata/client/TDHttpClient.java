@@ -42,7 +42,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import okhttp3.internal.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +91,9 @@ import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTI
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
 import static com.treasuredata.client.TDClientHttpTooManyRequestsException.TOO_MANY_REQUESTS_429;
+import static com.treasuredata.client.TDHttpRequestHandlers.byteArrayContentHandler;
+import static com.treasuredata.client.TDHttpRequestHandlers.newByteStreamHandler;
+import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler;
 
 /**
  * An extension of Jetty HttpClient with request retry handler
@@ -123,6 +125,8 @@ public class TDHttpClient
     public TDHttpClient(TDClientConfig config)
     {
         this.config = config;
+
+        // Prepare OkHttpClient
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(config.connectTimeoutMillis, TimeUnit.MILLISECONDS);
         builder.readTimeout(config.readTimeoutMillis, TimeUnit.MILLISECONDS);
@@ -438,7 +442,7 @@ public class TDHttpClient
         }
     }
 
-    protected <Result> Result submitRequest(RequestContext context, Handler<Result> handler)
+    protected <Result> Result submitRequest(RequestContext context, TDHttpRequestHandler<Result> handler)
             throws TDClientException, InterruptedException
     {
         if (context.retryCount > config.retryLimit) {
@@ -495,7 +499,7 @@ public class TDHttpClient
         }
     }
 
-    public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Handler<Result> handler)
+    public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, TDHttpRequestHandler<Result> handler)
             throws TDClientException
     {
         RequestContext requestContext = new RequestContext(apiRequest, apiKeyCache);
@@ -526,45 +530,6 @@ public class TDHttpClient
             }
         }
         return waitTimeMillis;
-    }
-
-    private TDClientException handleHttpResponseError(String apiRequestPath, int code, byte[] returnedContent, Response response)
-    {
-        long now = System.currentTimeMillis();
-        Date retryAfter = parseRetryAfter(now, response);
-        Optional<TDApiErrorMessage> errorResponse = parseErrorResponse(returnedContent);
-        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
-        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequestPath, responseErrorText);
-        if (HttpStatus.isClientError(code)) {
-            logger.debug(errorMessage);
-            switch (code) {
-                // Soft 4xx errors. These we retry.
-                case TOO_MANY_REQUESTS_429:
-                    return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
-                // Hard 4xx error. We do not retry the execution on this type of error
-                case HttpStatus.UNAUTHORIZED_401:
-                    throw new TDClientHttpUnauthorizedException(errorMessage);
-                case HttpStatus.NOT_FOUND_404:
-                    throw new TDClientHttpNotFoundException(errorMessage);
-                case HttpStatus.CONFLICT_409:
-                    String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
-                    throw new TDClientHttpConflictException(errorMessage, conflictsWith);
-                case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
-                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter);
-                case HttpStatus.UNPROCESSABLE_ENTITY_422:
-                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter);
-                default:
-                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter);
-            }
-        }
-        logger.warn(errorMessage);
-        if (HttpStatus.isServerError(code)) {
-            // Just returns exception info for 5xx errors
-            return new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter);
-        }
-        else {
-            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter);
-        }
     }
 
     /**
@@ -607,18 +572,49 @@ public class TDHttpClient
         return String.valueOf(conflictsWith);
     }
 
+    private TDClientException handleHttpResponseError(String apiRequestPath, int code, byte[] returnedContent, Response response)
+    {
+        long now = System.currentTimeMillis();
+        Date retryAfter = parseRetryAfter(now, response);
+        Optional<TDApiErrorMessage> errorResponse = parseErrorResponse(returnedContent);
+        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
+        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequestPath, responseErrorText);
+        if (HttpStatus.isClientError(code)) {
+            logger.debug(errorMessage);
+            switch (code) {
+                // Soft 4xx errors. These we retry.
+                case TOO_MANY_REQUESTS_429:
+                    return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
+                // Hard 4xx error. We do not retry the execution on this type of error
+                case HttpStatus.UNAUTHORIZED_401:
+                    throw new TDClientHttpUnauthorizedException(errorMessage);
+                case HttpStatus.NOT_FOUND_404:
+                    throw new TDClientHttpNotFoundException(errorMessage);
+                case HttpStatus.CONFLICT_409:
+                    String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
+                    throw new TDClientHttpConflictException(errorMessage, conflictsWith);
+                case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
+                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter);
+                case HttpStatus.UNPROCESSABLE_ENTITY_422:
+                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter);
+                default:
+                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter);
+            }
+        }
+        logger.warn(errorMessage);
+        if (HttpStatus.isServerError(code)) {
+            // Just returns exception info for 5xx errors
+            return new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter);
+        }
+        else {
+            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter);
+        }
+    }
+
     public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         try {
-            String content = submitRequest(apiRequest, apiKeyCache, new DefaultHandler<String>()
-            {
-                @Override
-                public String onSuccess(Response response)
-                        throws Exception
-                {
-                    return response.body().string();
-                }
-            });
+            String content = submitRequest(apiRequest, apiKeyCache, stringContentHandler);
             if (logger.isTraceEnabled()) {
                 logger.trace("response:\n{}", content);
             }
@@ -634,18 +630,7 @@ public class TDHttpClient
 
     public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final Function<InputStream, Result> contentStreamHandler)
     {
-        Result result = submitRequest(apiRequest, apiKeyCache, new DefaultHandler<Result>()
-        {
-            @Override
-            public Result onSuccess(Response response)
-                    throws Exception
-            {
-                try (ResponseBody body = response.body()) {
-                    return contentStreamHandler.apply(body.byteStream());
-                }
-            }
-        });
-        return result;
+        return submitRequest(apiRequest, apiKeyCache, newByteStreamHandler(contentStreamHandler));
     }
 
     /**
@@ -695,15 +680,7 @@ public class TDHttpClient
             throws TDClientException
     {
         try {
-            byte[] content = submitRequest(apiRequest, apiKeyCache, new DefaultHandler<byte[]>()
-            {
-                @Override
-                public byte[] onSuccess(Response response)
-                        throws Exception
-                {
-                    return response.body().bytes();
-                }
-            });
+            byte[] content = submitRequest(apiRequest, apiKeyCache, byteArrayContentHandler);
             if (logger.isTraceEnabled()) {
                 logger.trace("response:\n{}", new String(content, StandardCharsets.UTF_8));
             }
@@ -739,86 +716,5 @@ public class TDHttpClient
             }
         }
         return reader;
-    }
-
-    public static interface Handler<Result>
-    {
-        /**
-         * Set additinal request parameters here
-         *
-         * @param request
-         * @return
-         */
-        Request prepareRequest(Request request);
-
-        boolean isSuccess(Response response);
-
-        /**
-         * Send the request through the given client.
-         *
-         * @param httpClient
-         * @param request
-         * @return
-         * @throws IOException
-         */
-        Response send(OkHttpClient httpClient, Request request)
-                throws IOException;
-
-        Result onSuccess(Response response)
-                throws Exception;
-
-        /**
-         * @param response
-         * @return returned content
-         */
-        byte[] onError(Response response);
-    }
-
-    public abstract static class DefaultHandler<Result>
-            implements Handler<Result>
-    {
-        public DefaultHandler()
-        {
-        }
-
-        public Request prepareRequest(Request request)
-        {
-            return request;
-        }
-
-        @Override
-        public Response send(OkHttpClient httpClient, Request request)
-                throws IOException
-        {
-            return httpClient.newCall(request).execute();
-        }
-
-        @Override
-        public boolean isSuccess(Response response)
-        {
-            return response.isSuccessful();
-        }
-
-        @Override
-        public byte[] onError(Response response)
-        {
-            try {
-                return response.body().bytes();
-            }
-            catch (IOException e) {
-                throw new TDClientException(INVALID_JSON_RESPONSE, e);
-            }
-        }
-    }
-
-    public static class StringContentHandler
-            extends DefaultHandler<String>
-    {
-        @Override
-        public String onSuccess(Response response)
-                throws Exception
-        {
-            return response.body().string();
-        }
     }
 }

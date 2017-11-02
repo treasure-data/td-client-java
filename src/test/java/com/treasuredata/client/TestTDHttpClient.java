@@ -48,6 +48,8 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler;
+
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.Matchers.is;
@@ -88,7 +90,7 @@ public class TestTDHttpClient
     public void addHttpRequestHeader()
     {
         TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").addHeader("TEST_HEADER", "hello td-client-java").build();
-        String resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.StringContentHandler());
+        String resp = client.submitRequest(req, Optional.<String>absent(), stringContentHandler);
     }
 
     @Test
@@ -96,7 +98,7 @@ public class TestTDHttpClient
     {
         try {
             TDApiRequest req = TDApiRequest.Builder.DELETE("/v3/dummy_endpoint").build();
-            String resp = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.StringContentHandler());
+            String resp = client.submitRequest(req, Optional.<String>absent(), stringContentHandler);
         }
         catch (TDClientHttpException e) {
             logger.warn("error", e);
@@ -122,7 +124,7 @@ public class TestTDHttpClient
         final byte[] body = "foobar".getBytes("UTF-8");
         final long retryAfterSeconds = 5;
 
-        byte[] result = client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultHandler<byte[]>()
+        byte[] result = client.submitRequest(req, Optional.<String>absent(), new TDHttpRequestHandler<byte[]>()
         {
             @Override
             public Response send(OkHttpClient httpClient, Request request)
@@ -155,7 +157,6 @@ public class TestTDHttpClient
                 }
             }
 
-            @Override
             public byte[] onSuccess(Response response)
                     throws Exception
             {
@@ -284,7 +285,7 @@ public class TestTDHttpClient
     }
 
     private static class TestDefaultHandler
-            extends TDHttpClient.DefaultHandler<byte[]>
+            implements TDHttpRequestHandler<byte[]>
     {
         private final byte[] body;
 
@@ -323,7 +324,7 @@ public class TestTDHttpClient
         final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
 
         try {
-            client.submitRequest(req, Optional.<String>absent(), new TDHttpClient.DefaultHandler<byte[]>()
+            client.submitRequest(req, Optional.<String>absent(), new TDHttpRequestHandler<byte[]>()
             {
                 @Override
                 public Response send(OkHttpClient httpClient, Request request)
