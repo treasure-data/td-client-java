@@ -286,7 +286,15 @@ public class TDHttpClient
 
         request = setTDAuthHeaders(request, dateHeader);
 
-        // Set API Key
+        // Set other headers
+        for (Map.Entry<String, String> entry : headers.entries()) {
+            request = request.header(entry.getKey(), entry.getValue());
+        }
+        for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entries()) {
+            request = request.header(entry.getKey(), entry.getValue());
+        }
+
+        // Set API Key after setting the other headers
         Optional<String> apiKey = apiKeyCache.or(config.apiKey);
         if (apiKey.isPresent()) {
             String auth;
@@ -297,14 +305,6 @@ public class TDHttpClient
                 auth = apiKey.get();
             }
             request = request.header(AUTHORIZATION, auth);
-        }
-
-        // Set other headers
-        for (Map.Entry<String, String> entry : headers.entries()) {
-            request = request.addHeader(entry.getKey(), entry.getValue());
-        }
-        for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entries()) {
-            request = request.addHeader(entry.getKey(), entry.getValue());
         }
 
         // Submit method specific headers
