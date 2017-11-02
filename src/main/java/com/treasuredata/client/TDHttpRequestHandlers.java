@@ -15,7 +15,7 @@ public class TDHttpRequestHandlers
     {
     }
 
-    public static TDHttpRequestHandler<String> stringContentHandler = new TDHttpRequestHandler<String>()
+    public static final TDHttpRequestHandler<String> stringContentHandler = new TDHttpRequestHandler<String>()
     {
         @Override
         public String onSuccess(Response response)
@@ -25,7 +25,7 @@ public class TDHttpRequestHandlers
         }
     };
 
-    public static TDHttpRequestHandler<byte[]> byteArrayContentHandler = new TDHttpRequestHandler<byte[]>()
+    public static final TDHttpRequestHandler<byte[]> byteArrayContentHandler = new TDHttpRequestHandler<byte[]>()
     {
         @Override
         public byte[] onSuccess(Response response)
@@ -35,7 +35,7 @@ public class TDHttpRequestHandlers
         }
     };
 
-    public static <Result> TDHttpRequestHandler<Result> newByteStreamHandler(final Function<InputStream, Result> handler)
+    public static final <Result> TDHttpRequestHandler<Result> newByteStreamHandler(final Function<InputStream, Result> handler)
     {
         return new TDHttpRequestHandler<Result>()
         {
