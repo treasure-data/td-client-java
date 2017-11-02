@@ -284,7 +284,6 @@ public class TDHttpClient
         Request.Builder request =
                 new Request.Builder()
                         .url(requestUri)
-                        .cacheControl(CacheControl.FORCE_NETWORK) // Do not cache the result
                         .header(USER_AGENT, getClientName())
                         .header(DATE, dateHeader);
 
