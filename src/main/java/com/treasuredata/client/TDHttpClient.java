@@ -384,7 +384,7 @@ public class TDHttpClient
     protected Optional<TDClientException> handleError(Throwable e)
             throws TDClientException
     {
-        if (e instanceof Exception) {
+        if (Exception.class.isAssignableFrom(e.getClass())) {
             return handleException((Exception) e);
         }
         else {
@@ -399,7 +399,7 @@ public class TDHttpClient
     protected Optional<TDClientException> handleException(Exception e)
             throws TDClientException
     {
-        if (e instanceof TDClientException) {
+        if (TDClientException.class.isAssignableFrom(e.getClass())) {
             // If the error is known error, we should throw it as is
             throw (TDClientException) e;
         }
@@ -438,7 +438,7 @@ public class TDHttpClient
                 return Optional.<TDClientException>of(new TDClientSSLException(sslException));
             }
         }
-        else if (e.getCause() != null && e.getCause() instanceof Exception) {
+        else if (e.getCause() != null && Exception.class.isAssignableFrom(e.getCause().getClass())) {
             return handleError((Exception) e.getCause());
         }
         else {
