@@ -17,13 +17,11 @@ public interface TDHttpRequestHandler<Result>
 {
     static class ResponseContext
     {
-        public final TDHttpClient client;
         public final TDApiRequest apiRequest;
         public final Response response;
 
-        public ResponseContext(TDHttpClient client, TDApiRequest apiRequest, Response response)
+        public ResponseContext(TDApiRequest apiRequest, Response response)
         {
-            this.client = client;
             this.apiRequest = apiRequest;
             this.response = response;
         }

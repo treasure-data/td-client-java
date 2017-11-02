@@ -382,7 +382,7 @@ public class TDHttpClient
                         }
                     }
 
-                    ResponseContext responseContext = new ResponseContext(this, context.apiRequest, response);
+                    ResponseContext responseContext = new ResponseContext(context.apiRequest, response);
                     if (handler.isSuccess(responseContext)) {
                         // 2xx success
                         logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), context.apiRequest.getPath()));
