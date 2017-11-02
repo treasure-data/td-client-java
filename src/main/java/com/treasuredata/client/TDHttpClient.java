@@ -81,6 +81,13 @@ public class TDHttpClient
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
 
+    // Used for reading JSON response
+    static ObjectMapper defaultObjectMapper = new ObjectMapper()
+            .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
+            .registerModule(new GuavaModule())   // for mapping to Guava Optional class
+            .configure(DeserializationFeature.UNWRAP_ROOT_VALUE, false)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
     // A regex pattern that matches a TD1 apikey without the "TD1 " prefix.
     private static final Pattern NAKED_TD1_KEY_PATTERN = Pattern.compile("^(?:[1-9][0-9]*/)?[a-f0-9]{40}$");
 
@@ -119,11 +126,7 @@ public class TDHttpClient
         this.headers = ImmutableMultimap.copyOf(config.headers);
 
         // Prepare jackson json-object mapper
-        this.objectMapper = new ObjectMapper()
-                .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
-                .registerModule(new GuavaModule())   // for mapping to Guava Optional class
-                .configure(DeserializationFeature.UNWRAP_ROOT_VALUE, false)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.objectMapper = defaultObjectMapper;
     }
 
     private TDHttpClient(TDClientConfig config, OkHttpClient httpClient, ObjectMapper objectMapper, Multimap<String, String> headers)
@@ -343,7 +346,8 @@ public class TDHttpClient
     protected <Result> Result submitRequest(RequestContext context, TDHttpRequestHandler<Result> handler)
             throws TDClientException, InterruptedException
     {
-        if (context.backoff.getExecutionCount() > config.retryLimit) {
+        int executionCount = context.backoff.getExecutionCount();
+        if (executionCount > config.retryLimit) {
             logger.warn("API request retry limit exceeded: ({}/{})", config.retryLimit, config.retryLimit);
 
             checkState(context.rootCause.isPresent(), "rootCause must be present here");
@@ -351,10 +355,10 @@ public class TDHttpClient
             throw context.rootCause.get();
         }
         else {
-            if (context.backoff.getExecutionCount() > 0) {
-                // This will increment execution count
-                long waitTimeMillis = calculateWaitTimeMillis(context.backoff, context.rootCause);
-                logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", context.apiRequest.getPath(), context.backoff.getExecutionCount(), config.retryLimit, waitTimeMillis / 1000.0));
+            // This will increment execution count
+            long waitTimeMillis = calculateWaitTimeMillis(context.backoff, context.rootCause);
+            if (waitTimeMillis > 0) {
+                logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", context.apiRequest.getPath(), executionCount, config.retryLimit, waitTimeMillis / 1000.0));
                 // Sleeping for a while. This may throw InterruptedException
                 Thread.sleep(waitTimeMillis);
             }

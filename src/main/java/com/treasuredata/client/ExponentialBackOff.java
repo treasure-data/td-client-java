@@ -56,9 +56,15 @@ public class ExponentialBackOff
 
     public int nextWaitTimeMillis()
     {
-        int currentWaitTimeMillis = nextIntervalMillis;
-        nextIntervalMillis = Math.min((int) (nextIntervalMillis * multiplier), maxIntervalMillis);
-        executionCount++;
-        return currentWaitTimeMillis;
+        if (executionCount == 0) {
+            executionCount++;
+            return 0; // No wait for the first time
+        }
+        else {
+            int currentWaitTimeMillis = nextIntervalMillis;
+            nextIntervalMillis = Math.min((int) (nextIntervalMillis * multiplier), maxIntervalMillis);
+            executionCount++;
+            return currentWaitTimeMillis;
+        }
     }
 }

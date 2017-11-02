@@ -7,8 +7,8 @@ import okhttp3.Response;
 import java.io.IOException;
 
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
-import static com.treasuredata.client.TDRequestErrorHandler.defaultErrorHandler;
-import static com.treasuredata.client.TDRequestErrorHandler.defaultHttpResponseHandler;
+import static com.treasuredata.client.TDRequestErrorHandler.defaultErrorResolver;
+import static com.treasuredata.client.TDRequestErrorHandler.defaultHttpResponseErrorResolver;
 
 /**
  *
@@ -87,7 +87,7 @@ public interface TDHttpRequestHandler<Result>
     default TDClientException resolveHttpResponseError(ResponseContext responseContext)
             throws TDClientException
     {
-        return defaultHttpResponseHandler.apply(responseContext);
+        return defaultHttpResponseErrorResolver(responseContext);
     }
 
     /**
@@ -100,7 +100,7 @@ public interface TDHttpRequestHandler<Result>
     default TDClientException resolveError(Throwable e)
             throws TDClientException
     {
-        return defaultErrorHandler.apply(e);
+        return defaultErrorResolver(e);
     }
 
     /**

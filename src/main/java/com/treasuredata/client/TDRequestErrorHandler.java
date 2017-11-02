@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
@@ -62,120 +61,114 @@ public class TDRequestErrorHandler
         }
     };
 
-    public static Function<ResponseContext, TDClientException> defaultHttpResponseHandler = new Function<ResponseContext, TDClientException>()
+    public static TDClientException defaultHttpResponseErrorResolver(ResponseContext responseContext)
+            throws TDClientException
     {
-        @Override
-        public TDClientException apply(ResponseContext responseContext)
-        {
-            Response response = responseContext.response;
-            int code = response.code();
-            long now = System.currentTimeMillis();
+        Response response = responseContext.response;
+        int code = response.code();
+        long now = System.currentTimeMillis();
 
-            Date retryAfter = parseRetryAfter(now, response);
-            Optional<TDApiErrorMessage> errorResponse = extractErrorResponse(responseContext);
-            String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
-            String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), responseContext.apiRequest.getPath(), responseErrorText);
-            if (HttpStatus.isClientError(code)) {
-                logger.debug(errorMessage);
-                switch (code) {
-                    // Soft 4xx errors. These we retry.
-                    case TOO_MANY_REQUESTS_429:
-                        return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
-                    // Hard 4xx error. We do not retry the execution on this type of error
-                    case HttpStatus.UNAUTHORIZED_401:
-                        throw new TDClientHttpUnauthorizedException(errorMessage);
-                    case HttpStatus.NOT_FOUND_404:
-                        throw new TDClientHttpNotFoundException(errorMessage);
-                    case HttpStatus.CONFLICT_409:
-                        String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
-                        throw new TDClientHttpConflictException(errorMessage, conflictsWith);
-                    case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
-                        throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter);
-                    case HttpStatus.UNPROCESSABLE_ENTITY_422:
-                        throw new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter);
-                    default:
-                        throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter);
-                }
-            }
-            logger.warn(errorMessage);
-            if (HttpStatus.isServerError(code)) {
-                // Just returns exception info for 5xx errors
-                return new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter);
-            }
-            else {
-                throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter);
+        Date retryAfter = parseRetryAfter(now, response);
+        Optional<TDApiErrorMessage> errorResponse = extractErrorResponse(responseContext.response);
+        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
+        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), responseContext.apiRequest.getPath(), responseErrorText);
+        if (HttpStatus.isClientError(code)) {
+            logger.debug(errorMessage);
+            switch (code) {
+                // Soft 4xx errors. These we retry.
+                case TOO_MANY_REQUESTS_429:
+                    return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
+                // Hard 4xx error. We do not retry the execution on this type of error
+                case HttpStatus.UNAUTHORIZED_401:
+                    throw new TDClientHttpUnauthorizedException(errorMessage);
+                case HttpStatus.NOT_FOUND_404:
+                    throw new TDClientHttpNotFoundException(errorMessage);
+                case HttpStatus.CONFLICT_409:
+                    String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
+                    throw new TDClientHttpConflictException(errorMessage, conflictsWith);
+                case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
+                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter);
+                case HttpStatus.UNPROCESSABLE_ENTITY_422:
+                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter);
+                default:
+                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter);
             }
         }
-    };
+        logger.warn(errorMessage);
+        if (HttpStatus.isServerError(code)) {
+            // Just returns exception info for 5xx errors
+            return new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter);
+        }
+        else {
+            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter);
+        }
+    }
 
-    public static Function<Throwable, TDClientException> defaultErrorHandler = new Function<Throwable, TDClientException>()
+    public static TDClientException defaultErrorResolver(Throwable e)
+            throws TDClientException
     {
-        @Override
-        public TDClientException apply(Throwable e)
-        {
-            if (Exception.class.isAssignableFrom(e.getClass())) {
-                return handleException((Exception) e);
-            }
-            else {
-                throw new TDClientProcessingException(new RuntimeException(e));
-            }
+        if (Exception.class.isAssignableFrom(e.getClass())) {
+            return defaultExceptionResolver((Exception) e);
         }
+        else {
+            throw new TDClientProcessingException(new RuntimeException(e));
+        }
+    }
 
-        /**
-         * @return If the error type is retryable, return the exception. If not, throw it as TDClientException
-         * @throws TDClientException
-         */
-        protected TDClientException handleException(Exception e)
-                throws TDClientException
-        {
-            if (TDClientException.class.isAssignableFrom(e.getClass())) {
-                // If the error is known error, we should throw it as is
-                throw (TDClientException) e;
-            }
-            else if (e instanceof ProtocolException || e instanceof ConnectException || e instanceof EOFException) {
-                // OkHttp throws ProtocolException the content length is insufficient
-                // ConnectionException can be throw if server is shutting down
-                // EOFException can be thrown when the connection was interrupted
-                return new TDClientInterruptedException("connection failure", e);
-            }
-            else if (e instanceof TimeoutException || e instanceof SocketTimeoutException) {
-                // OkHttp throws SocketTimeoutException
-                return new TDClientTimeoutException(e);
-            }
-            else if (e instanceof SocketException) {
-                final SocketException socketException = (SocketException) e;
-                if (socketException instanceof BindException ||
-                        socketException instanceof ConnectException ||
-                        socketException instanceof NoRouteToHostException ||
-                        socketException instanceof PortUnreachableException) {
-                    // All known SocketException are retryable.
-                    return new TDClientSocketException(socketException);
-                }
-                else {
-                    // Other unknown SocketException are considered non-retryable.
-                    throw new TDClientSocketException(socketException);
-                }
-            }
-            else if (e instanceof SSLException) {
-                SSLException sslException = (SSLException) e;
-                if (sslException instanceof SSLHandshakeException || sslException instanceof SSLKeyException || sslException instanceof SSLPeerUnverifiedException) {
-                    // deterministic SSL exceptions
-                    throw new TDClientSSLException(sslException);
-                }
-                else {
-                    // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
-                    return new TDClientSSLException(sslException);
-                }
-            }
-            else if (e.getCause() != null && Exception.class.isAssignableFrom(e.getCause().getClass())) {
-                return handleException((Exception) e.getCause());
+    /**
+     * @return If the error type is retryable, return the exception. If not, throw it as TDClientException
+     * @throws TDClientException
+     */
+    public static TDClientException defaultExceptionResolver(Exception e)
+            throws TDClientException
+    {
+        if (TDClientException.class.isAssignableFrom(e.getClass())) {
+            // If the error is known error, we should throw it as is
+            throw (TDClientException) e;
+        }
+        else if (e instanceof ProtocolException || e instanceof ConnectException || e instanceof EOFException) {
+            // OkHttp throws ProtocolException the content length is insufficient
+            // ConnectionException can be throw if server is shutting down
+            // EOFException can be thrown when the connection was interrupted
+            return new TDClientInterruptedException("connection failure", e);
+        }
+        else if (e instanceof TimeoutException || e instanceof SocketTimeoutException) {
+            // OkHttp throws SocketTimeoutException
+            return new TDClientTimeoutException(e);
+        }
+        else if (e instanceof SocketException) {
+            final SocketException socketException = (SocketException) e;
+            if (socketException instanceof BindException ||
+                    socketException instanceof ConnectException ||
+                    socketException instanceof NoRouteToHostException ||
+                    socketException instanceof PortUnreachableException) {
+                // All known SocketException are retryable.
+                return new TDClientSocketException(socketException);
             }
             else {
-                logger.warn("unknown type exception: " + e.getClass(), e);
-                throw new TDClientProcessingException(e);
+                // Other unknown SocketException are considered non-retryable.
+                throw new TDClientSocketException(socketException);
             }
         }
-    };
+        else if (e instanceof SSLException) {
+            SSLException sslException = (SSLException) e;
+            if (sslException instanceof SSLHandshakeException || sslException instanceof SSLKeyException || sslException instanceof SSLPeerUnverifiedException) {
+                // deterministic SSL exceptions
+                throw new TDClientSSLException(sslException);
+            }
+            else {
+                // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
+                return new TDClientSSLException(sslException);
+            }
+        }
+        else if (e.getCause() != null && Exception.class.isAssignableFrom(e.getCause().getClass())) {
+            return defaultExceptionResolver((Exception) e.getCause());
+        }
+        else {
+            logger.warn("unknown type exception: " + e.getClass(), e);
+            throw new TDClientProcessingException(e);
+        }
+    }
 
     /**
      * https://tools.ietf.org/html/rfc7231#section-7.1.3
@@ -218,12 +211,12 @@ public class TDRequestErrorHandler
     }
 
     @VisibleForTesting
-    public static Optional<TDApiErrorMessage> extractErrorResponse(ResponseContext responseContext)
+    public static Optional<TDApiErrorMessage> extractErrorResponse(Response response)
     {
         byte[] content = null;
         try {
             try {
-                content = responseContext.response.body().bytes();
+                content = response.body().bytes();
             }
             catch (IOException e) {
                 throw new TDClientException(INVALID_JSON_RESPONSE, e);
@@ -231,7 +224,7 @@ public class TDRequestErrorHandler
 
             if (content.length > 0 && content[0] == '{') {
                 // Error message from TD API
-                return Optional.of(responseContext.client.getObjectMapper().readValue(content, TDApiErrorMessage.class));
+                return Optional.of(TDHttpClient.defaultObjectMapper.readValue(content, TDApiErrorMessage.class));
             }
             else {
                 // Error message from Proxy server etc.
@@ -240,7 +233,7 @@ public class TDRequestErrorHandler
             }
         }
         catch (IOException e) {
-            logger.warn(String.format("Failed to parse error response: %s", new String(content, StandardCharsets.UTF_8)), e);
+            logger.warn("Failed to parse the error response {}: {}\n{}", response.request().url(), new String(content, StandardCharsets.UTF_8), e.getMessage());
         }
         return Optional.absent();
     }

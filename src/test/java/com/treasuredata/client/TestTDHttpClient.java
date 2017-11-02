@@ -19,8 +19,6 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Optional;
-import com.treasuredata.client.model.TDApiErrorMessage;
-import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -31,8 +29,6 @@ import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Instant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.After;
@@ -42,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,7 +48,6 @@ import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -80,13 +74,6 @@ public class TestTDHttpClient
     }
 
     @Test
-    public void parseInvalidErrorMessage()
-    {
-        Optional<TDApiErrorMessage> err = client.parseErrorResponse("{invalid json response}".getBytes(StandardCharsets.UTF_8));
-        assertFalse(err.isPresent());
-    }
-
-    @Test
     public void addHttpRequestHeader()
     {
         TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").addHeader("TEST_HEADER", "hello td-client-java").build();
@@ -99,9 +86,9 @@ public class TestTDHttpClient
         try {
             TDApiRequest req = TDApiRequest.Builder.DELETE("/v3/dummy_endpoint").build();
             String resp = client.submitRequest(req, Optional.<String>absent(), stringContentHandler);
+            fail();
         }
         catch (TDClientHttpException e) {
-            logger.warn("error", e);
         }
     }
 
@@ -365,44 +352,5 @@ public class TestTDHttpClient
         }
 
         return requests.get();
-    }
-
-    @Test
-    public void testParseRetryAfterHttpDate()
-            throws Exception
-    {
-        Response response = new Response.Builder()
-                .request(new Request.Builder().url("https://api.treasuredata.com/v3/server_status").build())
-                .protocol(Protocol.HTTP_1_1)
-                .code(200)
-                .message("")
-                .headers(Headers.of("Retry-After", "Fri, 31 Dec 1999 23:59:59 GMT"))
-                .build();
-
-        long now = System.currentTimeMillis();
-        Date d = TDHttpClient.parseRetryAfter(now, response);
-        Instant retryAfter = new Instant(d);
-        Instant expected = new DateTime(1999, 12, 31, 23, 59, 59, DateTimeZone.UTC).toInstant();
-        assertThat(retryAfter, is(expected));
-    }
-
-    @Test
-    public void testParseRetryAfterSeconds()
-            throws Exception
-    {
-        Response response = new Response.Builder()
-                .request(new Request.Builder().url("https://api.treasuredata.com/v3/server_status").build())
-                .protocol(Protocol.HTTP_1_1)
-                .code(200)
-                .message("")
-                .headers(Headers.of("Retry-After", "120"))
-                .build();
-
-        long now = System.currentTimeMillis();
-
-        Date d = TDHttpClient.parseRetryAfter(now, response);
-        Instant retryAfter = new Instant(d);
-        Instant expected = new DateTime(now).plusSeconds(120).toInstant();
-        assertThat(retryAfter, is(expected));
     }
 }
