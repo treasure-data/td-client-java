@@ -356,7 +356,7 @@ public class TDHttpClient
         }
         else {
             // This will increment execution count
-            long waitTimeMillis = calculateWaitTimeMillis(context.backoff, context.rootCause);
+            long waitTimeMillis = calculateWaitTimeMillis(context.backoff.nextWaitTimeMillis(), context.rootCause);
             if (waitTimeMillis > 0) {
                 logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", context.apiRequest.getPath(), executionCount, config.retryLimit, waitTimeMillis / 1000.0));
                 // Sleeping for a while. This may throw InterruptedException
@@ -403,9 +403,8 @@ public class TDHttpClient
         }
     }
 
-    private long calculateWaitTimeMillis(ExponentialBackOff backoff, Optional<TDClientException> rootCause)
+    private long calculateWaitTimeMillis(long nextWaitTimeMillis, Optional<TDClientException> rootCause)
     {
-        long waitTimeMillis = backoff.nextWaitTimeMillis();
         if (rootCause.isPresent() && rootCause.get() instanceof TDClientHttpException) {
             TDClientHttpException httpException = (TDClientHttpException) rootCause.get();
             Optional<Date> retryAfter = httpException.getRetryAfter();
@@ -417,10 +416,10 @@ public class TDHttpClient
                 if (retryAfterMillis > maxWaitMillis) {
                     throw httpException;
                 }
-                waitTimeMillis = Math.max(waitTimeMillis, retryAfterMillis);
+                nextWaitTimeMillis = Math.max(nextWaitTimeMillis, retryAfterMillis);
             }
         }
-        return waitTimeMillis;
+        return nextWaitTimeMillis;
     }
 
     /**

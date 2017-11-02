@@ -58,7 +58,7 @@ public class ExponentialBackOff
     {
         if (executionCount == 0) {
             executionCount++;
-            return 0; // No wait for the first time
+            return 0;
         }
         else {
             int currentWaitTimeMillis = nextIntervalMillis;
