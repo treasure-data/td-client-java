@@ -36,7 +36,6 @@ import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
 import com.treasuredata.client.model.TDApiErrorMessage;
-import okhttp3.CacheControl;
 import okhttp3.ConnectionPool;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
@@ -44,6 +43,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.internal.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -651,7 +651,9 @@ public class TDHttpClient
             public Result onSuccess(Response response)
                     throws Exception
             {
-                return contentStreamHandler.apply(response.body().byteStream());
+                try (ResponseBody body = response.body()) {
+                    return contentStreamHandler.apply(body.byteStream());
+                }
             }
         });
         return result;
@@ -805,7 +807,7 @@ public class TDHttpClient
         @Override
         public boolean isSuccess(Response response)
         {
-            return HttpStatus.isSuccess(response.code());
+            return response.isSuccessful();
         }
 
         @Override
