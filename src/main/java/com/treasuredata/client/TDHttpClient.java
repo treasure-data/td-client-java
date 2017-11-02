@@ -35,7 +35,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
-import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -46,26 +45,12 @@ import okhttp3.internal.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLKeyException;
-import javax.net.ssl.SSLPeerUnverifiedException;
-
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.BindException;
-import java.net.ConnectException;
 import java.net.InetSocketAddress;
-import java.net.NoRouteToHostException;
-import java.net.PortUnreachableException;
-import java.net.ProtocolException;
 import java.net.Proxy;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,7 +58,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -81,16 +65,10 @@ import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
 import static com.google.common.net.HttpHeaders.DATE;
 import static com.google.common.net.HttpHeaders.LOCATION;
-import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDApiRequest.urlEncode;
-import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
-import static com.treasuredata.client.TDClientException.ErrorType.INVALID_INPUT;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
-import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE;
-import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
-import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
-import static com.treasuredata.client.TDClientHttpTooManyRequestsException.TOO_MANY_REQUESTS_429;
+import static com.treasuredata.client.TDHttpRequestHandler.ResponseContext;
 import static com.treasuredata.client.TDHttpRequestHandlers.byteArrayContentHandler;
 import static com.treasuredata.client.TDHttpRequestHandlers.newByteStreamHandler;
 import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler;
@@ -102,16 +80,6 @@ public class TDHttpClient
         implements AutoCloseable
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
-
-    @VisibleForTesting
-    static final ThreadLocal<SimpleDateFormat> HTTP_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>()
-    {
-        @Override
-        protected SimpleDateFormat initialValue()
-        {
-            return new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
-        }
-    };
 
     // A regex pattern that matches a TD1 apikey without the "TD1 " prefix.
     private static final Pattern NAKED_TD1_KEY_PATTERN = Pattern.compile("^(?:[1-9][0-9]*/)?[a-f0-9]{40}$");
@@ -192,26 +160,6 @@ public class TDHttpClient
         // Cleanup the internal thread manager and connections
         httpClient.dispatcher().executorService().shutdown();
         httpClient.connectionPool().evictAll();
-    }
-
-    @VisibleForTesting
-    Optional<TDApiErrorMessage> parseErrorResponse(byte[] content)
-    {
-        try {
-            if (content.length > 0 && content[0] == '{') {
-                // Error message from TD API
-                return Optional.of(objectMapper.readValue(content, TDApiErrorMessage.class));
-            }
-            else {
-                // Error message from Proxy server etc.
-                String contentStr = new String(content, StandardCharsets.UTF_8);
-                return Optional.of(new TDApiErrorMessage("error", contentStr, "error"));
-            }
-        }
-        catch (IOException e) {
-            logger.warn(String.format("Failed to parse error response: %s", new String(content, StandardCharsets.UTF_8)), e);
-            return Optional.absent();
-        }
     }
 
     private static final ThreadLocal<SimpleDateFormat> RFC2822_FORMAT =
@@ -361,91 +309,41 @@ public class TDHttpClient
         return NAKED_TD1_KEY_PATTERN.matcher(s).matches();
     }
 
-    private class RequestContext
+    protected static class RequestContext
     {
-        private final ExponentialBackOff backoff = new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);
-        public int retryCount = 0;
-        public TDApiRequest apiRequest;
-        public Optional<TDClientException> rootCause = Optional.absent();
+        private final ExponentialBackOff backoff;
+        public final TDApiRequest apiRequest;
         public final Optional<String> apiKeyCache;
+        public final Optional<TDClientException> rootCause;
 
-        public RequestContext(TDApiRequest apiRequest, Optional<String> apiKeyCache)
+        public RequestContext(TDClientConfig config, TDApiRequest apiRequest, Optional<String> apiKeyCache)
         {
+            this(new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier), apiRequest, apiKeyCache, Optional.absent());
+        }
+
+        public RequestContext(ExponentialBackOff backoff, TDApiRequest apiRequest, Optional<String> apiKeyCache, Optional<TDClientException> rootCause)
+        {
+            this.backoff = backoff;
             this.apiRequest = apiRequest;
             this.apiKeyCache = apiKeyCache;
+            this.rootCause = rootCause;
         }
-    }
 
-    protected Optional<TDClientException> handleError(Throwable e)
-            throws TDClientException
-    {
-        if (Exception.class.isAssignableFrom(e.getClass())) {
-            return handleException((Exception) e);
+        public RequestContext withTDApiRequest(TDApiRequest newApiRequest)
+        {
+            return new RequestContext(backoff, newApiRequest, apiKeyCache, rootCause);
         }
-        else {
-            throw new TDClientProcessingException(new RuntimeException(e));
-        }
-    }
 
-    /**
-     * @return If the error type is retryable, return the exception. If not, throw it as TDClientException
-     * @throws TDClientException
-     */
-    protected Optional<TDClientException> handleException(Exception e)
-            throws TDClientException
-    {
-        if (TDClientException.class.isAssignableFrom(e.getClass())) {
-            // If the error is known error, we should throw it as is
-            throw (TDClientException) e;
-        }
-        else if (e instanceof ProtocolException || e instanceof ConnectException || e instanceof EOFException) {
-            // OkHttp throws ProtocolException the content length is insufficient
-            // ConnectionException can be throw if server is shutting down
-            // EOFException can be thrown when the connection was interrupted
-            return Optional.<TDClientException>of(new TDClientInterruptedException("connection failure", e));
-        }
-        else if (e instanceof TimeoutException || e instanceof SocketTimeoutException) {
-            // OkHttp throws SocketTimeoutException
-            return Optional.<TDClientException>of(new TDClientTimeoutException(e));
-        }
-        else if (e instanceof SocketException) {
-            final SocketException socketException = (SocketException) e;
-            if (socketException instanceof BindException ||
-                    socketException instanceof ConnectException ||
-                    socketException instanceof NoRouteToHostException ||
-                    socketException instanceof PortUnreachableException) {
-                // All known SocketException are retryable.
-                return Optional.<TDClientException>of(new TDClientSocketException(socketException));
-            }
-            else {
-                // Other unknown SocketException are considered non-retryable.
-                throw new TDClientSocketException(socketException);
-            }
-        }
-        else if (e instanceof SSLException) {
-            SSLException sslException = (SSLException) e;
-            if (sslException instanceof SSLHandshakeException || sslException instanceof SSLKeyException || sslException instanceof SSLPeerUnverifiedException) {
-                // deterministic SSL exceptions
-                throw new TDClientSSLException(sslException);
-            }
-            else {
-                // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
-                return Optional.<TDClientException>of(new TDClientSSLException(sslException));
-            }
-        }
-        else if (e.getCause() != null && Exception.class.isAssignableFrom(e.getCause().getClass())) {
-            return handleError((Exception) e.getCause());
-        }
-        else {
-            logger.warn("unknown type exception: " + e.getClass(), e);
-            throw new TDClientProcessingException(e);
+        public RequestContext withRootCause(TDClientException e)
+        {
+            return new RequestContext(backoff, apiRequest, apiKeyCache, Optional.of(e));
         }
     }
 
     protected <Result> Result submitRequest(RequestContext context, TDHttpRequestHandler<Result> handler)
             throws TDClientException, InterruptedException
     {
-        if (context.retryCount > config.retryLimit) {
+        if (context.backoff.getExecutionCount() > config.retryLimit) {
             logger.warn("API request retry limit exceeded: ({}/{})", config.retryLimit, config.retryLimit);
 
             checkState(context.rootCause.isPresent(), "rootCause must be present here");
@@ -453,7 +351,8 @@ public class TDHttpClient
             throw context.rootCause.get();
         }
         else {
-            if (context.retryCount > 0) {
+            if (context.backoff.getExecutionCount() > 0) {
+                // This will increment execution count
                 long waitTimeMillis = calculateWaitTimeMillis(context.backoff, context.rootCause);
                 logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", context.apiRequest.getPath(), context.backoff.getExecutionCount(), config.retryLimit, waitTimeMillis / 1000.0));
                 // Sleeping for a while. This may throw InterruptedException
@@ -463,38 +362,39 @@ public class TDHttpClient
             try {
                 // Prepare http request
                 Request request = prepareRequest(context.apiRequest, context.apiKeyCache);
+                // Apply request customization
                 request = handler.prepareRequest(request);
 
                 // Get response
                 try (Response response = handler.send(httpClient, request)) {
                     int code = response.code();
                     // Retry upon proxy authentication request
+                    // This is a workaround for this issue: https://github.com/square/okhttp/issues/3111
                     if (code == HttpStatus.TEMPORARY_REDIRECT_307 || code == 308) {
                         String location = response.header(LOCATION);
                         if (location != null) {
-                            context.apiRequest = context.apiRequest.withUri(location);
+                            context = context.withTDApiRequest(context.apiRequest.withUri(location));
                             return submitRequest(context, handler);
                         }
                     }
-                    if (handler.isSuccess(response)) {
+
+                    ResponseContext responseContext = new ResponseContext(this, context.apiRequest, response);
+                    if (handler.isSuccess(responseContext)) {
                         // 2xx success
                         logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), context.apiRequest.getPath()));
                         return handler.onSuccess(response);
                     }
                     else {
-                        // on error
-                        byte[] returnedContent = handler.onError(response);
                         // This may directly throw an TDClientException if we know this is unrecoverable error.
-                        context.rootCause = Optional.of(handleHttpResponseError(context.apiRequest.getPath(), code, returnedContent, response));
+                        context = context.withRootCause(handler.resolveHttpResponseError(responseContext));
                     }
                 }
             }
             catch (Exception e) {
                 logger.warn(String.format("API request to %s failed: %s, cause: %s", context.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()), e);
                 // This may throw TDClientException if the error is not recoverable
-                context.rootCause = handleError(e);
+                context = context.withRootCause(handler.resolveError(e));
             }
-            context.retryCount += 1;
             return submitRequest(context, handler);
         }
     }
@@ -520,86 +420,8 @@ public class TDHttpClient
     }
 
     /**
-     * https://tools.ietf.org/html/rfc7231#section-7.1.3
-     */
-    @VisibleForTesting
-    static Date parseRetryAfter(long now, Response response)
-    {
-        String retryAfter = response.header(RETRY_AFTER);
-        if (retryAfter == null) {
-            return null;
-        }
-        // Try parsing as a number of seconds first
-        try {
-            long retryAfterSeconds = Long.parseLong(retryAfter);
-            return new Date(now + TimeUnit.SECONDS.toMillis(retryAfterSeconds));
-        }
-        catch (NumberFormatException e) {
-            // Then try parsing as a HTTP-date
-            try {
-                return HTTP_DATE_FORMAT.get().parse(retryAfter);
-            }
-            catch (ParseException ignore) {
-                logger.warn("Failed to parse Retry-After header: '" + retryAfter + "'");
-                return null;
-            }
-        }
-    }
-
-    private String parseConflictsWith(TDApiErrorMessage errorResponse)
-    {
-        Map<String, Object> details = errorResponse.getDetails();
-        if (details == null) {
-            return null;
-        }
-        Object conflictsWith = details.get("conflicts_with");
-        if (conflictsWith == null) {
-            return null;
-        }
-        return String.valueOf(conflictsWith);
-    }
-
-    private TDClientException handleHttpResponseError(String apiRequestPath, int code, byte[] returnedContent, Response response)
-    {
-        long now = System.currentTimeMillis();
-        Date retryAfter = parseRetryAfter(now, response);
-        Optional<TDApiErrorMessage> errorResponse = parseErrorResponse(returnedContent);
-        String responseErrorText = errorResponse.isPresent() ? ": " + errorResponse.get().getText() : "";
-        String errorMessage = String.format("[%d:%s] API request to %s has failed%s", code, HttpStatus.getMessage(code), apiRequestPath, responseErrorText);
-        if (HttpStatus.isClientError(code)) {
-            logger.debug(errorMessage);
-            switch (code) {
-                // Soft 4xx errors. These we retry.
-                case TOO_MANY_REQUESTS_429:
-                    return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
-                // Hard 4xx error. We do not retry the execution on this type of error
-                case HttpStatus.UNAUTHORIZED_401:
-                    throw new TDClientHttpUnauthorizedException(errorMessage);
-                case HttpStatus.NOT_FOUND_404:
-                    throw new TDClientHttpNotFoundException(errorMessage);
-                case HttpStatus.CONFLICT_409:
-                    String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
-                    throw new TDClientHttpConflictException(errorMessage, conflictsWith);
-                case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
-                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter);
-                case HttpStatus.UNPROCESSABLE_ENTITY_422:
-                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter);
-                default:
-                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter);
-            }
-        }
-        logger.warn(errorMessage);
-        if (HttpStatus.isServerError(code)) {
-            // Just returns exception info for 5xx errors
-            return new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter);
-        }
-        else {
-            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter);
-        }
-    }
-
-    /**
      * A low-level method to submit a TD API request.
+     *
      * @param apiRequest
      * @param apiKeyCache
      * @param handler
@@ -610,7 +432,7 @@ public class TDHttpClient
     public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, TDHttpRequestHandler<Result> handler)
             throws TDClientException
     {
-        RequestContext requestContext = new RequestContext(apiRequest, apiKeyCache);
+        RequestContext requestContext = new RequestContext(config, apiRequest, apiKeyCache);
         try {
             return submitRequest(requestContext, handler);
         }
@@ -628,6 +450,7 @@ public class TDHttpClient
 
     /**
      * Submit an API request and get the result as String value (e.g. json)
+     *
      * @param apiRequest
      * @param apiKeyCache
      * @return
@@ -643,6 +466,7 @@ public class TDHttpClient
 
     /**
      * Submit an API request, and returns the byte InputStream. This stream is valid until exiting this function.
+     *
      * @param apiRequest
      * @param apiKeyCache
      * @param contentStreamHandler

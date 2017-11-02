@@ -7,12 +7,28 @@ import okhttp3.Response;
 import java.io.IOException;
 
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
+import static com.treasuredata.client.TDRequestErrorHandler.defaultErrorHandler;
+import static com.treasuredata.client.TDRequestErrorHandler.defaultHttpResponseHandler;
 
 /**
  *
  */
 public interface TDHttpRequestHandler<Result>
 {
+    static class ResponseContext
+    {
+        public final TDHttpClient client;
+        public final TDApiRequest apiRequest;
+        public final Response response;
+
+        public ResponseContext(TDHttpClient client, TDApiRequest apiRequest, Response response)
+        {
+            this.client = client;
+            this.apiRequest = apiRequest;
+            this.response = response;
+        }
+    }
+
     /**
      * Set additional request parameters here.
      *
@@ -28,13 +44,13 @@ public interface TDHttpRequestHandler<Result>
     /**
      * If this returns true, onSuccess(resposne) will be called
      *
-     * @param response
+     * @param responseContext
      * @return
      */
-    default boolean isSuccess(Response response)
+    default boolean isSuccess(ResponseContext responseContext)
     {
         // Just check 200 <= code < 300 range
-        return response.isSuccessful();
+        return responseContext.response.isSuccessful();
     }
 
     /**
@@ -60,6 +76,32 @@ public interface TDHttpRequestHandler<Result>
      */
     Result onSuccess(Response response)
             throws Exception;
+
+    /**
+     * Resolve a corresponding TDClientException for the error response
+     *
+     * @param responseContext
+     * @return
+     * @throws TDClientException
+     */
+    default TDClientException resolveHttpResponseError(ResponseContext responseContext)
+            throws TDClientException
+    {
+        return defaultHttpResponseHandler.apply(responseContext);
+    }
+
+    /**
+     * Resolve a corresponding TDClientException for the exception thrown while receiving a response.
+     *
+     * @param e
+     * @return
+     * @throws TDClientException
+     */
+    default TDClientException resolveError(Throwable e)
+            throws TDClientException
+    {
+        return defaultErrorHandler.apply(e);
+    }
 
     /**
      * When isSuccess(response) returns false, this method will be called to read the returned response.
