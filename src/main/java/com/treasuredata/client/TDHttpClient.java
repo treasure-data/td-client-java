@@ -37,7 +37,6 @@ import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.ConnectionPool;
-import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -58,8 +57,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.BindException;
 import java.net.ConnectException;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.net.PortUnreachableException;
@@ -129,8 +126,6 @@ public class TDHttpClient
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(config.connectTimeoutMillis, TimeUnit.MILLISECONDS);
         builder.readTimeout(config.readTimeoutMillis, TimeUnit.MILLISECONDS);
-        CookieManager cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER);
-        builder.cookieJar(new JavaNetCookieJar(cookieManager));
 
         // Proxy configuration
         if (config.proxy.isPresent()) {
@@ -150,13 +145,6 @@ public class TDHttpClient
         // Build OkHttpClient
         this.httpClient = builder.build();
         this.headers = ImmutableMultimap.copyOf(config.headers);
-
-//        if (config.requestBufferSize.isPresent()) {
-//            httpClient.setRequestBufferSize(config.requestBufferSize.get());
-//        }
-//        if (config.responseBufferSize.isPresent()) {
-//            httpClient.setResponseBufferSize(config.responseBufferSize.get());
-//        }
 
         // Prepare jackson json-object mapper
         this.objectMapper = new ObjectMapper()
@@ -279,7 +267,9 @@ public class TDHttpClient
             }
         }
 
-        logger.debug("Sending API request to {}", requestUri);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Sending API request to {}", requestUri);
+        }
         String dateHeader = RFC2822_FORMAT.get().format(new Date());
         Request.Builder request =
                 new Request.Builder()
@@ -470,7 +460,6 @@ public class TDHttpClient
                 // Prepare http request
                 Request request = prepareRequest(context.apiRequest, context.apiKeyCache);
                 request = handler.prepareRequest(request);
-                logger.info("request: " + context.apiRequest.getPath() + " " + context.apiKeyCache.toString() + " " + request.headers().toString());
 
                 // Get response
                 try (Response response = handler.send(httpClient, request)) {
