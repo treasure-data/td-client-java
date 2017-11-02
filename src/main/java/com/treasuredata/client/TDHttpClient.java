@@ -36,6 +36,7 @@ import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
 import com.treasuredata.client.model.TDApiErrorMessage;
+import okhttp3.CacheControl;
 import okhttp3.ConnectionPool;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
@@ -262,7 +263,9 @@ public class TDHttpClient
                 return ":" + input.toString();
             }
         }).or("");
-        String requestUri = String.format("%s://%s%s%s", config.useSSL ? "https" : "http", config.endpoint, portStr, apiRequest.getPath());
+        String requestUri = apiRequest.getPath().startsWith("http")
+                ? apiRequest.getPath()
+                : String.format("%s://%s%s%s", config.useSSL ? "https" : "http", config.endpoint, portStr, apiRequest.getPath());
 
         if (!apiRequest.getQueryParams().isEmpty()) {
             List<String> queryParamList = new ArrayList<String>(apiRequest.getQueryParams().size());
@@ -281,6 +284,7 @@ public class TDHttpClient
         Request.Builder request =
                 new Request.Builder()
                         .url(requestUri)
+                        .cacheControl(CacheControl.FORCE_NETWORK) // Do not cache the result
                         .header(USER_AGENT, getClientName())
                         .header(DATE, dateHeader);
 
@@ -366,18 +370,16 @@ public class TDHttpClient
 
     private class RequestContext
     {
-        public final TDApiRequest apiRequest;
-        public Request request;
-
         private final ExponentialBackOff backoff = new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);
         public int retryCount = 0;
-
+        public TDApiRequest apiRequest;
         public Optional<TDClientException> rootCause = Optional.absent();
+        public final Optional<String> apiKeyCache;
 
-        public RequestContext(TDApiRequest apiRequest, Request request)
+        public RequestContext(TDApiRequest apiRequest, Optional<String> apiKeyCache)
         {
             this.apiRequest = apiRequest;
-            this.request = request;
+            this.apiKeyCache = apiKeyCache;
         }
     }
 
@@ -466,13 +468,19 @@ public class TDHttpClient
             }
 
             try {
-                try (Response response = handler.send(httpClient, context.request)) {
+                // Prepare http request
+                Request request = prepareRequest(context.apiRequest, context.apiKeyCache);
+                request = handler.prepareRequest(request);
+                logger.info("request: " + context.apiRequest.getPath() + " " + context.apiKeyCache.toString() + " " + request.headers().toString());
+
+                // Get response
+                try (Response response = handler.send(httpClient, request)) {
                     int code = response.code();
                     // Retry upon proxy authentication request
                     if (code == HttpStatus.TEMPORARY_REDIRECT_307 || code == 308) {
                         String location = response.header(LOCATION);
                         if (location != null) {
-                            context.request = context.request.newBuilder().url(location).build();
+                            context.apiRequest = context.apiRequest.withUri(location);
                             return submitRequest(context, handler);
                         }
                     }
@@ -502,9 +510,7 @@ public class TDHttpClient
     public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, Handler<Result> handler)
             throws TDClientException
     {
-        Request request = prepareRequest(apiRequest, apiKeyCache);
-        request = handler.prepareRequest(request);
-        RequestContext requestContext = new RequestContext(apiRequest, request);
+        RequestContext requestContext = new RequestContext(apiRequest, apiKeyCache);
         try {
             return submitRequest(requestContext, handler);
         }

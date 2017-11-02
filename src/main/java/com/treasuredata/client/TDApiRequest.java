@@ -70,6 +70,11 @@ public class TDApiRequest
         this.followRedirects = checkNotNull(followRedirects, "followRedirects is null");
     }
 
+    public TDApiRequest withUri(String uri)
+    {
+        return new TDApiRequest(method, uri, ImmutableMap.copyOf(queryParams), ImmutableMultimap.copyOf(headerParams), postJson, putFile, followRedirects);
+    }
+
     public String getPath()
     {
         return path;
