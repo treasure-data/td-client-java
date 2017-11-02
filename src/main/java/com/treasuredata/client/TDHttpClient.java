@@ -499,19 +499,6 @@ public class TDHttpClient
         }
     }
 
-    public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, TDHttpRequestHandler<Result> handler)
-            throws TDClientException
-    {
-        RequestContext requestContext = new RequestContext(apiRequest, apiKeyCache);
-        try {
-            return submitRequest(requestContext, handler);
-        }
-        catch (InterruptedException e) {
-            logger.warn("API request interrupted", e);
-            throw new TDClientInterruptedException(e);
-        }
-    }
-
     private long calculateWaitTimeMillis(ExponentialBackOff backoff, Optional<TDClientException> rootCause)
     {
         long waitTimeMillis = backoff.nextWaitTimeMillis();
@@ -611,14 +598,25 @@ public class TDHttpClient
         }
     }
 
-    public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)
+    /**
+     * A low-level method to submit a TD API request.
+     * @param apiRequest
+     * @param apiKeyCache
+     * @param handler
+     * @param <Result>
+     * @return
+     * @throws TDClientException
+     */
+    public <Result> Result submitRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache, TDHttpRequestHandler<Result> handler)
+            throws TDClientException
     {
+        RequestContext requestContext = new RequestContext(apiRequest, apiKeyCache);
         try {
-            String content = submitRequest(apiRequest, apiKeyCache, stringContentHandler);
-            if (logger.isTraceEnabled()) {
-                logger.trace("response:\n{}", content);
-            }
-            return content;
+            return submitRequest(requestContext, handler);
+        }
+        catch (InterruptedException e) {
+            logger.warn("API request interrupted", e);
+            throw new TDClientInterruptedException(e);
         }
         catch (TDClientException e) {
             throw e;
@@ -628,6 +626,29 @@ public class TDHttpClient
         }
     }
 
+    /**
+     * Submit an API request and get the result as String value (e.g. json)
+     * @param apiRequest
+     * @param apiKeyCache
+     * @return
+     */
+    public String call(TDApiRequest apiRequest, Optional<String> apiKeyCache)
+    {
+        String content = submitRequest(apiRequest, apiKeyCache, stringContentHandler);
+        if (logger.isTraceEnabled()) {
+            logger.trace("response:\n{}", content);
+        }
+        return content;
+    }
+
+    /**
+     * Submit an API request, and returns the byte InputStream. This stream is valid until exiting this function.
+     * @param apiRequest
+     * @param apiKeyCache
+     * @param contentStreamHandler
+     * @param <Result>
+     * @return
+     */
     public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final Function<InputStream, Result> contentStreamHandler)
     {
         return submitRequest(apiRequest, apiKeyCache, newByteStreamHandler(contentStreamHandler));
