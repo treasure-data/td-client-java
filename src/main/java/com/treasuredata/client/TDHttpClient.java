@@ -281,10 +281,10 @@ public class TDHttpClient
 
         // Set other headers
         for (Map.Entry<String, String> entry : headers.entries()) {
-            request = request.header(entry.getKey(), entry.getValue());
+            request = request.addHeader(entry.getKey(), entry.getValue());
         }
         for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entries()) {
-            request = request.header(entry.getKey(), entry.getValue());
+            request = request.addHeader(entry.getKey(), entry.getValue());
         }
 
         // Set API Key after setting the other headers
