@@ -355,9 +355,13 @@ public class TDHttpClient
             throw context.rootCause.get();
         }
         else {
-            // This will increment execution count
-            long waitTimeMillis = calculateWaitTimeMillis(context.backoff.nextWaitTimeMillis(), context.rootCause);
-            if (waitTimeMillis > 0) {
+            if (executionCount == 0) {
+                // First attempt
+                context.backoff.incrementExecutionCount();
+            }
+            else {
+                // Requst retry
+                long waitTimeMillis = calculateWaitTimeMillis(context.backoff.nextWaitTimeMillis(), context.rootCause);
                 logger.warn(String.format("Retrying request to %s (%d/%d) in %.2f sec.", context.apiRequest.getPath(), executionCount, config.retryLimit, waitTimeMillis / 1000.0));
                 // Sleeping for a while. This may throw InterruptedException
                 Thread.sleep(waitTimeMillis);
