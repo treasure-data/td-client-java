@@ -30,13 +30,13 @@ import static com.treasuredata.client.TDClientConfig.Type.API_ENDPOINT;
 import static com.treasuredata.client.TDClientConfig.Type.API_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECTION_POOL_SIZE;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECT_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.Type.READ_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.PASSOWRD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_HOST;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PASSWORD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_USER;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_USESSL;
+import static com.treasuredata.client.TDClientConfig.Type.READ_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_INITIAL_INTERVAL_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_LIMIT;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_MAX_INTERVAL_MILLIS;
@@ -65,9 +65,6 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected int readTimeoutMillis = 20000;
     protected int connectionPoolSize = 64;
     protected Multimap<String, String> headers = ImmutableMultimap.of();
-    protected Optional<Integer> requestBufferSize = Optional.absent();
-    protected Optional<Integer> responseBufferSize = Optional.absent();
-    protected Optional<Integer> maxContentLength = Optional.absent();
 
     private static Optional<String> getConfigProperty(Properties p, TDClientConfig.Type key)
     {
@@ -332,6 +329,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
 
     /**
      * Build a config object.
+     *
      * @return
      */
     public TDClientConfig buildConfig()
