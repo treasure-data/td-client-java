@@ -62,7 +62,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected int retryMaxIntervalMillis = 60000;
     protected double retryMultiplier = 2.0;
     protected int connectTimeoutMillis = 15000;
-    protected int readTimeoutMillis = 60000;
+    protected int readTimeoutMillis = 20000;
     protected int connectionPoolSize = 64;
     protected Multimap<String, String> headers = ImmutableMultimap.of();
     protected Optional<Integer> requestBufferSize = Optional.absent();
@@ -330,24 +330,6 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         return self();
     }
 
-    public BuilderImpl setRequestBufferSize(int requestBufferSize)
-    {
-        this.requestBufferSize = Optional.of(requestBufferSize);
-        return self();
-    }
-
-    public BuilderImpl setResponseBufferSize(int responseBufferSize)
-    {
-        this.responseBufferSize = Optional.of(responseBufferSize);
-        return self();
-    }
-
-    public BuilderImpl setMaxContentLength(int maxContentLength)
-    {
-        this.maxContentLength = Optional.of(maxContentLength);
-        return self();
-    }
-
     /**
      * Build a config object.
      * @return
@@ -369,10 +351,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
                 connectTimeoutMillis,
                 readTimeoutMillis,
                 connectionPoolSize,
-                headers,
-                requestBufferSize,
-                responseBufferSize,
-                maxContentLength);
+                headers);
     }
 
     protected abstract BuilderImpl self();

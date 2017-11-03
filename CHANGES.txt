@@ -1,3 +1,9 @@
+Release 0.8.0 - 2017-11-02
+ - [NOTICE] From this version, td-client-java requires Java 8
+ - Using OkHttp as an internal http client instead of jetty-client 9.2.x. This reduces the number of dependencies.
+ - Added TDHttpResponseHandler to customize request/response handling
+ - Deprecated some config parameters (requestTimeout, idleTimeout, response/requestBufferSize, maxContentLength), and add readTimeout.
+
 Release 0.7.41 - 2017-08-04
   - Change TDClient#appendTableSchema to not send column alias for append-schema API [#97](https://github.com/treasure-data/td-client-java/pull/97)
 

@@ -60,9 +60,6 @@ public class TDClientConfig
         CONNECT_TIMEOUT_MILLIS("td.client.connect-timeout", "connection timeout before reaching the API"),
         READ_TIMEOUT_MILLIS("td.client.read-timeout", "connection read timeout from API"),
         CONNECTION_POOL_SIZE("td.client.connection-pool-size", "connection pool size"),
-        REQUEST_BUFFER_SIZE("td.client.request-buffer-size", "request buffer size"),
-        RESPONSE_BUFFER_SIZE("td.client.response-buffer-size", "response buffer size"),
-        MAX_CONTENT_LENGTH("td.client.max-content-length", "maximum response body content length"),
         PROXY_HOST("td.client.proxy.host", "Proxy host (e.g., myproxy.com)"),
         PROXY_PORT("td.client.proxy.port", "Proxy port number"),
         PROXY_USER("td.client.proxy.user", "Proxy user name"),
@@ -106,9 +103,6 @@ public class TDClientConfig
     public final int readTimeoutMillis;
     public final int connectionPoolSize;
     public final Multimap<String, String> headers;
-    public final Optional<Integer> requestBufferSize;
-    public final Optional<Integer> responseBufferSize;
-    public final Optional<Integer> maxContentLength;
 
     @JsonCreator
     TDClientConfig(
@@ -126,10 +120,7 @@ public class TDClientConfig
             int connectTimeoutMillis,
             int readTimeoutMillis,
             int connectionPoolSize,
-            Multimap<String, String> headers,
-            Optional<Integer> requestBufferSize,
-            Optional<Integer> responseBufferSize,
-            Optional<Integer> maxContentLength)
+            Multimap<String, String> headers)
     {
         this.endpoint = endpoint.or("api.treasuredata.com");
         this.port = port;
@@ -146,9 +137,6 @@ public class TDClientConfig
         this.readTimeoutMillis = readTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
         this.headers = headers;
-        this.requestBufferSize = requestBufferSize;
-        this.responseBufferSize = responseBufferSize;
-        this.maxContentLength = maxContentLength;
     }
 
     public TDClientConfig withApiKey(String apikey)
@@ -173,10 +161,7 @@ public class TDClientConfig
                 connectTimeoutMillis,
                 readTimeoutMillis,
                 connectionPoolSize,
-                headers,
-                requestBufferSize,
-                responseBufferSize,
-                maxContentLength
+                headers
         );
     }
 
@@ -226,10 +211,6 @@ public class TDClientConfig
         saveProperty(p, Type.RETRY_MULTIPLIER, retryMultiplier);
         saveProperty(p, Type.CONNECT_TIMEOUT_MILLIS, connectTimeoutMillis);
         saveProperty(p, Type.CONNECTION_POOL_SIZE, connectionPoolSize);
-        saveProperty(p, Type.MAX_CONTENT_LENGTH, maxContentLength);
-        saveProperty(p, Type.REQUEST_BUFFER_SIZE, requestBufferSize);
-        saveProperty(p, Type.RESPONSE_BUFFER_SIZE, responseBufferSize);
-        saveProperty(p, Type.MAX_CONTENT_LENGTH, maxContentLength);
         return p;
     }
 
