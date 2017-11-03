@@ -9,16 +9,17 @@ With this client, you can:
  - retrieve query results
  - check the information of databases and tables
 
-td-client-java is built for Java 1.7 or higher, and licensed under Apache License Version 2.0.
+Since td-client-java 0.8.0, it requires Java 1.8 or higher. For Java7, use td-client-java-0.7.x.
+
+td-client-java is licensed under Apache License Version 2.0.
 
 ## Download
 
-You can download a jar file (td-client-java-(version)-jar-with-dependencies.jar) from here: http://central.maven.org/maven2/com/treasuredata/client/td-client
+You can download a jar file (td-client-java-(version)-shade.jar) from here: http://central.maven.org/maven2/com/treasuredata/client/td-client
 
-For the information of the older versions, see <https://github.com/treasure-data/td-client-java/tree/0.5.x>.
+For the information of the older versions, see <https://github.com/treasure-data/td-client-java/tree/0.7.x>.
 
 - [Release Notes](CHANGES.txt)
-
 
 ### For Maven Users
 
@@ -38,26 +39,21 @@ Use the following dependency settings:
 <dependency>
   <groupId>ch.qos.logback</groupId>
   <artifactId>logback-classic</artifactId>
-  <version>1.1.3</version>
+  <version>1.2.3</version>
 </dependency>
 ```
 
 #### Standalone jar
-td-client-java uses jetty-client 9.2.2.v20140723 to support Java7.
-If you are using an older (or non-compatible) version of jetty in your project, use `td-client-(version)-jar-with-dependencies.jar`
-to avoid class name conflict:
+td-client-java provides a standalone jar, which include all of the dependencies into a single jar file:
 
 ```
 <dependency>
   <groupId>com.treasuredata.client</groupId>
   <artifactId>td-client</artifactId>
   <version>(version)</version>
-  <classifier>jar-with-dependencies</classifier>
+  <classifier>shade</classifier>
 </dependency>
 ```
-
-td-client-(version)-jar-with-dependencies.jar renames `org.eclipse.jetty` package into `com.treasuredata.client.jetty922`
-so that you can use td-client-java and any version of jetty at the same time.
 
 ## Usage
 
@@ -221,7 +217,7 @@ TDClient client = TDClient.newBuilder().setProperties(prop).build();
 |`td.client.retry.max-interval` | 60000 | (optional) max retry interval |
 |`td.client.retry.multiplier` | 2.0 | (optional) retry interval multiplier |
 |`td.client.connect-timeout` | 15000 | (optional) connection timeout before reaching the API |
-|`td.client.idle-timeout` | 60000 | (optional) idle connection timeout when no data is coming from API |
+|`td.client.read-timeout` | 20000 | (optional) timeout when no data is coming from API |
 |`td.client.connection-pool-size` | 64 | (optional) Connection pool size|
 |`td.client.endpoint` | `api.treasuredata.com` | (optional) TD REST API endpoint name |
 |`td.client.port` | 80 for non-SSL, 443 for SSL connection | (optional) TD API port number |
@@ -258,5 +254,3 @@ $ sbt "sonatypeReleaseAll com.treasuredata"
 ```
 
 See also https://github.com/xerial/sbt-sonatype#publishing-maven-projects to use `sbt sonatypeReleaseAll` command.
-
-

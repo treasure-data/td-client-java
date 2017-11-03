@@ -18,31 +18,31 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
-import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+import com.google.common.net.HttpHeaders;
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.EOFException;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -52,89 +52,39 @@ import static org.junit.Assert.fail;
 public class TestServerFailures
 {
     private static Logger logger = LoggerFactory.getLogger(TestServerFailures.class);
-    Server server;
-    ServerConnector http;
-    int port;
 
-    private void prepareServer(int port)
-            throws Exception
-    {
-        server = new Server();
-
-        http = new ServerConnector(server);
-        http.setHost("localhost");
-        http.setPort(port);
-        server.addConnector(http);
-    }
+    private MockWebServer server;
+    private int port;
 
     @Before
     public void setUp()
             throws Exception
     {
-        // NOTICE. This jetty server does not accept SSL connection. So use http in TDClient
         port = TestProxyAccess.findAvailablePort();
-        prepareServer(port);
-    }
-
-    private void startServer()
-            throws InterruptedException
-    {
-        final AtomicBoolean ready = new AtomicBoolean(false);
-        new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                try {
-                    server.start();
-                    ready.set(true);
-                    server.join();
-                }
-                catch (Throwable e) {
-                    throw Throwables.propagate(e);
-                }
-            }
-        }).start();
-
-        ExponentialBackOff backoff = new ExponentialBackOff(10, 1000, 1.5);
-        while (!ready.get()) {
-            Thread.sleep(backoff.nextWaitTimeMillis());
-        }
+        server = new MockWebServer();
     }
 
     @After
     public void tearDown()
             throws Exception
     {
-        server.stop();
+        server.close();
     }
 
     @Test
-    public void jettyServerTest()
+    public void mockServerTest()
             throws Exception
     {
-        final AtomicInteger accessCount = new AtomicInteger(0);
-        server.setHandler(new AbstractHandler()
-        {
-            @Override
-            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                    throws IOException, ServletException
-            {
-                logger.debug("request: " + request);
-                accessCount.incrementAndGet();
-                response.setStatus(HttpStatus.OK_200);
-                response.getWriter().print("hello!");
-                baseRequest.setHandled(true);
-            }
-        });
-        startServer();
+        server.enqueue(new MockResponse().setBody("hello"));
+        server.start(port);
+
         String url = String.format("http://localhost:%s/v3/system/server_status", port);
         logger.info("url: " + url);
         try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
             String content = CharStreams.toString(reader);
             logger.info(content);
         }
-        assertEquals(1, accessCount.get());
+        assertEquals(1, server.getRequestCount());
     }
 
     @Test
@@ -143,21 +93,10 @@ public class TestServerFailures
     {
         logger.warn("Start request retry tests on 500 errors");
         final int retryLimit = 3;
-        final AtomicInteger accessCount = new AtomicInteger(0);
-        server.setHandler(new AbstractHandler()
-        {
-            @Override
-            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                    throws IOException, ServletException
-            {
-                // Keep returning 500 error
-                logger.debug("request: " + request);
-                accessCount.incrementAndGet();
-                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
-                baseRequest.setHandled(true);
-            }
-        });
-        startServer();
+        for (int i = 0; i < retryLimit + 1; ++i) {
+            server.enqueue(new MockResponse().setResponseCode(500));
+        }
+        server.start(port);
 
         TDClient client = TDClient
                 .newBuilder()
@@ -172,7 +111,7 @@ public class TestServerFailures
         }
         catch (TDClientHttpException e) {
             assertEquals(TDClientException.ErrorType.SERVER_ERROR, e.getErrorType());
-            assertEquals(1 + retryLimit, accessCount.get());
+            assertEquals(1 + retryLimit, server.getRequestCount());
         }
     }
 
@@ -186,11 +125,10 @@ public class TestServerFailures
                 .setEndpoint("localhost")
                 .setUseSSL(false)
                 .setPort(port)
-                .setIdleTimeoutMillis(100)
+                .setReadTimeoutMillis(100)
                 .setRetryLimit(1)
                 .buildConfig()
         );
-
     }
 
     @Test
@@ -203,69 +141,33 @@ public class TestServerFailures
                 .setEndpoint("localhost")
                 .setUseSSL(false)
                 .setPort(port)
-                .setRequestTimeoutMillis(100)
+                .setReadTimeoutMillis(100)
                 .setRetryLimit(1)
                 .buildConfig()
         );
     }
 
     private void handleTimeoutTest(TDClientConfig config)
-        throws Exception
+            throws Exception
     {
-        final AtomicInteger accessCount = new AtomicInteger(0);
-
-        server.setHandler(new AbstractHandler()
-        {
-            @Override
-            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                    throws IOException, ServletException
-            {
-                logger.debug("request: " + request);
-                int count = accessCount.incrementAndGet();
-                if (count == 1) {
-                    try {
-                        Thread.sleep(1000); // 1 sec
-                    }
-                    catch (InterruptedException e) {
-                    }
-                }
-                response.setStatus(HttpStatus.OK_200);
-                response.getWriter().write("{\"server\":\"ok\"}"); // write intermediate result
-                baseRequest.setHandled(true);
-            }
-        });
-        startServer();
+        server.enqueue(new MockResponse().setBody("{\"server\":\"ok\"}").throttleBody(5, 1, TimeUnit.SECONDS));
+        server.enqueue(new MockResponse().setBody("{\"server\":\"ok\"}"));
+        server.start(port);
 
         TDClient client = new TDClient(config);
         client.serverStatus();
-        assertEquals(2, accessCount.get());
+        assertEquals(2, server.getRequestCount());
     }
 
     @Test
     public void handleEOFException()
             throws Exception
     {
-        logger.warn("Start request retry tests on connection interruption");
-        final AtomicInteger accessCount = new AtomicInteger(0);
-        server.setHandler(new AbstractHandler()
-        {
-            @Override
-            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                    throws IOException, ServletException
-            {
-                logger.debug("request: " + request);
-                accessCount.incrementAndGet();
-                response.setStatus(HttpStatus.OK_200);
-                response.getWriter().write("{\"server\": "); // write intermediate result
-                try {
-                    // Shutdown the connection
-                    server.stop();
-                }
-                catch (Throwable e) {
-                }
-            }
-        });
-        startServer();
+        logger.warn("Start connection interruption test");
+        // write intermediate result
+        // Add long delay
+        server.enqueue(new MockResponse().setBody("{\"server\": ").setBodyDelay(3, TimeUnit.SECONDS));
+        server.start(port);
 
         TDClient client = TDClient
                 .newBuilder()
@@ -274,15 +176,54 @@ public class TestServerFailures
                 .setPort(port)
                 .setRetryLimit(0)
                 .build();
-        try {
-            client.serverStatus();
-            fail("cannot reach here");
-        }
-        catch (TDClientException e) {
-            assertEquals(TDClientException.ErrorType.INTERRUPTED, e.getErrorType());
-            logger.info(e.getMessage());
-            assertTrue(e.getRootCause().get() instanceof EOFException);
-            assertEquals(1, accessCount.get());
+
+        ExecutorService t = Executors.newFixedThreadPool(2);
+        t.submit(new Callable<Void>()
+        {
+            @Override
+            public Void call()
+                    throws Exception
+            {
+                try {
+                    logger.info("check server status");
+                    client.serverStatus();
+                    fail("should not reach here");
+                }
+                catch (TDClientException e) {
+                    logger.info("here: " + e.getMessage(), e);
+                    if (e.getErrorType() == TDClientException.ErrorType.INTERRUPTED) {
+                        assertThat(e.getRootCause().get(), anyOf(instanceOf(InterruptedException.class), instanceOf(EOFException.class)));
+                    }
+                    else {
+                        assertEquals(TDClientException.ErrorType.SOCKET_ERROR, e.getErrorType());
+                        assertTrue(e.getRootCause().get() instanceof ConnectException);
+                    }
+                    assertEquals(1, server.getRequestCount());
+                }
+                return null;
+            }
+        });
+        t.submit(new Callable<Void>()
+        {
+            @Override
+            public Void call()
+                    throws Exception
+            {
+                // Close the server while sending the response
+                try {
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+                    logger.warn("Force closing a mock server");
+                    server.shutdown();
+                }
+                catch (Exception e) {
+                    logger.warn("failed to close server", e);
+                }
+                return null;
+            }
+        });
+        t.shutdown();
+        if (!t.awaitTermination(5, TimeUnit.SECONDS)) {
+            fail("Gave up waiting MockServer termination");
         }
     }
 
@@ -290,23 +231,21 @@ public class TestServerFailures
     public void unknownResponseCode()
             throws Exception
     {
-        server.setHandler(new AbstractHandler()
+        server.setDispatcher(new Dispatcher()
         {
             @Override
-            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                    throws IOException, ServletException
+            public MockResponse dispatch(RecordedRequest request)
+                    throws InterruptedException
             {
-                logger.debug("request: " + request);
-                if (request.getRequestURI().endsWith("server_status")) {
-                    response.setStatus(600); // return invalid response code
+                if (request.getPath().endsWith("server_status")) {
+                    return new MockResponse().setResponseCode(600); // return an invalid response code
                 }
                 else {
-                    response.setStatus(HttpStatus.NOT_ACCEPTABLE_406); // return invalid response code
+                    return new MockResponse().setResponseCode(HttpStatus.NOT_ACCEPTABLE_406); // return an invalid resonce code
                 }
-                baseRequest.setHandled(true);
             }
         });
-        startServer();
+        server.start(port);
 
         TDClient client = TDClient.newBuilder()
                 .setEndpoint("localhost")
@@ -335,29 +274,9 @@ public class TestServerFailures
     public void corruptedJsonResponse()
             throws Exception
     {
-        server.setHandler(new AbstractHandler()
-        {
-            AtomicInteger count = new AtomicInteger(0);
-
-            @Override
-            public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                    throws IOException, ServletException
-            {
-                logger.debug("request: " + request);
-                response.setStatus(HttpStatus.OK_200);
-                response.setContentType("plain/text");
-                if (count.get() == 0) {
-                    response.getOutputStream().print("{broken json}");
-                }
-                else {
-                    // invalid response
-                    response.getOutputStream().print("{\"databases\":1}");
-                }
-                baseRequest.setHandled(true);
-                count.incrementAndGet();
-            }
-        });
-        startServer();
+        server.enqueue(new MockResponse().setBody("{broken json}").setHeader(HttpHeaders.CONTENT_TYPE, "plain/text"));
+        server.enqueue(new MockResponse().setBody("{\"database\":1}").setHeader(HttpHeaders.CONTENT_TYPE, "plain/text"));
+        server.start(port);
 
         TDClient client = TDClient
                 .newBuilder()

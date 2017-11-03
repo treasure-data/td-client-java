@@ -60,7 +60,6 @@ import com.treasuredata.client.model.TDUpdateTableResult;
 import com.treasuredata.client.model.TDUser;
 import com.treasuredata.client.model.TDUserList;
 import com.treasuredata.client.model.impl.TDScheduleRunResult;
-import org.eclipse.jetty.http.HttpStatus;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

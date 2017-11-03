@@ -30,14 +30,13 @@ import static com.treasuredata.client.TDClientConfig.Type.API_ENDPOINT;
 import static com.treasuredata.client.TDClientConfig.Type.API_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECTION_POOL_SIZE;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECT_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.Type.IDLE_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.PASSOWRD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_HOST;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PASSWORD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_USER;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_USESSL;
-import static com.treasuredata.client.TDClientConfig.Type.REQUEST_TIMEOUT_MILLIS;
+import static com.treasuredata.client.TDClientConfig.Type.READ_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_INITIAL_INTERVAL_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_LIMIT;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_MAX_INTERVAL_MILLIS;
@@ -63,13 +62,9 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected int retryMaxIntervalMillis = 60000;
     protected double retryMultiplier = 2.0;
     protected int connectTimeoutMillis = 15000;
-    protected int idleTimeoutMillis = 60000;
-    protected int requestTimeoutMillis = 0;
+    protected int readTimeoutMillis = 20000;
     protected int connectionPoolSize = 64;
     protected Multimap<String, String> headers = ImmutableMultimap.of();
-    protected Optional<Integer> requestBufferSize = Optional.absent();
-    protected Optional<Integer> responseBufferSize = Optional.absent();
-    protected Optional<Integer> maxContentLength = Optional.absent();
 
     private static Optional<String> getConfigProperty(Properties p, TDClientConfig.Type key)
     {
@@ -236,8 +231,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         this.retryMaxIntervalMillis = getConfigPropertyInt(p, RETRY_MAX_INTERVAL_MILLIS).or(retryMaxIntervalMillis);
         this.retryMultiplier = getConfigPropertyDouble(p, RETRY_MULTIPLIER).or(retryMultiplier);
         this.connectTimeoutMillis = getConfigPropertyInt(p, CONNECT_TIMEOUT_MILLIS).or(connectTimeoutMillis);
-        this.idleTimeoutMillis = getConfigPropertyInt(p, IDLE_TIMEOUT_MILLIS).or(idleTimeoutMillis);
-        this.requestTimeoutMillis = getConfigPropertyInt(p, REQUEST_TIMEOUT_MILLIS).or(requestTimeoutMillis);
+        this.readTimeoutMillis = getConfigPropertyInt(p, READ_TIMEOUT_MILLIS).or(readTimeoutMillis);
         this.connectionPoolSize = getConfigPropertyInt(p, CONNECTION_POOL_SIZE).or(connectionPoolSize);
 
         return self();
@@ -315,15 +309,9 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         return self();
     }
 
-    public BuilderImpl setIdleTimeoutMillis(int idleTimeoutMillis)
+    public BuilderImpl setReadTimeoutMillis(int readTimeoutMillis)
     {
-        this.idleTimeoutMillis = idleTimeoutMillis;
-        return self();
-    }
-
-    public BuilderImpl setRequestTimeoutMillis(int requestTimeoutMillis)
-    {
-        this.requestTimeoutMillis = requestTimeoutMillis;
+        this.readTimeoutMillis = readTimeoutMillis;
         return self();
     }
 
@@ -339,26 +327,9 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         return self();
     }
 
-    public BuilderImpl setRequestBufferSize(int requestBufferSize)
-    {
-        this.requestBufferSize = Optional.of(requestBufferSize);
-        return self();
-    }
-
-    public BuilderImpl setResponseBufferSize(int responseBufferSize)
-    {
-        this.responseBufferSize = Optional.of(responseBufferSize);
-        return self();
-    }
-
-    public BuilderImpl setMaxContentLength(int maxContentLength)
-    {
-        this.maxContentLength = Optional.of(maxContentLength);
-        return self();
-    }
-
     /**
      * Build a config object.
+     *
      * @return
      */
     public TDClientConfig buildConfig()
@@ -376,13 +347,9 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
                 retryMaxIntervalMillis,
                 retryMultiplier,
                 connectTimeoutMillis,
-                idleTimeoutMillis,
-                requestTimeoutMillis,
+                readTimeoutMillis,
                 connectionPoolSize,
-                headers,
-                requestBufferSize,
-                responseBufferSize,
-                maxContentLength);
+                headers);
     }
 
     protected abstract BuilderImpl self();

@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
 import org.littleshoot.proxy.HttpProxyServer;
-import org.littleshoot.proxy.ProxyAuthenticator;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +60,8 @@ public class TestSSLProxyAccess
         this.proxyServer = DefaultHttpProxyServer
                 .bootstrap()
                 .withPort(proxyPort)
-                .withProxyAuthenticator(new ProxyAuthenticator()
+                .withProxyAuthenticator(new org.littleshoot.proxy.ProxyAuthenticator()
                 {
-                    @Override
                     public boolean authenticate(String user, String pass)
                     {
                         boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);

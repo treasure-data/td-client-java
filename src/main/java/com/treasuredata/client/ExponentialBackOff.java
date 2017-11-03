@@ -54,6 +54,11 @@ public class ExponentialBackOff
         return executionCount;
     }
 
+    public int incrementExecutionCount()
+    {
+        return executionCount++;
+    }
+
     public int nextWaitTimeMillis()
     {
         int currentWaitTimeMillis = nextIntervalMillis;

@@ -61,7 +61,6 @@ import com.treasuredata.client.model.TDUserList;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.eclipse.jetty.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -107,6 +106,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static com.treasuredata.client.TDClientConfig.ENV_TD_CLIENT_APIKEY;
+
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -298,10 +298,16 @@ public class TestTDClient
         assertTrue(jobsInAnIDRange.getJobs().size() > 0);
 
         // Check getters
-        Iterable<Method> getters = Iterables.filter(ImmutableList.copyOf(TDJob.class.getDeclaredMethods()), new Predicate<Method>()
+        Iterable<Method> getters = FluentIterable.from(TDJob.class.getDeclaredMethods()).filter(new Predicate<Method>()
         {
             @Override
             public boolean apply(Method input)
+            {
+                return test(input);
+            }
+
+            @Override
+            public boolean test(Method input)
             {
                 return input.getName().startsWith("get");
             }
@@ -426,9 +432,13 @@ public class TestTDClient
     {
         client.deleteTableIfExists(SAMPLE_DB, "sample_output");
         String poolName = "hadoop2";
-        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
-        TDJobSummary tdJob = waitJobCompletion(jobId);
-        client.existsTable(SAMPLE_DB, "sample_output");
+        try {
+            String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
+            fail("should not reach here");
+        }
+        catch (TDClientHttpException e) {
+            assertEquals(400, e.getStatusCode());
+        }
     }
 
     @Test
@@ -996,6 +1006,12 @@ public class TestTDClient
                 @Override
                 public boolean apply(TDBulkImportSession input)
                 {
+                    return test(input);
+                }
+
+                @Override
+                public boolean test(TDBulkImportSession input)
+                {
                     return input.getName().equals(session);
                 }
             });
@@ -1129,6 +1145,12 @@ public class TestTDClient
                 @Override
                 public boolean apply(TDTable input)
                 {
+                    return test(input);
+                }
+
+                @Override
+                public boolean test(TDTable input)
+                {
                     return input.getName().equals(bulkImportTable);
                 }
             });
@@ -1158,6 +1180,7 @@ public class TestTDClient
             throws Exception
     {
         // authenticate() method should retrieve apikey, and set it to the TDClient
+        // [NOTE] To pass this you need to add password config to ~/.td/td.conf
         Properties p = TDClientConfig.readTDConf();
         TDClient client = new TDClientBuilder(false).build(); // Set no API key
         String user = firstNonNull(p.getProperty("user"), System.getenv("TD_USER"));
@@ -1206,7 +1229,7 @@ public class TestTDClient
             throws Exception
     {
         TDUser user = client.getUser();
-        logger.info("user: {}", user);
+        logger.trace("user: {}", user);
     }
 
     @Test
@@ -1215,9 +1238,9 @@ public class TestTDClient
     {
         TDUserList userList = client.listUsers();
         for (TDUser user : userList.getUsers()) {
-            logger.info("user: {}", user);
+            logger.trace("user: {}", user);
         }
-        logger.info("{} user(s)", userList.getUsers().size());
+        logger.trace("{} user(s)", userList.getUsers().size());
     }
 
     @Test
@@ -1442,7 +1465,6 @@ public class TestTDClient
 
         assertThat(recordedRequest.getPath(), is("/v3/job/kill/4711"));
         assertThat(recordedRequest.getHeader("Authorization"), is("TD1 " + apikey));
-
     }
 
     @Test

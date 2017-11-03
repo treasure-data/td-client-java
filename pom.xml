@@ -5,7 +5,7 @@
   <artifactId>td-client</artifactId>
   <name>Treasure Data Client for Java</name>
   <description>Treasure Data Client for Java.</description>
-  <version>0.7.42-SNAPSHOT</version>
+  <version>0.8.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-client-java</url>
 
@@ -55,7 +55,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.build.targetJdk>1.7</project.build.targetJdk>
+    <project.build.targetJdk>1.8</project.build.targetJdk>
     <project.build.jvmsize>512m</project.build.jvmsize>
     <project.test.fork-mode>once</project.test.fork-mode>
 
@@ -94,10 +94,24 @@
     </dependency>
 
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-client</artifactId>
-      <version>${jetty.version}</version>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>3.9.0</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp-urlconnection</artifactId>
+      <version>3.9.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>3.9.0</version>
+      <scope>test</scope>
+    </dependency>
+
 
     <dependency>
       <groupId>com.google.inject</groupId>
@@ -114,37 +128,37 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>18.0</version>
+      <version>21.0</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.6.7</version>
+      <version>2.8.1</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.6.7</version>
+      <version>2.8.1</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>2.6.7</version>
+      <version>2.8.1</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-guava</artifactId>
-      <version>2.6.7</version>
+      <version>2.8.1</version>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-json-org</artifactId>
-      <version>2.6.7</version>
+      <version>2.8.1</version>
     </dependency>
 
     <dependency>
@@ -212,20 +226,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
-      <version>${jetty.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>mockwebserver</artifactId>
-      <version>3.2.0</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-library</artifactId>
       <version>1.3</version>
@@ -253,7 +253,7 @@
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
+        <version>3.7.0</version>
         <configuration>
           <source>${project.build.targetJdk}</source>
           <target>${project.build.targetJdk}</target>
@@ -267,7 +267,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>2.4.2</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -275,14 +275,8 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <relocations>
-                <relocation>
-                  <pattern>org.eclipse.jetty</pattern>
-                  <shadedPattern>com.treasuredata.client.jetty922</shadedPattern>
-                </relocation>
-              </relocations>
               <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+              <shadedClassifierName>shade</shadedClassifierName>
             </configuration>
           </execution>
         </executions>
@@ -291,7 +285,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.6</version>
+        <version>3.0.2</version>
         <configuration>
           <archive>
             <manifest>

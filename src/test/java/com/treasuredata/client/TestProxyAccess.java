@@ -29,7 +29,6 @@ import org.junit.Test;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
 import org.littleshoot.proxy.HttpProxyServer;
-import org.littleshoot.proxy.ProxyAuthenticator;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +82,7 @@ public class TestProxyAccess
         this.proxyServer = DefaultHttpProxyServer
                 .bootstrap()
                 .withPort(proxyPort)
-                .withProxyAuthenticator(new ProxyAuthenticator()
+                .withProxyAuthenticator(new org.littleshoot.proxy.ProxyAuthenticator()
                 {
                     @Override
                     public boolean authenticate(String user, String pass)
@@ -139,14 +138,14 @@ public class TestProxyAccess
 
         try {
             Authenticator.setDefault(auth);
-            try (InputStream in = new URL("https://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
+            // Non SSL access
+            try (InputStream in = new URL("http://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
                 String ret = CharStreams.toString(new InputStreamReader(in));
                 logger.info(ret);
             }
             assertEquals(1, proxyAccessCount.get());
 
-            // Non SSL access
-            try (InputStream in = new URL("http://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
+            try (InputStream in = new URL("https://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
                 String ret = CharStreams.toString(new InputStreamReader(in));
                 logger.info(ret);
             }

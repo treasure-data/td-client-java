@@ -39,7 +39,7 @@ import static com.treasuredata.client.TDClientConfig.Type.API_ENDPOINT;
 import static com.treasuredata.client.TDClientConfig.Type.API_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECTION_POOL_SIZE;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECT_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.Type.IDLE_TIMEOUT_MILLIS;
+import static com.treasuredata.client.TDClientConfig.Type.READ_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.PASSOWRD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_HOST;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PASSWORD;
@@ -73,7 +73,7 @@ public class TestTDClientConfig
         p.put(API_PORT, 8981);
         p.put(USESSL, true);
         p.put(CONNECT_TIMEOUT_MILLIS, 2345);
-        p.put(IDLE_TIMEOUT_MILLIS, 3456);
+        p.put(READ_TIMEOUT_MILLIS, 3456);
         p.put(CONNECTION_POOL_SIZE, 234);
         p.put(RETRY_LIMIT, 11);
         p.put(RETRY_INITIAL_INTERVAL_MILLIS, 456);
@@ -93,7 +93,7 @@ public class TestTDClientConfig
         assertEquals(m.get(USESSL), config.useSSL);
         assertEquals(m.get(CONNECT_TIMEOUT_MILLIS), config.connectTimeoutMillis);
         assertEquals(m.get(CONNECTION_POOL_SIZE), config.connectionPoolSize);
-        assertEquals(m.get(IDLE_TIMEOUT_MILLIS), config.idleTimeoutMillis);
+        assertEquals(m.get(READ_TIMEOUT_MILLIS), config.readTimeoutMillis);
         assertEquals(m.get(RETRY_INITIAL_INTERVAL_MILLIS), config.retryInitialIntervalMillis);
         assertEquals(m.get(RETRY_MAX_INTERVAL_MILLIS), config.retryMaxIntervalMillis);
         assertEquals((double) m.get(RETRY_MULTIPLIER), config.retryMultiplier, 0.001);
@@ -122,7 +122,7 @@ public class TestTDClientConfig
         b.setUseSSL(Boolean.parseBoolean(m.get(USESSL).toString()));
         b.setConnectTimeoutMillis(Integer.parseInt(m.get(CONNECT_TIMEOUT_MILLIS).toString()));
         b.setConnectionPoolSize(Integer.parseInt(m.get(CONNECTION_POOL_SIZE).toString()));
-        b.setIdleTimeoutMillis(Integer.parseInt(m.get(IDLE_TIMEOUT_MILLIS).toString()));
+        b.setReadTimeoutMillis(Integer.parseInt(m.get(READ_TIMEOUT_MILLIS).toString()));
         b.setRetryInitialIntervalMillis(Integer.parseInt(m.get(RETRY_INITIAL_INTERVAL_MILLIS).toString()));
         b.setRetryMaxIntervalMillis(Integer.parseInt(m.get(RETRY_MAX_INTERVAL_MILLIS).toString()));
         b.setRetryMultiplier(Double.parseDouble(m.get(RETRY_MULTIPLIER).toString()));

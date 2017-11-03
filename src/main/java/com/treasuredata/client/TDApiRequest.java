@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 
-import org.eclipse.jetty.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class TDApiRequest
 {
     private static Logger logger = LoggerFactory.getLogger(TDApiRequest.class);
-    private final HttpMethod method;
+    private final TDHttpMethod method;
     private final String path;
     private final Map<String, String> queryParams;
     private final Multimap<String, String> headerParams;
@@ -53,7 +52,7 @@ public class TDApiRequest
     private final Optional<Boolean> followRedirects;
 
     TDApiRequest(
-            HttpMethod method,
+            TDHttpMethod method,
             String path,
             Map<String, String> queryParams,
             Multimap<String, String> headerParams,
@@ -71,12 +70,17 @@ public class TDApiRequest
         this.followRedirects = checkNotNull(followRedirects, "followRedirects is null");
     }
 
+    public TDApiRequest withUri(String uri)
+    {
+        return new TDApiRequest(method, uri, ImmutableMap.copyOf(queryParams), ImmutableMultimap.copyOf(headerParams), postJson, putFile, followRedirects);
+    }
+
     public String getPath()
     {
         return path;
     }
 
-    public HttpMethod getMethod()
+    public TDHttpMethod getMethod()
     {
         return method;
     }
@@ -110,7 +114,7 @@ public class TDApiRequest
     {
         private static final Map<String, String> EMPTY_MAP = ImmutableMap.of();
         private static final Multimap<String, String> EMPTY_HEADERS = ImmutableMultimap.of();
-        private HttpMethod method;
+        private TDHttpMethod method;
         private String path;
         private Map<String, String> queryParams;
         private ImmutableMultimap.Builder<String, String> headerParams;
@@ -118,7 +122,7 @@ public class TDApiRequest
         private Optional<File> file = Optional.absent();
         private Optional<Boolean> followRedirects = Optional.absent();
 
-        Builder(HttpMethod method, String path)
+        Builder(TDHttpMethod method, String path)
         {
             this.method = method;
             this.path = path;
@@ -126,22 +130,22 @@ public class TDApiRequest
 
         public static Builder GET(String uri)
         {
-            return new Builder(HttpMethod.GET, uri);
+            return new Builder(TDHttpMethod.GET, uri);
         }
 
         public static Builder POST(String uri)
         {
-            return new Builder(HttpMethod.POST, uri);
+            return new Builder(TDHttpMethod.POST, uri);
         }
 
         public static Builder PUT(String uri)
         {
-            return new Builder(HttpMethod.PUT, uri);
+            return new Builder(TDHttpMethod.PUT, uri);
         }
 
         public static Builder DELETE(String uri)
         {
-            return new Builder(HttpMethod.DELETE, uri);
+            return new Builder(TDHttpMethod.DELETE, uri);
         }
 
         public Builder addHeader(String key, String value)
