@@ -221,7 +221,7 @@ public class TDRequestErrorHandler
                 throw new TDClientException(INVALID_JSON_RESPONSE, e);
             }
 
-            if (content.isPresent() && content.get().charAt(0) == '{') {
+            if (content.isPresent() && content.get().length() > 0 && content.get().charAt(0) == '{') {
                 // Error message from TD API
                 return Optional.of(TDHttpClient.defaultObjectMapper.readValue(content.get(), TDApiErrorMessage.class));
             }
