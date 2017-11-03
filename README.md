@@ -217,7 +217,7 @@ TDClient client = TDClient.newBuilder().setProperties(prop).build();
 |`td.client.retry.max-interval` | 60000 | (optional) max retry interval |
 |`td.client.retry.multiplier` | 2.0 | (optional) retry interval multiplier |
 |`td.client.connect-timeout` | 15000 | (optional) connection timeout before reaching the API |
-|`td.client.read-timeout` | 20000 | (optional) timeout when no data is coming from API |
+|`td.client.read-timeout` | 60000 | (optional) timeout when no data is coming from API |
 |`td.client.connection-pool-size` | 64 | (optional) Connection pool size|
 |`td.client.endpoint` | `api.treasuredata.com` | (optional) TD REST API endpoint name |
 |`td.client.port` | 80 for non-SSL, 443 for SSL connection | (optional) TD API port number |

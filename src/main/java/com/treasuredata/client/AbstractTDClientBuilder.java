@@ -62,7 +62,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected int retryMaxIntervalMillis = 60000;
     protected double retryMultiplier = 2.0;
     protected int connectTimeoutMillis = 15000;
-    protected int readTimeoutMillis = 20000;
+    protected int readTimeoutMillis = 60000;
     protected int connectionPoolSize = 64;
     protected Multimap<String, String> headers = ImmutableMultimap.of();
 
