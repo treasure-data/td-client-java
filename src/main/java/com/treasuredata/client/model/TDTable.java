@@ -35,6 +35,7 @@ public class TDTable
     private final long estimatedStorageSize;
     private final String lastLogTimeStamp;
     private final String expireDays;
+    private final boolean includeV;
     private final String createdAt;
     private final String updatedAt;
 
@@ -48,6 +49,7 @@ public class TDTable
             @JsonProperty("estimated_storage_size") long estimatedStroageSize,
             @JsonProperty("last_log_timestamp") String lastLogTimeStamp,
             @JsonProperty("expire_days") String expireDays,
+            @JsonProperty("include_v") boolean includeV,
             @JsonProperty("created_at") String createdAt,
             @JsonProperty("updated_at") String updatedAt
     )
@@ -60,6 +62,7 @@ public class TDTable
         this.estimatedStorageSize = estimatedStroageSize;
         this.lastLogTimeStamp = lastLogTimeStamp;
         this.expireDays = expireDays;
+        this.includeV = includeV;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -114,6 +117,11 @@ public class TDTable
     public String getExpireDays()
     {
         return expireDays;
+    }
+
+    public boolean getIncludeV()
+    {
+        return includeV;
     }
 
     public String getCreatedAt()

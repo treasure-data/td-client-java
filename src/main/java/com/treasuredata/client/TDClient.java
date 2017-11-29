@@ -421,12 +421,32 @@ public class TDClient
         doPost(buildUrl("/v3/table/create", databaseName, validateTableName(tableName), TDTableType.LOG.getTypeName()));
     }
 
+    public void createTable(String databaseName, String tableName, boolean includeV)
+            throws TDClientException
+    {
+        doPost(
+                buildUrl("/v3/table/create", databaseName, validateTableName(tableName), TDTableType.LOG.getTypeName()),
+                ImmutableMap.of("include_v", String.valueOf(includeV)),
+                String.class);
+    }
+
     @Override
     public void createTableIfNotExists(String databaseName, String tableName)
             throws TDClientException
     {
         try {
             createTable(databaseName, tableName);
+        }
+        catch (TDClientHttpConflictException e) {
+            // This can be thrown when the table already exists or Nginx returns conflict(409) upon request retry
+        }
+    }
+
+    public void createTableIfNotExists(String databaseName, String tableName, boolean includeV)
+            throws TDClientException
+    {
+        try {
+            createTable(databaseName, tableName, includeV);
         }
         catch (TDClientHttpConflictException e) {
             // This can be thrown when the table already exists or Nginx returns conflict(409) upon request retry

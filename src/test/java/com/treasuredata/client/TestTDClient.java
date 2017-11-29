@@ -243,6 +243,53 @@ public class TestTDClient
     }
 
     @Test
+    public void createTable()
+            throws Exception
+    {
+        String t = newTemporaryName("sample");
+        String newTableName = t + "_renamed";
+
+        try {
+            TDTable table;
+            client.deleteTableIfExists(SAMPLE_DB, t);
+
+            client.createTable(SAMPLE_DB, t);
+            table = client.showTable(SAMPLE_DB, t);
+            assertTrue(table.getIncludeV());
+            client.deleteTable(SAMPLE_DB, t);
+
+            client.createTable(SAMPLE_DB, t, true);
+            table = client.showTable(SAMPLE_DB, t);
+            assertTrue(table.getIncludeV());
+            client.deleteTable(SAMPLE_DB, t);
+
+            client.createTable(SAMPLE_DB, t, false);
+            table = client.showTable(SAMPLE_DB, t);
+            assertFalse(table.getIncludeV());
+            client.deleteTable(SAMPLE_DB, t);
+
+            client.createTableIfNotExists(SAMPLE_DB, t);
+            table = client.showTable(SAMPLE_DB, t);
+            assertTrue(table.getIncludeV());
+            client.deleteTable(SAMPLE_DB, t);
+
+            client.createTableIfNotExists(SAMPLE_DB, t, true);
+            table = client.showTable(SAMPLE_DB, t);
+            assertTrue(table.getIncludeV());
+            client.deleteTable(SAMPLE_DB, t);
+
+            client.createTableIfNotExists(SAMPLE_DB, t, false);
+            table = client.showTable(SAMPLE_DB, t);
+            assertFalse(table.getIncludeV());
+            client.deleteTable(SAMPLE_DB, t);
+        }
+        finally {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+            client.deleteTableIfExists(SAMPLE_DB, newTableName);
+        }
+    }
+
+    @Test
     public void listTables()
             throws Exception
     {
