@@ -246,8 +246,7 @@ public class TestTDClient
     public void createTable()
             throws Exception
     {
-        String t = newTemporaryName("sample");
-        String newTableName = t + "_renamed";
+        String t = newTemporaryName("create_table");
 
         try {
             TDTable table;
@@ -256,36 +255,25 @@ public class TestTDClient
             client.createTable(SAMPLE_DB, t);
             table = client.showTable(SAMPLE_DB, t);
             assertTrue(table.getIncludeV());
-            client.deleteTable(SAMPLE_DB, t);
+            client.deleteTableIfExists(SAMPLE_DB, t);
 
-            client.createTable(SAMPLE_DB, t, true);
-            table = client.showTable(SAMPLE_DB, t);
-            assertTrue(table.getIncludeV());
-            client.deleteTable(SAMPLE_DB, t);
-
-            client.createTable(SAMPLE_DB, t, false);
+            client.createTableWithoutV(SAMPLE_DB, t);
             table = client.showTable(SAMPLE_DB, t);
             assertFalse(table.getIncludeV());
-            client.deleteTable(SAMPLE_DB, t);
+            client.deleteTableIfExists(SAMPLE_DB, t);
 
             client.createTableIfNotExists(SAMPLE_DB, t);
             table = client.showTable(SAMPLE_DB, t);
             assertTrue(table.getIncludeV());
-            client.deleteTable(SAMPLE_DB, t);
+            client.deleteTableIfExists(SAMPLE_DB, t);
 
-            client.createTableIfNotExists(SAMPLE_DB, t, true);
-            table = client.showTable(SAMPLE_DB, t);
-            assertTrue(table.getIncludeV());
-            client.deleteTable(SAMPLE_DB, t);
-
-            client.createTableIfNotExists(SAMPLE_DB, t, false);
+            client.createTableIfNotExistsWithoutV(SAMPLE_DB, t);
             table = client.showTable(SAMPLE_DB, t);
             assertFalse(table.getIncludeV());
-            client.deleteTable(SAMPLE_DB, t);
+            client.deleteTableIfExists(SAMPLE_DB, t);
         }
         finally {
             client.deleteTableIfExists(SAMPLE_DB, t);
-            client.deleteTableIfExists(SAMPLE_DB, newTableName);
         }
     }
 

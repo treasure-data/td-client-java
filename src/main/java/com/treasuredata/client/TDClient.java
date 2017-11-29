@@ -421,12 +421,16 @@ public class TDClient
         doPost(buildUrl("/v3/table/create", databaseName, validateTableName(tableName), TDTableType.LOG.getTypeName()));
     }
 
-    public void createTable(String databaseName, String tableName, boolean includeV)
+    /**
+     * Create table setting include_v flag as false
+     * https://docs.treasuredata.com/articles/schema#default-schema-time-and-v
+     */
+    public void createTableWithoutV(String databaseName, String tableName)
             throws TDClientException
     {
         doPost(
                 buildUrl("/v3/table/create", databaseName, validateTableName(tableName), TDTableType.LOG.getTypeName()),
-                ImmutableMap.of("include_v", String.valueOf(includeV)),
+                ImmutableMap.of("include_v", "false"),
                 String.class);
     }
 
@@ -442,11 +446,15 @@ public class TDClient
         }
     }
 
-    public void createTableIfNotExists(String databaseName, String tableName, boolean includeV)
+    /**
+     * Create table if not exists, setting include_v flag as false
+     * https://docs.treasuredata.com/articles/schema#default-schema-time-and-v
+     */
+    public void createTableIfNotExistsWithoutV(String databaseName, String tableName)
             throws TDClientException
     {
         try {
-            createTable(databaseName, tableName, includeV);
+            createTableWithoutV(databaseName, tableName);
         }
         catch (TDClientHttpConflictException e) {
             // This can be thrown when the table already exists or Nginx returns conflict(409) upon request retry
