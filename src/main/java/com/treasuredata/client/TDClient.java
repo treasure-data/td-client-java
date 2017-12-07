@@ -492,6 +492,9 @@ public class TDClient
         try {
             deleteTable(databaseName, tableName);
         }
+        catch (TDClientHttpConflictException e) {
+            // This can be thrown when the database already exists or Nginx returns conflict(409) upon request retry
+        }
         catch (TDClientHttpNotFoundException e) {
             // This will be thrown the table does not exists or Nginx calls this API request twice
         }
