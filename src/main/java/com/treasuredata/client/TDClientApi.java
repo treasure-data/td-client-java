@@ -185,6 +185,9 @@ public interface TDClientApi<ClientImpl>
     // schema API
     void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema);
 
+    // schema API
+    void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema, boolean ignoreDuplicate);
+
     void appendTableSchema(String databaseName, String tableName, List<TDColumn> newSchema);
 
     /**

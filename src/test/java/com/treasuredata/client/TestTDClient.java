@@ -835,6 +835,17 @@ public class TestTDClient
             logger.debug(updatedTable.toString());
             assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("int_col", TDColumnType.INT, keyName)));
 
+            // schema test with duplicated key
+            newSchema = ImmutableList.<TDColumn>builder()
+                    .addAll(targetTable.getSchema())
+                    .add(new TDColumn("str_col", TDColumnType.STRING, keyName))
+                    .add(new TDColumn("str_col", TDColumnType.STRING, keyName))
+                    .build();
+            client.updateTableSchema(SAMPLE_DB, t, newSchema, true);
+            updatedTable = findTable(SAMPLE_DB, t).get();
+            logger.debug(updatedTable.toString());
+            assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("str_col", TDColumnType.STRING, keyName)));
+
             // rename
             client.deleteTableIfExists(SAMPLE_DB, newTableName);
             client.renameTable(SAMPLE_DB, t, newTableName);
