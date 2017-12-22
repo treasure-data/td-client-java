@@ -505,6 +505,12 @@ public class TDClient
     @Override
     public void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema)
     {
+        updateTableSchema(databaseName, tableName, newSchema, false);
+    }
+
+    @Override
+    public void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema, boolean ignoreDuplicate)
+    {
         checkNotNull(databaseName, "databaseName is null");
         checkNotNull(tableName, "tableName is null");
         checkNotNull(newSchema, "newSchema is null");
@@ -514,7 +520,7 @@ public class TDClient
             // TODO: Schema should be array of [name, type, key], not [key, type, name]. Kept for backward compatibility for now...
             builder.add(ImmutableList.of(newColumn.getKeyString(), newColumn.getType().toString(), newColumn.getName()));
         }
-        String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build()));
+        String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build(), "ignore_duplicate_schema", ignoreDuplicate));
         doPost(buildUrl("/v3/table/update-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
     }
 
