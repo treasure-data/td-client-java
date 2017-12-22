@@ -1,3 +1,6 @@
+Release 0.8.1 - 2017-12-22
+ - updateTableSchema accept optional parameter ignoreDuplicate which ignores duplicated columns
+
 Release 0.8.0 - 2017-11-02
  - [NOTICE] From this version, td-client-java requires Java 8
  - Using OkHttp as an internal http client instead of jetty-client 9.2.x. This reduces the number of dependencies.
