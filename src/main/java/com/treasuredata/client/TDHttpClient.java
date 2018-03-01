@@ -129,6 +129,11 @@ public class TDHttpClient
         this.objectMapper = defaultObjectMapper;
     }
 
+    protected TDHttpClient(TDHttpClient reference)
+    {
+        this(reference.config, reference.httpClient, reference.objectMapper, reference.headers);
+    }
+
     private TDHttpClient(TDClientConfig config, OkHttpClient httpClient, ObjectMapper objectMapper, Multimap<String, String> headers)
     {
         this.config = config;
