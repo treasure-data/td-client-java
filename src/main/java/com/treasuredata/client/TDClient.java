@@ -701,9 +701,25 @@ public class TDClient
     }
 
     @Override
+    public void performBulkImportSession(String sessionName, Optional<String> poolName)
+    {
+        performBulkImportSession(sessionName, poolName, TDJob.Priority.NORMAL);
+    }
+
+    @Override
     public void performBulkImportSession(String sessionName, TDJob.Priority priority)
     {
-        doPost(buildUrl("/v3/bulk_import/perform", sessionName), ImmutableMap.of("priority", Integer.toString(priority.toInt())), Optional.<String>absent(), String.class);
+        performBulkImportSession(sessionName, Optional.absent(), priority);
+    }
+
+    @Override
+    public void performBulkImportSession(String sessionName, Optional<String> poolName, TDJob.Priority priority)
+    {
+        Optional<String> jsonBody = Optional.absent();
+        if (poolName.isPresent()) {
+            jsonBody = Optional.of(JSONObject.toJSONString(ImmutableMap.of("pool_name", poolName.get())));
+        }
+        doPost(buildUrl("/v3/bulk_import/perform", sessionName), ImmutableMap.of("priority", Integer.toString(priority.toInt())), jsonBody, String.class);
     }
 
     @Override

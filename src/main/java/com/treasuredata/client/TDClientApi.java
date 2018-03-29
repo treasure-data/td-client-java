@@ -19,6 +19,7 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 
 import com.treasuredata.client.model.TDBulkImportSession;
@@ -241,7 +242,11 @@ public interface TDClientApi<ClientImpl>
 
     void performBulkImportSession(String sessionName);
 
+    void performBulkImportSession(String sessionName, Optional<String> poolName);
+
     void performBulkImportSession(String sessionName, TDJob.Priority priority);
+
+    void performBulkImportSession(String sessionName, Optional<String> poolName, TDJob.Priority priority);
 
     void commitBulkImportSession(String sessionName);
 
