@@ -404,7 +404,13 @@ public class TDHttpClient
                 }
             }
             catch (Exception e) {
-                logger.warn(String.format("API request to %s failed: %s, cause: %s", context.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()), e);
+                if (e instanceof TDClientHttpConflictException) {
+                    // Suppress stack trace because 409 frequently happens when checking the presence of databases and tables
+                    logger.warn(String.format("API request to %s failed: %s, cause: %s", context.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()));
+                }
+                else {
+                    logger.warn(String.format("API request to %s failed: %s, cause: %s", context.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()), e);
+                }
                 // This may throw TDClientException if the error is not recoverable
                 context = context.withRootCause(handler.resolveError(e));
             }
