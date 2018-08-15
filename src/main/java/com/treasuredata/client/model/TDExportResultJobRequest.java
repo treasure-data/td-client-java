@@ -7,12 +7,12 @@ import org.immutables.value.Value;
 public class TDExportResultJobRequest
 {
     private final String jobId;
-    private final String result;
+    private final String resultOutput;
 
-    private TDExportResultJobRequest(String jobId, String result)
+    private TDExportResultJobRequest(String jobId, String resultOutput)
     {
         this.jobId = jobId;
-        this.result = result;
+        this.resultOutput = resultOutput;
     }
 
     public String getJobId()
@@ -20,15 +20,15 @@ public class TDExportResultJobRequest
         return jobId;
     }
 
-    public String getResult()
+    public String getResultOutput()
     {
-        return result;
+        return resultOutput;
     }
 
     @Builder.Factory
-    static TDExportResultJobRequest of(String jobId, String result)
+    static TDExportResultJobRequest of(String jobId, String resultOutput)
     {
-        return new TDExportResultJobRequest(jobId, result);
+        return new TDExportResultJobRequest(jobId, resultOutput);
     }
 
     public static TDExportResultJobRequestBuilder builder()
@@ -41,7 +41,7 @@ public class TDExportResultJobRequest
     {
         return "TDExportResultJobRequest{" +
                 "jobId='" + jobId + '\'' +
-                ", result='" + result + '\'' +
+                ", resultOutput='" + resultOutput + '\'' +
                 '}';
     }
 }

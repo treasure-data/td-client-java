@@ -941,7 +941,7 @@ public class TDClient
     public String submitResultExportJob(TDExportResultJobRequest jobRequest)
     {
         Map<String, String> queryParam = new HashMap<>();
-        queryParam.put("result", jobRequest.getResult());
+        queryParam.put("result", jobRequest.getResultOutput());
 
         TDJobSubmitResult result = doPost(
                 buildUrl("/v3/job/result_export", jobRequest.getJobId()),
