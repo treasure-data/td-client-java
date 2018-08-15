@@ -43,6 +43,7 @@ import com.treasuredata.client.model.TDColumnType;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportFileFormatType;
 import com.treasuredata.client.model.TDExportJobRequest;
+import com.treasuredata.client.model.TDExportResultJobRequest;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -1554,6 +1555,21 @@ public class TestTDClient
         assertThat(request2.getHeaders().toMultimap().get("k2"), containsInAnyOrder("v2"));
         assertThat(request2.getHeaders().toMultimap().get("k3"), containsInAnyOrder("v3"));
         assertThat(request2.getHeaders().toMultimap().get("k4"), containsInAnyOrder("v4"));
+    }
+
+    @Test
+    public void submitResultExportJob()
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("{\"job_id\":\"17\"}"));
+
+        TDExportResultJobRequest jobRequest = TDExportResultJobRequest.builder()
+                .jobId("17")
+                .result("td://api_key@/sample_database/sample_output_table")
+                .build();
+
+        String jobId = client.submitResultExportJob(jobRequest);
+        assertEquals("17", jobId);
     }
 
     private static String apikey()
