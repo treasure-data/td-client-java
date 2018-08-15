@@ -1565,7 +1565,7 @@ public class TestTDClient
 
         TDExportResultJobRequest jobRequest = TDExportResultJobRequest.builder()
                 .jobId("17")
-                .result("td://api_key@/sample_database/sample_output_table")
+                .resultOutput("td://api_key@/sample_database/sample_output_table")
                 .build();
 
         String jobId = client.submitResultExportJob(jobRequest);
