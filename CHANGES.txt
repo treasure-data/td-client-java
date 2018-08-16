@@ -1,3 +1,6 @@
+Release 0.8.4 - 2018-08-15
+ - Support result_export jobs. [#107]
+
 Release 0.8.4 - 2018-04-24
  - Suppress stack trace upon 409 conflict 
 
