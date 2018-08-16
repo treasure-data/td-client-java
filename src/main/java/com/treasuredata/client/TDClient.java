@@ -39,6 +39,7 @@ import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDConnectionLookupResult;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
+import com.treasuredata.client.model.TDExportResultJobRequest;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -955,5 +956,19 @@ public class TDClient
     public long lookupConnection(String name)
     {
         return doGet(buildUrl("/v3/connections/lookup?name=" + urlPathSegmentEscaper().escape(name)), TDConnectionLookupResult.class).getId();
+    }
+
+    @Override
+    public String submitResultExportJob(TDExportResultJobRequest jobRequest)
+    {
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("result", jobRequest.getResultOutput());
+
+        TDJobSubmitResult result = doPost(
+                buildUrl("/v3/job/result_export", jobRequest.getJobId()),
+                queryParam,
+                TDJobSubmitResult.class);
+
+        return result.getJobId();
     }
 }

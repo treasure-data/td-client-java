@@ -28,6 +28,7 @@ import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
+import com.treasuredata.client.model.TDExportResultJobRequest;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -363,6 +364,14 @@ public interface TDClientApi<ClientImpl>
      * @return job id
      */
     TDBulkLoadSessionStartResult startBulkLoadSession(String name, TDBulkLoadSessionStartRequest request);
+
+    /**
+     * Start a result_export job.
+     *
+     * @param jobRequest
+     * @return job id
+     */
+    String submitResultExportJob(TDExportResultJobRequest jobRequest);
 
     long lookupConnection(String name);
 }
