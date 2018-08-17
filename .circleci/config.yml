@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    working_directory: /tmp/td-client-java
+    docker:
+      - image: circleci/openjdk:8-jdk-browsers
+    steps:
+      - checkout
+      - run:
+          name: Test
+          command: |
+            mvn test findbugs:check
+      - store_artifacts:
+            path: /tmp/td-client-java/target/site
