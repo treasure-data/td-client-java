@@ -376,6 +376,7 @@ public class TestTDClient
             }
         });
         assertEquals(1, array.length());
+        assertEquals(1, jobInfo.getNumRecords());
         assertEquals(8807278, array.getLong(0));
 
         // test msgpack.gz format
