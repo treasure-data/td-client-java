@@ -1558,7 +1558,7 @@ public class TestTDClient
     }
 
     @Test
-    public void submitResultExportJob()
+    public void submitResultExportJobWithResultOutput()
     {
         client = mockClient();
         server.enqueue(new MockResponse().setBody("{\"job_id\":\"17\"}"));
@@ -1570,6 +1570,38 @@ public class TestTDClient
 
         String jobId = client.submitResultExportJob(jobRequest);
         assertEquals("17", jobId);
+    }
+
+    @Test
+    public void submitResultExportJobWithConnectionId()
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("{\"job_id\":\"17\"}"));
+
+        TDExportResultJobRequest jobRequest = TDExportResultJobRequest.builder()
+                .jobId("17")
+                .resultConnectionId("3822")
+                .resultConnectionSettings(
+                        "{\"api_key\":\"api_key\"," +
+                                "\"user_database_name\":\"sample_database\"," +
+                                "\"user_table_name\":\"sample_output_table\"}")
+                .build();
+
+        String jobId = client.submitResultExportJob(jobRequest);
+        assertEquals("17", jobId);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void submitResultExportJobWithOnlyJobId()
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("{\"job_id\":\"17\"}"));
+
+        TDExportResultJobRequest jobRequest = TDExportResultJobRequest.builder()
+                .jobId("17")
+                .build();
+
+        client.submitResultExportJob(jobRequest);
     }
 
     private static String apikey()
