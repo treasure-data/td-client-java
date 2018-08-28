@@ -156,6 +156,7 @@ public class TDJob
     private final long duration;
     private final long resultSize;
     private final Optional<Debug> debug;
+    private final long numRecords;
 
     @JsonCreator
     static TDJob createTDJobV3(
@@ -174,9 +175,10 @@ public class TDJob
             @JsonProperty("user_name") String userName,
             @JsonProperty("duration") long duration,
             @JsonProperty("result_size") long resultSize,
-            @JsonProperty("debug") Optional<Debug> debug)
+            @JsonProperty("debug") Optional<Debug> debug,
+            @JsonProperty("num_records") long numRecords)
     {
-        return new TDJob(jobId, status, type, query.getQuery(), createdAt, startAt, updatedAt, endAt, resultSchema, database, result, url, userName, duration, resultSize, debug);
+        return new TDJob(jobId, status, type, query.getQuery(), createdAt, startAt, updatedAt, endAt, resultSchema, database, result, url, userName, duration, resultSize, debug, numRecords);
     }
 
     public TDJob(String jobId,
@@ -194,7 +196,8 @@ public class TDJob
             String userName,
             long duration,
             long resultSize,
-            Optional<Debug> debug
+            Optional<Debug> debug,
+            long numRecords
     )
     {
         this.jobId = jobId;
@@ -213,6 +216,7 @@ public class TDJob
         this.duration = duration;
         this.resultSize = resultSize;
         this.debug = debug;
+        this.numRecords = numRecords;
     }
 
     public String getJobId()
@@ -290,6 +294,10 @@ public class TDJob
         return debug;
     }
 
+    public long getNumRecords(){
+        return numRecords;
+    }
+
     /**
      * A short cut for reading cmdout message
      *
@@ -344,6 +352,7 @@ public class TDJob
                 ", duration=" + duration +
                 ", resultSize=" + resultSize +
                 ", debug=" + debug +
+                ", numRecords=" + numRecords +
                 '}';
     }
 }
