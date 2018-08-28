@@ -962,7 +962,16 @@ public class TDClient
     public String submitResultExportJob(TDExportResultJobRequest jobRequest)
     {
         Map<String, String> queryParam = new HashMap<>();
-        queryParam.put("result", jobRequest.getResultOutput());
+        if (!jobRequest.getResultConnectionId().isEmpty() && !jobRequest.getResultConnectionSettings().isEmpty()) {
+            queryParam.put("result_connection_id", jobRequest.getResultConnectionId());
+            queryParam.put("result_connection_settings", jobRequest.getResultConnectionSettings());
+        }
+        else if (!jobRequest.getResultOutput().isEmpty()) {
+            queryParam.put("result", jobRequest.getResultOutput());
+        }
+        else {
+            throw new IllegalStateException("Either resultOutput or a pair of resultConnectionId and resultConnectionSettings is required");
+        }
 
         TDJobSubmitResult result = doPost(
                 buildUrl("/v3/job/result_export", jobRequest.getJobId()),

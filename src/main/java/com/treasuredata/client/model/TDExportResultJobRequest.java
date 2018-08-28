@@ -1,5 +1,6 @@
 package com.treasuredata.client.model;
 
+import com.google.common.base.Optional;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 
@@ -8,11 +9,15 @@ public class TDExportResultJobRequest
 {
     private final String jobId;
     private final String resultOutput;
+    private final String resultConnectionId;
+    private final String resultConnectionSettings;
 
-    private TDExportResultJobRequest(String jobId, String resultOutput)
+    private TDExportResultJobRequest(String jobId, String resultOutput, String reseultConnectionId, String resultConnectionSettings)
     {
         this.jobId = jobId;
         this.resultOutput = resultOutput;
+        this.resultConnectionId = reseultConnectionId;
+        this.resultConnectionSettings = resultConnectionSettings;
     }
 
     public String getJobId()
@@ -25,10 +30,20 @@ public class TDExportResultJobRequest
         return resultOutput;
     }
 
+    public String getResultConnectionId() { return resultConnectionId; }
+
+    public String getResultConnectionSettings() { return resultConnectionSettings; }
+
     @Builder.Factory
-    static TDExportResultJobRequest of(String jobId, String resultOutput)
+    static TDExportResultJobRequest of(String jobId,
+            Optional<String> resultOutput,
+            Optional<String> resultConnectionId,
+            Optional<String> resultConnectionSettings)
     {
-        return new TDExportResultJobRequest(jobId, resultOutput);
+        return new TDExportResultJobRequest(jobId,
+                resultOutput.or(""),
+                resultConnectionId.or(""),
+                resultConnectionSettings.or(""));
     }
 
     public static TDExportResultJobRequestBuilder builder()
@@ -42,6 +57,8 @@ public class TDExportResultJobRequest
         return "TDExportResultJobRequest{" +
                 "jobId='" + jobId + '\'' +
                 ", resultOutput='" + resultOutput + '\'' +
+                ", resultConnectionId='" + resultConnectionId + '\'' +
+                ", resultConnectionSettings='" + resultConnectionSettings + '\'' +
                 '}';
     }
 }
