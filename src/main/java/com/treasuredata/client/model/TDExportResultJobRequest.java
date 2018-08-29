@@ -30,9 +30,15 @@ public class TDExportResultJobRequest
         return resultOutput;
     }
 
-    public String getResultConnectionId() { return resultConnectionId; }
+    public String getResultConnectionId()
+    {
+        return resultConnectionId;
+    }
 
-    public String getResultConnectionSettings() { return resultConnectionSettings; }
+    public String getResultConnectionSettings()
+    {
+        return resultConnectionSettings;
+    }
 
     @Builder.Factory
     static TDExportResultJobRequest of(String jobId,
