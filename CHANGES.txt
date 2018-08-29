@@ -1,4 +1,8 @@
-Release 0.8.4 - 2018-08-15
+Release 0.8.6 - 2018-08-29
+ - Support `numRecords` attribute for `TDJob`. [#113]
+ - Support new parameters for `TDExportResultJobRequest`. [#114]
+
+Release 0.8.5 - 2018-08-15
  - Support result_export jobs. [#107]
 
 Release 0.8.4 - 2018-04-24
