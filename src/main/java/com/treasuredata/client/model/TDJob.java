@@ -294,7 +294,8 @@ public class TDJob
         return debug;
     }
 
-    public long getNumRecords(){
+    public long getNumRecords()
+    {
         return numRecords;
     }
 
