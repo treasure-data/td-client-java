@@ -55,6 +55,7 @@ import com.treasuredata.client.model.TDSavedQueryStartRequestV4;
 import com.treasuredata.client.model.TDSavedQueryStartResultV4;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
+import com.treasuredata.client.model.TDTableDistribution;
 import com.treasuredata.client.model.TDTableList;
 import com.treasuredata.client.model.TDTableType;
 import com.treasuredata.client.model.TDUpdateTableResult;
@@ -979,5 +980,11 @@ public class TDClient
                 TDJobSubmitResult.class);
 
         return result.getJobId();
+    }
+
+    @Override
+    public TDTableDistribution tableDistribution(String databaseName, String tableName)
+    {
+        return doGet(buildUrl(String.format("/v3/table/distribution/%s/%s", databaseName, tableName)), TDTableDistribution.class);
     }
 }
