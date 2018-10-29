@@ -8,7 +8,9 @@ jobs:
       - checkout
       - run:
           name: Test
-          command: |
-            mvn test findbugs:check
+          command: mvn test
+      - run:
+          name: Find Bugs
+          command: mvn findbugs:check
       - store_artifacts:
             path: /tmp/td-client-java/target/site
