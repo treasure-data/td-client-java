@@ -35,18 +35,27 @@ public class TDTableDistribution
         return userTableId;
     }
 
+    /**
+     * The maximum number of buckets of UDP table.
+     */
     @JsonProperty
     public long getBucketCount()
     {
         return bucketCount;
     }
 
+    /**
+     * Hash function to calculate the partitioning key.
+     */
     @JsonProperty
     public String getPartitionFunction()
     {
         return partitionFunction;
     }
 
+    /**
+     * Columns used for partitioning key in UDP table
+     */
     @JsonProperty
     public List<TDColumn> getColumns()
     {
