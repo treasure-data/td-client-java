@@ -41,6 +41,7 @@ import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryStartRequest;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
+import com.treasuredata.client.model.TDTableDistribution;
 import com.treasuredata.client.model.TDUser;
 import com.treasuredata.client.model.TDUserList;
 
@@ -374,4 +375,6 @@ public interface TDClientApi<ClientImpl>
     String submitResultExportJob(TDExportResultJobRequest jobRequest);
 
     long lookupConnection(String name);
+
+    TDTableDistribution tableDistribution(String databaseName, String tableName);
 }

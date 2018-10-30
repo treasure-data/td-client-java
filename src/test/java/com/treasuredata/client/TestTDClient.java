@@ -57,6 +57,7 @@ import com.treasuredata.client.model.TDSavedQueryHistory;
 import com.treasuredata.client.model.TDSavedQueryStartRequest;
 import com.treasuredata.client.model.TDSavedQueryUpdateRequest;
 import com.treasuredata.client.model.TDTable;
+import com.treasuredata.client.model.TDTableDistribution;
 import com.treasuredata.client.model.TDUser;
 import com.treasuredata.client.model.TDUserList;
 import okhttp3.mockwebserver.MockResponse;
@@ -1603,6 +1604,21 @@ public class TestTDClient
                 .build();
 
         client.submitResultExportJob(jobRequest);
+    }
+
+    @Test
+    public void testTableDistribution()
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("{\"user_table_id\":123,\"bucket_count\":512,\"partition_function\":\"hash\",\"columns\":[{\"key\":\"col1\",\"type\":\"int\",\"name\":\"col1\"},{\"key\":\"col2\",\"type\":\"int\",\"name\":\"col2\"}]}"));
+
+        TDTableDistribution distribution = client.tableDistribution("sample_datasets", "www_access");
+        assertEquals(123, distribution.getUserTableId());
+        assertEquals(512, distribution.getBucketCount());
+        assertEquals("hash", distribution.getPartitionFunction());
+        assertEquals(2, distribution.getColumns().size());
+        assertEquals("col1", distribution.getColumns().get(0).getName());
+        assertEquals("col2", distribution.getColumns().get(1).getName());
     }
 
     private static String apikey()
