@@ -187,22 +187,4 @@ public class TestTDClientQuery
         }
         return result;
     }
-
-    public static void main (String [] args){
-        // first and second parameters should be java and TDClientQuery so we remove java out of the args array
-        String [] param = new String [args.length - 1];
-        for (int i = 0; i < args.length - 1; i++)
-            param[i] = args[i + 1];
-
-        TestTDClientQuery testQuery = new TestTDClientQuery();
-        TDClientQuery query = new TDClientQuery();
-        try{
-            testQuery.setUp();
-            testQuery.executeQuery(query, param);
-        } catch (Exception e){
-            logger.error(e.getMessage());
-            e.printStackTrace();
-        }
-
-    }
 }
