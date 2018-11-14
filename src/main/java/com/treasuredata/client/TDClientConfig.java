@@ -122,7 +122,7 @@ public class TDClientConfig
             int connectionPoolSize,
             Multimap<String, String> headers)
     {
-        this.endpoint = endpoint.or("api.treasuredata.com");
+        this.endpoint = endpoint.or("api-development.treasuredata.com");
         this.port = port;
         this.useSSL = useSSL;
         this.apiKey = apiKey;
