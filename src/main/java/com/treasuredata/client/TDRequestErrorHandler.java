@@ -66,8 +66,9 @@ public class TDRequestErrorHandler
     private static TDClientHttpException clientError(TDClientHttpException e, ResponseContext responseContext)
     {
         boolean showWarning = true;
-        boolean showStackTrace = true;
-        switch (e.getStatusCode()) {
+        boolean showStackTrace = false;
+        int code = e.getStatusCode();
+        switch (code) {
             case HttpStatus.NOT_FOUND_404:
                 if (responseContext.apiRequest.getPath().startsWith("/v3/table/distribution")) {
                     // Table distribution data will not be found for non-UDP tables.
@@ -78,13 +79,19 @@ public class TDRequestErrorHandler
                 // Suppress stack trace because 409 frequently happens when checking the presence of databases and tables.
                 showStackTrace = false;
                 break;
+            default:
+                if (!(HttpStatus.isClientError(code) || HttpStatus.isServerError(code))) {
+                    // Show stack trace for non 4xx, 5xx errors
+                    showStackTrace = true;
+                }
+                break;
         }
         if (showWarning) {
             if (showStackTrace) {
-                logger.warn(String.format("API request to %s failed: %s, cause: %s", responseContext.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()), e);
+                logger.warn(e.getCause() == null ? e.getMessage() : e.getCause().getClass().toString(), e);
             }
             else {
-                logger.warn(String.format("API request to %s failed: %s, cause: %s", responseContext.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()));
+                logger.warn(e.getCause() == null ? e.getMessage() : e.getCause().getClass().toString());
             }
         }
         return e;
@@ -123,8 +130,7 @@ public class TDRequestErrorHandler
                     throw clientError(new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter), responseContext);
             }
         }
-        logger.warn(errorMessage);
-        if (HttpStatus.isServerError(code)) {
+        else if (HttpStatus.isServerError(code)) {
             // Just returns exception info for 5xx errors
             return clientError(new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter), responseContext);
         }
