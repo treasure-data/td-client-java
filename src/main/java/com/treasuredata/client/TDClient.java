@@ -989,7 +989,7 @@ public class TDClient
             TDTableDistribution distribution = doGet(buildUrl(String.format("/v3/table/distribution/%s/%s", databaseName, tableName)), TDTableDistribution.class);
             return Optional.of(distribution);
         }
-        catch(TDClientHttpNotFoundException e) {
+        catch (TDClientHttpNotFoundException e) {
             return Optional.absent();
         }
     }

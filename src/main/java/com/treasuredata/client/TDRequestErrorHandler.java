@@ -63,12 +63,13 @@ public class TDRequestErrorHandler
     /**
      * Show or suppress warning messages for TDClientHttpException
      */
-    private static TDClientHttpException clientError(TDClientHttpException e, ResponseContext responseContext) {
+    private static TDClientHttpException clientError(TDClientHttpException e, ResponseContext responseContext)
+    {
         boolean showWarning = true;
         boolean showStackTrace = true;
-        switch(e.getStatusCode()) {
+        switch (e.getStatusCode()) {
             case HttpStatus.NOT_FOUND_404:
-                if(responseContext.apiRequest.getPath().startsWith("/v3/table/distribution")) {
+                if (responseContext.apiRequest.getPath().startsWith("/v3/table/distribution")) {
                     // Table distribution data will not be found for non-UDP tables.
                     showWarning = false;
                 }
@@ -78,8 +79,8 @@ public class TDRequestErrorHandler
                 showStackTrace = false;
                 break;
         }
-        if(showWarning) {
-            if(showStackTrace) {
+        if (showWarning) {
+            if (showStackTrace) {
                 logger.warn(String.format("API request to %s failed: %s, cause: %s", responseContext.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()), e);
             }
             else {
