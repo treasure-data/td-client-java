@@ -983,8 +983,14 @@ public class TDClient
     }
 
     @Override
-    public TDTableDistribution tableDistribution(String databaseName, String tableName)
+    public Optional<TDTableDistribution> tableDistribution(String databaseName, String tableName)
     {
-        return doGet(buildUrl(String.format("/v3/table/distribution/%s/%s", databaseName, tableName)), TDTableDistribution.class);
+        try {
+            TDTableDistribution distribution = doGet(buildUrl(String.format("/v3/table/distribution/%s/%s", databaseName, tableName)), TDTableDistribution.class);
+            return Optional.of(distribution);
+        }
+        catch(TDClientHttpNotFoundException e) {
+            return Optional.absent();
+        }
     }
 }

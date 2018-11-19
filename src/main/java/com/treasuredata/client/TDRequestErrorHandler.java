@@ -60,6 +60,35 @@ public class TDRequestErrorHandler
         }
     };
 
+    /**
+     * Show or suppress warning messages for TDClientHttpException
+     */
+    private static TDClientHttpException clientError(TDClientHttpException e, ResponseContext responseContext) {
+        boolean showWarning = true;
+        boolean showStackTrace = true;
+        switch(e.getStatusCode()) {
+            case HttpStatus.NOT_FOUND_404:
+                if(responseContext.apiRequest.getPath().startsWith("/v3/table/distribution")) {
+                    // Table distribution data will not be found for non-UDP tables.
+                    showWarning = false;
+                }
+                break;
+            case HttpStatus.CONFLICT_409:
+                // Suppress stack trace because 409 frequently happens when checking the presence of databases and tables.
+                showStackTrace = false;
+                break;
+        }
+        if(showWarning) {
+            if(showStackTrace) {
+                logger.warn(String.format("API request to %s failed: %s, cause: %s", responseContext.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()), e);
+            }
+            else {
+                logger.warn(String.format("API request to %s failed: %s, cause: %s", responseContext.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()));
+            }
+        }
+        return e;
+    }
+
     public static TDClientException defaultHttpResponseErrorResolver(ResponseContext responseContext)
             throws TDClientException
     {
@@ -76,30 +105,30 @@ public class TDRequestErrorHandler
             switch (code) {
                 // Soft 4xx errors. These we retry.
                 case TOO_MANY_REQUESTS_429:
-                    return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
+                    return clientError(new TDClientHttpTooManyRequestsException(errorMessage, retryAfter), responseContext);
                 // Hard 4xx error. We do not retry the execution on this type of error
                 case HttpStatus.UNAUTHORIZED_401:
-                    throw new TDClientHttpUnauthorizedException(errorMessage);
+                    throw clientError(new TDClientHttpUnauthorizedException(errorMessage), responseContext);
                 case HttpStatus.NOT_FOUND_404:
-                    throw new TDClientHttpNotFoundException(errorMessage);
+                    throw clientError(new TDClientHttpNotFoundException(errorMessage), responseContext);
                 case HttpStatus.CONFLICT_409:
                     String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
-                    throw new TDClientHttpConflictException(errorMessage, conflictsWith);
+                    throw clientError(new TDClientHttpConflictException(errorMessage, conflictsWith), responseContext);
                 case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
-                    throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter);
+                    throw clientError(new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter), responseContext);
                 case HttpStatus.UNPROCESSABLE_ENTITY_422:
-                    throw new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter);
+                    throw clientError(new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter), responseContext);
                 default:
-                    throw new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter);
+                    throw clientError(new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter), responseContext);
             }
         }
         logger.warn(errorMessage);
         if (HttpStatus.isServerError(code)) {
             // Just returns exception info for 5xx errors
-            return new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter);
+            return clientError(new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter), responseContext);
         }
         else {
-            throw new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter);
+            throw clientError(new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter), responseContext);
         }
     }
 

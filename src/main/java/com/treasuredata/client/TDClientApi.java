@@ -376,5 +376,5 @@ public interface TDClientApi<ClientImpl>
 
     long lookupConnection(String name);
 
-    TDTableDistribution tableDistribution(String databaseName, String tableName);
+    Optional<TDTableDistribution> tableDistribution(String databaseName, String tableName);
 }
