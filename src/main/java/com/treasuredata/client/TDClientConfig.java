@@ -243,7 +243,7 @@ public class TDClientConfig
         Properties p = new Properties();
         File file = new File(System.getProperty("user.home", "./"), String.format(".td/td.conf"));
         if (!file.exists()) {
-            logger.debug(String.format("config file %s is not found", file));
+            logger.warn(String.format("config file %s is not found", file));
             return p;
         }
         return readTDConf(file);
