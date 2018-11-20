@@ -70,10 +70,8 @@ public class TDRequestErrorHandler
         int code = e.getStatusCode();
         switch (code) {
             case HttpStatus.NOT_FOUND_404:
-                if (responseContext.apiRequest.getPath().startsWith("/v3/table/distribution")) {
-                    // Table distribution data will not be found for non-UDP tables.
-                    showWarning = false;
-                }
+                // Not found (e.g., database, table, table distribution data might be missing)
+                showWarning = false;
                 break;
             case HttpStatus.CONFLICT_409:
                 // Suppress stack trace because 409 frequently happens when checking the presence of databases and tables.
