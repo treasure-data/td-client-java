@@ -249,8 +249,15 @@ This creates jar files within `target` folder.
 
 ```
 # update pom.xml, README.md and CHANGES.txt
+$ git commit -am "Release (version)"
+$ git tag "(version)"
 $ mvn deploy -DperformRelease=true
 $ sbt "sonatypeReleaseAll com.treasuredata"
+
+# update pom.xml to use the next SNAPSHOT version
+$ git commit -am "Next snapshot version"
+$ git push
+$ git push --tags
 ```
 
 See also https://github.com/xerial/sbt-sonatype#publishing-maven-projects to use `sbt sonatypeReleaseAll` command.
