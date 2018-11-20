@@ -404,11 +404,8 @@ public class TDHttpClient
                 }
             }
             catch (Exception e) {
-                if (e instanceof TDClientHttpConflictException) {
-                    // Suppress stack trace because 409 frequently happens when checking the presence of databases and tables
-                    logger.warn(String.format("API request to %s failed: %s, cause: %s", context.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()));
-                }
-                else {
+                // TDClientHttpException is already handled in TDRequestErrorHandler, so we need to show warning for the other types of error messages
+                if (!TDClientHttpException.class.isAssignableFrom(e.getClass())) {
                     logger.warn(String.format("API request to %s failed: %s, cause: %s", context.apiRequest.getPath(), e.getClass(), e.getCause() == null ? e.getMessage() : e.getCause().getClass()), e);
                 }
                 // This may throw TDClientException if the error is not recoverable

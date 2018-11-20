@@ -1612,13 +1612,22 @@ public class TestTDClient
         client = mockClient();
         server.enqueue(new MockResponse().setBody("{\"user_table_id\":123,\"bucket_count\":512,\"partition_function\":\"hash\",\"columns\":[{\"key\":\"col1\",\"type\":\"int\",\"name\":\"col1\"},{\"key\":\"col2\",\"type\":\"int\",\"name\":\"col2\"}]}"));
 
-        TDTableDistribution distribution = client.tableDistribution("sample_datasets", "www_access");
+        Optional<TDTableDistribution> distributionOpt = client.tableDistribution("sample_datasets", "www_access");
+        assertTrue(distributionOpt.isPresent());
+        TDTableDistribution distribution = distributionOpt.get();
         assertEquals(123, distribution.getUserTableId());
         assertEquals(512, distribution.getBucketCount());
         assertEquals("hash", distribution.getPartitionFunction());
         assertEquals(2, distribution.getColumns().size());
         assertEquals("col1", distribution.getColumns().get(0).getName());
         assertEquals("col2", distribution.getColumns().get(1).getName());
+    }
+
+    @Test
+    public void testMissingTableDistribution()
+    {
+        Optional<TDTableDistribution> distributionOpt = client.tableDistribution("sample_datasets", "www_access");
+        assertFalse(distributionOpt.isPresent());
     }
 
     private static String apikey()
