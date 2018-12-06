@@ -29,6 +29,7 @@ import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDExportResultJobRequest;
+import com.treasuredata.client.model.TDImportResult;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -377,4 +378,8 @@ public interface TDClientApi<ClientImpl>
     long lookupConnection(String name);
 
     Optional<TDTableDistribution> tableDistribution(String databaseName, String tableName);
+
+    TDImportResult importFile(String database, String table, String format, File file);
+
+    TDImportResult importFile(String database, String table, String format, File file, String id);
 }

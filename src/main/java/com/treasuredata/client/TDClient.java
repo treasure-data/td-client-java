@@ -40,6 +40,7 @@ import com.treasuredata.client.model.TDConnectionLookupResult;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDExportResultJobRequest;
+import com.treasuredata.client.model.TDImportResult;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -242,6 +243,22 @@ public class TDClient
             throws TDClientException
     {
         return this.<ResultType>doPost(path, queryParam, Optional.<String>absent(), resultTypeClass);
+    }
+
+    protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, File file, Class<ResultType> resultTypeClass)
+            throws TDClientException
+    {
+        checkNotNull(path, "path is null");
+        checkNotNull(file, "file is null");
+        checkNotNull(queryParam, "param is null");
+        checkNotNull(resultTypeClass, "resultTypeClass is null");
+
+        TDApiRequest.Builder request = TDApiRequest.Builder.PUT(path);
+        for (Map.Entry<String, String> e : queryParam.entrySet()) {
+            request.addQueryParam(e.getKey(), e.getValue());
+        }
+        request.setFile(file);
+        return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
     }
 
     protected String doPost(String path)
@@ -992,5 +1009,17 @@ public class TDClient
         catch (TDClientHttpNotFoundException e) {
             return Optional.absent();
         }
+    }
+
+    @Override
+    public TDImportResult importFile(String databaseName, String tableName, String format, File file)
+    {
+        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, format)), ImmutableMap.of(), file, TDImportResult.class);
+    }
+
+    @Override
+    public TDImportResult importFile(String databaseName, String tableName, String format, File file, String id)
+    {
+        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, format)), ImmutableMap.of(), file, TDImportResult.class);
     }
 }
