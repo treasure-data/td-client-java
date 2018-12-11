@@ -379,7 +379,41 @@ public interface TDClientApi<ClientImpl>
 
     Optional<TDTableDistribution> tableDistribution(String databaseName, String tableName);
 
-    TDImportResult importFile(String database, String table, String format, File file);
+    /**
+     * Import a msgpack.gz file upon target table
+     * @param database target database
+     * @param table target table
+     * @param file source msgpack.gz formatted file
+     * @return TDImportResult which contains a unique import id and md5
+     */
+    TDImportResult importFile(String database, String table, File file);
 
-    TDImportResult importFile(String database, String table, String format, File file, String id);
+    /**
+     * Import a msgpack.gz file upon target table
+     * @param database target database
+     * @param table target table
+     * @param file source msgpack.gz formatted file
+     * @param id unique import id, ex uuid, which can be used at idempotent import
+     * @return TDImportResult which contains a unique import id and md5
+     */
+    TDImportResult importFile(String database, String table, File file, String id);
+
+    /**
+     * Import a msgpack.gz file upon target table
+     * @param database target database
+     * @param table target table
+     * @param content source msgpack.gz formatted bytes
+     * @return TDImportResult which contains a unique import id and md5
+     */
+    TDImportResult importBytes(String database, String table, byte[] content);
+
+    /**
+     * Import a msgpack.gz file upon target table
+     * @param database target database
+     * @param table target table
+     * @param content source msgpack.gz formatted bytes
+     * @param id unique import id, ex uuid, which can be used at idempotent import
+     * @return TDImportResult which contains a unique import id and md5
+     */
+    TDImportResult importBytes(String database, String table, byte[] content, String id);
 }

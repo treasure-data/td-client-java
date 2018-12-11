@@ -291,6 +291,14 @@ public class TDHttpClient
                         throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, "Failed to read input file: " + apiRequest.getPutFile().get());
                     }
                 }
+                else if (apiRequest.getContent().isPresent()) {
+                    try {
+                        request = request.put(RequestBody.create(mediaTypeOctetStream, apiRequest.getContent().get()));
+                    }
+                    catch (Throwable e) {
+                        throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, "Failed to get Content");
+                    }
+                }
                 break;
         }
 

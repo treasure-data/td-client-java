@@ -248,17 +248,36 @@ public class TDClient
     protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, File file, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
         checkNotNull(file, "file is null");
-        checkNotNull(queryParam, "param is null");
         checkNotNull(resultTypeClass, "resultTypeClass is null");
+
+        TDApiRequest.Builder request = buildPutRequest(path, queryParam);
+        request.setFile(file);
+        return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
+    }
+
+    protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, byte[] content, Class<ResultType> resultTypeClass)
+            throws TDClientException
+    {
+        checkNotNull(content, "content is null");
+        checkNotNull(resultTypeClass, "resultTypeClass is null");
+
+        TDApiRequest.Builder request = buildPutRequest(path, queryParam);
+        request.setContent(content);
+        return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
+    }
+
+    private TDApiRequest.Builder buildPutRequest(String path, Map<String, String> queryParam)
+    {
+        checkNotNull(path, "path is null");
+        checkNotNull(queryParam, "param is null");
 
         TDApiRequest.Builder request = TDApiRequest.Builder.PUT(path);
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
             request.addQueryParam(e.getKey(), e.getValue());
         }
-        request.setFile(file);
-        return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
+
+        return request;
     }
 
     protected String doPost(String path)
@@ -1012,14 +1031,26 @@ public class TDClient
     }
 
     @Override
-    public TDImportResult importFile(String databaseName, String tableName, String format, File file)
+    public TDImportResult importFile(String databaseName, String tableName, File file)
     {
-        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, format)), ImmutableMap.of(), file, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), ImmutableMap.of(), file, TDImportResult.class);
     }
 
     @Override
-    public TDImportResult importFile(String databaseName, String tableName, String format, File file, String id)
+    public TDImportResult importFile(String databaseName, String tableName, File file, String id)
     {
-        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, format)), ImmutableMap.of(), file, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), ImmutableMap.of(), file, TDImportResult.class);
+    }
+
+    @Override
+    public TDImportResult importBytes(String databaseName, String tableName, byte[] content)
+    {
+        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), ImmutableMap.of(), content, TDImportResult.class);
+    }
+
+    @Override
+    public TDImportResult importBytes(String databaseName, String tableName, byte[] content, String id)
+    {
+        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), ImmutableMap.of(), content, TDImportResult.class);
     }
 }

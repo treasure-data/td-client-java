@@ -49,6 +49,7 @@ public class TDApiRequest
     private final Multimap<String, String> headerParams;
     private final Optional<String> postJson;
     private final Optional<File> putFile;
+    private final Optional<byte[]> content;
     private final Optional<Boolean> followRedirects;
 
     TDApiRequest(
@@ -58,6 +59,7 @@ public class TDApiRequest
             Multimap<String, String> headerParams,
             Optional<String> postJson,
             Optional<File> putFile,
+            Optional<byte[]> content,
             Optional<Boolean> followRedirects
     )
     {
@@ -67,12 +69,13 @@ public class TDApiRequest
         this.headerParams = checkNotNull(headerParams, "headerParams is null");
         this.postJson = checkNotNull(postJson, "postJson is null");
         this.putFile = checkNotNull(putFile, "putFile is null");
+        this.content = checkNotNull(content, "content is null");
         this.followRedirects = checkNotNull(followRedirects, "followRedirects is null");
     }
 
     public TDApiRequest withUri(String uri)
     {
-        return new TDApiRequest(method, uri, ImmutableMap.copyOf(queryParams), ImmutableMultimap.copyOf(headerParams), postJson, putFile, followRedirects);
+        return new TDApiRequest(method, uri, ImmutableMap.copyOf(queryParams), ImmutableMultimap.copyOf(headerParams), postJson, putFile, content, followRedirects);
     }
 
     public String getPath()
@@ -105,6 +108,11 @@ public class TDApiRequest
         return putFile;
     }
 
+    public Optional<byte[]> getContent()
+    {
+        return content;
+    }
+
     public Optional<Boolean> getFollowRedirects()
     {
         return followRedirects;
@@ -120,6 +128,7 @@ public class TDApiRequest
         private ImmutableMultimap.Builder<String, String> headerParams;
         private Optional<String> postJson = Optional.absent();
         private Optional<File> file = Optional.absent();
+        private Optional<byte[]> content = Optional.absent();
         private Optional<Boolean> followRedirects = Optional.absent();
 
         Builder(TDHttpMethod method, String path)
@@ -187,6 +196,12 @@ public class TDApiRequest
             return this;
         }
 
+        public Builder setContent(byte[] content)
+        {
+            this.content = Optional.of(content);
+            return this;
+        }
+
         public Builder setFollowRedirects(boolean followRedirects)
         {
             this.followRedirects = Optional.of(followRedirects);
@@ -202,6 +217,7 @@ public class TDApiRequest
                     headerParams != null ? headerParams.build() : EMPTY_HEADERS,
                     postJson,
                     file,
+                    content,
                     followRedirects
             );
         }
