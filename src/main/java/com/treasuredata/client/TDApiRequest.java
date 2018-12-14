@@ -51,6 +51,8 @@ public class TDApiRequest
     private final Optional<File> putFile;
     private final Optional<byte[]> content;
     private final Optional<Boolean> followRedirects;
+    private final int contentOffset;
+    private final int contentLength;
 
     TDApiRequest(
             TDHttpMethod method,
@@ -60,6 +62,8 @@ public class TDApiRequest
             Optional<String> postJson,
             Optional<File> putFile,
             Optional<byte[]> content,
+            int contentOffset,
+            int contentLength,
             Optional<Boolean> followRedirects
     )
     {
@@ -70,12 +74,14 @@ public class TDApiRequest
         this.postJson = checkNotNull(postJson, "postJson is null");
         this.putFile = checkNotNull(putFile, "putFile is null");
         this.content = checkNotNull(content, "content is null");
+        this.contentOffset = contentOffset;
+        this.contentLength = contentLength;
         this.followRedirects = checkNotNull(followRedirects, "followRedirects is null");
     }
 
     public TDApiRequest withUri(String uri)
     {
-        return new TDApiRequest(method, uri, ImmutableMap.copyOf(queryParams), ImmutableMultimap.copyOf(headerParams), postJson, putFile, content, followRedirects);
+        return new TDApiRequest(method, uri, ImmutableMap.copyOf(queryParams), ImmutableMultimap.copyOf(headerParams), postJson, putFile, content, contentOffset, contentLength, followRedirects);
     }
 
     public String getPath()
@@ -113,6 +119,16 @@ public class TDApiRequest
         return content;
     }
 
+    public int getContentOffset()
+    {
+        return contentOffset;
+    }
+
+    public int getContentLength()
+    {
+        return contentLength;
+    }
+
     public Optional<Boolean> getFollowRedirects()
     {
         return followRedirects;
@@ -129,6 +145,8 @@ public class TDApiRequest
         private Optional<String> postJson = Optional.absent();
         private Optional<File> file = Optional.absent();
         private Optional<byte[]> content = Optional.absent();
+        private int contentOffset;
+        private int contentLength;
         private Optional<Boolean> followRedirects = Optional.absent();
 
         Builder(TDHttpMethod method, String path)
@@ -196,9 +214,11 @@ public class TDApiRequest
             return this;
         }
 
-        public Builder setContent(byte[] content)
+        public Builder setContent(byte[] content, int offset, int length)
         {
             this.content = Optional.of(content);
+            this.contentOffset = offset;
+            this.contentLength = length;
             return this;
         }
 
@@ -218,6 +238,8 @@ public class TDApiRequest
                     postJson,
                     file,
                     content,
+                    contentOffset,
+                    contentLength,
                     followRedirects
             );
         }

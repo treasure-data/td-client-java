@@ -412,8 +412,31 @@ public interface TDClientApi<ClientImpl>
      * @param database target database
      * @param table target table
      * @param content source msgpack.gz formatted bytes
+     * @param offset start offset of content bytes
+     * @param length length of bytes
+     * @return TDImportResult which contains a unique import id and md5
+     */
+    TDImportResult importBytes(String database, String table, byte[] content, int offset, int length);
+
+    /**
+     * Import a msgpack.gz file upon target table
+     * @param database target database
+     * @param table target table
+     * @param content source msgpack.gz formatted bytes
      * @param id unique import id, ex uuid, which can be used at idempotent import
      * @return TDImportResult which contains a unique import id and md5
      */
     TDImportResult importBytes(String database, String table, byte[] content, String id);
+
+    /**
+     * Import a msgpack.gz file upon target table
+     * @param database target database
+     * @param table target table
+     * @param content source msgpack.gz formatted bytes
+     * @param offset start offset of content bytes
+     * @param length length of bytes
+     * @param id unique import id, ex uuid, which can be used at idempotent import
+     * @return TDImportResult which contains a unique import id and md5
+     */
+    TDImportResult importBytes(String database, String table, byte[] content, int offset, int length, String id);
 }

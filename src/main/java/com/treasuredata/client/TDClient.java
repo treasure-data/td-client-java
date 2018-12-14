@@ -256,14 +256,14 @@ public class TDClient
         return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
     }
 
-    protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, byte[] content, Class<ResultType> resultTypeClass)
+    protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, byte[] content, int offset, int length, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
         checkNotNull(content, "content is null");
         checkNotNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest.Builder request = buildPutRequest(path, queryParam);
-        request.setContent(content);
+        request.setContent(content, offset, length);
         return httpClient.call(request.build(), apiKeyCache, resultTypeClass);
     }
 
@@ -1045,12 +1045,24 @@ public class TDClient
     @Override
     public TDImportResult importBytes(String databaseName, String tableName, byte[] content)
     {
-        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), ImmutableMap.of(), content, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), ImmutableMap.of(), content, 0, content.length, TDImportResult.class);
+    }
+
+    @Override
+    public TDImportResult importBytes(String databaseName, String tableName, byte[] content, int offset, int length)
+    {
+        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), ImmutableMap.of(), content, offset, length, TDImportResult.class);
     }
 
     @Override
     public TDImportResult importBytes(String databaseName, String tableName, byte[] content, String id)
     {
-        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), ImmutableMap.of(), content, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), ImmutableMap.of(), content, 0, content.length, TDImportResult.class);
+    }
+
+    @Override
+    public TDImportResult importBytes(String databaseName, String tableName, byte[] content, int offset, int length, String id)
+    {
+        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), ImmutableMap.of(), content, offset, length, TDImportResult.class);
     }
 }

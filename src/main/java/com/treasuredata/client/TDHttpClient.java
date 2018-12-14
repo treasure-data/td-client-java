@@ -293,7 +293,7 @@ public class TDHttpClient
                 }
                 else if (apiRequest.getContent().isPresent()) {
                     try {
-                        request = request.put(RequestBody.create(mediaTypeOctetStream, apiRequest.getContent().get()));
+                        request = request.put(RequestBody.create(mediaTypeOctetStream, apiRequest.getContent().get(), apiRequest.getContentOffset(), apiRequest.getContentLength()));
                     }
                     catch (Throwable e) {
                         throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, "Failed to get Content");
