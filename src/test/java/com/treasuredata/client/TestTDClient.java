@@ -44,6 +44,7 @@ import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportFileFormatType;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDExportResultJobRequest;
+import com.treasuredata.client.model.TDImportResult;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
@@ -82,6 +83,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -1628,6 +1631,98 @@ public class TestTDClient
     {
         Optional<TDTableDistribution> distributionOpt = client.tableDistribution("sample_datasets", "www_access");
         assertFalse(distributionOpt.isPresent());
+    }
+
+    @Test
+    public void testImportFile()
+            throws Exception
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("{\"unique_id\":\"4288048cf8f811e88b560a87157ac806\",\"md5_hex\":\"a34e7c79aa6b6cc48e6e1075c2215a8b\",\"database\":\"db\",\"table\":\"tbl\",\"elapsed_time\":10}"));
+
+        File tmpFile = createTempMsgpackGz("import", 10);
+        TDImportResult result = client.importFile("db", "tbl", tmpFile);
+
+        assertEquals(result.getDatabaseName(), "db");
+        assertEquals(result.getTableName(), "tbl");
+        assertEquals(result.getElapsedTime(), 10);
+        assertEquals(result.getMd5Hex(), "a34e7c79aa6b6cc48e6e1075c2215a8b");
+        assertEquals(result.getUniqueId(), "4288048cf8f811e88b560a87157ac806");
+    }
+
+    @Test
+    public void testImportFileWithId()
+            throws Exception
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("{\"unique_id\":\"4288048cf8f811e88b560a87157ac806\",\"md5_hex\":\"a34e7c79aa6b6cc48e6e1075c2215a8b\",\"database\":\"db\",\"table\":\"tbl\",\"elapsed_time\":10}"));
+
+        File tmpFile = createTempMsgpackGz("import", 10);
+        TDImportResult result = client.importFile("db", "tbl", tmpFile, "4288048cf8f811e88b560a87157ac806");
+
+        assertEquals(result.getDatabaseName(), "db");
+        assertEquals(result.getTableName(), "tbl");
+        assertEquals(result.getElapsedTime(), 10);
+        assertEquals(result.getMd5Hex(), "a34e7c79aa6b6cc48e6e1075c2215a8b");
+        assertEquals(result.getUniqueId(), "4288048cf8f811e88b560a87157ac806");
+    }
+
+    @Test
+    public void testImportBytes()
+            throws Exception
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("{\"unique_id\":\"4288048cf8f811e88b560a87157ac806\",\"md5_hex\":\"a34e7c79aa6b6cc48e6e1075c2215a8b\",\"database\":\"db\",\"table\":\"tbl\",\"elapsed_time\":10}"));
+
+        File tmpFile = createTempMsgpackGz("import", 10);
+        byte[] bytes = ByteStreams.toByteArray(new FileInputStream(tmpFile));
+        TDImportResult result = client.importBytes("db", "tbl", bytes);
+
+        assertEquals(result.getDatabaseName(), "db");
+        assertEquals(result.getTableName(), "tbl");
+        assertEquals(result.getElapsedTime(), 10);
+        assertEquals(result.getMd5Hex(), "a34e7c79aa6b6cc48e6e1075c2215a8b");
+        assertEquals(result.getUniqueId(), "4288048cf8f811e88b560a87157ac806");
+    }
+
+    @Test
+    public void testImportBytesWithId()
+            throws Exception
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("{\"unique_id\":\"4288048cf8f811e88b560a87157ac806\",\"md5_hex\":\"a34e7c79aa6b6cc48e6e1075c2215a8b\",\"database\":\"db\",\"table\":\"tbl\",\"elapsed_time\":10}"));
+
+        File tmpFile = createTempMsgpackGz("import", 10);
+        byte[] bytes = ByteStreams.toByteArray(new FileInputStream(tmpFile));
+        TDImportResult result = client.importBytes("db", "tbl", bytes, "4288048cf8f811e88b560a87157ac806");
+
+        assertEquals(result.getDatabaseName(), "db");
+        assertEquals(result.getTableName(), "tbl");
+        assertEquals(result.getElapsedTime(), 10);
+        assertEquals(result.getMd5Hex(), "a34e7c79aa6b6cc48e6e1075c2215a8b");
+        assertEquals(result.getUniqueId(), "4288048cf8f811e88b560a87157ac806");
+    }
+
+    private File createTempMsgpackGz(String prefix, int numRows)
+            throws IOException
+    {
+        int count = 0;
+        final long time = System.currentTimeMillis() / 1000;
+
+        File tmpFile = File.createTempFile(prefix, ".msgpack.gz");
+        try (OutputStream out = new GZIPOutputStream(new FileOutputStream(tmpFile));
+             MessagePacker packer = MessagePack.newDefaultPacker(out)) {
+            for (int n = 0; n < numRows; ++n) {
+                ValueFactory.MapBuilder b = ValueFactory.newMapBuilder();
+                b.put(ValueFactory.newString("time"), ValueFactory.newInteger(time + count));
+                b.put(ValueFactory.newString("event"), ValueFactory.newString("log" + count));
+                b.put(ValueFactory.newString("description"), ValueFactory.newString("sample data"));
+                packer.packValue(b.build());
+                count += 1;
+            }
+        }
+
+        return tmpFile;
     }
 
     private static String apikey()
