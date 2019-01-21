@@ -298,9 +298,13 @@ public class TestTDClient
         TDJobList jobs = client.listJobs();
         logger.debug("job list: " + jobs);
 
-        TDJobList jobsInAnIDRange = client.listJobs(34022478, 34022600);
+        TDJobList jobsInAnIDDefault = client.listJobs();
+        logger.debug("job list: " + jobsInAnIDDefault);
+        assertEquals(20, jobsInAnIDDefault.getJobs().size());
+
+        TDJobList jobsInAnIDRange = client.listJobs(0, 100);
         logger.debug("job list: " + jobsInAnIDRange);
-        assertTrue(jobsInAnIDRange.getJobs().size() > 0);
+        assertEquals(101, jobsInAnIDRange.getJobs().size());
 
         // Check getters
         Iterable<Method> getters = FluentIterable.from(TDJob.class.getDeclaredMethods()).filter(new Predicate<Method>()

@@ -641,10 +641,10 @@ public class TDClient
     }
 
     @Override
-    public TDJobList listJobs(long fromJobId, long toJobId)
+    public TDJobList listJobs(long from, long to)
             throws TDClientException
     {
-        return doGet(String.format("/v3/job/list?from_id=%d&to_id=%d", fromJobId, toJobId), TDJobList.class);
+        return doGet(String.format("/v3/job/list?from=%d&to=%d", from, to), TDJobList.class);
     }
 
     @Override
