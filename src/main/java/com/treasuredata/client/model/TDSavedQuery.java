@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -54,6 +55,7 @@ public class TDSavedQuery
         b.setPriority(priority);
         b.setRetryLimit(retryLimit);
         b.setResult(result);
+        b.setEngineVersion(engineVersion);
         return b;
     }
 
@@ -70,6 +72,7 @@ public class TDSavedQuery
     private final int retryLimit;
     private final String result;
     private final String nextTime;
+    private final TDJob.EngineVersion engineVersion;
 
     public TDSavedQuery(
             @JsonProperty("id") String id,
@@ -84,7 +87,9 @@ public class TDSavedQuery
             @JsonProperty("priority") int priority,
             @JsonProperty("retry_limit") int retryLimit,
             @JsonProperty("result") String result,
-            @JsonProperty("next_time") String nextTime)
+            @JsonProperty("next_time") String nextTime,
+            @JsonProperty("engine_version") @JsonInclude(JsonInclude.Include.NON_NULL) TDJob.EngineVersion engineVersion
+            )
     {
         this.id = id;
         this.name = name;
@@ -99,6 +104,7 @@ public class TDSavedQuery
         this.retryLimit = retryLimit;
         this.result = result;
         this.nextTime = nextTime;
+        this.engineVersion = engineVersion;
     }
 
     public String getId()
@@ -171,6 +177,11 @@ public class TDSavedQuery
         return nextTime;
     }
 
+    public TDJob.EngineVersion getEngineVersion()
+    {
+        return engineVersion;
+    }
+
     @Override
     public String toString()
     {
@@ -187,6 +198,7 @@ public class TDSavedQuery
                 ", retryLimit=" + retryLimit +
                 ", result='" + result + '\'' +
                 ", nextTime='" + nextTime + '\'' +
+                ", engineVersion='" + engineVersion + '\'' +
                 '}';
     }
 }

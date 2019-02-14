@@ -415,6 +415,105 @@ public class TestTDClient
     }
 
     @Test
+    public void submitJobWithInvalidEngineVersionPresto() throws Exception
+    {
+        //Invalid engine_version should be throw TDClientHttpException
+        try {
+            submitJobWithEngineVersion(TDJob.Type.PRESTO, Optional.of(TDJob.EngineVersion.fromString("AAAAAA")));
+        }
+        catch (TDClientHttpException te) {
+            assertEquals(te.getStatusCode(), 422);
+            assertTrue(te.getMessage().matches(".*Job engine version is invalid.*"));
+        }
+        catch (Exception e) {
+            fail("Unexpected exception:" + e.toString());
+        }
+    }
+
+    @Test
+    public void submitJobWithValidEngineVersionPresto() throws Exception
+    {
+        // Valid engine_version should be acceepted
+        try {
+            submitJobWithEngineVersion(TDJob.Type.PRESTO, Optional.of(TDJob.EngineVersion.STABLE));
+        }
+        catch (Exception e) {
+            fail("Unexpected exception:" + e.toString());
+        }
+    }
+
+    @Test
+    public void submitJobWithInvalidEngineVersionHive() throws Exception
+    {
+        //Invalid engine_version should be throw TDClientHttpException
+        try {
+            submitJobWithEngineVersion(TDJob.Type.HIVE, Optional.of(TDJob.EngineVersion.fromString("AAAAAA")));
+        }
+        catch (TDClientHttpException te) {
+            assertEquals(te.getStatusCode(), 422);
+            assertTrue(te.getMessage().matches(".*Job engine version is invalid.*"));
+        }
+        catch (Exception e) {
+            fail("Unexpected exception:" + e.toString());
+        }
+    }
+
+    @Test
+    public void submitJobWithValidEngineVersionHive() throws Exception
+    {
+        // Valid engine_version should be acceepted
+        try {
+            submitJobWithEngineVersion(TDJob.Type.HIVE, Optional.of(TDJob.EngineVersion.STABLE));
+        }
+        catch (Exception e) {
+            fail("Unexpected exception:" + e.toString());
+        }
+    }
+
+    private void submitJobWithEngineVersion(TDJob.Type type, Optional<TDJob.EngineVersion> engineVersion)
+            throws Exception
+    {
+        TDJobRequestBuilder jobRequestBuilder =
+                new TDJobRequestBuilder()
+                        .setType(type)
+                        .setDatabase("sample_datasets")
+                        .setQuery("-- td-client-java test\nselect count(*) cnt from nasdaq");
+        jobRequestBuilder = engineVersion.isPresent() ? jobRequestBuilder.setEngineVersion(engineVersion.get()) : jobRequestBuilder;
+
+        TDJobRequest jobRequest = jobRequestBuilder.createTDJobRequest();
+        String jobId = client.submit(jobRequest);
+        logger.debug("job id: " + jobId);
+
+        TDJobSummary tdJob = waitJobCompletion(jobId);
+        TDJob jobInfo = client.jobInfo(jobId);
+        logger.debug("job show result: " + tdJob);
+        logger.debug("job info: " + jobInfo);
+        Optional<String> schema = jobInfo.getResultSchema();
+        assertTrue(schema.isPresent());
+        assertEquals("[[\"cnt\", \"bigint\"]]", schema.get());
+
+        JSONArray array = client.jobResult(jobId, TDResultFormat.JSON, new Function<InputStream, JSONArray>()
+        {
+            @Override
+            public JSONArray apply(InputStream input)
+            {
+                try {
+                    String result = new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8);
+                    logger.info("result:\n" + result);
+                    return new JSONArray(result);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        assertEquals(1, array.length());
+        assertEquals(1, jobInfo.getNumRecords());
+        assertEquals(8807278, array.getLong(0));
+    }
+
+    @Test
     public void submitJobWithResultOutput()
             throws Exception
     {
@@ -1203,7 +1302,10 @@ public class TestTDClient
         // authenticate() method should retrieve apikey, and set it to the TDClient
         // [NOTE] To pass this you need to add password config to ~/.td/td.conf
         Properties p = TDClientConfig.readTDConf();
-        TDClient client = new TDClientBuilder(false).build(); // Set no API key
+        TDClientBuilder clientBuilder = new TDClientBuilder(false); // Set no API key
+        String endpoint = p.getProperty("endpoint");
+        clientBuilder = (endpoint != null) ? clientBuilder.setEndpoint(endpoint) : clientBuilder; //Set endpoint from td.conf if exists
+        TDClient client = clientBuilder.build();
         String user = firstNonNull(p.getProperty("user"), System.getenv("TD_USER"));
         String password = firstNonNull(p.getProperty("password"), System.getenv("TD_PASS"));
         TDClient newClient = client.authenticate(user, password);
@@ -1310,6 +1412,8 @@ public class TestTDClient
         assertEquals(expected.getDatabase(), target.getDatabase());
         assertEquals(expected.getPriority(), target.getPriority());
         assertEquals(expected.getRetryLimit(), target.getRetryLimit());
+        //ToDo engine_version never returned.
+        // assertEquals(expected.getEngineVersion(), target.getEngineVersion());
     }
 
     @Test

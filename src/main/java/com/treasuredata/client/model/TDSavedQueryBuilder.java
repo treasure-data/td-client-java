@@ -33,6 +33,7 @@ public class TDSavedQueryBuilder
     private Optional<Integer> priority = Optional.absent();
     private Optional<Integer> retryLimit = Optional.absent();
     private Optional<String> result = Optional.absent();
+    private Optional<TDJob.EngineVersion> engineVersion = Optional.absent();
 
     public TDSavedQueryBuilder setName(String name)
     {
@@ -94,6 +95,12 @@ public class TDSavedQueryBuilder
         return this;
     }
 
+    public TDSavedQueryBuilder setEngineVersion(TDJob.EngineVersion engineVersion)
+    {
+        this.engineVersion = Optional.fromNullable(engineVersion);
+        return this;
+    }
+
     private static <T> void checkPresence(Optional<T> opt, String errorMessage)
     {
         if (!opt.isPresent()) {
@@ -119,7 +126,8 @@ public class TDSavedQueryBuilder
                 database.get(),
                 priority.or(TDJob.Priority.NORMAL.toInt()),
                 retryLimit.or(0),
-                result.or("")
+                result.or(""),
+                engineVersion.orNull()
         );
     }
 

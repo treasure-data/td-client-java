@@ -108,6 +108,53 @@ public class TDJob
         }
     }
 
+    /**
+     * Engine version for hive, presto
+     * To accept specific version number like 'Hive TD 2018.01', Implement as not enum but class
+     */
+    public static class EngineVersion
+    {
+        private final String engineVersion;
+
+        private EngineVersion(String engineVersion)
+        {
+            this.engineVersion = engineVersion;
+        }
+
+        public static final EngineVersion EXPERIMENTAL = new EngineVersion("experimental");
+        public static final EngineVersion STABLE = new EngineVersion("stable");
+        public static final EngineVersion LEGACY = new EngineVersion("legacy");
+        public static final EngineVersion CURRENT = new EngineVersion("current");
+
+        @JsonValue
+        public String getEngineVersion()
+        {
+            return engineVersion;
+        }
+
+        @Override
+        public String toString()
+        {
+            return engineVersion;
+        }
+
+        public static EngineVersion fromString(String engineVersion)
+        {
+            switch (engineVersion) {
+                case "stable":
+                    return STABLE;
+                case "experimental":
+                    return EXPERIMENTAL;
+                case "legacy":
+                    return LEGACY;
+                case "current":
+                    return CURRENT;
+                default:
+                    return new EngineVersion(engineVersion);
+            }
+        }
+    }
+
     private static class Debug
     {
         private final Optional<String> cmdout;
@@ -157,6 +204,7 @@ public class TDJob
     private final long resultSize;
     private final Optional<Debug> debug;
     private final long numRecords;
+    private final Optional<EngineVersion> engineVersion;
 
     @JsonCreator
     static TDJob createTDJobV3(
@@ -176,9 +224,10 @@ public class TDJob
             @JsonProperty("duration") long duration,
             @JsonProperty("result_size") long resultSize,
             @JsonProperty("debug") Optional<Debug> debug,
-            @JsonProperty("num_records") long numRecords)
+            @JsonProperty("num_records") long numRecords,
+            @JsonProperty("engine_version") Optional<EngineVersion> engineVersion)
     {
-        return new TDJob(jobId, status, type, query.getQuery(), createdAt, startAt, updatedAt, endAt, resultSchema, database, result, url, userName, duration, resultSize, debug, numRecords);
+        return new TDJob(jobId, status, type, query.getQuery(), createdAt, startAt, updatedAt, endAt, resultSchema, database, result, url, userName, duration, resultSize, debug, numRecords, engineVersion);
     }
 
     public TDJob(String jobId,
@@ -197,7 +246,8 @@ public class TDJob
             long duration,
             long resultSize,
             Optional<Debug> debug,
-            long numRecords
+            long numRecords,
+            Optional<EngineVersion> engineVersion
     )
     {
         this.jobId = jobId;
@@ -217,6 +267,7 @@ public class TDJob
         this.resultSize = resultSize;
         this.debug = debug;
         this.numRecords = numRecords;
+        this.engineVersion = engineVersion;
     }
 
     public String getJobId()
@@ -299,6 +350,11 @@ public class TDJob
         return numRecords;
     }
 
+    public Optional<EngineVersion> getEngineVersion()
+    {
+        return engineVersion;
+    }
+
     /**
      * A short cut for reading cmdout message
      *
@@ -354,6 +410,7 @@ public class TDJob
                 ", resultSize=" + resultSize +
                 ", debug=" + debug +
                 ", numRecords=" + numRecords +
+                ", engineVersion=" + engineVersion +
                 '}';
     }
 }
