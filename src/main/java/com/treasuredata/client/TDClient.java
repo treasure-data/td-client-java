@@ -894,6 +894,7 @@ public class TDClient
     public TDSavedQuery saveQuery(TDSaveQueryRequest request)
     {
         String json = toJson(request);
+        logger.debug("saveQuery request:" + json);
         TDSavedQuery result =
                 doPost(
                         buildUrl("/v3/schedule/create", request.getName()),
@@ -907,6 +908,7 @@ public class TDClient
     public TDSavedQuery updateSavedQuery(String name, TDSavedQueryUpdateRequest request)
     {
         String json = request.toJson();
+        logger.debug("updateSaveQuery request:" + json);
         TDSavedQuery result =
                 doPost(
                         buildUrl("/v3/schedule/update", name),

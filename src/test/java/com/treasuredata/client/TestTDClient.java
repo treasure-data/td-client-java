@@ -417,7 +417,7 @@ public class TestTDClient
     @Test
     public void submitJobWithInvalidEngineVersionPresto() throws Exception
     {
-        //Invalid engine_version should be throw TDClientHttpException
+        //Invalid engine_version must throw TDClientHttpException
         try {
             submitJobWithEngineVersion(TDJob.Type.PRESTO, Optional.of(TDJob.EngineVersion.fromString("AAAAAA")));
         }
@@ -433,7 +433,7 @@ public class TestTDClient
     @Test
     public void submitJobWithValidEngineVersionPresto() throws Exception
     {
-        // Valid engine_version should be acceepted
+        // Valid engine_version must be accepted
         try {
             submitJobWithEngineVersion(TDJob.Type.PRESTO, Optional.of(TDJob.EngineVersion.STABLE));
         }
@@ -445,7 +445,7 @@ public class TestTDClient
     @Test
     public void submitJobWithInvalidEngineVersionHive() throws Exception
     {
-        //Invalid engine_version should be throw TDClientHttpException
+        //Invalid engine_version must throw TDClientHttpException
         try {
             submitJobWithEngineVersion(TDJob.Type.HIVE, Optional.of(TDJob.EngineVersion.fromString("AAAAAA")));
         }
@@ -461,7 +461,7 @@ public class TestTDClient
     @Test
     public void submitJobWithValidEngineVersionHive() throws Exception
     {
-        // Valid engine_version should be acceepted
+        // Valid engine_version must be accepted
         try {
             submitJobWithEngineVersion(TDJob.Type.HIVE, Optional.of(TDJob.EngineVersion.STABLE));
         }
@@ -1471,6 +1471,177 @@ public class TestTDClient
             client.deleteSavedQuery(queryName);
         }
 
+        Optional<TDSavedQuery> q = findSavedQuery(queryName);
+        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+    }
+
+    @Test
+    public void saveQueryWithValidEngineVersion()
+    {
+        // Save query with valid engine_version. Must be successful.
+
+        String queryName = newTemporaryName("td_client_test");
+
+        TDSaveQueryRequest query = TDSavedQuery.newBuilder(
+                queryName,
+                TDJob.Type.PRESTO,
+                SAMPLE_DB,
+                "select 1",
+                "Asia/Tokyo")
+                .setCron("0 * * * *")
+                .setPriority(-1)
+                .setRetryLimit(2)
+                .setEngineVersion(TDJob.EngineVersion.STABLE)
+                .build();
+
+        try {
+            TDSavedQuery result = client.saveQuery(query);
+            assertThat(result.getId(), not(isEmptyOrNullString()));
+            Optional<TDSavedQuery> q = findSavedQuery(queryName);
+            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+        }
+        catch (TDClientException e) {
+            logger.error("failed", e);
+            throw e;
+        }
+        finally {
+            client.deleteSavedQuery(queryName);
+        }
+        Optional<TDSavedQuery> q = findSavedQuery(queryName);
+        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+    }
+
+    @Test
+    public void saveQueryWithInvalidEngineVersion()
+    {
+        // Save query with invalid engine_version. Must be error.
+
+        String queryName = newTemporaryName("td_client_test");
+
+        TDSaveQueryRequest query = TDSavedQuery.newBuilder(
+                queryName,
+                TDJob.Type.PRESTO,
+                SAMPLE_DB,
+                "select 1",
+                "Asia/Tokyo")
+                .setCron("0 * * * *")
+                .setPriority(-1)
+                .setRetryLimit(2)
+                .setEngineVersion(TDJob.EngineVersion.fromString("DUMMY_VERSION"))
+                .build();
+
+        try {
+            TDSavedQuery result = client.saveQuery(query);
+            fail("Invalid engine_version must not be accepted");
+        }
+        catch (TDClientHttpException te) {
+            logger.debug(te.toString());
+            assertEquals(te.getStatusCode(), 422);
+            assertTrue(te.getMessage().matches(".*Engine version is not included.*"));
+        }
+        catch (TDClientException e) {
+            logger.error("failed", e);
+            throw e;
+        }
+        finally {
+            Optional<TDSavedQuery> q = findSavedQuery(queryName);
+            if (q.isPresent()) {
+                client.deleteSavedQuery(queryName);
+            }
+        }
+        Optional<TDSavedQuery> q = findSavedQuery(queryName);
+        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+    }
+
+    @Test
+    public void updateQueryWithValidEngineVersion()
+    {
+        // Test engine_version update. Updated engine_version is valid one, so must be successful.
+
+        String queryName = newTemporaryName("td_client_test");
+
+        TDSaveQueryRequest query = TDSavedQuery.newBuilder(
+                queryName,
+                TDJob.Type.HIVE,
+                SAMPLE_DB,
+                "select 1",
+                "Asia/Tokyo")
+                .setCron("0 * * * *")
+                .setPriority(-1)
+                .setRetryLimit(2)
+                .setEngineVersion(TDJob.EngineVersion.EXPERIMENTAL)
+                .build();
+
+        try {
+            TDSavedQuery result = client.saveQuery(query);
+            assertThat(result.getId(), not(isEmptyOrNullString()));
+            Optional<TDSavedQuery> q = findSavedQuery(queryName);
+            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            // Update
+            TDSavedQueryUpdateRequest query2 =
+                    TDSavedQuery.newUpdateRequestBuilder()
+                            .setQuery("select 2")
+                            .setEngineVersion(TDJob.EngineVersion.STABLE)
+                            .build();
+            TDSavedQuery updated = client.updateSavedQuery(queryName, query2);
+        }
+        catch (TDClientException e) {
+            logger.error("failed", e);
+            throw e;
+        }
+        finally {
+            client.deleteSavedQuery(queryName);
+        }
+        Optional<TDSavedQuery> q = findSavedQuery(queryName);
+        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+    }
+
+    @Test
+    public void updateQueryWithInvalidEngineVersion()
+    {
+        // Test engine_version update. Updated engine_version is invalid one, so must be error.
+
+        String queryName = newTemporaryName("td_client_test");
+
+        TDSaveQueryRequest query = TDSavedQuery.newBuilder(
+                queryName,
+                TDJob.Type.HIVE,
+                SAMPLE_DB,
+                "select 1",
+                "Asia/Tokyo")
+                .setCron("0 * * * *")
+                .setPriority(-1)
+                .setRetryLimit(2)
+                .setEngineVersion(TDJob.EngineVersion.EXPERIMENTAL)
+                .build();
+
+        try {
+            TDSavedQuery result = client.saveQuery(query);
+            assertThat(result.getId(), not(isEmptyOrNullString()));
+            Optional<TDSavedQuery> q = findSavedQuery(queryName);
+            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            // Update
+            TDSavedQueryUpdateRequest query2 =
+                    TDSavedQuery.newUpdateRequestBuilder()
+                            .setQuery("select 2")
+                            .setEngineVersion(TDJob.EngineVersion.fromString("DUMMY_VERSION"))
+                            .build();
+            TDSavedQuery updated = client.updateSavedQuery(queryName, query2);
+            fail("Invalid engine_version must not be accepted");
+            logger.error(updated.toString());
+        }
+        catch (TDClientHttpException te) {
+            logger.debug(te.toString());
+            assertEquals(te.getStatusCode(), 422);
+            assertTrue(te.getMessage().matches(".*Engine version is not included.*"));
+        }
+        catch (TDClientException e) {
+            logger.error("failed", e);
+            throw e;
+        }
+        finally {
+            client.deleteSavedQuery(queryName);
+        }
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
         assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
     }

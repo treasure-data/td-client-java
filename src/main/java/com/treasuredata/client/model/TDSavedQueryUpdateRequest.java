@@ -176,7 +176,7 @@ public class TDSavedQueryUpdateRequest
         return result;
     }
 
-    @JsonProperty
+    @JsonProperty("engine_version")
     public Optional<TDJob.EngineVersion> getEngineVersion()
     {
         return engineVersion;
