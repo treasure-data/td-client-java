@@ -611,6 +611,9 @@ public class TDClient
         if (jobRequest.getResultConnectionSettings().isPresent()) {
             queryParam.put("result_connection_settings", jobRequest.getResultConnectionSettings().get());
         }
+        if (jobRequest.getEngineVersion().isPresent()) {
+            queryParam.put("engine_version", jobRequest.getEngineVersion().get());
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("submit job: " + jobRequest);

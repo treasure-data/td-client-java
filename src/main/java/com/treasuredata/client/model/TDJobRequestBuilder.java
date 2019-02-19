@@ -36,6 +36,7 @@ public class TDJobRequestBuilder
     private Optional<String> domainKey = Optional.absent();
     private Optional<Long> resultConnectionId = Optional.absent();
     private Optional<String> resultConnectionSettings = Optional.absent();
+    private Optional<String> engineVersion = Optional.absent();
 
     public TDJobRequestBuilder setResultOutput(String result)
     {
@@ -215,5 +216,16 @@ public class TDJobRequestBuilder
     public TDJobRequest createTDJobRequest()
     {
         return TDJobRequest.of(this);
+    }
+
+    public Optional<String> getEngineVersion()
+    {
+        return engineVersion;
+    }
+
+    public TDJobRequestBuilder setEngineVersion(String executorVersion)
+    {
+        this.engineVersion = Optional.fromNullable(executorVersion);
+        return this;
     }
 }
