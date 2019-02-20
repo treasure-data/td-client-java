@@ -46,6 +46,7 @@ import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDExportResultJobRequest;
 import com.treasuredata.client.model.TDImportResult;
 import com.treasuredata.client.model.TDJob;
+import com.treasuredata.client.model.TDJob.EngineVersion;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobRequestBuilder;
@@ -435,7 +436,7 @@ public class TestTDClient
     {
         // Valid engine_version must be accepted
         try {
-            submitJobWithEngineVersion(TDJob.Type.PRESTO, Optional.of(TDJob.EngineVersion.STABLE));
+            submitJobWithEngineVersion(TDJob.Type.PRESTO, Optional.of(EngineVersion.fromString("stable")));
         }
         catch (Exception e) {
             fail("Unexpected exception:" + e.toString());
@@ -463,7 +464,7 @@ public class TestTDClient
     {
         // Valid engine_version must be accepted
         try {
-            submitJobWithEngineVersion(TDJob.Type.HIVE, Optional.of(TDJob.EngineVersion.STABLE));
+            submitJobWithEngineVersion(TDJob.Type.HIVE, Optional.of(EngineVersion.fromString("stable")));
         }
         catch (Exception e) {
             fail("Unexpected exception:" + e.toString());
@@ -1491,7 +1492,7 @@ public class TestTDClient
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
-                .setEngineVersion(TDJob.EngineVersion.STABLE)
+                .setEngineVersion(EngineVersion.fromString("stable"))
                 .build();
 
         try {
@@ -1569,7 +1570,7 @@ public class TestTDClient
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
-                .setEngineVersion(TDJob.EngineVersion.EXPERIMENTAL)
+                .setEngineVersion(EngineVersion.fromString("experimental"))
                 .build();
 
         try {
@@ -1581,7 +1582,7 @@ public class TestTDClient
             TDSavedQueryUpdateRequest query2 =
                     TDSavedQuery.newUpdateRequestBuilder()
                             .setQuery("select 2")
-                            .setEngineVersion(TDJob.EngineVersion.STABLE)
+                            .setEngineVersion(EngineVersion.fromString("stable"))
                             .build();
             TDSavedQuery updated = client.updateSavedQuery(queryName, query2);
         }
@@ -1612,7 +1613,7 @@ public class TestTDClient
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
-                .setEngineVersion(TDJob.EngineVersion.EXPERIMENTAL)
+                .setEngineVersion(EngineVersion.fromString("experimental"))
                 .build();
 
         try {

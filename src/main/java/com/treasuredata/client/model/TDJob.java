@@ -121,11 +121,6 @@ public class TDJob
             this.engineVersion = engineVersion;
         }
 
-        public static final EngineVersion EXPERIMENTAL = new EngineVersion("experimental");
-        public static final EngineVersion STABLE = new EngineVersion("stable");
-        public static final EngineVersion LEGACY = new EngineVersion("legacy");
-        public static final EngineVersion CURRENT = new EngineVersion("current");
-
         @JsonValue
         public String getEngineVersion()
         {
@@ -140,18 +135,7 @@ public class TDJob
 
         public static EngineVersion fromString(String engineVersion)
         {
-            switch (engineVersion) {
-                case "stable":
-                    return STABLE;
-                case "experimental":
-                    return EXPERIMENTAL;
-                case "legacy":
-                    return LEGACY;
-                case "current":
-                    return CURRENT;
-                default:
-                    return new EngineVersion(engineVersion);
-            }
+            return new EngineVersion(engineVersion);
         }
     }
 
