@@ -612,6 +612,10 @@ public class TDClient
             queryParam.put("result_connection_settings", jobRequest.getResultConnectionSettings().get());
         }
 
+        if (jobRequest.getEngineVersion().isPresent()) {
+            queryParam.put("engine_version", jobRequest.getEngineVersion().get().getEngineVersion());
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("submit job: " + jobRequest);
         }
@@ -890,6 +894,7 @@ public class TDClient
     public TDSavedQuery saveQuery(TDSaveQueryRequest request)
     {
         String json = toJson(request);
+        logger.debug("saveQuery request:" + json);
         TDSavedQuery result =
                 doPost(
                         buildUrl("/v3/schedule/create", request.getName()),
@@ -903,6 +908,7 @@ public class TDClient
     public TDSavedQuery updateSavedQuery(String name, TDSavedQueryUpdateRequest request)
     {
         String json = request.toJson();
+        logger.debug("updateSaveQuery request:" + json);
         TDSavedQuery result =
                 doPost(
                         buildUrl("/v3/schedule/update", name),

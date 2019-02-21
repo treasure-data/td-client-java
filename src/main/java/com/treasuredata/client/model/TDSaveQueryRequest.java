@@ -18,6 +18,7 @@
  */
 package com.treasuredata.client.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -35,6 +36,7 @@ public class TDSaveQueryRequest
     private final int priority;
     private final int retryLimit;
     private final String result;
+    private final TDJob.EngineVersion engineVersion;
 
     public TDSaveQueryRequest(
             @JsonProperty("name") String name,
@@ -46,7 +48,8 @@ public class TDSaveQueryRequest
             @JsonProperty("database") String database,
             @JsonProperty("priority") int priority,
             @JsonProperty("retry_limit") int retryLimit,
-            @JsonProperty("result") String result)
+            @JsonProperty("result") String result,
+            @JsonProperty("engine_version") @JsonInclude(JsonInclude.Include.NON_NULL) TDJob.EngineVersion engineVersion)
     {
         this.name = name;
         this.cron = cron;
@@ -58,6 +61,7 @@ public class TDSaveQueryRequest
         this.priority = priority;
         this.retryLimit = retryLimit;
         this.result = result;
+        this.engineVersion = engineVersion;
     }
 
     public String getName()
@@ -109,5 +113,12 @@ public class TDSaveQueryRequest
     public String getResult()
     {
         return result;
+    }
+
+    @JsonProperty("engine_version")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public TDJob.EngineVersion getEngineVersion()
+    {
+        return engineVersion;
     }
 }

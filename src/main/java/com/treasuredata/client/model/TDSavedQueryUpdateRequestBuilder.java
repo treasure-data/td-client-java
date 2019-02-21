@@ -35,6 +35,7 @@ public class TDSavedQueryUpdateRequestBuilder
     private Optional<Integer> priority = Optional.absent();
     private Optional<Integer> retryLimit = Optional.absent();
     private Optional<String> result = Optional.absent();
+    private Optional<TDJob.EngineVersion> engineVersion = Optional.absent();
 
     TDSavedQueryUpdateRequestBuilder()
     {
@@ -52,7 +53,8 @@ public class TDSavedQueryUpdateRequestBuilder
                 database,
                 priority,
                 retryLimit,
-                result
+                result,
+                engineVersion
         );
     }
 
@@ -113,6 +115,12 @@ public class TDSavedQueryUpdateRequestBuilder
     public TDSavedQueryUpdateRequestBuilder setResult(String result)
     {
         this.result = Optional.of(result);
+        return this;
+    }
+
+    public TDSavedQueryUpdateRequestBuilder setEngineVersion(TDJob.EngineVersion engineVersion)
+    {
+        this.engineVersion = Optional.of(engineVersion);
         return this;
     }
 }

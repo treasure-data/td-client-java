@@ -42,6 +42,7 @@ public class TDSavedQueryUpdateRequest
     private final Optional<Integer> priority;
     private final Optional<Integer> retryLimit;
     private final Optional<String> result;
+    private final Optional<TDJob.EngineVersion> engineVersion;
 
     @VisibleForTesting
     @JsonCreator
@@ -55,7 +56,8 @@ public class TDSavedQueryUpdateRequest
             @JsonProperty("database") Optional<String> database,
             @JsonProperty("priority") Optional<Integer> priority,
             @JsonProperty("retry_limit") Optional<Integer> retryLimit,
-            @JsonProperty("result") Optional<String> result)
+            @JsonProperty("result") Optional<String> result,
+            @JsonProperty("engine_version") Optional<TDJob.EngineVersion> engineVersion)
     {
         this.name = name;
         this.cron = cron;
@@ -67,6 +69,7 @@ public class TDSavedQueryUpdateRequest
         this.priority = priority;
         this.retryLimit = retryLimit;
         this.result = result;
+        this.engineVersion = engineVersion;
     }
 
     @VisibleForTesting
@@ -109,7 +112,8 @@ public class TDSavedQueryUpdateRequest
                 database.or(base.getDatabase()),
                 priority.or(base.getPriority()),
                 retryLimit.or(base.getRetryLimit()),
-                result.or(base.getResult()));
+                result.or(base.getResult()),
+                engineVersion.isPresent() ? engineVersion.get() : base.getEngineVersion());
     }
 
     @JsonProperty
@@ -172,6 +176,12 @@ public class TDSavedQueryUpdateRequest
         return result;
     }
 
+    @JsonProperty("engine_version")
+    public Optional<TDJob.EngineVersion> getEngineVersion()
+    {
+        return engineVersion;
+    }
+
     @Override
     public String toString()
     {
@@ -186,6 +196,7 @@ public class TDSavedQueryUpdateRequest
                 ", priority=" + priority +
                 ", retryLimit=" + retryLimit +
                 ", result=" + result +
+                ", engineVersion=" + engineVersion +
                 '}';
     }
 
@@ -228,6 +239,9 @@ public class TDSavedQueryUpdateRequest
         if (retryLimit != null ? !retryLimit.equals(that.retryLimit) : that.retryLimit != null) {
             return false;
         }
+        if (engineVersion != null ? !engineVersion.equals(that.engineVersion) : that.engineVersion != null) {
+            return false;
+        }
         return result != null ? result.equals(that.result) : that.result == null;
     }
 
@@ -244,6 +258,7 @@ public class TDSavedQueryUpdateRequest
         result1 = 31 * result1 + (priority != null ? priority.hashCode() : 0);
         result1 = 31 * result1 + (retryLimit != null ? retryLimit.hashCode() : 0);
         result1 = 31 * result1 + (result != null ? result.hashCode() : 0);
+        result1 = 31 * result1 + (engineVersion != null ? engineVersion.hashCode() : 0);
         return result1;
     }
 }

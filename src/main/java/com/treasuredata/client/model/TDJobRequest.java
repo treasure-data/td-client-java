@@ -39,6 +39,7 @@ public class TDJobRequest
     private final Optional<String> domainKey;
     private final Optional<Long> resultConnectionId;
     private final Optional<String> resultConnectionSettings;
+    private final Optional<TDJob.EngineVersion> engineVersion;
 
     @Deprecated
     public TDJobRequest(String database, TDJob.Type type, String query, TDJob.Priority priority, Optional<String> resultOutput, Optional<Integer> retryLimit, Optional<String> poolName, Optional<String> table, Optional<ObjectNode> config)
@@ -56,6 +57,7 @@ public class TDJobRequest
         this.domainKey = Optional.absent();
         this.resultConnectionId = Optional.absent();
         this.resultConnectionSettings = Optional.absent();
+        this.engineVersion = Optional.absent();
     }
 
     private TDJobRequest(TDJobRequestBuilder builder)
@@ -73,6 +75,8 @@ public class TDJobRequest
         this.domainKey = builder.getDomainKey();
         this.resultConnectionId = builder.getResultConnectionId();
         this.resultConnectionSettings = builder.getResultConnectionSettings();
+        this.engineVersion = builder.getEngineVersion();
+
     }
 
     public static TDJobRequest newPrestoQuery(String database, String query)
@@ -241,6 +245,11 @@ public class TDJobRequest
         return resultConnectionSettings;
     }
 
+    public Optional<TDJob.EngineVersion> getEngineVersion()
+    {
+        return engineVersion;
+    }
+
     static TDJobRequest of(TDJobRequestBuilder builder)
     {
         return new TDJobRequest(builder);
@@ -263,6 +272,7 @@ public class TDJobRequest
                 ", domainKey=" + domainKey +
                 ", resultConnectionId=" + resultConnectionId +
                 ", resultConnectionSettings=" + resultConnectionSettings +
+                ", engineVersion=" + engineVersion +
                 '}';
     }
 }
