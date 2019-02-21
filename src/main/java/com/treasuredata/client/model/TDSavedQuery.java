@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -88,7 +87,7 @@ public class TDSavedQuery
             @JsonProperty("retry_limit") int retryLimit,
             @JsonProperty("result") String result,
             @JsonProperty("next_time") String nextTime,
-            @JsonProperty("engine_version") @JsonInclude(JsonInclude.Include.NON_NULL) TDJob.EngineVersion engineVersion
+            @JsonProperty("engine_version") TDJob.EngineVersion engineVersion
             )
     {
         this.id = id;
