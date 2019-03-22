@@ -35,6 +35,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.ObjectMappers;
+import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
@@ -112,7 +113,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static com.treasuredata.client.TDClientConfig.ENV_TD_CLIENT_APIKEY;
-
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -1354,6 +1354,34 @@ public class TestTDClient
     {
         TDUser user = client.getUser();
         logger.trace("user: {}", user);
+    }
+
+    @Test
+    public void validateApiKeyMocked()
+            throws Exception
+    {
+        client = mockClient();
+
+        String expectedKeyJson = "{\"user_id\":1,\"account_id\":2,\"key_type\":\"normal\",\"administrator\":true}";
+
+        TDApiKey expectedKey = ObjectMappers.compactMapper().readValue(expectedKeyJson, TDApiKey.class);
+
+        server.enqueue(new MockResponse().setBody(expectedKeyJson));
+
+        TDApiKey key = client.validateApiKey();
+
+        assertThat(key, is(expectedKey));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getPath(), is("/v3/user/apikey/validate"));
+    }
+
+    @Test
+    public void validateApiKey()
+            throws Exception
+    {
+        TDApiKey key = client.validateApiKey();
+        logger.trace("api_key: {}", key);
     }
 
     @Test
