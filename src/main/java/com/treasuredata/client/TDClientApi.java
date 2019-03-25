@@ -21,7 +21,7 @@ package com.treasuredata.client;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
-
+import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
@@ -90,6 +90,12 @@ public interface TDClientApi<ClientImpl>
      * @return A {@link TDUser} instance.
      */
     TDUser getUser();
+
+    /**
+     * Validates and return information about the current API key.
+     * @return A {@link TDApiKey} instance.
+     */
+    TDApiKey validateApiKey();
 
     /**
      * List the users in the current account.

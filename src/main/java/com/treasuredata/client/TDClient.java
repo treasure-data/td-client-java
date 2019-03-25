@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.ObjectMappers;
+import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportParts;
 import com.treasuredata.client.model.TDBulkImportSession;
@@ -310,6 +311,12 @@ public class TDClient
     public TDUser getUser()
     {
         return doGet("/v3/user/show", TDUser.class);
+    }
+
+    @Override
+    public TDApiKey validateApiKey()
+    {
+        return doGet("/v3/user/apikey/validate", TDApiKey.class);
     }
 
     @Override
