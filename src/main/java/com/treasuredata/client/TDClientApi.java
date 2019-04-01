@@ -176,6 +176,14 @@ public interface TDClientApi<ClientImpl>
      */
     void createTable(String databaseName, String tableName);
 
+    /**
+     * EXPERIMENTAL: Create a new table with idempotent retry
+     * @param databaseName
+     * @param tableName
+     * @param idempotentKey
+     */
+    void createTable(String databaseName, String tableName, String idempotentKey);
+
     void createTableIfNotExists(String databaseName, String tableName);
 
     void renameTable(String databaseName, String tableName, String newTableName);

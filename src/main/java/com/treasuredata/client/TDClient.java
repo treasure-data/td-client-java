@@ -290,6 +290,20 @@ public class TDClient
         return httpClient.call(request, apiKeyCache);
     }
 
+    protected String doPost(String path, Map<String, String> queryParam)
+            throws TDClientException
+    {
+        checkNotNull(path, "path is null");
+        checkNotNull(queryParam, "param is null");
+
+        TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
+        for (Map.Entry<String, String> e : queryParam.entrySet()) {
+            request.addQueryParam(e.getKey(), e.getValue());
+        }
+
+        return httpClient.call(request.build(), apiKeyCache);
+    }
+
     protected String doPut(String path, File filePath)
             throws TDClientException
     {
@@ -464,6 +478,15 @@ public class TDClient
             throws TDClientException
     {
         doPost(buildUrl("/v3/table/create", databaseName, validateTableName(tableName), TDTableType.LOG.getTypeName()));
+    }
+
+    @Override
+    public void createTable(String databaseName, String tableName, String idempotentKey)
+            throws TDClientException
+    {
+        // Idempotent key support is EXPERIMENTAL.
+        doPost(buildUrl("/v3/table/create", databaseName, validateTableName(tableName), TDTableType.LOG.getTypeName()),
+                ImmutableMap.of("idempotent_key", idempotentKey));
     }
 
     @Override
