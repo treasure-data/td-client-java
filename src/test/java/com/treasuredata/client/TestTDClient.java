@@ -968,6 +968,40 @@ public class TestTDClient
         }
     }
 
+    @Test(expected = TDClientException.class)
+    public void createTableWithoutIdempotentKey()
+            throws Exception
+    {
+        String t = newTemporaryName("non_idempotent_test");
+        try {
+            // It should throw TDClientException without idempotent key.
+            client.createTable(SAMPLE_DB, t);
+            client.createTable(SAMPLE_DB, t);
+        }
+        finally {
+            client.deleteTable(SAMPLE_DB, t);
+        }
+    }
+
+    @Test
+    public void createTableWithIdempotentKey()
+            throws Exception
+    {
+        String t = newTemporaryName("idempotent_test");
+        try {
+            String idempotentKey = "idempotent_key";
+            client.createTable(SAMPLE_DB, t, idempotentKey);
+            client.createTable(SAMPLE_DB, t, idempotentKey);
+        }
+        catch (TDClientException e) {
+            // Duplicated request must not throw exception with idempotent key.
+            fail();
+        }
+        finally {
+            client.deleteTable(SAMPLE_DB, t);
+        }
+    }
+
     private String queryResult(String database, String sql)
             throws InterruptedException
     {
