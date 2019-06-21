@@ -436,6 +436,7 @@
           <skip>${project.check.skip-findbugs}</skip>
           <jvmArgs>-Xmx${project.build.jvmsize}</jvmArgs>
           <failOnError>${project.check.fail-findbugs}</failOnError>
+	  <excludeFilterFile>findbugs-exclude-filter.xml</excludeFilterFile>
         </configuration>
         <executions>
           <execution>
