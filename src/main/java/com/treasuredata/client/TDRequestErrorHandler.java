@@ -65,33 +65,7 @@ public class TDRequestErrorHandler
      */
     private static TDClientHttpException clientError(TDClientHttpException e, ResponseContext responseContext)
     {
-        boolean showWarning = true;
-        boolean showStackTrace = false;
-        int code = e.getStatusCode();
-        switch (code) {
-            case HttpStatus.NOT_FOUND_404:
-                // Not found (e.g., database, table, table distribution data might be missing)
-                showWarning = false;
-                break;
-            case HttpStatus.CONFLICT_409:
-                // Suppress stack trace because 409 frequently happens when checking the presence of databases and tables.
-                showStackTrace = false;
-                break;
-            default:
-                if (!(HttpStatus.isClientError(code) || HttpStatus.isServerError(code))) {
-                    // Show stack trace for non 4xx, 5xx errors
-                    showStackTrace = true;
-                }
-                break;
-        }
-        if (showWarning) {
-            if (showStackTrace) {
-                logger.warn(e.getCause() == null ? e.getMessage() : e.getCause().getClass().toString(), e);
-            }
-            else {
-                logger.warn(e.getCause() == null ? e.getMessage() : e.getCause().getClass().toString());
-            }
-        }
+        // Just throw exception because show/supress warning message should be handled by caller method
         return e;
     }
 
