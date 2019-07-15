@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- skip FindBugs for generated classes -->
+    <Match>
+        <Class name="~.*model\.Immutable.*" />
+    </Match>
+
+    <!-- A workaround for a bug of findbugs when using Guava Optional.fromNullable(...) -->
+    <Match>
+      <Class name="com.treasuredata.client.AbstractTDClientBuilder"/>
+      <Bugs pattern="NP_NULL_PARAM_DEREF"/>
+    </Match>
+</FindBugsFilter>

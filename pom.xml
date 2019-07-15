@@ -127,7 +127,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>21.0</version>
+      <version>24.1.1-jre</version>
     </dependency>
 
     <dependency>
@@ -436,6 +436,7 @@
           <skip>${project.check.skip-findbugs}</skip>
           <jvmArgs>-Xmx${project.build.jvmsize}</jvmArgs>
           <failOnError>${project.check.fail-findbugs}</failOnError>
+	  <excludeFilterFile>findbugs-exclude-filter.xml</excludeFilterFile>
         </configuration>
         <executions>
           <execution>
