@@ -18,10 +18,10 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import java.util.Optional;
 
 /**
  * Proxy configuration to access TD API
@@ -102,8 +102,8 @@ public class ProxyConfig
         private String host = "localhost";
         private int port = 8080;
         private boolean useSSL = false;
-        private Optional<String> user = Optional.absent();
-        private Optional<String> password = Optional.absent();
+        private Optional<String> user = Optional.empty();
+        private Optional<String> password = Optional.empty();
 
         public ProxyConfigBuilder()
         {

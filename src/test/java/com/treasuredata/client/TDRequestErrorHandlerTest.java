@@ -1,6 +1,5 @@
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -18,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;

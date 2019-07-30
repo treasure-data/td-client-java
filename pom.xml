@@ -160,6 +160,14 @@
       <version>2.9.9</version>
     </dependency>
 
+    <!-- Required for generated code to properly use java.util.Optional -->
+    <!-- https://www.baeldung.com/jackson-optional -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
+      <version>2.9.9</version>
+    </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>

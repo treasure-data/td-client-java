@@ -18,7 +18,7 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -84,7 +84,7 @@ public class TDClientException
 
     public TDClientException(ErrorType errorType, String message)
     {
-        this(errorType, message, Optional.<Exception>absent());
+        this(errorType, message, Optional.<Exception>empty());
     }
 
     public ErrorType getErrorType()

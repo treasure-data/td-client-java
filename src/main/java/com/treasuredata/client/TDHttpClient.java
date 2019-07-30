@@ -26,11 +26,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -85,6 +86,7 @@ public class TDHttpClient
     static ObjectMapper defaultObjectMapper = new ObjectMapper()
             .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
             .registerModule(new GuavaModule())   // for mapping to Guava Optional class
+            .registerModule(new Jdk8Module())    // for handling java.util.Optional correctly
             .configure(DeserializationFeature.UNWRAP_ROOT_VALUE, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -203,14 +205,14 @@ public class TDHttpClient
     public Request prepareRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
-        String portStr = config.port.transform(new Function<Integer, String>()
+        String portStr = config.port.map(new Function<Integer, String>()
         {
             @Override
             public String apply(Integer input)
             {
                 return ":" + input.toString();
             }
-        }).or("");
+        }).orElse("");
         String requestUri = apiRequest.getPath().startsWith("http")
                 ? apiRequest.getPath()
                 : String.format("%s://%s%s%s", config.useSSL ? "https" : "http", config.endpoint, portStr, apiRequest.getPath());
@@ -248,7 +250,7 @@ public class TDHttpClient
         }
 
         // Set API Key after setting the other headers
-        Optional<String> apiKey = apiKeyCache.or(config.apiKey);
+        Optional<String> apiKey = apiKeyCache.isPresent() ? apiKeyCache : config.apiKey;
         if (apiKey.isPresent()) {
             String auth;
             if (isNakedTD1Key(apiKey.get())) {
@@ -334,7 +336,7 @@ public class TDHttpClient
 
         public RequestContext(TDClientConfig config, TDApiRequest apiRequest, Optional<String> apiKeyCache)
         {
-            this(new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier), apiRequest, apiKeyCache, Optional.absent());
+            this(new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier), apiRequest, apiKeyCache, Optional.empty());
         }
 
         public RequestContext(ExponentialBackOff backoff, TDApiRequest apiRequest, Optional<String> apiKeyCache, Optional<TDClientException> rootCause)

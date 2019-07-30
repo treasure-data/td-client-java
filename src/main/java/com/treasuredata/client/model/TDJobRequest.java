@@ -19,7 +19,8 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 /**
  *
@@ -53,11 +54,11 @@ public class TDJobRequest
         this.poolName = poolName;
         this.table = table;
         this.config = config;
-        this.scheduledTime = Optional.absent();
-        this.domainKey = Optional.absent();
-        this.resultConnectionId = Optional.absent();
-        this.resultConnectionSettings = Optional.absent();
-        this.engineVersion = Optional.absent();
+        this.scheduledTime = Optional.empty();
+        this.domainKey = Optional.empty();
+        this.resultConnectionId = Optional.empty();
+        this.resultConnectionSettings = Optional.empty();
+        this.engineVersion = Optional.empty();
     }
 
     private TDJobRequest(TDJobRequestBuilder builder)

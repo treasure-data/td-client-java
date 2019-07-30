@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -40,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -77,7 +77,7 @@ public class TestTDHttpClient
     public void addHttpRequestHeader()
     {
         TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").addHeader("TEST_HEADER", "hello td-client-java").build();
-        String resp = client.submitRequest(req, Optional.<String>absent(), stringContentHandler);
+        String resp = client.submitRequest(req, Optional.<String>empty(), stringContentHandler);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class TestTDHttpClient
     {
         try {
             TDApiRequest req = TDApiRequest.Builder.DELETE("/v3/dummy_endpoint").build();
-            String resp = client.submitRequest(req, Optional.<String>absent(), stringContentHandler);
+            String resp = client.submitRequest(req, Optional.<String>empty(), stringContentHandler);
             fail();
         }
         catch (TDClientHttpException e) {
@@ -111,7 +111,7 @@ public class TestTDHttpClient
         final byte[] body = "foobar".getBytes("UTF-8");
         final long retryAfterSeconds = 5;
 
-        byte[] result = client.submitRequest(req, Optional.<String>absent(), new TDHttpRequestHandler<byte[]>()
+        byte[] result = client.submitRequest(req, Optional.<String>empty(), new TDHttpRequestHandler<byte[]>()
         {
             @Override
             public Response send(OkHttpClient httpClient, Request request)
@@ -169,7 +169,7 @@ public class TestTDHttpClient
                 .build()
                 .httpClient;
 
-        int requests = failWith429(Optional.<String>absent(), Optional.<Matcher<Date>>absent());
+        int requests = failWith429(Optional.<String>empty(), Optional.<Matcher<Date>>empty());
 
         assertThat(requests, is(4));
     }
@@ -184,7 +184,7 @@ public class TestTDHttpClient
                 .build()
                 .httpClient;
 
-        int requests = failWith429(Optional.of("foobar"), Optional.<Matcher<Date>>absent());
+        int requests = failWith429(Optional.of("foobar"), Optional.<Matcher<Date>>empty());
 
         assertThat(requests, is(4));
     }
@@ -267,7 +267,7 @@ public class TestTDHttpClient
         final byte[] body = new byte[3 * 1024 * 1024];
         Arrays.fill(body, (byte) 100);
 
-        byte[] res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultHandler(body));
+        byte[] res = client.submitRequest(req, Optional.<String>empty(), new TestDefaultHandler(body));
         assertThat(res, is(body));
     }
 
@@ -311,7 +311,7 @@ public class TestTDHttpClient
         final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
 
         try {
-            client.submitRequest(req, Optional.<String>absent(), new TDHttpRequestHandler<byte[]>()
+            client.submitRequest(req, Optional.<String>empty(), new TDHttpRequestHandler<byte[]>()
             {
                 @Override
                 public Response send(OkHttpClient httpClient, Request request)
@@ -347,7 +347,7 @@ public class TestTDHttpClient
             }
             TDClientHttpTooManyRequestsException tooManyRequestsException = (TDClientHttpTooManyRequestsException) e;
             if (retryAfterMatcher.isPresent()) {
-                assertThat(tooManyRequestsException.getRetryAfter().orNull(), retryAfterMatcher.get());
+                assertThat(tooManyRequestsException.getRetryAfter().orElse(null), retryAfterMatcher.get());
             }
         }
 

@@ -20,21 +20,21 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.treasuredata.client.model.impl.TDColumnTypeDeserializer;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 @JsonDeserialize(using = TDColumnTypeDeserializer.class)
 public class TDColumnType implements Serializable
 {
-    public static final TDColumnType INT = new TDColumnType(TDTypeName.INT, Optional.<List<TDColumnType>>absent());
-    public static final TDColumnType LONG = new TDColumnType(TDTypeName.LONG, Optional.<List<TDColumnType>>absent());
-    public static final TDColumnType FLOAT = new TDColumnType(TDTypeName.FLOAT, Optional.<List<TDColumnType>>absent());
-    public static final TDColumnType DOUBLE = new TDColumnType(TDTypeName.DOUBLE, Optional.<List<TDColumnType>>absent());
-    public static final TDColumnType STRING = new TDColumnType(TDTypeName.STRING, Optional.<List<TDColumnType>>absent());
+    public static final TDColumnType INT = new TDColumnType(TDTypeName.INT, Optional.<List<TDColumnType>>empty());
+    public static final TDColumnType LONG = new TDColumnType(TDTypeName.LONG, Optional.<List<TDColumnType>>empty());
+    public static final TDColumnType FLOAT = new TDColumnType(TDTypeName.FLOAT, Optional.<List<TDColumnType>>empty());
+    public static final TDColumnType DOUBLE = new TDColumnType(TDTypeName.DOUBLE, Optional.<List<TDColumnType>>empty());
+    public static final TDColumnType STRING = new TDColumnType(TDTypeName.STRING, Optional.<List<TDColumnType>>empty());
 
     public static final List<TDColumnType> primitiveTypes = ImmutableList.of(INT, LONG, FLOAT, DOUBLE, STRING);
 
@@ -49,12 +49,13 @@ public class TDColumnType implements Serializable
     }
 
     private final TDTypeName typeName;
-    private final Optional<List<TDColumnType>> elementTypes;
+    //private final Optional<List<TDColumnType>> elementTypes;
+    private final List<TDColumnType> elementTypes;
 
     private TDColumnType(TDTypeName typeName, Optional<List<TDColumnType>> elementTypes)
     {
         this.typeName = typeName;
-        this.elementTypes = elementTypes;
+        this.elementTypes = elementTypes.isPresent() ? elementTypes.get() : null;
     }
 
     public TDTypeName getTypeName()
@@ -64,7 +65,7 @@ public class TDColumnType implements Serializable
 
     public boolean isPrimitive()
     {
-        return !elementTypes.isPresent();
+        return elementTypes == null;
     }
 
     public boolean isArrayType()
@@ -82,7 +83,7 @@ public class TDColumnType implements Serializable
         if (!isArrayType()) {
             throw new UnsupportedOperationException("getArrayElementType is not supported for " + this);
         }
-        return elementTypes.get().get(0);
+        return elementTypes.get(0);
     }
 
     public TDColumnType getMapKeyType()
@@ -90,7 +91,7 @@ public class TDColumnType implements Serializable
         if (!isMapType()) {
             throw new UnsupportedOperationException("getmapKeyType is not supported for " + this);
         }
-        return elementTypes.get().get(0);
+        return elementTypes.get(0);
     }
 
     public TDColumnType getMapValueType()
@@ -98,7 +99,7 @@ public class TDColumnType implements Serializable
         if (!isMapType()) {
             throw new UnsupportedOperationException("getMapValueType is not supported for " + this);
         }
-        return elementTypes.get().get(1);
+        return elementTypes.get(1);
     }
 
     @JsonValue

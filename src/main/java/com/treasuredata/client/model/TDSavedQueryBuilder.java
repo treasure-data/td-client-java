@@ -18,22 +18,23 @@
  */
 package com.treasuredata.client.model;
 
-import com.google.common.base.Optional;
 import com.treasuredata.client.TDClientException;
+
+import java.util.Optional;
 
 public class TDSavedQueryBuilder
 {
-    private Optional<String> name = Optional.absent();
-    private Optional<String> cron = Optional.absent();
-    private Optional<TDJob.Type> type = Optional.absent();
-    private Optional<String> query = Optional.absent();
-    private Optional<String> timezone = Optional.absent();
-    private Optional<Long> delay = Optional.absent();
-    private Optional<String> database = Optional.absent();
-    private Optional<Integer> priority = Optional.absent();
-    private Optional<Integer> retryLimit = Optional.absent();
-    private Optional<String> result = Optional.absent();
-    private Optional<TDJob.EngineVersion> engineVersion = Optional.absent();
+    private Optional<String> name = Optional.empty();
+    private Optional<String> cron = Optional.empty();
+    private Optional<TDJob.Type> type = Optional.empty();
+    private Optional<String> query = Optional.empty();
+    private Optional<String> timezone = Optional.empty();
+    private Optional<Long> delay = Optional.empty();
+    private Optional<String> database = Optional.empty();
+    private Optional<Integer> priority = Optional.empty();
+    private Optional<Integer> retryLimit = Optional.empty();
+    private Optional<String> result = Optional.empty();
+    private Optional<TDJob.EngineVersion> engineVersion = Optional.empty();
 
     public TDSavedQueryBuilder setName(String name)
     {
@@ -97,7 +98,7 @@ public class TDSavedQueryBuilder
 
     public TDSavedQueryBuilder setEngineVersion(TDJob.EngineVersion engineVersion)
     {
-        this.engineVersion = Optional.fromNullable(engineVersion);
+        this.engineVersion = Optional.ofNullable(engineVersion);
         return this;
     }
 
@@ -118,16 +119,16 @@ public class TDSavedQueryBuilder
 
         return new TDSaveQueryRequest(
                 name.get(),
-                cron.or(""),
+                cron.orElse(""),
                 type.get(),
                 query.get(),
                 timezone.get(),
-                delay.or(0L),
+                delay.orElse(0L),
                 database.get(),
-                priority.or(TDJob.Priority.NORMAL.toInt()),
-                retryLimit.or(0),
-                result.or(""),
-                engineVersion.orNull()
+                priority.orElse(TDJob.Priority.NORMAL.toInt()),
+                retryLimit.orElse(0),
+                result.orElse(""),
+                engineVersion.orElse(null)
         );
     }
 

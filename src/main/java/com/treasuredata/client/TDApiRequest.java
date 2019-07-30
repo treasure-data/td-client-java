@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -32,6 +31,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -142,12 +142,12 @@ public class TDApiRequest
         private String path;
         private Map<String, String> queryParams;
         private ImmutableMultimap.Builder<String, String> headerParams;
-        private Optional<String> postJson = Optional.absent();
-        private Optional<File> file = Optional.absent();
-        private Optional<byte[]> content = Optional.absent();
+        private Optional<String> postJson = Optional.empty();
+        private Optional<File> file = Optional.empty();
+        private Optional<byte[]> content = Optional.empty();
         private int contentOffset;
         private int contentLength;
-        private Optional<Boolean> followRedirects = Optional.absent();
+        private Optional<Boolean> followRedirects = Optional.empty();
 
         Builder(TDHttpMethod method, String path)
         {

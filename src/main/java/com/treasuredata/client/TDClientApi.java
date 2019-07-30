@@ -19,7 +19,6 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
@@ -50,6 +49,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Treasure Data Client API

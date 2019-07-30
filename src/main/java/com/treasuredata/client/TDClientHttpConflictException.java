@@ -18,7 +18,7 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 /**
  * On 409 conflict error (e.g., database already exists)
@@ -42,6 +42,6 @@ public class TDClientHttpConflictException
 
     public Optional<String> getConflictsWith()
     {
-        return Optional.fromNullable(conflictsWith);
+        return Optional.ofNullable(conflictsWith);
     }
 }

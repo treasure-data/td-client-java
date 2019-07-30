@@ -18,11 +18,11 @@
  */
 package com.treasuredata.client.model;
 
-import com.google.common.base.Optional;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 
 import java.util.Date;
+import java.util.Optional;
 
 /**
  *
@@ -68,7 +68,7 @@ public class TDExportJobRequest
         this.bucketName = bucketName;
         this.filePrefix = filePrefix;
         this.poolName = poolName;
-        this.domainKey = Optional.absent();
+        this.domainKey = Optional.empty();
     }
 
     private TDExportJobRequest(String database, String table, Date from, Date to, TDExportFileFormatType fileFormat, String accessKeyId, String secretAccessKey, String bucketName, String filePrefix, Optional<String> poolName, Optional<String> domainKey)

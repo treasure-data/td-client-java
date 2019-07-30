@@ -22,7 +22,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 /**
  *
@@ -153,12 +154,12 @@ public class TDJob
 
         public String getCmdout()
         {
-            return cmdout.or("");
+            return cmdout.orElse("");
         }
 
         public String getStderr()
         {
-            return stderr.or("");
+            return stderr.orElse("");
         }
 
         @Override
@@ -346,14 +347,14 @@ public class TDJob
      */
     public String getCmdOut()
     {
-        return debug.transform(new Function<Debug, String>()
+        return debug.map(new Function<Debug, String>()
         {
             @Override
             public String apply(Debug input)
             {
                 return input.getCmdout();
             }
-        }).or("");
+        }).orElse("");
     }
 
     /**
@@ -363,14 +364,14 @@ public class TDJob
      */
     public String getStdErr()
     {
-        return debug.transform(new Function<Debug, String>()
+        return debug.map(new Function<Debug, String>()
         {
             @Override
             public String apply(Debug input)
             {
                 return input.getStderr();
             }
-        }).or("");
+        }).orElse("");
     }
 
     @Override
