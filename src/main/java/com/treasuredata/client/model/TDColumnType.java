@@ -49,7 +49,6 @@ public class TDColumnType implements Serializable
     }
 
     private final TDTypeName typeName;
-    //private final Optional<List<TDColumnType>> elementTypes;
     private final List<TDColumnType> elementTypes;
 
     private TDColumnType(TDTypeName typeName, Optional<List<TDColumnType>> elementTypes)
