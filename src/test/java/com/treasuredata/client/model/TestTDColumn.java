@@ -22,12 +22,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.treasuredata.client.model.TDColumnType.FLOAT;
@@ -220,26 +224,87 @@ public class TestTDColumn
         TDColumnType.parseColumnType("xint");
     }
 
-    private static void checkSerialization(Object o)
+    private static <T extends Serializable> byte[] pickle(T obj)
             throws IOException
     {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        ObjectOutputStream os = new ObjectOutputStream(b);
-        os.writeObject(o);
-        os.close();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(obj);
+        oos.close();
+        return baos.toByteArray();
+    }
+
+    private static <T extends Serializable> T unpickle(byte[] b, Class<T> cl)
+            throws IOException, ClassNotFoundException
+    {
+        ByteArrayInputStream bais = new ByteArrayInputStream(b);
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        Object o = ois.readObject();
+        return cl.cast(o);
     }
 
     @Test
     public void serializableTest()
             throws Exception
     {
-        checkSerialization(new TDColumn("int", TDColumnType.INT));
-        checkSerialization(new TDColumn("str", TDColumnType.STRING));
-        checkSerialization(new TDColumn("long", TDColumnType.LONG));
-        checkSerialization(new TDColumn("double", TDColumnType.DOUBLE));
-        checkSerialization(new TDColumn("float", TDColumnType.FLOAT));
-        checkSerialization(newArrayType(TDColumnType.STRING));
-        checkSerialization(newMapType(TDColumnType.INT, TDColumnType.STRING));
+        //
+        // Check primitive TDColumnType types
+        //
+
+        {
+            TDColumn in = new TDColumn("int", TDColumnType.INT);
+            byte[] p = pickle(in);
+            TDColumn out = unpickle(p, TDColumn.class);
+
+            assertTrue(Objects.equals(in, out));
+        }
+        {
+            TDColumn in = new TDColumn("int", TDColumnType.STRING);
+            byte[] p = pickle(in);
+            TDColumn out = unpickle(p, TDColumn.class);
+
+            assertTrue(Objects.equals(in, out));
+        }
+        {
+            TDColumn in = new TDColumn("int", TDColumnType.LONG);
+            byte[] p = pickle(in);
+            TDColumn out = unpickle(p, TDColumn.class);
+
+            assertTrue(Objects.equals(in, out));
+        }
+        {
+            TDColumn in = new TDColumn("int", TDColumnType.DOUBLE);
+            byte[] p = pickle(in);
+            TDColumn out = unpickle(p, TDColumn.class);
+
+            assertTrue(Objects.equals(in, out));
+        }
+        {
+            TDColumn in = new TDColumn("int", TDColumnType.FLOAT);
+            byte[] p = pickle(in);
+            TDColumn out = unpickle(p, TDColumn.class);
+
+            assertTrue(Objects.equals(in, out));
+        }
+
+        //
+        // Check the other TDColumnType types
+        //
+
+        {
+            TDColumn in = new TDColumn("array", newArrayType(TDColumnType.STRING));
+            byte[] p = pickle(in);
+            TDColumn out = unpickle(p, TDColumn.class);
+
+            assertTrue(Objects.equals(in, out));
+        }
+        {
+            TDColumn in = new TDColumn("map", newMapType(TDColumnType.INT, TDColumnType.STRING));
+            byte[] p = pickle(in);
+            TDColumn out = unpickle(p, TDColumn.class);
+
+            assertTrue(Objects.equals(in, out));
+        }
     }
 
     private static void checkJsonSerDe(TDColumn column)
