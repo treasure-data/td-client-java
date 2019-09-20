@@ -37,6 +37,8 @@ import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDBulkLoadRequest;
+import com.treasuredata.client.model.TDBulkLoadResult;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
@@ -386,7 +388,7 @@ public class TestTDClient
         });
         assertEquals(1, array.length());
         assertEquals(1, jobInfo.getNumRecords());
-        assertEquals(8807278, array.getLong(0));
+        assertEquals(8807279, array.getLong(0));
 
         // test msgpack.gz format
         client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>()
@@ -402,7 +404,7 @@ public class TestTDClient
                         ArrayValue array = unpacker.unpackValue().asArrayValue();
                         assertEquals(1, array.size());
                         int numColumns = array.get(0).asIntegerValue().toInt();
-                        assertEquals(8807278, numColumns);
+                        assertEquals(8807279, numColumns);
                         rowCount++;
                     }
                     assertEquals(rowCount, 1);
@@ -511,7 +513,7 @@ public class TestTDClient
 
         assertEquals(1, array.length());
         assertEquals(1, jobInfo.getNumRecords());
-        assertEquals(8807278, array.getLong(0));
+        assertEquals(8807279, array.getLong(0));
     }
 
     @Test
@@ -694,6 +696,27 @@ public class TestTDClient
         String jobId = client.submit(TDJobRequest.newBulkLoad(SAMPLE_DB, "sample_output", config));
         TDJobSummary tdJob = waitJobCompletion(jobId);
         // this job will fail because of lack of parameters for s3 input plugin
+    }
+
+    @Test
+    public void submitBulkLoadJobWithConnection()
+            throws Exception
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("{\"job_id\":\"17\"}"));
+
+        ObjectNode in = JsonNodeFactory.instance.objectNode();
+        in.put("type", "s3");
+
+        TDBulkLoadRequest jobRequest = TDBulkLoadRequest.builder()
+                .setConnectionId("3822")
+                .setConnectionSettings(in.toString())
+                .setTableId("1").build();
+        TDBulkLoadResult jobResult = client.submitBulkLoadJob(jobRequest);
+        assertThat(jobResult.getJobId(), is("17"));
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertThat(recordedRequest.getPath(), is("/v3/connections/3822/tables/1/bulk_loads"));
     }
 
     @Test

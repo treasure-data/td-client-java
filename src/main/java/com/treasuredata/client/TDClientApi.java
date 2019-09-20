@@ -23,6 +23,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDBulkLoadRequest;
+import com.treasuredata.client.model.TDBulkLoadResult;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
@@ -358,6 +360,13 @@ public interface TDClientApi<ClientImpl>
     /*
      * Data Connector Bulk Loading Session APIs
      */
+
+    /**
+     * Start a Data Connector Bulk Load Job.
+     * @param request
+     * @return job id
+     */
+    TDBulkLoadResult submitBulkLoadJob(TDBulkLoadRequest request);
 
     /**
      * Start a Data Connector Bulk Loading Session Job.

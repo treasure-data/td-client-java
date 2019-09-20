@@ -34,6 +34,8 @@ import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDAuthenticationResult;
 import com.treasuredata.client.model.TDBulkImportParts;
 import com.treasuredata.client.model.TDBulkImportSession;
+import com.treasuredata.client.model.TDBulkLoadRequest;
+import com.treasuredata.client.model.TDBulkLoadResult;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
 import com.treasuredata.client.model.TDColumn;
@@ -990,6 +992,16 @@ public class TDClient
                         queryParam,
                         TDJobSubmitResult.class);
         return result.getJobId();
+    }
+
+    @Override
+    public TDBulkLoadResult submitBulkLoadJob(TDBulkLoadRequest request)
+    {
+        Map<String, String> queryParam = new HashMap<>();
+        queryParam.put("in_settings", request.getConnectionSettings());
+
+        return doPost(buildUrl("/v3/connections", request.getConnectionId(), "tables", request.getTableId(), "bulk_loads"),
+                queryParam, TDBulkLoadResult.class);
     }
 
     @Override
