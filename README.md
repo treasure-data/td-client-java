@@ -150,7 +150,7 @@ client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream
 
 }
 finally {
-  // Never forget to close the TDClient. 
+  // Never forget to close the TDClient.
   client.close();
 }
 ```
