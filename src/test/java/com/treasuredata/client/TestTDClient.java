@@ -386,7 +386,7 @@ public class TestTDClient
         });
         assertEquals(1, array.length());
         assertEquals(1, jobInfo.getNumRecords());
-        assertEquals(8807278, array.getLong(0));
+        assertTrue(array.getLong(0) > 0);
 
         // test msgpack.gz format
         client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>()
