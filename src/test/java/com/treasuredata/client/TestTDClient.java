@@ -386,7 +386,7 @@ public class TestTDClient
         });
         assertEquals(1, array.length());
         assertEquals(1, jobInfo.getNumRecords());
-        assertEquals(8807278, array.getLong(0));
+        assertTrue(array.getLong(0) > 0);
 
         // test msgpack.gz format
         client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>()
@@ -401,8 +401,8 @@ public class TestTDClient
                     while (unpacker.hasNext()) {
                         ArrayValue array = unpacker.unpackValue().asArrayValue();
                         assertEquals(1, array.size());
-                        int numColumns = array.get(0).asIntegerValue().toInt();
-                        assertEquals(8807278, numColumns);
+                        int numRows = array.get(0).asIntegerValue().toInt();
+                        assertTrue(numRows > 0);
                         rowCount++;
                     }
                     assertEquals(rowCount, 1);
@@ -511,7 +511,7 @@ public class TestTDClient
 
         assertEquals(1, array.length());
         assertEquals(1, jobInfo.getNumRecords());
-        assertEquals(8807278, array.getLong(0));
+        assertTrue(array.getLong(0) > 0);
     }
 
     @Test
