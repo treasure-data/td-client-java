@@ -511,7 +511,7 @@ public class TestTDClient
 
         assertEquals(1, array.length());
         assertEquals(1, jobInfo.getNumRecords());
-        assertTrue(array.getLong(0) >= 0);
+        assertTrue(array.getLong(0) > 0);
     }
 
     @Test
