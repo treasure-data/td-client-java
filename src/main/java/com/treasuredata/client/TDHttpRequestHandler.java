@@ -29,9 +29,6 @@ public interface TDHttpRequestHandler<Result>
 
     /**
      * Set additional request parameters here.
-     *
-     * @param request
-     * @return
      */
     default Request prepareRequest(Request request)
     {
@@ -41,9 +38,6 @@ public interface TDHttpRequestHandler<Result>
 
     /**
      * If this returns true, onSuccess(resposne) will be called
-     *
-     * @param responseContext
-     * @return
      */
     default boolean isSuccess(ResponseContext responseContext)
     {
@@ -53,10 +47,6 @@ public interface TDHttpRequestHandler<Result>
 
     /**
      * Send the request through the given client.
-     *
-     * @param httpClient
-     * @param request
-     * @return
      * @throws IOException
      */
     default Response send(OkHttpClient httpClient, Request request)
@@ -67,9 +57,6 @@ public interface TDHttpRequestHandler<Result>
 
     /**
      * Handle the response
-     *
-     * @param response
-     * @return
      * @throws Exception
      */
     Result onSuccess(Response response)

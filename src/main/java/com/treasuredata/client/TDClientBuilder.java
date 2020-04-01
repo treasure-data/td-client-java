@@ -30,7 +30,6 @@ public class TDClientBuilder
      * </ol>
      *
      * @param loadTDConf
-     * @return
      */
     public TDClientBuilder(boolean loadTDConf)
     {
