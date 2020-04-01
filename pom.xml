@@ -422,7 +422,7 @@
           <encoding>${project.build.sourceEncoding}</encoding>
           <maxmemory>${project.build.jvmsize}</maxmemory>
           <additionalparam>${javadoc.opts}</additionalparam>
-	      <sourcepath>${project.basedir}/src/main;${project.basedir}/target/generated-sources/annotations</sourcepath>
+          <sourcepath>${project.basedir}/src/main;${project.basedir}/target/generated-sources/annotations</sourcepath>
         </configuration>
         <executions>
           <execution>
