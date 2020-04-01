@@ -24,7 +24,7 @@ For the information of the older versions, see <https://github.com/treasure-data
 ### For Maven Users
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.treasuredata.client/td-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.treasuredata.client/td-client/)
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.treasuredata.client/td-client/badge.svg)](http://www.javadoc.io/doc/com.treasuredata.client/td-client)
+[![javadoc](https://javadoc.io/badge2/com.treasuredata.client/td-client/javadoc.svg)](https://javadoc.io/doc/com.treasuredata.client/td-client)
 
 Use the following dependency settings:
 
