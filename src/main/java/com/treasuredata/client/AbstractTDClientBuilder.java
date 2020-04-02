@@ -141,8 +141,6 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
      * <li>System Properties</li>
      * <li>$HOME/.td/td.conf values</li>
      * </ol>
-     *
-     * @return
      */
     protected AbstractTDClientBuilder(boolean loadTDConf)
     {

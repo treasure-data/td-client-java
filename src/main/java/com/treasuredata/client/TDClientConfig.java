@@ -236,7 +236,6 @@ public class TDClientConfig
      * Read apikey, user (e-mail address) and password from $HOME/.td/td.conf
      *
      * @return
-     * @throws IOException
      */
     public static Properties readTDConf()
     {

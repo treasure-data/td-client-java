@@ -171,7 +171,6 @@ public interface TDClientApi<ClientImpl>
      *
      * @param databaseName
      * @param tableName
-     * @return
      * @throws TDClientException
      */
     void createTable(String databaseName, String tableName);
@@ -232,7 +231,7 @@ public interface TDClientApi<ClientImpl>
     /**
      * Open an input stream to retrieve the job result.
      * The input stream will be closed after this method
-     * <p/>
+     *
      * You will receive an empty stream if the query has not finished yet.
      *
      * @param jobId

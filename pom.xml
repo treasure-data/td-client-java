@@ -5,7 +5,7 @@
   <artifactId>td-client</artifactId>
   <name>Treasure Data Client for Java</name>
   <description>Treasure Data Client for Java.</description>
-  <version>0.9.1-SNAPSHOT</version>
+  <version>0.9.1</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-client-java</url>
 
@@ -178,6 +178,12 @@
       <artifactId>builder</artifactId>
       <version>2.2.10</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>1.2</version>
     </dependency>
 
     <!-- ==================== -->
@@ -410,12 +416,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
+        <version>3.2.0</version>
         <configuration>
           <source>${project.build.targetJdk}</source>
           <encoding>${project.build.sourceEncoding}</encoding>
           <maxmemory>${project.build.jvmsize}</maxmemory>
           <additionalparam>${javadoc.opts}</additionalparam>
+          <sourcepath>${project.basedir}/src/main;${project.basedir}/target/generated-sources/annotations</sourcepath>
         </configuration>
         <executions>
           <execution>

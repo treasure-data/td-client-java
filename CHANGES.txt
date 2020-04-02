@@ -1,3 +1,9 @@
+Release 0.9.1 - 2020-04-01
+ - Upgrade Guava to 24.1.1-jre
+ - Upgrade Jackson to 2.9.10
+ - Upgrade okhttp to 3.12.10
+ - Miscellaneous internal fixes 
+
 Release 0.9.0 - 2019-06-06
  - Upgrade to jackson 2.9.9
 
