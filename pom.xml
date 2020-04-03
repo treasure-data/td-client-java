@@ -61,12 +61,10 @@
     <project.check.skip-all>false</project.check.skip-all>
     <project.check.skip-dependency>${project.check.skip-all}</project.check.skip-dependency>
     <project.check.skip-dependency-version-check>${project.check.skip-all}</project.check.skip-dependency-version-check>
-    <project.check.skip-findbugs>${project.check.skip-all}</project.check.skip-findbugs>
 
     <project.check.fail-all>true</project.check.fail-all>
     <project.check.fail-dependency>false</project.check.fail-dependency>
     <project.check.fail-dependency-version-check>${project.check.fail-all}</project.check.fail-dependency-version-check>
-    <project.check.fail-findbugs>${project.check.fail-all}</project.check.fail-findbugs>
 
     <jetty.version>9.2.22.v20170606</jetty.version>
   </properties>
@@ -430,27 +428,6 @@
             <phase>verify</phase>
             <goals>
               <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>3.0.5</version>
-        <configuration>
-          <skip>${project.check.skip-findbugs}</skip>
-          <jvmArgs>-Xmx${project.build.jvmsize}</jvmArgs>
-          <failOnError>${project.check.fail-findbugs}</failOnError>
-	  <excludeFilterFile>findbugs-exclude-filter.xml</excludeFilterFile>
-        </configuration>
-        <executions>
-          <execution>
-            <id>default</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
             </goals>
           </execution>
         </executions>
