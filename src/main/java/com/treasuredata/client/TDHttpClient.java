@@ -41,7 +41,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.internal.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -309,11 +308,11 @@ public class TDHttpClient
 
     private static RequestBody createRequestBodyWithoutCharset(MediaType contentType, String content)
     {
-        Charset charset = Util.UTF_8;
+        Charset charset = StandardCharsets.UTF_8;
         if (contentType != null) {
             charset = contentType.charset();
             if (charset == null) {
-                charset = Util.UTF_8;
+                charset = StandardCharsets.UTF_8;
             }
         }
         byte[] bytes = content.getBytes(charset);
@@ -543,7 +542,7 @@ public class TDHttpClient
      * @return
      * @throws TDClientException
      */
-    @SuppressWarnings(value = "unchecked cast")
+    @SuppressWarnings(value = "unchecked")
     public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final JavaType resultType)
             throws TDClientException
     {

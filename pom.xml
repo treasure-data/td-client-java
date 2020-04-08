@@ -99,13 +99,13 @@
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp-urlconnection</artifactId>
-      <version>3.12.0</version>
+      <version>3.14.7</version>
     </dependency>
 
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>mockwebserver</artifactId>
-      <version>3.12.0</version>
+      <version>3.14.7</version>
       <scope>test</scope>
     </dependency>
 
@@ -275,7 +275,15 @@
           <relocations>
             <relocation>
               <pattern>com.google</pattern>
-              <shadedPattern>com.treasuredata.client.com.google</shadedPattern>
+              <shadedPattern>com.treasuredata.client.thirdparty.com.google</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>okhttp3</pattern>
+              <shadedPattern>com.treasuredata.client.thirdparty.okhttp3</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>okio</pattern>
+              <shadedPattern>com.treasuredata.client.thirdparty.okio</shadedPattern>
             </relocation>
           </relocations>
         </configuration>
