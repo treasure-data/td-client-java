@@ -114,7 +114,7 @@ public class HttpConnectionImpl {
     public void doGetRequest(Request<?> request, String path, Map<String, String> header,
             Map<String, String> params) throws IOException {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("http://").append(getApiServerPath()).append(path);
+        sbuf.append("https://").append(getApiServerPath()).append(path);
 
         // parameters
         if (params != null && !params.isEmpty()) {
@@ -151,7 +151,7 @@ public class HttpConnectionImpl {
     public void doPostRequest(Request<?> request, String path, Map<String, String> header,
             Map<String, String> params) throws IOException {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("http://").append(getApiServerPath()).append(path);
+        sbuf.append("https://").append(getApiServerPath()).append(path);
 
         // parameters
         if (params != null && !params.isEmpty()) {
@@ -192,7 +192,7 @@ public class HttpConnectionImpl {
     public void doPutRequest(Request<?> request, String path, byte[] bytes)
             throws IOException {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("http://").append(getApiServerPath()).append(path);
+        sbuf.append("https://").append(getApiServerPath()).append(path);
 
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
@@ -217,7 +217,7 @@ public class HttpConnectionImpl {
     public void doPutRequest(Request<?> request, String path,
             InputStream in, int size) throws IOException {
         StringBuilder sbuf = new StringBuilder();
-        sbuf.append("http://").append(getApiServerPath()).append(path);
+        sbuf.append("https://").append(getApiServerPath()).append(path);
 
         URL url = new URL(sbuf.toString());
         conn = (HttpURLConnection) url.openConnection();
