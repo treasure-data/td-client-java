@@ -30,7 +30,7 @@ public abstract class AbstractListModels<T extends AbstractModel>
     }
 
     /**
-     * @see com.treasure_data.data.model.AbstractModel#getName()
+     * see com.treasure_data.data.model.AbstractModel#getName()
      */
     @Override
     public String getName() {

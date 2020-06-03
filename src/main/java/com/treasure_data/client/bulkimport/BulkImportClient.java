@@ -70,7 +70,7 @@ public class BulkImportClient {
     /**
      * List bulk import sessions.
      *
-     * @sess td command: bulk_import:list
+     *  td command: bulk_import:list
      */
     public List<SessionSummary> listSessions() throws ClientException {
         return listSessions(new ListSessionsRequest()).getSessions();
@@ -86,7 +86,7 @@ public class BulkImportClient {
      * @param sess
      * @return
      * @throws ClientException
-     * @see td command: bulk_import:show <name>
+     *  td command: bulk_import:show (name)
      */
     public List<String> listParts(Session sess) throws ClientException {
         return listParts(new ListPartsRequest(sess)).getParts();
@@ -104,7 +104,7 @@ public class BulkImportClient {
      * @param tableName
      * @return
      * @throws ClientException
-     * @see td command: bulk_import:create <name> <db> <tbl>
+     *  td command: bulk_import:create (name) (db) (
      */
     public Session createSession(String sessName, String databaseName, String tableName)
             throws ClientException {
@@ -124,7 +124,7 @@ public class BulkImportClient {
      * @param partID    a part name
      * @param bytes     data
      * @throws ClientException
-     * @see td command: bulk_import:upload_part <name> <id> <path.msgpack.gz>
+     * td command: bulk_import:upload_part (name) (id) (path.msgpack.gz)
      */
     public void uploadPart(Session sess, String partID, byte[] bytes)
             throws ClientException {
@@ -146,7 +146,7 @@ public class BulkImportClient {
      * @param sess
      * @param partID
      * @throws ClientException
-     * @see td command: bulk_import:delete_part <name> <id>
+     *  td command: bulk_import:delete_part (name) (id)
      */
     public void deletePart(Session sess, String partID) throws ClientException {
         deletePart(new DeletePartRequest(sess, partID));
@@ -162,7 +162,7 @@ public class BulkImportClient {
      *
      * @param sess
      * @throws ClientException
-     * @see td command: bulk_import:perform <name>
+     *  td command: bulk_import:perform (name)
      */
     public void performSession(Session sess) throws ClientException {
         performSession(new PerformSessionRequest(sess));
@@ -176,7 +176,7 @@ public class BulkImportClient {
     /**
      * Show records which did not pass validations.
      *
-     * @see td command: bulk_import:error_records <name>
+     *  td command: bulk_import:error_records (name)
      */
     public Unpacker getErrorRecords(Session sess) throws ClientException {
         return getErrorRecords(new GetErrorRecordsRequest(sess)).getErrorRecords();
@@ -192,7 +192,7 @@ public class BulkImportClient {
      *
      * @param sess
      * @throws ClientException
-     * @see td command: bulk_import:commit <name>
+     *  td command: bulk_import:commit (name)
      */
     public void commitSession(Session sess) throws ClientException {
         commitSession(new CommitSessionRequest(sess));
@@ -208,7 +208,7 @@ public class BulkImportClient {
      *
      * @param sessionName
      * @throws ClientException
-     * @see td command: bulk_import:delete <name>
+     *  td command: bulk_import:delete (name)
      */
     public void deleteSession(String sessionName) throws ClientException {
         deleteSession(new Session(sessionName, null, null));
@@ -228,9 +228,8 @@ public class BulkImportClient {
      * uploadings to a bulk import session.
      *
      * @param sess
-     * @return 
      * @throws ClientException
-     * @see td command: bulk_import:freeze <name>
+     *  td command: bulk_import:freeze (name)
      */
     public void freezeSession(Session sess) throws ClientException {
         freezeSession(new FreezeSessionRequest(sess));
@@ -246,7 +245,7 @@ public class BulkImportClient {
      *
      * @param sess
      * @throws ClientException
-     * @see td command: bulk_import:unfreeze <name>
+     *  td command: bulk_import:unfreeze (name)
      */
     public void unfreezeSession(Session sess) throws ClientException {
         unfreezeSession(new UnfreezeSessionRequest(sess));

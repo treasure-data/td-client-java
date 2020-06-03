@@ -63,7 +63,7 @@
     <maven-assembly-plugin.version>2.3</maven-assembly-plugin.version>
     <maven-eclipse-plugin.version>2.5.1</maven-eclipse-plugin.version>
     <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
-    <maven-javadoc-plugin.version>2.9</maven-javadoc-plugin.version>
+    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
     <wagon-webdav-jackrabbit.version>1.0-beta-7</wagon-webdav-jackrabbit.version>
     <maven-scm-plugin.version>1.6</maven-scm-plugin.version>
     <maven-jxr-plugin.version>2.2</maven-jxr-plugin.version>
@@ -199,14 +199,7 @@
           <aggregate>true</aggregate>
           <locale>en_US</locale>
           <encoding>UTF-8</encoding>
-          <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
-          <docletArtifact>
-            <groupId>org.umlgraph</groupId>
-            <artifactId>umlgraph</artifactId>
-            <version>5.6</version>
-          </docletArtifact>
-          <additionalparam>-views -all</additionalparam>
-          <useStandardDocletOptions>true</useStandardDocletOptions>
+          <detectJavaApiLink>false</detectJavaApiLink>
         </configuration>
       </plugin>
       <plugin>
