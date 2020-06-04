@@ -1,3 +1,7 @@
+Release 0.2.14.5 - 2020/06/04
+  - Use jfrog repository
+  - Fix javadoc build errors  
+
 Release 0.2.14.4 - 2020/06/02
   IMPROVEMENTS
     Replace HTTP by HTTPS to request to API endpoint.
