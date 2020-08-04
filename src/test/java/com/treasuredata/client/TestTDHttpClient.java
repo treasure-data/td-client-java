@@ -19,6 +19,7 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMultimap;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -43,11 +44,13 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -78,6 +81,21 @@ public class TestTDHttpClient
     {
         TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").addHeader("TEST_HEADER", "hello td-client-java").build();
         String resp = client.submitRequest(req, Optional.<String>absent(), stringContentHandler);
+    }
+
+    @Test
+    public void addUserAgentHeader()
+    {
+        TDApiRequest apiRequest = TDApiRequest.Builder.GET("/v3/system/server_status").build();
+
+        // Without specifying User-Agent header
+        Request request1 = client.prepareRequest(apiRequest, Optional.<String>absent());
+        assertEquals("td-client-java unknown", request1.header(USER_AGENT));
+
+        // With specifying User-Agent header
+        TDHttpClient newClient = client.withHeaders(ImmutableMultimap.of(USER_AGENT, "td-sample-client 1.0"));
+        Request request2 = newClient.prepareRequest(apiRequest, Optional.<String>absent());
+        assertEquals("td-client-java unknown,td-sample-client 1.0", request2.header(USER_AGENT));
     }
 
     @Test

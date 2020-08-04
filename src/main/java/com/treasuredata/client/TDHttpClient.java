@@ -53,6 +53,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -230,17 +231,23 @@ public class TDHttpClient
             logger.debug("Sending API request to {}", requestUri);
         }
         String dateHeader = RFC2822_FORMAT.get().format(new Date());
+        String userAgent = getClientName();
+        for (Iterator<String> i = headers.get(USER_AGENT).iterator(); i.hasNext(); ) {
+            userAgent = userAgent + "," + i.next();
+        }
         Request.Builder request =
                 new Request.Builder()
                         .url(requestUri)
-                        .header(USER_AGENT, getClientName())
+                        .header(USER_AGENT, userAgent)
                         .header(DATE, dateHeader);
 
         request = setTDAuthHeaders(request, dateHeader);
 
         // Set other headers
         for (Map.Entry<String, String> entry : headers.entries()) {
-            request = request.addHeader(entry.getKey(), entry.getValue());
+            if (!entry.getKey().equals(USER_AGENT)) {
+                request = request.addHeader(entry.getKey(), entry.getValue());
+            }
         }
         for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entries()) {
             request = request.addHeader(entry.getKey(), entry.getValue());
