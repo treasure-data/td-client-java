@@ -305,6 +305,15 @@ public class TDHttpClient
                         throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, "Failed to get Content");
                     }
                 }
+                else if (queryStr.length() > 0) {
+                        request = request.put(createRequestBodyWithoutCharset(mediaTypeXwwwFormUrlencoded, queryStr));
+                }
+                else {
+                    // We should set content-length explicitly for an empty put
+                    request = request
+                            .header(CONTENT_LENGTH, "0")
+                            .put(RequestBody.create(null, ""));
+                }
                 break;
         }
 
