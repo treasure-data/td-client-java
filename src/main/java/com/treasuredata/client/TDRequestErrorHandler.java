@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.Response;
+import okhttp3.internal.http2.StreamResetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +64,7 @@ public class TDRequestErrorHandler
     /**
      * Show or suppress warning messages for TDClientHttpException
      */
-    private static TDClientHttpException clientError(TDClientHttpException e, ResponseContext responseContext)
+    private static TDClientHttpException clientError(TDClientHttpException e)
     {
         boolean showWarning = true;
         boolean showStackTrace = false;
@@ -111,29 +112,29 @@ public class TDRequestErrorHandler
             switch (code) {
                 // Soft 4xx errors. These we retry.
                 case TOO_MANY_REQUESTS_429:
-                    return clientError(new TDClientHttpTooManyRequestsException(errorMessage, retryAfter), responseContext);
+                    return clientError(new TDClientHttpTooManyRequestsException(errorMessage, retryAfter));
                 // Hard 4xx error. We do not retry the execution on this type of error
                 case HttpStatus.UNAUTHORIZED_401:
-                    throw clientError(new TDClientHttpUnauthorizedException(errorMessage), responseContext);
+                    throw clientError(new TDClientHttpUnauthorizedException(errorMessage));
                 case HttpStatus.NOT_FOUND_404:
-                    throw clientError(new TDClientHttpNotFoundException(errorMessage), responseContext);
+                    throw clientError(new TDClientHttpNotFoundException(errorMessage));
                 case HttpStatus.CONFLICT_409:
                     String conflictsWith = errorResponse.isPresent() ? parseConflictsWith(errorResponse.get()) : null;
-                    throw clientError(new TDClientHttpConflictException(errorMessage, conflictsWith), responseContext);
+                    throw clientError(new TDClientHttpConflictException(errorMessage, conflictsWith));
                 case HttpStatus.PROXY_AUTHENTICATION_REQUIRED_407:
-                    throw clientError(new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter), responseContext);
+                    throw clientError(new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, errorMessage, code, retryAfter));
                 case HttpStatus.UNPROCESSABLE_ENTITY_422:
-                    throw clientError(new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter), responseContext);
+                    throw clientError(new TDClientHttpException(INVALID_INPUT, errorMessage, code, retryAfter));
                 default:
-                    throw clientError(new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter), responseContext);
+                    throw clientError(new TDClientHttpException(CLIENT_ERROR, errorMessage, code, retryAfter));
             }
         }
         else if (HttpStatus.isServerError(code)) {
             // Just returns exception info for 5xx errors
-            return clientError(new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter), responseContext);
+            return clientError(new TDClientHttpException(SERVER_ERROR, errorMessage, code, retryAfter));
         }
         else {
-            throw clientError(new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter), responseContext);
+            throw clientError(new TDClientHttpException(UNEXPECTED_RESPONSE_CODE, errorMessage, code, retryAfter));
         }
     }
 
@@ -193,6 +194,12 @@ public class TDRequestErrorHandler
                 // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
                 return new TDClientSSLException(sslException);
             }
+        }
+        else if (e instanceof StreamResetException) {
+            // okhttp 4.10.0 will throw 429 Too Many Requests and defaultHttpResponseErrorResolver will handle
+            // just retry after 1 secs but we could consider increasing it
+            Date retryAfter = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(1));
+            return clientError(new TDClientHttpTooManyRequestsException(e.getMessage(), retryAfter));
         }
         else if (e.getCause() != null && Exception.class.isAssignableFrom(e.getCause().getClass())) {
             return defaultExceptionResolver((Exception) e.getCause());
