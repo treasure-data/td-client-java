@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.Response;
+import okhttp3.internal.http2.StreamResetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +112,7 @@ public class TDRequestErrorHandler
             switch (code) {
                 // Soft 4xx errors. These we retry.
                 case TOO_MANY_REQUESTS_429:
-                    return clientError(new TDClientHttpTooManyRequestsException(errorMessage, retryAfter), responseContext);
+                    return new TDClientHttpTooManyRequestsException(errorMessage, retryAfter);
                 // Hard 4xx error. We do not retry the execution on this type of error
                 case HttpStatus.UNAUTHORIZED_401:
                     throw clientError(new TDClientHttpUnauthorizedException(errorMessage), responseContext);
@@ -193,6 +194,12 @@ public class TDRequestErrorHandler
                 // SSLProtocolException and uncategorized SSL exceptions (SSLException) such as unexpected_message may be retryable
                 return new TDClientSSLException(sslException);
             }
+        }
+        else if (e instanceof StreamResetException) {
+            // okhttp 4.10.0 will throw 429 Too Many Requests and defaultHttpResponseErrorResolver will handle
+            // just retry after 1 secs but we could consider increasing it
+            Date retryAfter = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(1));
+            return new TDClientHttpTooManyRequestsException(e.getMessage(), retryAfter);
         }
         else if (e.getCause() != null && Exception.class.isAssignableFrom(e.getCause().getClass())) {
             return defaultExceptionResolver((Exception) e.getCause());
