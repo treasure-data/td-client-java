@@ -1,3 +1,7 @@
+Release 0.9.4 - 2020-10-20
+ - Fix Jackson vulnerabilities (#141)
+ - Add retry pattern for StreamResetException (#160)
+
 Release 0.9.3 - 2020-08-20
  - [Internal API Update] Support query params in PUT request [#156]
 
