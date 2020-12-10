@@ -20,6 +20,7 @@ package com.treasuredata.client;
 
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
+import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDColumnType;
 import com.treasuredata.client.model.TDDatabase;
@@ -65,47 +66,35 @@ public class Example
     public static void main(String[] args)
     {
         String dbName = "td_client_java_db";
+        //String bulkName = "td_client_java_bulk_example";
         String table1 = "table1";
-        String table2 = "table2";
+        //String table2 = "table2";
 
+        // Create database
+        //Example.createDatabaseExample(dbName);
+
+        // Create tables
+        //Example.createTableExample(dbName, table1);
+        //Example.createTableExample(dbName, table2);
+
+        // Update table schema
         List<TDColumn> columns = new ArrayList<>();
         TDColumn column = new TDColumn("col1", TDColumnType.STRING);
         columns.add(column);
         column = new TDColumn("col2", TDColumnType.STRING);
         columns.add(column);
-
-        Example.createDatabaseExample(dbName);
-        Example.createTableExample(dbName, table1);
-//        Example.createTableExample(dbName, table2);
-//
         Example.updateSchemaExample(dbName, table1, columns);
 
-        Example.importDataExample(dbName, table1);
-    }
+        // Import data to table
+        //Example.createDatabaseExample(dbName);
+        //Example.createTableExample(dbName, table1);
+        //Example.importDataExample(dbName, table1);
 
-    public static void createMsgpackFile() throws IOException
-    {
-        File file = File.createTempFile("data", ".msgpack.gz");
-        System.out.println("File path: " + file.getAbsolutePath());
-        file.deleteOnExit();
-
-        StringValue timeCol = ValueFactory.newString("time");
-        StringValue timeColValue = ValueFactory.newString("1");
-        StringValue col1 = ValueFactory.newString("col1");
-        StringValue col1Value = ValueFactory.newString("value1");
-        StringValue col2 = ValueFactory.newString("col2");
-        StringValue col2Value = ValueFactory.newString("value2");
-
-        Map<Value, Value> sampleData = new HashMap<>();
-        sampleData.put(timeCol, timeColValue);
-        sampleData.put(col1, col1Value);
-        sampleData.put(col2, col2Value);
-
-        ImmutableMapValue mapValue = ValueFactory.newMap(sampleData);
-
-        MessagePacker packer = MessagePack.newDefaultPacker(new GZIPOutputStream(new FileOutputStream(file)));
-        packer.packValue(mapValue);
-        packer.close();
+        // Bulk import
+        //Example.createDatabaseExample(dbName);
+        //Example.createTableExample(dbName, table1);
+        //Example.updateSchemaExample(dbName, table1, columns);
+        //Example.bulkImportExample(bulkName, dbName, table1);
     }
 
     public static void createDatabaseExample(String databaseName)
@@ -293,11 +282,57 @@ public class Example
         }
     }
 
+    public static File createBulkImportData() throws IOException
+    {
+        File file = File.createTempFile("data", ".msgpack.gz");
+        file.deleteOnExit();
+
+        Map<Value, Value> mapData = new HashMap<>();
+
+        MessagePacker packer = MessagePack.newDefaultPacker(new GZIPOutputStream(new FileOutputStream(file)));
+        int numberOfRecords = 100;
+        for (int i = 1; i <= numberOfRecords; i++) {
+            StringValue timeCol = ValueFactory.newString("time");
+            StringValue timeColValue = ValueFactory.newString(i + "");
+            StringValue col1 = ValueFactory.newString("col1");
+            StringValue col1Value = ValueFactory.newString("value" + i);
+            StringValue col2 = ValueFactory.newString("col2");
+            StringValue col2Value = ValueFactory.newString("value2_" + i);
+
+            mapData.put(timeCol, timeColValue);
+            mapData.put(col1, col1Value);
+            mapData.put(col2, col2Value);
+
+            ImmutableMapValue mapValue = ValueFactory.newMap(mapData);
+            packer.packValue(mapValue);
+        }
+        packer.close();
+
+        return file;
+    }
+
     public static void bulkImportExample(String bulkName, String databaseName, String tableName)
     {
         TDClient client = TDClient.newClient();
         try {
+            File msgpackFile = Example.createBulkImportData();
+
             client.createBulkImportSession(bulkName, databaseName, tableName);
+            client.uploadBulkImportPart(bulkName, "td_client_java_part_1", msgpackFile);
+            client.performBulkImportSession(bulkName);
+
+            TDBulkImportSession importSession = client.getBulkImportSession(bulkName);
+            // Wait until the importing finishes
+            ExponentialBackOff backOff = new ExponentialBackOff();
+            TDJobSummary job = client.jobStatus(importSession.getJobId());
+            while (!job.getStatus().isFinished()) {
+                Thread.sleep(backOff.nextWaitTimeMillis());
+                job = client.jobStatus(importSession.getJobId());
+            }
+
+            System.out.print("Bulk import job status: " + job.getStatus());
+
+            client.commitBulkImportSession(bulkName);
         }
         catch (Exception e) {
             e.printStackTrace();
