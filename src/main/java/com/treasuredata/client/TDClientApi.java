@@ -92,7 +92,7 @@ public interface TDClientApi<ClientImpl>
     TDUser getUser();
 
     /**
-     * @deprecated reason this API is deprecated since 202102.
+     * @deprecated reason this API is deprecated since February 2021.
      * Validates and return information about the current API key.
      * @return A {@link TDApiKey} instance.
      */
