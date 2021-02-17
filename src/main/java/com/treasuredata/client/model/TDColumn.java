@@ -44,7 +44,7 @@ public class TDColumn implements Serializable
     // The column SQL alias.
     private final String name;
     private final TDColumnType type;
-    // The actual column name.
+    // The physical column name in partition files
     private final byte[] key;
 
     public TDColumn(String name, TDColumnType type)
