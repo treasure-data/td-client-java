@@ -585,7 +585,6 @@ public class TDClient
 
         ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
         for (TDColumn newColumn : newSchema) {
-            // TODO: Schema should be array of [name, type, key], not [key, type, name]. Kept for backward compatibility for now...
             builder.add(ImmutableList.of(newColumn.getKeyString(), newColumn.getType().toString(), newColumn.getName()));
         }
         String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build(), "ignore_duplicate_schema", ignoreDuplicate));
@@ -602,8 +601,8 @@ public class TDClient
         ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
         for (TDColumn appendedColumn : appendedSchema) {
             // Unlike update-schema API, append-schema API can generate alias for column name.
-            // So we should not pass `appendedColumn.getKeyString()` here.
-            builder.add(ImmutableList.of(appendedColumn.getName(), appendedColumn.getType().toString()));
+            // So we should not pass `appendedColumn.getName()` here.
+            builder.add(ImmutableList.of(appendedColumn.getKeyString(), appendedColumn.getType().toString()));
         }
         String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build()));
         doPost(buildUrl("/v3/table/append-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
