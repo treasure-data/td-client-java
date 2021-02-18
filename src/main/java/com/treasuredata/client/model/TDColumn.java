@@ -41,8 +41,10 @@ public class TDColumn implements Serializable
 {
     static final byte[] LOG_TABLE_PUSHDOWN_KEY = "time".getBytes(UTF_8);
 
+    // The column SQL alias.
     private final String name;
     private final TDColumnType type;
+    // The physical column name in partition files
     private final byte[] key;
 
     public TDColumn(String name, TDColumnType type)
