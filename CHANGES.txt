@@ -1,3 +1,7 @@
+Release 0.9.5 - 2020-02-18
+ - Fixes the schema update to properly use physical column names #165
+ - Removed API key validation endpoint
+
 Release 0.9.4 - 2020-10-20
  - Fix Jackson vulnerabilities (#141)
  - Add retry pattern for StreamResetException (#160)
