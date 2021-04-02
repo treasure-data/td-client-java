@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,31 +18,27 @@
  */
 package com.treasuredata.client;
 
-/**
- *
- */
-public class ExponentialBackOff
+import java.util.Random;
+
+public class FullJitterBackOff
         extends BackOff
 {
-    private int nextIntervalMillis;
+    private final Random rnd = new Random();
 
-    public ExponentialBackOff()
+    public FullJitterBackOff()
     {
-        this(2000, 60000, 1.5);
+        this(2000, 60000, 2);
     }
 
-    public ExponentialBackOff(int initialIntervalMillis, int maxIntervalMillis, double multiplier)
+    public FullJitterBackOff(int baseIntervalMillis, int maxIntervalMillis, double multiplier)
     {
-        super(initialIntervalMillis, maxIntervalMillis, multiplier);
-        this.nextIntervalMillis = initialIntervalMillis;
+        super(baseIntervalMillis, maxIntervalMillis, multiplier);
     }
 
     @Override
     public int nextWaitTimeMillis()
     {
-        int currentWaitTimeMillis = nextIntervalMillis;
-        nextIntervalMillis = Math.min((int) (nextIntervalMillis * multiplier), maxIntervalMillis);
         executionCount++;
-        return currentWaitTimeMillis;
+        return rnd.nextInt((int) calculateExponential());
     }
 }
