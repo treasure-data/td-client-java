@@ -157,7 +157,7 @@ public class TDBulkImportSession
         if (validRecords == 0) {
             return "No record processed";
         }
-        if (errorRecords > 0) {
+        if (errorParts > 0) {
             return String.format("%d invalid parts", errorParts);
         }
         if (errorRecords > 0) {
