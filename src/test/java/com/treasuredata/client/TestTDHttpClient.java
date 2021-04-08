@@ -256,11 +256,12 @@ public class TestTDHttpClient
     }
 
     @Test
-    public void failOn429_RetryLimitExceeded()
+    public void failOn429_RetryLimitExceededUsingExponentialBackOff()
             throws Exception
     {
         client = TDClient.newBuilder()
                 .setRetryMaxIntervalMillis(Integer.MAX_VALUE)
+                .setRetryStrategy(BackOffStrategy.Exponential.getText())
                 .setRetryLimit(3)
                 .build()
                 .httpClient;

@@ -21,7 +21,7 @@ package com.treasuredata.client;
 import java.util.Random;
 
 public class EqualJitterBackOff
-        extends BackOff
+        extends AbstractBackOff
 {
     private final Random rnd = new Random();
 

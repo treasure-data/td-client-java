@@ -41,6 +41,7 @@ import static com.treasuredata.client.TDClientConfig.Type.RETRY_INITIAL_INTERVAL
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_LIMIT;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_MAX_INTERVAL_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_MULTIPLIER;
+import static com.treasuredata.client.TDClientConfig.Type.RETRY_STRATEGY;
 import static com.treasuredata.client.TDClientConfig.Type.USER;
 import static com.treasuredata.client.TDClientConfig.Type.USESSL;
 import static com.treasuredata.client.TDClientConfig.getTDConfProperties;
@@ -57,6 +58,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected Optional<String> user = Optional.absent();
     protected Optional<String> password = Optional.absent();
     protected Optional<ProxyConfig> proxy = Optional.absent();
+    protected String retryStrategy = BackOffStrategy.FullJitter.getText();
     protected int retryLimit = 7;
     protected int retryInitialIntervalMillis = 500;
     protected int retryMaxIntervalMillis = 60000;
@@ -225,6 +227,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
 
         // http client parameter
         this.retryLimit = getConfigPropertyInt(p, RETRY_LIMIT).or(retryLimit);
+        this.retryStrategy = getConfigProperty(p, RETRY_STRATEGY).or(retryStrategy);
         this.retryInitialIntervalMillis = getConfigPropertyInt(p, RETRY_INITIAL_INTERVAL_MILLIS).or(retryInitialIntervalMillis);
         this.retryMaxIntervalMillis = getConfigPropertyInt(p, RETRY_MAX_INTERVAL_MILLIS).or(retryMaxIntervalMillis);
         this.retryMultiplier = getConfigPropertyDouble(p, RETRY_MULTIPLIER).or(retryMultiplier);
@@ -274,6 +277,12 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     public BuilderImpl setProxy(ProxyConfig proxyConfig)
     {
         this.proxy = Optional.of(proxyConfig);
+        return self();
+    }
+
+    public BuilderImpl setRetryStrategy(String retryStrategy)
+    {
+        this.retryStrategy = retryStrategy;
         return self();
     }
 
@@ -340,6 +349,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
                 user,
                 password,
                 proxy,
+                retryStrategy,
                 retryLimit,
                 retryInitialIntervalMillis,
                 retryMaxIntervalMillis,

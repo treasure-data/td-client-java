@@ -342,17 +342,17 @@ public class TDHttpClient
 
     protected static class RequestContext
     {
-        private final ExponentialBackOff backoff;
+        private final BackOff backoff;
         public final TDApiRequest apiRequest;
         public final Optional<String> apiKeyCache;
         public final Optional<TDClientException> rootCause;
 
         public RequestContext(TDClientConfig config, TDApiRequest apiRequest, Optional<String> apiKeyCache)
         {
-            this(new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier), apiRequest, apiKeyCache, Optional.absent());
+            this(BackOffFactory.newBackoff(config), apiRequest, apiKeyCache, Optional.absent());
         }
 
-        public RequestContext(ExponentialBackOff backoff, TDApiRequest apiRequest, Optional<String> apiKeyCache, Optional<TDClientException> rootCause)
+        public RequestContext(BackOff backoff, TDApiRequest apiRequest, Optional<String> apiKeyCache, Optional<TDClientException> rootCause)
         {
             this.backoff = backoff;
             this.apiRequest = apiRequest;

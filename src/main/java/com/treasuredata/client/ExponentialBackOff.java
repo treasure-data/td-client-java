@@ -22,7 +22,7 @@ package com.treasuredata.client;
  *
  */
 public class ExponentialBackOff
-        extends BackOff
+        extends AbstractBackOff
 {
     private int nextIntervalMillis;
 
