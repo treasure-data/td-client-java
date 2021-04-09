@@ -349,7 +349,7 @@ public class TDHttpClient
 
         public RequestContext(TDClientConfig config, TDApiRequest apiRequest, Optional<String> apiKeyCache)
         {
-            this(BackOffFactory.newBackoff(config), apiRequest, apiKeyCache, Optional.absent());
+            this(BackOffStrategy.newBackoff(config), apiRequest, apiKeyCache, Optional.absent());
         }
 
         public RequestContext(BackOff backoff, TDApiRequest apiRequest, Optional<String> apiKeyCache, Optional<TDClientException> rootCause)

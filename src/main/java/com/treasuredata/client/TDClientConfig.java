@@ -95,7 +95,7 @@ public class TDClientConfig
     public final Optional<String> password;
     public final Optional<ProxyConfig> proxy;
     public final boolean useSSL;
-    public final String retryStrategy;
+    public final BackOffStrategy retryStrategy;
     public final int retryLimit;
     public final int retryInitialIntervalMillis;
     public final int retryMaxIntervalMillis;
@@ -131,7 +131,7 @@ public class TDClientConfig
         this.user = user;
         this.password = password;
         this.proxy = proxy;
-        this.retryStrategy = retryStrategy.getText();
+        this.retryStrategy = retryStrategy;
         this.retryLimit = retryLimit;
         this.retryInitialIntervalMillis = retryInitialIntervalMillis;
         this.retryMaxIntervalMillis = retryMaxIntervalMillis;
@@ -157,7 +157,7 @@ public class TDClientConfig
                 user,
                 password,
                 proxy,
-                BackOffStrategy.fromString(retryStrategy),
+                retryStrategy,
                 retryLimit,
                 retryInitialIntervalMillis,
                 retryMaxIntervalMillis,

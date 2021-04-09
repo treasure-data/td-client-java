@@ -31,11 +31,6 @@ public enum BackOffStrategy
         this.name = name;
     }
 
-    public String getText()
-    {
-        return name;
-    }
-
     public static BackOffStrategy fromString(String strategyName)
     {
         for (BackOffStrategy strategy : BackOffStrategy.values()) {
@@ -44,5 +39,31 @@ public enum BackOffStrategy
             }
         }
         throw new IllegalArgumentException("Illegal strategy name: " + strategyName);
+    }
+
+    public static BackOff newBackoff(TDClientConfig config)
+    {
+        BackOff backoff;
+        switch (config.retryStrategy) {
+            case Exponential:
+                backoff = new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);
+                break;
+            case EqualJitter:
+                backoff = new EqualJitterBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);
+                break;
+            case FullJitter:
+            default:
+                backoff = new FullJitterBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);
+                break;
+        }
+        return backoff;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "BackOffStrategy{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }
