@@ -28,9 +28,6 @@ public class BackOffFactory
     {
         BackOff backoff;
         BackOffStrategy strategy = BackOffStrategy.fromString(config.retryStrategy);
-        if (strategy == null) {
-            strategy = BackOffStrategy.FullJitter;
-        }
         switch (strategy) {
             case Exponential:
                 backoff = new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier);

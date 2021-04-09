@@ -43,6 +43,6 @@ public enum BackOffStrategy
                 return strategy;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Illegal strategy name: " + strategyName);
     }
 }

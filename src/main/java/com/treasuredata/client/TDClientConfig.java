@@ -53,7 +53,6 @@ public class TDClientConfig
         USESSL("td.client.usessl", "Use SSL encryption"),
         API_ENDPOINT("td.client.endpoint", "TD API end point (e.g., api.treasuredata.com"),
         API_PORT("td.client.port", "TD API port number"),
-        RETRY_STRATEGY("td.client.retry.strategy", "The retry strategy for API request"),
         RETRY_LIMIT("td.client.retry.limit", "The maximum nubmer of API request retry"),
         RETRY_INITIAL_INTERVAL_MILLIS("td.client.retry.initial-interval", "backoff retry interval = (interval) * (multiplier) ^ (retry count)"),
         RETRY_MAX_INTERVAL_MILLIS("td.client.retry.max-interval", "max retry interval"),
@@ -115,7 +114,7 @@ public class TDClientConfig
             Optional<String> user,
             Optional<String> password,
             Optional<ProxyConfig> proxy,
-            String retryStrategy,
+            BackOffStrategy retryStrategy,
             int retryLimit,
             int retryInitialIntervalMillis,
             int retryMaxIntervalMillis,
@@ -132,7 +131,7 @@ public class TDClientConfig
         this.user = user;
         this.password = password;
         this.proxy = proxy;
-        this.retryStrategy = retryStrategy;
+        this.retryStrategy = retryStrategy.getText();
         this.retryLimit = retryLimit;
         this.retryInitialIntervalMillis = retryInitialIntervalMillis;
         this.retryMaxIntervalMillis = retryMaxIntervalMillis;
@@ -158,7 +157,7 @@ public class TDClientConfig
                 user,
                 password,
                 proxy,
-                retryStrategy,
+                BackOffStrategy.fromString(retryStrategy),
                 retryLimit,
                 retryInitialIntervalMillis,
                 retryMaxIntervalMillis,
@@ -210,7 +209,6 @@ public class TDClientConfig
             saveProperty(p, Type.PROXY_PASSWORD, pc.getPassword());
             saveProperty(p, Type.PROXY_USESSL, pc.useSSL());
         }
-        saveProperty(p, Type.RETRY_STRATEGY, retryStrategy);
         saveProperty(p, Type.RETRY_LIMIT, retryLimit);
         saveProperty(p, Type.RETRY_INITIAL_INTERVAL_MILLIS, retryInitialIntervalMillis);
         saveProperty(p, Type.RETRY_MAX_INTERVAL_MILLIS, retryMaxIntervalMillis);
