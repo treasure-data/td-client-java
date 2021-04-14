@@ -57,6 +57,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected Optional<String> user = Optional.absent();
     protected Optional<String> password = Optional.absent();
     protected Optional<ProxyConfig> proxy = Optional.absent();
+    protected BackOffStrategy retryStrategy = BackOffStrategy.FullJitter;
     protected int retryLimit = 7;
     protected int retryInitialIntervalMillis = 500;
     protected int retryMaxIntervalMillis = 60000;
@@ -277,6 +278,12 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         return self();
     }
 
+    public BuilderImpl setRetryStrategy(BackOffStrategy strategy)
+    {
+        this.retryStrategy = strategy;
+        return self();
+    }
+
     public BuilderImpl setRetryLimit(int retryLimit)
     {
         this.retryLimit = retryLimit;
@@ -340,6 +347,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
                 user,
                 password,
                 proxy,
+                retryStrategy,
                 retryLimit,
                 retryInitialIntervalMillis,
                 retryMaxIntervalMillis,

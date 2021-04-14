@@ -333,7 +333,7 @@ public class TestTDClient
             throws InterruptedException
     {
         int retryCount = 0;
-        ExponentialBackOff backoff = new ExponentialBackOff();
+        BackOff backoff = new ExponentialBackOff();
         long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
         TDJobSummary tdJob = null;
         do {
@@ -1231,7 +1231,7 @@ public class TestTDClient
             client.performBulkImportSession(session);
 
             // Wait the perform completion
-            ExponentialBackOff backoff = new ExponentialBackOff();
+            BackOff backoff = new ExponentialBackOff();
             long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
             bs = client.getBulkImportSession(session);
             while (bs.getStatus() == TDBulkImportSession.ImportStatus.PERFORMING) {

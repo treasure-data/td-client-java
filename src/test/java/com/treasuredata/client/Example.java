@@ -64,7 +64,7 @@ public class Example
             String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(1) cnt from www_access"));
 
             // Wait until the query finishes
-            ExponentialBackOff backOff = new ExponentialBackOff();
+            BackOff backOff = new ExponentialBackOff();
             TDJobSummary job = client.jobStatus(jobId);
             while (!job.getStatus().isFinished()) {
                 Thread.sleep(backOff.nextWaitTimeMillis());

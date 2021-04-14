@@ -46,7 +46,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler;
-
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.Matchers.is;
@@ -256,11 +255,12 @@ public class TestTDHttpClient
     }
 
     @Test
-    public void failOn429_RetryLimitExceeded()
+    public void failOn429_RetryLimitExceededUsingExponentialBackOff()
             throws Exception
     {
         client = TDClient.newBuilder()
                 .setRetryMaxIntervalMillis(Integer.MAX_VALUE)
+                .setRetryStrategy(BackOffStrategy.Exponential)
                 .setRetryLimit(3)
                 .build()
                 .httpClient;
