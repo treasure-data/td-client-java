@@ -18,28 +18,28 @@
  */
 package com.treasuredata.client;
 
+/**
+ *  An enum of Backoff strategies. In td-client-java, 3 backoff strategies are supported : {@link FullJitterBackOff}, {@link EqualJitterBackOff} & {@link ExponentialBackOff}.
+ *  <p>
+ *  {@link FullJitterBackOff} is recommend to use. The retry interval for it calculates with the following formula:</p>
+ *  <pre>
+ *      v = min(baseIntervalMillis * pow(multiplier, attempt), maxIntervalMillis);
+ *      sleep = random_between(0, v)</pre>
+ *  <p>
+ *  The retry interval for {@link EqualJitterBackOff} is similar to {@link FullJitterBackOff}. The retry interval for it calculates with the following formula
+ *  </p>
+ *  <pre>
+ *      v = min(baseIntervalMillis * pow(multiplier, attempt), maxIntervalMillis);
+ *      sleep = v/2 + random_between(0, v/2)</pre>
+ *  <p>
+ *      {@link ExponentialBackOff} was used as default before. The retry interval for it extends linearly to the max interval.
+ *  </p>
+ */
 public enum BackOffStrategy
 {
-    FullJitter("fullJitter"),
-    EqualJitter("equalJitter"),
-    Exponential("exponential");
-
-    private final String name;
-
-    BackOffStrategy(String name)
-    {
-        this.name = name;
-    }
-
-    public static BackOffStrategy fromString(String strategyName)
-    {
-        for (BackOffStrategy strategy : BackOffStrategy.values()) {
-            if (strategy.name.equals(strategyName)) {
-                return strategy;
-            }
-        }
-        throw new IllegalArgumentException("Illegal strategy name: " + strategyName);
-    }
+    FullJitter,
+    EqualJitter,
+    Exponential;
 
     public static BackOff newBackoff(TDClientConfig config)
     {
@@ -57,13 +57,5 @@ public enum BackOffStrategy
                 break;
         }
         return backoff;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "BackOffStrategy{" +
-                "name='" + name + '\'' +
-                '}';
     }
 }
