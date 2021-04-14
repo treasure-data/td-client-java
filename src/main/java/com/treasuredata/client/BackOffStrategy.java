@@ -41,7 +41,7 @@ public enum BackOffStrategy
     EqualJitter,
     Exponential;
 
-    public static BackOff newBackoff(TDClientConfig config)
+    public static BackOff newBackOff(TDClientConfig config)
     {
         BackOff backoff;
         switch (config.retryStrategy) {
