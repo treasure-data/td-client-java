@@ -258,6 +258,11 @@ public class TDRequestErrorHandler
             try {
                 content = Optional.of(response.body().string());
             }
+            catch (SocketTimeoutException e) {
+                // http status was error or not found but failed to get body content
+                // handler by status will process further
+                return Optional.of(new TDApiErrorMessage(e.getClass().getSimpleName(), e.getMessage(), "error"));
+            }
             catch (IOException e) {
                 throw new TDClientException(INVALID_JSON_RESPONSE, e);
             }

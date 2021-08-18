@@ -300,4 +300,67 @@ public class TestServerFailures
             assertEquals(TDClientException.ErrorType.INVALID_JSON_RESPONSE, e.getErrorType());
         }
     }
+
+    @Test
+    public void errorBodyTimeoutRetryTest()
+            throws Exception
+    {
+        logger.warn("Start request body timeout tests on 500 errors");
+        final int retryLimit = 3;
+        for (int i = 0; i < retryLimit + 1; ++i) {
+            server.enqueue(new MockResponse().setResponseCode(500).setBody("{\"error\": \"server error\"}").setBodyDelay(1, TimeUnit.SECONDS));
+        }
+        server.enqueue(new MockResponse().setBody("{\"server\":\"ok\"}"));
+        server.start(port);
+
+        TDClient client = TDClient
+                .newBuilder()
+                .setEndpoint("localhost")
+                .setUseSSL(false)
+                .setPort(port)
+                .setReadTimeoutMillis(100)
+                .setRetryLimit(3)
+                .build();
+        try {
+            client.serverStatus();
+            fail("cannot reach here");
+        }
+        catch (TDClientHttpException e) {
+            assertEquals(TDClientException.ErrorType.SERVER_ERROR, e.getErrorType());
+            assertEquals(1 + retryLimit, server.getRequestCount());
+        }
+
+        server.shutdown();
+    }
+
+    @Test
+    public void errorBodyTimeoutNonRetryTest()
+            throws Exception
+    {
+        logger.warn("Start request body timeout tests on 404 errors");
+        final int retryLimit = 3;
+        for (int i = 0; i < retryLimit + 1; ++i) {
+            server.enqueue(new MockResponse().setResponseCode(404).setBody("{\"error\": \"not found\"}").setBodyDelay(1, TimeUnit.SECONDS));
+        }
+        server.start(port);
+
+        TDClient client = TDClient
+                .newBuilder()
+                .setEndpoint("localhost")
+                .setUseSSL(false)
+                .setPort(port)
+                .setReadTimeoutMillis(100)
+                .setRetryLimit(3)
+                .build();
+        try {
+            client.serverStatus();
+            fail("cannot reach here");
+        }
+        catch (TDClientHttpException e) {
+            assertEquals(TDClientException.ErrorType.TARGET_NOT_FOUND, e.getErrorType());
+            assertEquals(1, server.getRequestCount()); // no retry
+        }
+
+        server.shutdown();
+    }
 }
