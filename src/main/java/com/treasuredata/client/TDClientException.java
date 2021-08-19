@@ -65,7 +65,7 @@ public class TDClientException
 
     public TDClientException(ErrorType errorType, String message, Optional<Exception> cause)
     {
-        super(formatErrorMessage(errorType, message, cause));
+        super(formatErrorMessage(errorType, message, cause), cause.orNull());
         checkNotNull(errorType, "errorType is null");
         checkNotNull(cause, "cause is null");
         this.errorType = errorType;
