@@ -17,4 +17,4 @@ jobs:
           distribution: 'adopt'
           java-version: 11
       - name: Build javadoc
-        run: mvn javadoc:javadoc
+        run: mvn compile javadoc:javadoc
