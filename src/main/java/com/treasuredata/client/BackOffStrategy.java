@@ -19,7 +19,7 @@
 package com.treasuredata.client;
 
 /**
- *  An enum of Backoff strategies. In td-client-java, 3 backoff strategies are supported : {@link FullJitterBackOff}, {@link EqualJitterBackOff} & {@link ExponentialBackOff}.
+ *  An enum of Backoff strategies. In td-client-java, 3 backoff strategies are supported : {@link FullJitterBackOff}, {@link EqualJitterBackOff} &amp; {@link ExponentialBackOff}.
  *  <p>
  *  {@link FullJitterBackOff} is recommend to use. The retry interval for it calculates with the following formula:</p>
  *  <pre>
