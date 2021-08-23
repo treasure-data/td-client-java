@@ -1,8 +1,8 @@
-Release 0.9.6 - 2020-08-19
+Release 0.9.6 - 2021-08-19
  - Use jittering by default for http request retires
  - Handle timeout exception after getting JSON responses
  
-Release 0.9.5 - 2020-02-18
+Release 0.9.5 - 2021-02-18
  - Fixes the schema update to properly use physical column names #165
  - Removed API key validation endpoint
 
