@@ -68,7 +68,7 @@
 
     <jetty.version>9.2.22.v20170606</jetty.version>
     <jackson-core.version>2.9.10</jackson-core.version>
-    <jackson-bind.version>2.9.10.5</jackson-bind.version>
+    <jackson-bind.version>2.9.10.8</jackson-bind.version>
   </properties>
 
   <repositories>
