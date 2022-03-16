@@ -1603,7 +1603,7 @@ public class TestTDClient
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
-                .setEngineVersion(EngineVersion.fromString("experimental"))
+                .setEngineVersion(EngineVersion.fromString("stable"))
                 .build();
 
         try {
@@ -1646,7 +1646,7 @@ public class TestTDClient
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
-                .setEngineVersion(EngineVersion.fromString("experimental"))
+                .setEngineVersion(EngineVersion.fromString("stable"))
                 .build();
 
         try {
