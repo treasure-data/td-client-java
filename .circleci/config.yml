@@ -8,6 +8,6 @@ jobs:
       - checkout
       - run:
           name: Test
-          command: mvn test
+          command: mvn test -Dtd.client.endpoint=api-staging.treasuredata.com
       - store_artifacts:
             path: /tmp/td-client-java/target/site
