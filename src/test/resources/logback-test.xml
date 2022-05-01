@@ -25,7 +25,7 @@
     </encoder>
   </appender>
 
-  <logger name="com.treasuredata.client" level="DEBUG" />
+  <logger name="com.treasuredata.client" level="INFO" />
   <logger name="com.treasuredata.client.jetty922" level="INFO" />
   <logger name="org.eclipse.jetty.client" level="INFO" />
 
