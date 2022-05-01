@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
@@ -76,8 +75,6 @@ public class TDSavedQueryUpdateRequest
     static ObjectMapper getObjectMapper()
     {
         ObjectMapper mapper = new ObjectMapper();
-        // Configure object mapper to exclude Optional.absent values in the generated json string
-        mapper.registerModule(new GuavaModule().configureAbsentsAsNulls(false));
         mapper.setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
         return mapper;
     }
