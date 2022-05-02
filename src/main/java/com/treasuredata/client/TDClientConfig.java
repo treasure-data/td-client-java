@@ -19,7 +19,6 @@
 package com.treasuredata.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
@@ -33,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -124,7 +124,7 @@ public class TDClientConfig
             int connectionPoolSize,
             Multimap<String, String> headers)
     {
-        this.endpoint = endpoint.or("api.treasuredata.com");
+        this.endpoint = endpoint.orElse("api.treasuredata.com");
         this.port = port;
         this.useSSL = useSSL;
         this.apiKey = apiKey;

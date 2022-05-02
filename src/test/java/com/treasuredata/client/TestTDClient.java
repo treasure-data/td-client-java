@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
@@ -103,6 +102,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
@@ -800,7 +800,7 @@ public class TestTDClient
                 "secret access key",
                 "bucket",
                 "prefix/",
-                Optional.<String>absent());
+                Optional.empty());
         client.createDatabaseIfNotExists(SAMPLE_DB);
         client.createTableIfNotExists(SAMPLE_DB, "sample_output");
         String jobId = client.submitExportJob(jobRequest);
@@ -892,7 +892,7 @@ public class TestTDClient
                 return Optional.of(table);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Test
@@ -1432,7 +1432,7 @@ public class TestTDClient
                 return Optional.of(q);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private void validateSavedQuery(TDSaveQueryRequest expected, TDSavedQuery target)

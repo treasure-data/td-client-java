@@ -30,7 +30,6 @@ import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
@@ -57,8 +56,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
@@ -203,14 +204,7 @@ public class TDHttpClient
     public Request prepareRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
-        String portStr = config.port.transform(new Function<Integer, String>()
-        {
-            @Override
-            public String apply(Integer input)
-            {
-                return ":" + input.toString();
-            }
-        }).or("");
+        String portStr = config.port.map((input) -> ":" + input).orElse("");
         String requestUri = apiRequest.getPath().startsWith("http")
                 ? apiRequest.getPath()
                 : String.format("%s://%s%s%s", config.useSSL ? "https" : "http", config.endpoint, portStr, apiRequest.getPath());
@@ -254,7 +248,9 @@ public class TDHttpClient
         }
 
         // Set API Key after setting the other headers
-        Optional<String> apiKey = apiKeyCache.or(config.apiKey);
+        Optional<String> apiKey = Stream.of(apiKeyCache, config.apiKey)
+                .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
+                .findFirst();
         if (apiKey.isPresent()) {
             String auth;
             if (isNakedTD1Key(apiKey.get())) {
@@ -349,7 +345,7 @@ public class TDHttpClient
 
         public RequestContext(TDClientConfig config, TDApiRequest apiRequest, Optional<String> apiKeyCache)
         {
-            this(BackOffStrategy.newBackOff(config), apiRequest, apiKeyCache, Optional.absent());
+            this(BackOffStrategy.newBackOff(config), apiRequest, apiKeyCache, Optional.empty());
         }
 
         public RequestContext(BackOff backoff, TDApiRequest apiRequest, Optional<String> apiKeyCache, Optional<TDClientException> rootCause)

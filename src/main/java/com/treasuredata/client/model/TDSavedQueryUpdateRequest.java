@@ -25,7 +25,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 /**
  * Update request for saved queries. Use {@link TDSavedQuery#newUpdateRequestBuilder()} to build this object.
@@ -103,16 +104,16 @@ public class TDSavedQueryUpdateRequest
     public TDSaveQueryRequest merge(TDSavedQuery base)
     {
         return new TDSaveQueryRequest(
-                name.or(base.getName()),
-                cron.or(base.getCron()),
-                type.or(base.getType()),
-                query.or(base.getQuery()),
-                timezone.or(base.getTimezone()),
-                delay.or(base.getDelay()),
-                database.or(base.getDatabase()),
-                priority.or(base.getPriority()),
-                retryLimit.or(base.getRetryLimit()),
-                result.or(base.getResult()),
+                name.orElse(base.getName()),
+                cron.orElse(base.getCron()),
+                type.orElse(base.getType()),
+                query.orElse(base.getQuery()),
+                timezone.orElse(base.getTimezone()),
+                delay.orElse(base.getDelay()),
+                database.orElse(base.getDatabase()),
+                priority.orElse(base.getPriority()),
+                retryLimit.orElse(base.getRetryLimit()),
+                result.orElse(base.getResult()),
                 engineVersion.isPresent() ? engineVersion.get() : base.getEngineVersion());
     }
 

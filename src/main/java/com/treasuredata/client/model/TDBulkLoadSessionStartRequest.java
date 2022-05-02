@@ -2,7 +2,8 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 public class TDBulkLoadSessionStartRequest
 {
@@ -21,20 +22,20 @@ public class TDBulkLoadSessionStartRequest
 
     TDBulkLoadSessionStartRequest(TDBulkLoadSessionStartRequestBuilder builder)
     {
-        this.scheduledTime = builder.getScheduledTime().orNull();
-        this.domainKey = builder.getDomainKey().orNull();
+        this.scheduledTime = builder.getScheduledTime().orElse(null);
+        this.domainKey = builder.getDomainKey().orElse(null);
     }
 
     @JsonProperty("scheduled_time")
     public Optional<String> getScheduledTime()
     {
-        return Optional.fromNullable(scheduledTime);
+        return Optional.ofNullable(scheduledTime);
     }
 
     @JsonProperty("domain_key")
     public Optional<String> getDomainKey()
     {
-        return Optional.fromNullable(domainKey);
+        return Optional.ofNullable(domainKey);
     }
 
     @Override

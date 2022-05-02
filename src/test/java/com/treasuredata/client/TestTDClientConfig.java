@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -32,6 +31,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
@@ -252,10 +252,10 @@ public class TestTDClientConfig
 
         assertThat(config.withApiKey("foo").apiKey, is(Optional.of("foo")));
         assertThat(config.withApiKey(Optional.of("foo")).apiKey, is(Optional.of("foo")));
-        assertThat(config.withApiKey(Optional.<String>absent()).apiKey, is(Optional.<String>absent()));
+        assertThat(config.withApiKey(Optional.empty()).apiKey, is(Optional.empty()));
         assertThat(config.withApiKey("foo").withApiKey("bar").apiKey, is(Optional.of("bar")));
-        assertThat(config.withApiKey("foo").withApiKey(Optional.<String>absent()).apiKey, is(Optional.<String>absent()));
-        assertThat(config.withApiKey(Optional.<String>absent()).withApiKey("bar").apiKey, is(Optional.of("bar")));
+        assertThat(config.withApiKey("foo").withApiKey(Optional.empty()).apiKey, is(Optional.empty()));
+        assertThat(config.withApiKey(Optional.empty()).withApiKey("bar").apiKey, is(Optional.of("bar")));
     }
 
     private Matcher<Multimap<String, String>> equalTo(final Multimap<String, String> multimap)

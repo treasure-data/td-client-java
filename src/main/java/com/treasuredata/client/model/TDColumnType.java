@@ -20,32 +20,32 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.treasuredata.client.model.impl.TDColumnTypeDeserializer;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 @JsonDeserialize(using = TDColumnTypeDeserializer.class)
 public class TDColumnType implements Serializable
 {
-    public static final TDColumnType INT = new TDColumnType(TDTypeName.INT, Optional.<List<TDColumnType>>absent());
-    public static final TDColumnType LONG = new TDColumnType(TDTypeName.LONG, Optional.<List<TDColumnType>>absent());
-    public static final TDColumnType FLOAT = new TDColumnType(TDTypeName.FLOAT, Optional.<List<TDColumnType>>absent());
-    public static final TDColumnType DOUBLE = new TDColumnType(TDTypeName.DOUBLE, Optional.<List<TDColumnType>>absent());
-    public static final TDColumnType STRING = new TDColumnType(TDTypeName.STRING, Optional.<List<TDColumnType>>absent());
+    public static final TDColumnType INT = new TDColumnType(TDTypeName.INT, Optional.empty());
+    public static final TDColumnType LONG = new TDColumnType(TDTypeName.LONG, Optional.empty());
+    public static final TDColumnType FLOAT = new TDColumnType(TDTypeName.FLOAT, Optional.empty());
+    public static final TDColumnType DOUBLE = new TDColumnType(TDTypeName.DOUBLE, Optional.empty());
+    public static final TDColumnType STRING = new TDColumnType(TDTypeName.STRING, Optional.empty());
 
     public static final List<TDColumnType> primitiveTypes = ImmutableList.of(INT, LONG, FLOAT, DOUBLE, STRING);
 
     public static TDColumnType newArrayType(TDColumnType elementType)
     {
-        return new TDColumnType(TDTypeName.ARRAY, Optional.<List<TDColumnType>>of(ImmutableList.of(elementType)));
+        return new TDColumnType(TDTypeName.ARRAY, Optional.of(ImmutableList.of(elementType)));
     }
 
     public static TDColumnType newMapType(TDColumnType keyType, TDColumnType valueType)
     {
-        return new TDColumnType(TDTypeName.MAP, Optional.<List<TDColumnType>>of(ImmutableList.of(keyType, valueType)));
+        return new TDColumnType(TDTypeName.MAP, Optional.of(ImmutableList.of(keyType, valueType)));
     }
 
     private final TDTypeName typeName;

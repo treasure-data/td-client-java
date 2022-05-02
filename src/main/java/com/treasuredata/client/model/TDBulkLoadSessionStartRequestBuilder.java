@@ -1,6 +1,6 @@
 package com.treasuredata.client.model;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 public class TDBulkLoadSessionStartRequestBuilder
 {
@@ -13,7 +13,7 @@ public class TDBulkLoadSessionStartRequestBuilder
 
     public Optional<String> getScheduledTime()
     {
-        return Optional.fromNullable(scheduledTime);
+        return Optional.ofNullable(scheduledTime);
     }
 
     public TDBulkLoadSessionStartRequestBuilder setScheduledTime(String scheduledTime)
@@ -29,13 +29,13 @@ public class TDBulkLoadSessionStartRequestBuilder
 
     public TDBulkLoadSessionStartRequestBuilder setScheduledTime(Optional<String> scheduledTime)
     {
-        this.scheduledTime = scheduledTime.orNull();
+        this.scheduledTime = scheduledTime.orElse(null);
         return this;
     }
 
     public Optional<String> getDomainKey()
     {
-        return Optional.fromNullable(domainKey);
+        return Optional.ofNullable(domainKey);
     }
 
     public TDBulkLoadSessionStartRequestBuilder setDomainKey(String domainKey)
@@ -46,7 +46,7 @@ public class TDBulkLoadSessionStartRequestBuilder
 
     public TDBulkLoadSessionStartRequestBuilder setDomainKey(Optional<String> domainKey)
     {
-        return setDomainKey(domainKey.orNull());
+        return setDomainKey(domainKey.orElse(null));
     }
 
     public TDBulkLoadSessionStartRequest build()

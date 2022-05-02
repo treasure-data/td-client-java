@@ -3,11 +3,11 @@ package com.treasuredata.client.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Optional;
 import org.immutables.value.Value;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Optional;
 import java.util.TimeZone;
 
 @Value.Immutable

@@ -18,9 +18,8 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
-
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * Exception class for reporting http server status code
@@ -47,7 +46,7 @@ public class TDClientHttpException
     public Optional<Date> getRetryAfter()
     {
         if (retryAfter == -1) {
-            return Optional.absent();
+            return Optional.empty();
         }
         else {
             return Optional.of(new Date(retryAfter));
