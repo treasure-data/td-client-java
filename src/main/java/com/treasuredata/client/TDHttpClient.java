@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -86,6 +87,7 @@ public class TDHttpClient
     static ObjectMapper defaultObjectMapper = new ObjectMapper()
             .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
             .registerModule(new GuavaModule())   // for mapping to Guava Optional class
+            .registerModule(new Jdk8Module())
             .configure(DeserializationFeature.UNWRAP_ROOT_VALUE, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
