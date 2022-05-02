@@ -24,34 +24,35 @@ import com.google.common.collect.ImmutableList;
 import com.treasuredata.client.model.impl.TDColumnTypeDeserializer;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 @JsonDeserialize(using = TDColumnTypeDeserializer.class)
 public class TDColumnType implements Serializable
 {
-    public static final TDColumnType INT = new TDColumnType(TDTypeName.INT, Optional.empty());
-    public static final TDColumnType LONG = new TDColumnType(TDTypeName.LONG, Optional.empty());
-    public static final TDColumnType FLOAT = new TDColumnType(TDTypeName.FLOAT, Optional.empty());
-    public static final TDColumnType DOUBLE = new TDColumnType(TDTypeName.DOUBLE, Optional.empty());
-    public static final TDColumnType STRING = new TDColumnType(TDTypeName.STRING, Optional.empty());
+    public static final TDColumnType INT = new TDColumnType(TDTypeName.INT, Collections.emptyList());
+    public static final TDColumnType LONG = new TDColumnType(TDTypeName.LONG, Collections.emptyList());
+    public static final TDColumnType FLOAT = new TDColumnType(TDTypeName.FLOAT, Collections.emptyList());
+    public static final TDColumnType DOUBLE = new TDColumnType(TDTypeName.DOUBLE, Collections.emptyList());
+    public static final TDColumnType STRING = new TDColumnType(TDTypeName.STRING, Collections.emptyList());
 
     public static final List<TDColumnType> primitiveTypes = ImmutableList.of(INT, LONG, FLOAT, DOUBLE, STRING);
 
     public static TDColumnType newArrayType(TDColumnType elementType)
     {
-        return new TDColumnType(TDTypeName.ARRAY, Optional.of(ImmutableList.of(elementType)));
+        return new TDColumnType(TDTypeName.ARRAY, ImmutableList.of(elementType));
     }
 
     public static TDColumnType newMapType(TDColumnType keyType, TDColumnType valueType)
     {
-        return new TDColumnType(TDTypeName.MAP, Optional.of(ImmutableList.of(keyType, valueType)));
+        return new TDColumnType(TDTypeName.MAP, ImmutableList.of(keyType, valueType));
     }
 
     private final TDTypeName typeName;
-    private final Optional<List<TDColumnType>> elementTypes;
+    private final List<TDColumnType> elementTypes;
 
-    private TDColumnType(TDTypeName typeName, Optional<List<TDColumnType>> elementTypes)
+    private TDColumnType(TDTypeName typeName, List<TDColumnType> elementTypes)
     {
         this.typeName = typeName;
         this.elementTypes = elementTypes;
@@ -64,7 +65,7 @@ public class TDColumnType implements Serializable
 
     public boolean isPrimitive()
     {
-        return !elementTypes.isPresent();
+        return elementTypes.size() == 0;
     }
 
     public boolean isArrayType()
@@ -82,7 +83,7 @@ public class TDColumnType implements Serializable
         if (!isArrayType()) {
             throw new UnsupportedOperationException("getArrayElementType is not supported for " + this);
         }
-        return elementTypes.get().get(0);
+        return elementTypes.get(0);
     }
 
     public TDColumnType getMapKeyType()
@@ -90,7 +91,7 @@ public class TDColumnType implements Serializable
         if (!isMapType()) {
             throw new UnsupportedOperationException("getmapKeyType is not supported for " + this);
         }
-        return elementTypes.get().get(0);
+        return elementTypes.get(0);
     }
 
     public TDColumnType getMapValueType()
@@ -98,7 +99,7 @@ public class TDColumnType implements Serializable
         if (!isMapType()) {
             throw new UnsupportedOperationException("getMapValueType is not supported for " + this);
         }
-        return elementTypes.get().get(1);
+        return elementTypes.get(1);
     }
 
     @JsonValue
@@ -129,7 +130,7 @@ public class TDColumnType implements Serializable
         if (!typeName.equals(that.typeName)) {
             return false;
         }
-        return !(elementTypes != null ? !elementTypes.equals(that.elementTypes) : that.elementTypes != null);
+        return Objects.equals(elementTypes, that.elementTypes);
     }
 
     @Override
