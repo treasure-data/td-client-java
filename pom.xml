@@ -491,15 +491,7 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav-jackrabbit</artifactId>
-        <version>2.9</version>
-      </extension>
-    </extensions>
   </build>
 
   <reporting>
