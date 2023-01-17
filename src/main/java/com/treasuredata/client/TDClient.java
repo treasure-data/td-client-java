@@ -364,6 +364,13 @@ public class TDClient
         return doGet("/v3/database/list", new TypeReference<List<TDDatabase>>() {});
     }
 
+    @Override
+    public TDDatabase showDatabase(String databaseName)
+            throws TDClientException
+    {
+        return doGet(buildUrl("/v3/database/show", databaseName), TDDatabase.class);
+    }
+
     private static Pattern acceptableNamePattern = Pattern.compile("^([a-z0-9_]+)$");
 
     static String validateDatabaseName(String databaseName)

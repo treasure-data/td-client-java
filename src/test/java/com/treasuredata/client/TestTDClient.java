@@ -208,6 +208,17 @@ public class TestTDClient
     }
 
     @Test
+    public void showDatabase()
+            throws Exception
+    {
+        String databaseName = "sample_datasets";
+        TDDatabase dbDetail = client.showDatabase(databaseName);
+        assertEquals("should be named with sample_datasets", dbDetail.getName(), databaseName);
+
+        logger.debug(dbDetail.toString());
+    }
+
+    @Test
     public void listDatabases()
             throws Exception
     {
