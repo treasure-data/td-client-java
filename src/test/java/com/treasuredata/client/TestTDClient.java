@@ -213,7 +213,7 @@ public class TestTDClient
     {
         String databaseName = "sample_datasets";
         TDDatabase dbDetail = client.showDatabase(databaseName);
-        assertEquals("should be named with sample_datasets", dbDetail.getName(), databaseName);
+        assertEquals("should be named with sample_datasets", databaseName, dbDetail.getName());
 
         logger.debug(dbDetail.toString());
     }
