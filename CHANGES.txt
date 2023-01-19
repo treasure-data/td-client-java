@@ -1,3 +1,6 @@
+Release 0.9.7 - 2023-01-19
+ - Support showDatabase API
+
 Release 0.9.6 - 2021-08-19
  - Use jittering by default for http request retires
  - Handle timeout exception after getting JSON responses
