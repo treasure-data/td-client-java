@@ -117,6 +117,14 @@ public interface TDClientApi<ClientImpl>
     List<String> listDatabaseNames();
 
     /**
+     * Get the detailed information of a database
+     *
+     * @return TDDatabase
+     * @throws TDClientException if failed to retrieve the detailed information of a database.
+     */
+    TDDatabase showDatabase(String databaseName);
+
+    /**
      * Get the detailed information of databases
      *
      * @return list of TDDatabase

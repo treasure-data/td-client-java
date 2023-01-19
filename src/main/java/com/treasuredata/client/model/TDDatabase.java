@@ -26,6 +26,7 @@ import com.google.common.base.Optional;
 @JsonCollectionRootName(value = "databases")
 public class TDDatabase
 {
+    private final String id;
     private final String name;
     private final long count;
     private final String createdAt;
@@ -35,6 +36,7 @@ public class TDDatabase
 
     @JsonCreator
     public TDDatabase(
+            @JsonProperty("id") String id,
             @JsonProperty("name") String name,
             @JsonProperty("count") long count,
             @JsonProperty("created_at") String createdAt,
@@ -43,12 +45,19 @@ public class TDDatabase
             @JsonProperty("permission") String permission
     )
     {
+        this.id = id;
         this.name = name;
         this.count = count;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.organization = organization;
         this.permission = permission;
+    }
+
+    @JsonProperty
+    public String getId()
+    {
+        return id;
     }
 
     @JsonProperty
