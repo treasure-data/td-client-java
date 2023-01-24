@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -76,6 +75,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -237,13 +237,13 @@ public class TDClient
     protected <ResultType> ResultType doPost(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        return this.<ResultType>doPost(path, ImmutableMap.<String, String>of(), Optional.<String>absent(), resultTypeClass);
+        return this.<ResultType>doPost(path, ImmutableMap.<String, String>of(), Optional.empty(), resultTypeClass);
     }
 
     protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        return this.<ResultType>doPost(path, queryParam, Optional.<String>absent(), resultTypeClass);
+        return this.<ResultType>doPost(path, queryParam, Optional.empty(), resultTypeClass);
     }
 
     protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, File file, Class<ResultType> resultTypeClass)
@@ -343,7 +343,7 @@ public class TDClient
     public String serverStatus()
     {
         // No API key is requried for server_status
-        return httpClient.call(TDApiRequest.Builder.GET("/v3/system/server_status").build(), Optional.<String>absent());
+        return httpClient.call(TDApiRequest.Builder.GET("/v3/system/server_status").build(), Optional.empty());
     }
 
     @Override
@@ -660,14 +660,10 @@ public class TDClient
                 doPost(
                         buildUrl("/v3/job/issue", jobRequest.getType().getType(), jobRequest.getDatabase()),
                         queryParam,
-                        jobRequest.getConfig().transform(new Function<ObjectNode, String>()
-                        {
-                            public String apply(ObjectNode config)
-                            {
+                        jobRequest.getConfig().map((config) -> {
                                 ObjectNode body = config.objectNode();
                                 body.set("config", config);
                                 return body.toString();
-                            }
                         }),
                         TDJobSubmitResult.class);
         return result.getJobId();
@@ -787,13 +783,13 @@ public class TDClient
     @Override
     public void performBulkImportSession(String sessionName, TDJob.Priority priority)
     {
-        performBulkImportSession(sessionName, Optional.absent(), priority);
+        performBulkImportSession(sessionName, Optional.empty(), priority);
     }
 
     @Override
     public void performBulkImportSession(String sessionName, Optional<String> poolName, TDJob.Priority priority)
     {
-        Optional<String> jsonBody = Optional.absent();
+        Optional<String> jsonBody = Optional.empty();
         if (poolName.isPresent()) {
             jsonBody = Optional.of(JSONObject.toJSONString(ImmutableMap.of("pool_name", poolName.get())));
         }
@@ -1068,7 +1064,7 @@ public class TDClient
             return Optional.of(distribution);
         }
         catch (TDClientHttpNotFoundException e) {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

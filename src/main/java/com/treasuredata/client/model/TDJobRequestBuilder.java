@@ -19,7 +19,8 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 public class TDJobRequestBuilder
 {
@@ -28,15 +29,15 @@ public class TDJobRequestBuilder
     private String query;
     private TDJob.Priority priority = TDJob.Priority.NORMAL;
     private String result;
-    private Optional<Integer> retryLimit = Optional.absent();
+    private Optional<Integer> retryLimit = Optional.empty();
     private String poolName;
-    private Optional<String> table = Optional.absent();
-    private Optional<ObjectNode> config = Optional.absent();
-    private Optional<Long> scheduledTime = Optional.absent();
-    private Optional<String> domainKey = Optional.absent();
-    private Optional<Long> resultConnectionId = Optional.absent();
-    private Optional<String> resultConnectionSettings = Optional.absent();
-    private Optional<TDJob.EngineVersion> engineVersion = Optional.absent();
+    private Optional<String> table = Optional.empty();
+    private Optional<ObjectNode> config = Optional.empty();
+    private Optional<Long> scheduledTime = Optional.empty();
+    private Optional<String> domainKey = Optional.empty();
+    private Optional<Long> resultConnectionId = Optional.empty();
+    private Optional<String> resultConnectionSettings = Optional.empty();
+    private Optional<TDJob.EngineVersion> engineVersion = Optional.empty();
 
     public TDJobRequestBuilder setResultOutput(String result)
     {
@@ -46,7 +47,7 @@ public class TDJobRequestBuilder
 
     public Optional<String> getResultOutput()
     {
-        return Optional.fromNullable(result);
+        return Optional.ofNullable(result);
     }
 
     public TDJobRequestBuilder setDatabase(String database)
@@ -124,7 +125,7 @@ public class TDJobRequestBuilder
 
     public Optional<String> getPoolName()
     {
-        return Optional.fromNullable(poolName);
+        return Optional.ofNullable(poolName);
     }
 
     public TDJobRequestBuilder setTable(String table)
@@ -151,7 +152,7 @@ public class TDJobRequestBuilder
 
     public TDJobRequestBuilder setScheduledTime(Long scheduledTime)
     {
-        return setScheduledTime(Optional.fromNullable(scheduledTime));
+        return setScheduledTime(Optional.ofNullable(scheduledTime));
     }
 
     public TDJobRequestBuilder setScheduledTime(Optional<Long> scheduledTime)
@@ -178,7 +179,7 @@ public class TDJobRequestBuilder
 
     public TDJobRequestBuilder setDomainKey(String domainKey)
     {
-        return setDomainKey(Optional.fromNullable(domainKey));
+        return setDomainKey(Optional.ofNullable(domainKey));
     }
 
     public Optional<Long> getResultConnectionId()
@@ -210,18 +211,18 @@ public class TDJobRequestBuilder
 
     public TDJobRequestBuilder setResultConnectionSettings(String resultConnectionSettings)
     {
-        return setResultConnectionSettings(Optional.fromNullable(resultConnectionSettings));
+        return setResultConnectionSettings(Optional.ofNullable(resultConnectionSettings));
     }
 
     public TDJobRequestBuilder setEngineVersion(String engineVersion)
     {
-        this.engineVersion = Optional.fromNullable(TDJob.EngineVersion.fromString(engineVersion));
+        this.engineVersion = Optional.ofNullable(TDJob.EngineVersion.fromString(engineVersion));
         return this;
     }
 
     public TDJobRequestBuilder setEngineVersion(TDJob.EngineVersion engineVersion)
     {
-        this.engineVersion = Optional.fromNullable(engineVersion);
+        this.engineVersion = Optional.ofNullable(engineVersion);
         return this;
     }
 

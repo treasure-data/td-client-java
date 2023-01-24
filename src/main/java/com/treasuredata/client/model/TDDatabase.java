@@ -21,7 +21,8 @@ package com.treasuredata.client.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 @JsonCollectionRootName(value = "databases")
 public class TDDatabase
