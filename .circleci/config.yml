@@ -1,4 +1,6 @@
-version: 2
+version: 2.1
+orbs:
+  maven: circleci/maven@1.4.0
 jobs:
   build:
     working_directory: /tmp/td-client-java
@@ -6,8 +8,11 @@ jobs:
       - image: cimg/openjdk:8.0
     steps:
       - checkout
-      - run:
-          name: Test
-          command: mvn test -Dtd.client.endpoint=api-staging.treasuredata.com
+      - maven/with_cache:
+          steps:
+            - run:
+                name: Test
+                command: mvn test -Dtd.client.endpoint=api-staging.treasuredata.com
+      - maven/process_test_results
       - store_artifacts:
             path: /tmp/td-client-java/target/site
