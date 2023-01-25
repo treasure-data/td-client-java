@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
@@ -49,7 +48,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -59,6 +61,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDApiRequest.urlEncode;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
 import static com.treasuredata.client.TDHttpRequestHandler.ResponseContext;
@@ -97,7 +100,7 @@ public class TDHttpClient
     /**
      * Visible for testing.
      */
-    final Multimap<String, String> headers;
+    final Map<String, Collection<String>> headers;
 
     public TDHttpClient(TDClientConfig config)
     {
@@ -125,7 +128,7 @@ public class TDHttpClient
 
         // Build OkHttpClient
         this.httpClient = builder.build();
-        this.headers = ImmutableMultimap.copyOf(config.headers);
+        this.headers = config.headersV2;
 
         // Prepare jackson json-object mapper
         this.objectMapper = defaultObjectMapper;
@@ -136,7 +139,7 @@ public class TDHttpClient
         this(reference.config, reference.httpClient, reference.objectMapper, reference.headers);
     }
 
-    private TDHttpClient(TDClientConfig config, OkHttpClient httpClient, ObjectMapper objectMapper, Multimap<String, String> headers)
+    private TDHttpClient(TDClientConfig config, OkHttpClient httpClient, ObjectMapper objectMapper, Map<String, Collection<String>> headers)
     {
         this.config = config;
         this.httpClient = httpClient;
@@ -148,16 +151,28 @@ public class TDHttpClient
      * Get a {@link TDHttpClient} that uses the specified headers for each request. Reuses the same
      * underlying http client so closing the returned instance will return this instance as well.
      *
+     * @deprecated Use {@link #withHeaders(Map)} instead.
      * @param headers
      * @return
      */
+    @Deprecated
     public TDHttpClient withHeaders(Multimap<String, String> headers)
     {
-        Multimap<String, String> mergedHeaders = ImmutableMultimap.<String, String>builder()
-                .putAll(this.headers)
-                .putAll(headers)
-                .build();
-        return new TDHttpClient(config, httpClient, objectMapper, mergedHeaders);
+        return withHeaders(headers.asMap());
+    }
+
+    /**
+     * Get a {@link TDHttpClient} that uses the specified headers for each request. Reuses the same
+     * underlying http client so closing the returned instance will return this instance as well.
+     *
+     * @param headers
+     * @return
+     */
+    public TDHttpClient withHeaders(Map<String, ? extends Collection<String>> headers)
+    {
+        Map<String, Collection<String>> mergedHeaders = new HashMap<>(this.headers);
+        mergedHeaders.putAll(headers);
+        return new TDHttpClient(config, httpClient, objectMapper, Collections.unmodifiableMap(mergedHeaders));
     }
 
     ObjectMapper getObjectMapper()
@@ -228,7 +243,7 @@ public class TDHttpClient
         String dateHeader = RFC2822_FORMAT.get().format(new Date());
         StringJoiner joiner = new StringJoiner(",");
         joiner.add(getClientName());
-        for (String s : headers.get(USER_AGENT)) {
+        for (String s : headers.getOrDefault(USER_AGENT, Collections.emptyList())) {
             joiner.add(s);
         }
         String userAgent = joiner.toString();
@@ -241,9 +256,11 @@ public class TDHttpClient
         request = setTDAuthHeaders(request, dateHeader);
 
         // Set other headers
-        for (Map.Entry<String, String> entry : headers.entries()) {
-            if (!entry.getKey().equals(USER_AGENT)) {
-                request = request.addHeader(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Collection<String>> e : headers.entrySet()) {
+            if (!e.getKey().equals(USER_AGENT)) {
+                for (String v : e.getValue()) {
+                    request = request.addHeader(e.getKey(), v);
+                }
             }
         }
         for (Map.Entry<String, String> entry : apiRequest.getHeaderParams().entries()) {

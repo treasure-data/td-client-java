@@ -18,19 +18,20 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Collections;
 
 import static java.util.Objects.requireNonNull;
 
@@ -45,7 +46,7 @@ public class TDApiRequest
     private final TDHttpMethod method;
     private final String path;
     private final Map<String, String> queryParams;
-    private final Multimap<String, String> headerParams;
+    private final Map<String, Collection<String>> headerParams;
     private final Optional<String> postJson;
     private final Optional<File> putFile;
     private final Optional<byte[]> content;
@@ -57,7 +58,7 @@ public class TDApiRequest
             TDHttpMethod method,
             String path,
             Map<String, String> queryParams,
-            Multimap<String, String> headerParams,
+            Map<String, Collection<String>> headerParams,
             Optional<String> postJson,
             Optional<File> putFile,
             Optional<byte[]> content,
@@ -80,7 +81,7 @@ public class TDApiRequest
 
     public TDApiRequest withUri(String uri)
     {
-        return new TDApiRequest(method, uri, ImmutableMap.copyOf(queryParams), ImmutableMultimap.copyOf(headerParams), postJson, putFile, content, contentOffset, contentLength, followRedirects);
+        return new TDApiRequest(method, uri, Collections.unmodifiableMap(new HashMap<>(queryParams)), Collections.unmodifiableMap(new HashMap<>(headerParams)), postJson, putFile, content, contentOffset, contentLength, followRedirects);
     }
 
     public String getPath()
@@ -98,7 +99,21 @@ public class TDApiRequest
         return queryParams;
     }
 
+    /**
+     * @deprecated Use {@link #getHeaderParamsV2()} instead.
+     * @return
+     */
+    @Deprecated
     public Multimap<String, String> getHeaderParams()
+    {
+        ImmutableMultimap.Builder<String, String> builder = new ImmutableMultimap.Builder<>();
+        for (Map.Entry<String, Collection<String>> e : headerParams.entrySet()) {
+            builder.putAll(e.getKey(), e.getValue());
+        }
+        return builder.build();
+    }
+
+    public Map<String, Collection<String>> getHeaderParamsV2()
     {
         return headerParams;
     }
@@ -135,12 +150,12 @@ public class TDApiRequest
 
     public static class Builder
     {
-        private static final Map<String, String> EMPTY_MAP = ImmutableMap.of();
-        private static final Multimap<String, String> EMPTY_HEADERS = ImmutableMultimap.of();
+        private static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
+        private static final Map<String, Collection<String>> EMPTY_HEADERS = Collections.emptyMap();
         private TDHttpMethod method;
         private String path;
         private Map<String, String> queryParams;
-        private ImmutableMultimap.Builder<String, String> headerParams;
+        private HashMap<String, Collection<String>> headerParams;
         private Optional<String> postJson = Optional.empty();
         private Optional<File> file = Optional.empty();
         private Optional<byte[]> content = Optional.empty();
@@ -176,19 +191,36 @@ public class TDApiRequest
 
         public Builder addHeader(String key, String value)
         {
-            if (headerParams == null) {
-                headerParams = ImmutableMultimap.builder();
-            }
-            headerParams.put(key, value);
-            return this;
+            return addHeaders(Collections.singletonMap(key, Collections.singletonList(value)));
         }
 
+        /**
+         * @deprecated Use {@link #addHeaders(Map)} instead.
+         * @param headers
+         * @return
+         */
+        @Deprecated
         public Builder addHeaders(Multimap<String, String> headers)
         {
+            return this.addHeaders(headers.asMap());
+        }
+
+        public Builder addHeaders(Map<String, ? extends Collection<String>> headers)
+        {
             if (headerParams == null) {
-                headerParams = ImmutableMultimap.builder();
+                headerParams = new HashMap<>();
             }
-            headerParams.putAll(headers);
+            for (Map.Entry<String, ? extends Collection<String>> e : headers.entrySet()) {
+                headerParams.compute(e.getKey(), (unused, list) -> {
+                    if (list == null) {
+                        return new ArrayList<>(e.getValue());
+                    }
+                    else {
+                        list.addAll(e.getValue());
+                        return list;
+                    }
+                });
+            }
             return this;
         }
 
@@ -233,7 +265,7 @@ public class TDApiRequest
                     method,
                     path,
                     queryParams != null ? queryParams : EMPTY_MAP,
-                    headerParams != null ? headerParams.build() : EMPTY_HEADERS,
+                    headerParams != null ? Collections.unmodifiableMap(new HashMap<>(headerParams)) : EMPTY_HEADERS,
                     postJson,
                     file,
                     content,

@@ -18,6 +18,8 @@
  */
 package com.treasuredata.client;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 import com.google.common.base.Function;
@@ -72,9 +74,19 @@ public interface TDClientApi<ClientImpl>
      * This instance will share the same internal http client, so closing the returned client will invalidate the current instance.
      *
      * @param headers
+     * @deprecated Use {@link #withHeaders(Map)} instead
      * @return
      */
-    ClientImpl withHeaders(Multimap<String, String> headers);
+    @Deprecated ClientImpl withHeaders(Multimap<String, String> headers);
+
+    /**
+     * Return a TDClientApi implementation that uses the provided headers when making api requests.
+     * This instance will share the same internal http client, so closing the returned client will invalidate the current instance.
+     *
+     * @param headers
+     * @return
+     */
+    ClientImpl withHeaders(Map<String, ? extends Collection<String>> headers);
 
     /**
      * Perform user email and password based authentication and return a new client that will use apikey based authentication.

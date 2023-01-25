@@ -18,22 +18,21 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.Set;
 
 import static com.treasuredata.client.TDClientConfig.Type.API_ENDPOINT;
 import static com.treasuredata.client.TDClientConfig.Type.API_PORT;
@@ -65,10 +64,10 @@ import static org.junit.Assert.fail;
 @SuppressWarnings("unchecked")
 public class TestTDClientConfig
 {
-    static ImmutableMap<TDClientConfig.Type, Object> m;
+    static Map<TDClientConfig.Type, Object> m;
 
     static {
-        ImmutableMap.Builder<TDClientConfig.Type, Object> p = ImmutableMap.builder();
+        Map<TDClientConfig.Type, Object> p = new HashMap<>();
         p.put(API_ENDPOINT, "api2.treasuredata.com");
         p.put(API_PORT, 8981);
         p.put(USESSL, true);
@@ -81,7 +80,7 @@ public class TestTDClientConfig
         p.put(RETRY_MULTIPLIER, 1.5);
         p.put(USER, "xxxx");
         p.put(PASSOWRD, "yyyy");
-        m = p.build();
+        m = Collections.unmodifiableMap(p);
 
         assertTrue(new HashSet<>(TDClientConfig.knownProperties()).containsAll(m.keySet()));
     }
@@ -214,17 +213,25 @@ public class TestTDClientConfig
     public void customHeaders()
             throws Exception
     {
-        Multimap<String, String> noHeaders = ImmutableMultimap.of();
-        Multimap<String, String> headers = ImmutableMultimap.of(
-                "k1", "v1a",
-                "k2", "v2");
-        Multimap<String, String> extraHeaders = ImmutableMultimap.of(
-                "k1", "v1b",
-                "k3", "v3");
-        Multimap<String, String> combinedHeaders = ImmutableMultimap.<String, String>builder()
-                .putAll(headers)
-                .putAll(extraHeaders)
-                .build();
+        Map<String, List<String>> noHeaders = Collections.emptyMap();
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("k1", Collections.singletonList("v1a"));
+        headers.put("k2", Collections.singletonList("v2"));
+        Map<String, List<String>> extraHeaders = new HashMap<>();
+        headers.put("k1", Collections.singletonList("v1b"));
+        headers.put("k3", Collections.singletonList("v3"));
+        Map<String, List<String>> combinedHeaders = new HashMap<>(headers);
+        for (Map.Entry<String, List<String>> e : extraHeaders.entrySet()) {
+            combinedHeaders.compute(e.getKey(), (unused, col) -> {
+               if (col != null) {
+                   col.addAll(e.getValue());
+                   return col;
+               }
+               else {
+                   return new ArrayList<>(e.getValue());
+               }
+            });
+        }
 
         TDClient clientWithNoHeaders1 = TDClient.newBuilder(false).build();
         TDClient clientWithNoHeaders2 = TDClient.newBuilder(false).setHeaders(noHeaders).build();
@@ -258,26 +265,24 @@ public class TestTDClientConfig
         assertThat(config.withApiKey(Optional.empty()).withApiKey("bar").apiKey, is(Optional.of("bar")));
     }
 
-    private Matcher<Multimap<String, String>> equalTo(final Multimap<String, String> multimap)
+    private Matcher<Map<String, ? extends Collection<String>>> equalTo(final Map<String, ? extends Collection<String>> multimap)
     {
-        return new BaseMatcher<Multimap<String, String>>()
+        return new BaseMatcher<Map<String, ? extends Collection<String>>>()
         {
             @Override
             public boolean matches(Object item)
             {
-                if (!(item instanceof Multimap)) {
+                if (!(item instanceof Map)) {
                     return false;
                 }
-                Multimap<String, String> other = (Multimap<String, String>) item;
-                Set<Map.Entry<String, String>> entries = ImmutableSet.copyOf(multimap.entries());
-                Set<Map.Entry<String, String>> otherEntries = ImmutableSet.copyOf(other.entries());
-                return entries.equals(otherEntries);
+                Map<String, Collection<String>> other = (Map<String, Collection<String>>) item;
+                return multimap.entrySet().equals(other.entrySet());
             }
 
             @Override
             public void describeTo(Description description)
             {
-                description.appendValue(multimap.entries());
+                description.appendValue(multimap.entrySet());
             }
         };
     }
