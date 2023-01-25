@@ -115,7 +115,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>29.0-jre</version>
+      <version>31.1-jre</version>
     </dependency>
 
     <dependency>
@@ -133,12 +133,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>${jackson-core.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-guava</artifactId>
       <version>${jackson-core.version}</version>
     </dependency>
 
