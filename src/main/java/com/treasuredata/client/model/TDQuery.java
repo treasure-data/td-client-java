@@ -21,7 +21,6 @@ package com.treasuredata.client.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Throwables;
 
 import java.io.StringWriter;
 
@@ -54,7 +53,7 @@ public class TDQuery
             return new TDQuery(s.toString());
         }
         catch (java.io.IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 

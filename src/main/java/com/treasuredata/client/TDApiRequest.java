@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -251,7 +250,7 @@ public class TDApiRequest
             return URLEncoder.encode(value, "UTF-8");
         }
         catch (UnsupportedEncodingException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 }
