@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Escape URL path segment in a compatible way with com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
+ */
 final class UrlPathSegmentEscaper
 {
     private UrlPathSegmentEscaper()
@@ -31,8 +34,8 @@ final class UrlPathSegmentEscaper
         return sb.toString();
     }
 
-    private static final Pattern NO_ESCAPE_CHARS = Pattern.compile("\\+|%(?:2[146789BC]|3[ABD]|7E|40)");
-    private static final Map<String, String> REPLACEMENT_TABLE;
+    private static final Pattern GUAVA_INCOMPATIBLE = Pattern.compile("\\+|%(?:2[146789BC]|3[ABD]|7E|40)");
+    private static final Map<String, String> REPLACEMENT_MAP;
     static {
         Map<String, String> m = new HashMap<>();
         m.put("+", "%20");
@@ -49,14 +52,14 @@ final class UrlPathSegmentEscaper
         m.put("%3D", "=");
         m.put("%7E", "~");
         m.put("%40", "@");
-        REPLACEMENT_TABLE = Collections.unmodifiableMap(m);
+        REPLACEMENT_MAP = Collections.unmodifiableMap(m);
     }
 
     static String escape(String s)
     {
         try {
             String encoded = URLEncoder.encode(s, "UTF-8");
-            return replaceWithMap(encoded, NO_ESCAPE_CHARS, REPLACEMENT_TABLE);
+            return replaceWithMap(encoded, GUAVA_INCOMPATIBLE, REPLACEMENT_MAP);
         }
         catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
