@@ -191,11 +191,11 @@ public class TDApiRequest
 
         public Builder addHeader(String key, String value)
         {
-            return addHeaders(Collections.singletonMap(key, Collections.singletonList(value)));
+            return addHeaders(key, Collections.singletonList(value));
         }
 
         /**
-         * @deprecated Use {@link #addHeaders(Map)} instead.
+         * @deprecated Use {@link #addHeaders(Map)} or {@link #addHeaders(String, Collection)} instead.
          * @param headers
          * @return
          */
@@ -205,23 +205,37 @@ public class TDApiRequest
             return this.addHeaders(headers.asMap());
         }
 
+        public Builder addHeaders(String key, Collection<String> values)
+        {
+            if (headerParams == null) {
+                headerParams = new HashMap<>();
+            }
+            addHeaderValues(key, values);
+            return this;
+        }
+
         public Builder addHeaders(Map<String, ? extends Collection<String>> headers)
         {
             if (headerParams == null) {
                 headerParams = new HashMap<>();
             }
             for (Map.Entry<String, ? extends Collection<String>> e : headers.entrySet()) {
-                headerParams.compute(e.getKey(), (unused, list) -> {
-                    if (list == null) {
-                        return new ArrayList<>(e.getValue());
-                    }
-                    else {
-                        list.addAll(e.getValue());
-                        return list;
-                    }
-                });
+                addHeaderValues(e.getKey(), e.getValue());
             }
             return this;
+        }
+
+        private void addHeaderValues(String key, Collection<String> values)
+        {
+            headerParams.compute(key, (unused, list) -> {
+                if (list == null) {
+                    return new ArrayList<>(values);
+                }
+                else {
+                    list.addAll(values);
+                    return list;
+                }
+            });
         }
 
         public Builder addQueryParam(String key, String value)
