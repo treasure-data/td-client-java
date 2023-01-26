@@ -61,7 +61,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
 import static com.google.common.net.HttpHeaders.DATE;
@@ -374,9 +373,13 @@ public class TDHttpClient
         if (executionCount > config.retryLimit) {
             logger.warn("API request retry limit exceeded: ({}/{})", config.retryLimit, config.retryLimit);
 
-            checkState(context.rootCause.isPresent(), "rootCause must be present here");
-            // Throw the last seen error
-            throw context.rootCause.get();
+            if (context.rootCause.isPresent()) {
+                // Throw the last seen error
+                throw context.rootCause.get();
+            }
+            else {
+                throw new IllegalStateException("rootCause must be present here");
+            }
         }
         else {
             if (executionCount == 0) {
