@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * An abstraction of TD API request, which will be translated to Jetty's http client request.
@@ -67,16 +67,16 @@ public class TDApiRequest
             Optional<Boolean> followRedirects
     )
     {
-        this.method = checkNotNull(method, "method is null");
-        this.path = checkNotNull(path, "uri is null");
-        this.queryParams = checkNotNull(queryParams, "queryParms is null");
-        this.headerParams = checkNotNull(headerParams, "headerParams is null");
-        this.postJson = checkNotNull(postJson, "postJson is null");
-        this.putFile = checkNotNull(putFile, "putFile is null");
-        this.content = checkNotNull(content, "content is null");
+        this.method = requireNonNull(method, "method is null");
+        this.path = requireNonNull(path, "uri is null");
+        this.queryParams = requireNonNull(queryParams, "queryParms is null");
+        this.headerParams = requireNonNull(headerParams, "headerParams is null");
+        this.postJson = requireNonNull(postJson, "postJson is null");
+        this.putFile = requireNonNull(putFile, "putFile is null");
+        this.content = requireNonNull(content, "content is null");
         this.contentOffset = contentOffset;
         this.contentLength = contentLength;
-        this.followRedirects = checkNotNull(followRedirects, "followRedirects is null");
+        this.followRedirects = requireNonNull(followRedirects, "followRedirects is null");
     }
 
     public TDApiRequest withUri(String uri)

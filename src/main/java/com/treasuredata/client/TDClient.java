@@ -79,8 +79,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -189,8 +189,8 @@ public class TDClient
     protected <ResultType> ResultType doGet(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(resultTypeClass, "resultTypeClass is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest request = TDApiRequest.Builder.GET(path).build();
         return httpClient.call(request, apiKeyCache, resultTypeClass);
@@ -199,8 +199,8 @@ public class TDClient
     protected <ResultType> ResultType doGet(String path, TypeReference<ResultType> resultTypeReference)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(resultTypeReference, "resultTypeReference is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(resultTypeReference, "resultTypeReference is null");
 
         TDApiRequest request = TDApiRequest.Builder.GET(path).build();
         return httpClient.call(request, apiKeyCache, resultTypeReference);
@@ -209,8 +209,8 @@ public class TDClient
     protected <ResultType> ResultType doGet(String path, JavaType resultType)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(resultType, "resultType is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(resultType, "resultType is null");
 
         TDApiRequest request = TDApiRequest.Builder.GET(path).build();
         return httpClient.call(request, apiKeyCache, resultType);
@@ -219,10 +219,10 @@ public class TDClient
     protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Optional<String> jsonBody, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(queryParam, "param is null");
-        checkNotNull(jsonBody, "body is null");
-        checkNotNull(resultTypeClass, "resultTypeClass is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(queryParam, "param is null");
+        requireNonNull(jsonBody, "body is null");
+        requireNonNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
@@ -249,8 +249,8 @@ public class TDClient
     protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, File file, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(file, "file is null");
-        checkNotNull(resultTypeClass, "resultTypeClass is null");
+        requireNonNull(file, "file is null");
+        requireNonNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest.Builder request = buildPutRequest(path, queryParam);
         request.setFile(file);
@@ -260,8 +260,8 @@ public class TDClient
     protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, byte[] content, int offset, int length, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(content, "content is null");
-        checkNotNull(resultTypeClass, "resultTypeClass is null");
+        requireNonNull(content, "content is null");
+        requireNonNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest.Builder request = buildPutRequest(path, queryParam);
         request.setContent(content, offset, length);
@@ -270,8 +270,8 @@ public class TDClient
 
     private TDApiRequest.Builder buildPutRequest(String path, Map<String, String> queryParam)
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(queryParam, "param is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(queryParam, "param is null");
 
         TDApiRequest.Builder request = TDApiRequest.Builder.PUT(path);
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
@@ -284,7 +284,7 @@ public class TDClient
     protected String doPost(String path)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
+        requireNonNull(path, "path is null");
 
         TDApiRequest request = TDApiRequest.Builder.POST(path).build();
         return httpClient.call(request, apiKeyCache);
@@ -293,8 +293,8 @@ public class TDClient
     protected String doPost(String path, Map<String, String> queryParam)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(queryParam, "param is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(queryParam, "param is null");
 
         TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
@@ -307,8 +307,8 @@ public class TDClient
     protected String doPut(String path, File filePath)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(filePath, "filePath is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(filePath, "filePath is null");
 
         TDApiRequest request = TDApiRequest.Builder.PUT(path).setFile(filePath).build();
         return httpClient.call(request, apiKeyCache);
@@ -586,9 +586,9 @@ public class TDClient
     @Override
     public void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema, boolean ignoreDuplicate)
     {
-        checkNotNull(databaseName, "databaseName is null");
-        checkNotNull(tableName, "tableName is null");
-        checkNotNull(newSchema, "newSchema is null");
+        requireNonNull(databaseName, "databaseName is null");
+        requireNonNull(tableName, "tableName is null");
+        requireNonNull(newSchema, "newSchema is null");
 
         ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
         for (TDColumn newColumn : newSchema) {
@@ -601,9 +601,9 @@ public class TDClient
     @Override
     public void appendTableSchema(String databaseName, String tableName, List<TDColumn> appendedSchema)
     {
-        checkNotNull(databaseName, "databaseName is null");
-        checkNotNull(tableName, "tableName is null");
-        checkNotNull(appendedSchema, "appendedSchema is null");
+        requireNonNull(databaseName, "databaseName is null");
+        requireNonNull(tableName, "tableName is null");
+        requireNonNull(appendedSchema, "appendedSchema is null");
 
         ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
         for (TDColumn appendedColumn : appendedSchema) {

@@ -20,7 +20,7 @@ package com.treasuredata.client;
 
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Exception class for reporting td-client errors
@@ -66,10 +66,8 @@ public class TDClientException
     public TDClientException(ErrorType errorType, String message, Optional<Exception> cause)
     {
         super(formatErrorMessage(errorType, message, cause), cause.orElse(null));
-        checkNotNull(errorType, "errorType is null");
-        checkNotNull(cause, "cause is null");
-        this.errorType = errorType;
-        this.rootCause = cause;
+        this.errorType = requireNonNull(errorType, "errorType is null");
+        this.rootCause = requireNonNull(cause, "cause is null");
     }
 
     public TDClientException(ErrorType errorType, String message, Exception cause)

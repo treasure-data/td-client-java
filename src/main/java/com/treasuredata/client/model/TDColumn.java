@@ -34,8 +34,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
 
 public class TDColumn implements Serializable
 {
@@ -63,9 +63,9 @@ public class TDColumn implements Serializable
 
     public TDColumn(String name, TDColumnType type, byte[] key)
     {
-        this.name = checkNotNull(name, "name is null");
-        this.type = checkNotNull(type, "type is null");
-        this.key = Arrays.copyOf(checkNotNull(key, "key is null"), key.length);
+        this.name = requireNonNull(name, "name is null");
+        this.type = requireNonNull(type, "type is null");
+        this.key = Arrays.copyOf(requireNonNull(key, "key is null"), key.length);
     }
 
     @JsonProperty
