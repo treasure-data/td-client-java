@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
@@ -1020,7 +1019,7 @@ public class TDClient
             payload = ObjectMappers.compactMapper().writeValueAsString(request);
         }
         catch (JsonProcessingException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         return doPost(buildUrl("/v3/bulk_loads", name, "jobs"),
                 queryParams, Optional.of(payload),

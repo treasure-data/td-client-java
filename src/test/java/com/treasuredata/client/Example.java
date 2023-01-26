@@ -19,7 +19,6 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Function;
-import com.google.common.base.Throwables;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobRequest;
@@ -94,7 +93,7 @@ public class Example
                         unpacker.close();
                     }
                     catch (Exception e) {
-                        throw Throwables.propagate(e);
+                        throw new RuntimeException(e);
                     }
                     return count;
                 }
