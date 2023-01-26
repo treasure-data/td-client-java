@@ -59,11 +59,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.google.common.net.HttpHeaders.AUTHORIZATION;
-import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
-import static com.google.common.net.HttpHeaders.DATE;
-import static com.google.common.net.HttpHeaders.LOCATION;
-import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDApiRequest.urlEncode;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
 import static com.treasuredata.client.TDHttpRequestHandler.ResponseContext;
@@ -78,6 +73,12 @@ public class TDHttpClient
         implements AutoCloseable
 {
     private static final Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
+
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String DATE = "Date";
+    private static final String LOCATION = "Location";
+    private static final String USER_AGENT = "User-Agent";
 
     // Used for reading JSON response
     static ObjectMapper defaultObjectMapper = new ObjectMapper()

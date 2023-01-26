@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_INPUT;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
@@ -43,6 +42,8 @@ import static com.treasuredata.client.TDHttpRequestHandler.ResponseContext;
  */
 public class TDRequestErrorHandler
 {
+    private static final String RETRY_AFTER = "Retry-After";
+
     private TDRequestErrorHandler()
     {
     }

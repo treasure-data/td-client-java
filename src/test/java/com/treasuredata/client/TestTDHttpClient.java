@@ -45,7 +45,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -60,6 +59,8 @@ import static org.junit.Assert.fail;
  */
 public class TestTDHttpClient
 {
+    private static final String USER_AGENT = "User-Agent";
+
     private static Logger logger = LoggerFactory.getLogger(TestTDHttpClient.class);
     private TDHttpClient client;
 
