@@ -20,10 +20,10 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TDTable
 {
@@ -150,6 +150,6 @@ public class TDTable
     @Override
     public String toString()
     {
-        return String.format("%s(%s)", name, Joiner.on(", ").join(columns));
+        return String.format("%s(%s)", name, columns.stream().map(TDColumn::toString).collect(Collectors.joining(", ")));
     }
 }
