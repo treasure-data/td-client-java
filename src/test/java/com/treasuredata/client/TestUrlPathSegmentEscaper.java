@@ -20,39 +20,45 @@ package com.treasuredata.client;
 
 import org.junit.Test;
 
-import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Ensure compatibility with com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
  */
-public class TestUrlEscaper
+public class TestUrlPathSegmentEscaper
 {
     @Test
     public void nonAscii()
     {
-        String v = urlPathSegmentEscaper().escape("あ漢ü");
-        assertEquals("%E3%81%82%E6%BC%A2%C3%BC", v);
+        String v = UrlPathSegmentEscaper.escape("あ漢ü🇸🇨");
+        assertEquals("%E3%81%82%E6%BC%A2%C3%BC%F0%9F%87%B8%F0%9F%87%A8", v);
     }
 
     @Test
-    public void emoji()
+    public void space()
     {
-        String v = urlPathSegmentEscaper().escape("🇸🇨");
-        assertEquals("%F0%9F%87%B8%F0%9F%87%A8", v);
+        String v = UrlPathSegmentEscaper.escape(" ");
+        assertEquals("%20", v);
     }
 
     @Test
-    public void specialChars()
+    public void specialCharsUnescaped()
     {
-        String v = urlPathSegmentEscaper().escape("-_.~!*'();:@&=+$,/?%#[]^¥|{}\\<> ");
-        assertEquals("-_.~!*'();:@&=+$,%2F%3F%25%23%5B%5D%5E%C2%A5%7C%7B%7D%5C%3C%3E%20", v);
+        String v = UrlPathSegmentEscaper.escape("-_.~!*'();:@&=+$,");
+        assertEquals("-_.~!*'();:@&=+$,", v);
+    }
+
+    @Test
+    public void specialCharsEscaped()
+    {
+        String v = UrlPathSegmentEscaper.escape("/?%#[]^¥|{}\\<>");
+        assertEquals("%2F%3F%25%23%5B%5D%5E%C2%A5%7C%7B%7D%5C%3C%3E", v);
     }
 
     @Test
     public void alphaNum()
     {
-        String v = urlPathSegmentEscaper().escape("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+        String v = UrlPathSegmentEscaper.escape("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
         assertEquals("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", v);
     }
 }

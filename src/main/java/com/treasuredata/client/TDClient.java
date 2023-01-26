@@ -77,7 +77,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -185,7 +184,7 @@ public class TDClient
         s.append(urlPrefix);
         for (String a : args) {
             s.append("/");
-            s.append(urlPathSegmentEscaper().escape(a));
+            s.append(UrlPathSegmentEscaper.escape(a));
         }
         return s.toString();
     }
@@ -1034,7 +1033,7 @@ public class TDClient
     @Override
     public long lookupConnection(String name)
     {
-        return doGet(buildUrl("/v3/connections/lookup?name=" + urlPathSegmentEscaper().escape(name)), TDConnectionLookupResult.class).getId();
+        return doGet(buildUrl("/v3/connections/lookup?name=" + UrlPathSegmentEscaper.escape(name)), TDConnectionLookupResult.class).getId();
     }
 
     @Override
