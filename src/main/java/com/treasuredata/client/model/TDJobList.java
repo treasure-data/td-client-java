@@ -19,10 +19,10 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Joiner;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -69,6 +69,6 @@ public class TDJobList
     @Override
     public String toString()
     {
-        return Joiner.on("\n").join(jobs);
+        return jobs.stream().map(TDJob::toString).collect(Collectors.joining("\n"));
     }
 }

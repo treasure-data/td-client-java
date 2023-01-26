@@ -29,7 +29,6 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
@@ -213,7 +212,7 @@ public class TDHttpClient
             for (Map.Entry<String, String> queryParam : apiRequest.getQueryParams().entrySet()) {
                 queryParamList.add(String.format("%s=%s", urlEncode(queryParam.getKey()), urlEncode(queryParam.getValue())));
             }
-            queryStr = Joiner.on("&").join(queryParamList);
+            queryStr = String.join("&", queryParamList);
             if (apiRequest.getMethod() == TDHttpMethod.GET ||
                     (apiRequest.getMethod() == TDHttpMethod.POST && apiRequest.getPostJson().isPresent())) {
                 requestUri += "?" + queryStr;

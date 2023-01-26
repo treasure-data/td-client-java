@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
@@ -107,6 +106,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -225,7 +225,7 @@ public class TestTDClient
         List<String> dbList = client.listDatabaseNames();
         assertTrue("should contain sample_datasets", dbList.contains("sample_datasets"));
 
-        String dbListStr = Joiner.on(", ").join(dbList);
+        String dbListStr = String.join(", ", dbList);
         logger.debug(dbListStr);
 
         List<TDDatabase> detailedDBList = client.listDatabases();
@@ -239,7 +239,7 @@ public class TestTDClient
             }
         });
 
-        String detailedDbListStr = Joiner.on(", ").join(dbStr);
+        String detailedDbListStr = String.join(", ", dbStr);
         logger.trace(detailedDbListStr);
     }
 
@@ -264,7 +264,7 @@ public class TestTDClient
     {
         List<TDTable> tableList = client.listTables("sample_datasets");
         assertTrue(tableList.size() >= 2);
-        logger.debug(Joiner.on(", ").join(tableList));
+        logger.debug(tableList.stream().map(TDTable::toString).collect(Collectors.joining(", ")));
 
         Set<TDTable> tableSet = new HashSet<>();
         for (final TDTable t : tableList) {
@@ -1322,7 +1322,7 @@ public class TestTDClient
 
             assertEquals(numRowsInPart * 2, imported.getRowCount());
             List<TDColumn> columns = imported.getColumns();
-            logger.info(Joiner.on(", ").join(columns));
+            logger.info(columns.stream().map(TDColumn::toString).collect(Collectors.joining(", ")));
             assertEquals(2, columns.size()); // event, description, (time)
         }
         finally {
@@ -1416,7 +1416,7 @@ public class TestTDClient
     {
         List<TDSavedQuery> savedQueries = client.listSavedQueries();
         assertTrue(savedQueries.size() > 0);
-        logger.info(Joiner.on(", ").join(savedQueries));
+        logger.info(savedQueries.stream().map(TDSavedQuery::toString).collect(Collectors.joining(", ")));
     }
 
     @Test
