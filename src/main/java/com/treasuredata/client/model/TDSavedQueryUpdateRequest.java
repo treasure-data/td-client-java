@@ -45,7 +45,9 @@ public class TDSavedQueryUpdateRequest
     private final Optional<String> result;
     private final Optional<TDJob.EngineVersion> engineVersion;
 
-    @VisibleForTesting
+    /**
+     * Visible for testing.
+     */
     @JsonCreator
     TDSavedQueryUpdateRequest(
             @JsonProperty("name") Optional<String> name,
@@ -73,7 +75,6 @@ public class TDSavedQueryUpdateRequest
         this.engineVersion = engineVersion;
     }
 
-    @VisibleForTesting
     static ObjectMapper getObjectMapper()
     {
         ObjectMapper mapper = new ObjectMapper();

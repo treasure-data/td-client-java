@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -94,7 +93,10 @@ public class TDHttpClient
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    @VisibleForTesting final Multimap<String, String> headers;
+    /**
+     * Visible for testing.
+     */
+    final Multimap<String, String> headers;
 
     public TDHttpClient(TDClientConfig config)
     {
