@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.io.CharStreams;
 import com.google.common.net.HttpHeaders;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -30,6 +29,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
@@ -38,6 +38,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.instanceOf;
@@ -80,8 +81,8 @@ public class TestServerFailures
 
         String url = String.format("http://localhost:%s/v3/system/server_status", port);
         logger.info("url: " + url);
-        try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
-            String content = CharStreams.toString(reader);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(url).openStream()))) {
+            String content = reader.lines().collect(Collectors.joining());
             logger.info(content);
         }
         assertEquals(1, server.getRequestCount());

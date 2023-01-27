@@ -29,8 +29,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
@@ -79,9 +77,9 @@ import org.msgpack.value.ValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -384,8 +382,8 @@ public class TestTDClient
             @Override
             public JSONArray apply(InputStream input)
             {
-                try {
-                    String result = new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8);
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+                    String result = reader.lines().collect(Collectors.joining());
                     logger.info("result:\n" + result);
                     return new JSONArray(result);
                 }
@@ -508,8 +506,8 @@ public class TestTDClient
             @Override
             public JSONArray apply(InputStream input)
             {
-                try {
-                    String result = new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8);
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+                    String result = reader.lines().collect(Collectors.joining());
                     logger.info("result:\n" + result);
                     return new JSONArray(result);
                 }
@@ -594,8 +592,8 @@ public class TestTDClient
             @Override
             public JSONArray apply(InputStream input)
             {
-                try {
-                    String result = new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8);
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+                    String result = reader.lines().collect(Collectors.joining());
                     logger.info("result:\n" + result);
                     return new JSONArray(result);
                 }
@@ -1022,8 +1020,8 @@ public class TestTDClient
             @Override
             public String apply(InputStream input)
             {
-                try {
-                    String result = CharStreams.toString(new InputStreamReader(input));
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+                    String result = reader.lines().collect(Collectors.joining());
                     logger.info(result);
                     return result;
                 }
@@ -1999,7 +1997,7 @@ public class TestTDClient
         server.enqueue(new MockResponse().setBody("{\"unique_id\":\"4288048cf8f811e88b560a87157ac806\",\"md5_hex\":\"a34e7c79aa6b6cc48e6e1075c2215a8b\",\"database\":\"db\",\"table\":\"tbl\",\"elapsed_time\":10}"));
 
         File tmpFile = createTempMsgpackGz("import", 10);
-        byte[] bytes = ByteStreams.toByteArray(new FileInputStream(tmpFile));
+        byte[] bytes = Files.readAllBytes(tmpFile.toPath());
         TDImportResult result = client.importBytes("db", "tbl", bytes);
 
         assertEquals(result.getDatabaseName(), "db");
@@ -2017,7 +2015,7 @@ public class TestTDClient
         server.enqueue(new MockResponse().setBody("{\"unique_id\":\"4288048cf8f811e88b560a87157ac806\",\"md5_hex\":\"a34e7c79aa6b6cc48e6e1075c2215a8b\",\"database\":\"db\",\"table\":\"tbl\",\"elapsed_time\":10}"));
 
         File tmpFile = createTempMsgpackGz("import", 10);
-        byte[] bytes = ByteStreams.toByteArray(new FileInputStream(tmpFile));
+        byte[] bytes = Files.readAllBytes(tmpFile.toPath());
         TDImportResult result = client.importBytes("db", "tbl", bytes, "4288048cf8f811e88b560a87157ac806");
 
         assertEquals(result.getDatabaseName(), "db");

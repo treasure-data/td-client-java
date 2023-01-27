@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDTable;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,6 +32,7 @@ import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,6 +44,7 @@ import java.net.ServerSocket;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -140,8 +141,10 @@ public class TestProxyAccess
         try {
             System.setProperty(disabledSchemesProperty, "");
             Authenticator.setDefault(auth);
-            try (InputStream in = new URL("https://api.treasuredata.com/v3/system/server_status").openConnection(proxy).getInputStream()) {
-                String ret = CharStreams.toString(new InputStreamReader(in));
+            URL url = new URL("https://api.treasuredata.com/v3/system/server_status");
+            try (InputStream in = url.openConnection(proxy).getInputStream();
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                String ret = reader.lines().collect(Collectors.joining());
                 logger.info(ret);
             }
             assertEquals(1, proxyAccessCount.get());
