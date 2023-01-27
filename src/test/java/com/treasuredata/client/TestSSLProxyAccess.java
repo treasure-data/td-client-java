@@ -62,11 +62,18 @@ public class TestSSLProxyAccess
                 .withPort(proxyPort)
                 .withProxyAuthenticator(new org.littleshoot.proxy.ProxyAuthenticator()
                 {
+                    @Override
                     public boolean authenticate(String user, String pass)
                     {
                         boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
                         logger.debug("Proxy Authentication: " + (isValid ? "success" : "failure"));
                         return isValid;
+                    }
+
+                    @Override
+                    public String getRealm()
+                    {
+                        return null;
                     }
                 })
                 .withFiltersSource(new HttpFiltersSourceAdapter()

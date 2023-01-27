@@ -88,6 +88,12 @@ public class TestProxyAccess
                         logger.debug("Proxy Authentication: " + (isValid ? "success" : "failure"));
                         return isValid;
                     }
+
+                    @Override
+                    public String getRealm()
+                    {
+                        return null;
+                    }
                 })
                 .withFiltersSource(new HttpFiltersSourceAdapter()
                 {
