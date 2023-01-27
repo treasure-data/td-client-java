@@ -7,15 +7,13 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Instant;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
@@ -74,8 +72,8 @@ public class TDRequestErrorHandlerTest
 
         long now = System.currentTimeMillis();
         Date d = TDRequestErrorHandler.parseRetryAfter(now, response);
-        Instant retryAfter = new Instant(d);
-        Instant expected = new DateTime(1999, 12, 31, 23, 59, 59, DateTimeZone.UTC).toInstant();
+        Instant retryAfter = d.toInstant();
+        Instant expected = Instant.parse("1999-12-31T23:59:59Z");
         assertThat(retryAfter, is(expected));
     }
 
@@ -94,8 +92,8 @@ public class TDRequestErrorHandlerTest
         long now = System.currentTimeMillis();
 
         Date d = TDRequestErrorHandler.parseRetryAfter(now, response);
-        Instant retryAfter = new Instant(d);
-        Instant expected = new DateTime(now).plusSeconds(120).toInstant();
+        Instant retryAfter = d.toInstant();
+        Instant expected = Instant.ofEpochMilli(now).plusSeconds(120);
         assertThat(retryAfter, is(expected));
     }
 }

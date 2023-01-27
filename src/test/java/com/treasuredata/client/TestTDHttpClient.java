@@ -28,9 +28,6 @@ import okhttp3.ResponseBody;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
@@ -242,13 +243,13 @@ public class TestTDHttpClient
 
         // A late Retry-After value to verify that the exception is propagated without any retries when
         // the Retry-After value exceeds the configured retryLimit * retryMaxInterval
-        DateTime retryAfter = new DateTime().plusSeconds(4711);
-        DateTimeFormatter httpDateFormatter = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss zzz");
-        String retryAfterString = retryAfter.toString(httpDateFormatter);
+        ZonedDateTime retryAfter = ZonedDateTime.now(ZoneId.systemDefault()).plusSeconds(4711);
+        DateTimeFormatter httpDateFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz");
+        String retryAfterString = httpDateFormatter.format(retryAfter);
 
         int requests = failWith429(
                 Optional.of(retryAfterString),
-                Optional.of(DateMatchers.within(30, SECONDS, retryAfter.toDate())));
+                Optional.of(DateMatchers.within(30, ChronoUnit.SECONDS, retryAfter.toLocalDateTime())));
 
         // Verify that only one attempt was made
         assertThat(requests, is(1));
