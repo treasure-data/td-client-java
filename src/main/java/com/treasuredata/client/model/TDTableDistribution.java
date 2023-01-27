@@ -2,9 +2,9 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * TDTableDistribution provides the information about custom partitioning of the table.
@@ -72,16 +72,16 @@ public class TDTableDistribution
             return false;
         }
         TDTableDistribution other = (TDTableDistribution) obj;
-        return Objects.equal(this.userTableId, other.userTableId) &&
-                Objects.equal(this.bucketCount, other.bucketCount) &&
-                Objects.equal(this.partitionFunction, other.partitionFunction) &&
-                Objects.equal(this.columns, other.columns);
+        return Objects.equals(this.userTableId, other.userTableId) &&
+                Objects.equals(this.bucketCount, other.bucketCount) &&
+                Objects.equals(this.partitionFunction, other.partitionFunction) &&
+                Objects.equals(this.columns, other.columns);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hashCode(userTableId, bucketCount, partitionFunction);
+        return Objects.hash(userTableId, bucketCount, partitionFunction);
     }
 
     @Override

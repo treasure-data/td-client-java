@@ -20,8 +20,8 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @JsonCollectionRootName(value = "databases")
@@ -112,12 +112,12 @@ public class TDDatabase
             return false;
         }
         TDDatabase other = (TDDatabase) obj;
-        return Objects.equal(this.name, other.name);
+        return Objects.equals(this.name, other.name);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hashCode(name);
+        return Objects.hash(name);
     }
 }

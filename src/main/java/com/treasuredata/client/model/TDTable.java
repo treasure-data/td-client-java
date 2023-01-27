@@ -20,9 +20,9 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class TDTable
@@ -136,15 +136,15 @@ public class TDTable
             return false;
         }
         TDTable other = (TDTable) obj;
-        return Objects.equal(this.name, other.name) &&
-                Objects.equal(this.type, other.type) &&
-                Objects.equal(this.columns, other.columns);
+        return Objects.equals(this.name, other.name) &&
+                Objects.equals(this.type, other.type) &&
+                Objects.equals(this.columns, other.columns);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hashCode(name, type, columns);
+        return Objects.hash(name, type, columns);
     }
 
     @Override

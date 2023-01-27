@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
-import com.google.common.base.Objects;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -33,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
@@ -169,15 +169,15 @@ public class TDColumn implements Serializable
             return false;
         }
         TDColumn other = (TDColumn) obj;
-        return Objects.equal(this.name, other.name) &&
-                Objects.equal(type, other.type) &&
+        return Objects.equals(this.name, other.name) &&
+                Objects.equals(type, other.type) &&
                 Arrays.equals(key, other.key);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hashCode(name, type, Arrays.hashCode(key));
+        return Objects.hash(name, type, Arrays.hashCode(key));
     }
 
     @Override
