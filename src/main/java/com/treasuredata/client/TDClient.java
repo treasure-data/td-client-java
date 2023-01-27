@@ -24,8 +24,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
@@ -76,11 +74,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
+import static java.util.Objects.requireNonNull;
 
 /**
  *
@@ -189,8 +188,8 @@ public class TDClient
     protected <ResultType> ResultType doGet(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(resultTypeClass, "resultTypeClass is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest request = TDApiRequest.Builder.GET(path).build();
         return httpClient.call(request, apiKeyCache, resultTypeClass);
@@ -199,8 +198,8 @@ public class TDClient
     protected <ResultType> ResultType doGet(String path, TypeReference<ResultType> resultTypeReference)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(resultTypeReference, "resultTypeReference is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(resultTypeReference, "resultTypeReference is null");
 
         TDApiRequest request = TDApiRequest.Builder.GET(path).build();
         return httpClient.call(request, apiKeyCache, resultTypeReference);
@@ -209,8 +208,8 @@ public class TDClient
     protected <ResultType> ResultType doGet(String path, JavaType resultType)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(resultType, "resultType is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(resultType, "resultType is null");
 
         TDApiRequest request = TDApiRequest.Builder.GET(path).build();
         return httpClient.call(request, apiKeyCache, resultType);
@@ -219,10 +218,10 @@ public class TDClient
     protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Optional<String> jsonBody, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(queryParam, "param is null");
-        checkNotNull(jsonBody, "body is null");
-        checkNotNull(resultTypeClass, "resultTypeClass is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(queryParam, "param is null");
+        requireNonNull(jsonBody, "body is null");
+        requireNonNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
@@ -237,20 +236,20 @@ public class TDClient
     protected <ResultType> ResultType doPost(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        return this.<ResultType>doPost(path, ImmutableMap.<String, String>of(), Optional.<String>absent(), resultTypeClass);
+        return this.<ResultType>doPost(path, ImmutableMap.<String, String>of(), Optional.empty(), resultTypeClass);
     }
 
     protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        return this.<ResultType>doPost(path, queryParam, Optional.<String>absent(), resultTypeClass);
+        return this.<ResultType>doPost(path, queryParam, Optional.empty(), resultTypeClass);
     }
 
     protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, File file, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(file, "file is null");
-        checkNotNull(resultTypeClass, "resultTypeClass is null");
+        requireNonNull(file, "file is null");
+        requireNonNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest.Builder request = buildPutRequest(path, queryParam);
         request.setFile(file);
@@ -260,8 +259,8 @@ public class TDClient
     protected <ResultType> ResultType doPut(String path, Map<String, String> queryParam, byte[] content, int offset, int length, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        checkNotNull(content, "content is null");
-        checkNotNull(resultTypeClass, "resultTypeClass is null");
+        requireNonNull(content, "content is null");
+        requireNonNull(resultTypeClass, "resultTypeClass is null");
 
         TDApiRequest.Builder request = buildPutRequest(path, queryParam);
         request.setContent(content, offset, length);
@@ -270,8 +269,8 @@ public class TDClient
 
     private TDApiRequest.Builder buildPutRequest(String path, Map<String, String> queryParam)
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(queryParam, "param is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(queryParam, "param is null");
 
         TDApiRequest.Builder request = TDApiRequest.Builder.PUT(path);
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
@@ -284,7 +283,7 @@ public class TDClient
     protected String doPost(String path)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
+        requireNonNull(path, "path is null");
 
         TDApiRequest request = TDApiRequest.Builder.POST(path).build();
         return httpClient.call(request, apiKeyCache);
@@ -293,8 +292,8 @@ public class TDClient
     protected String doPost(String path, Map<String, String> queryParam)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(queryParam, "param is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(queryParam, "param is null");
 
         TDApiRequest.Builder request = TDApiRequest.Builder.POST(path);
         for (Map.Entry<String, String> e : queryParam.entrySet()) {
@@ -307,8 +306,8 @@ public class TDClient
     protected String doPut(String path, File filePath)
             throws TDClientException
     {
-        checkNotNull(path, "path is null");
-        checkNotNull(filePath, "filePath is null");
+        requireNonNull(path, "path is null");
+        requireNonNull(filePath, "filePath is null");
 
         TDApiRequest request = TDApiRequest.Builder.PUT(path).setFile(filePath).build();
         return httpClient.call(request, apiKeyCache);
@@ -343,7 +342,7 @@ public class TDClient
     public String serverStatus()
     {
         // No API key is requried for server_status
-        return httpClient.call(TDApiRequest.Builder.GET("/v3/system/server_status").build(), Optional.<String>absent());
+        return httpClient.call(TDApiRequest.Builder.GET("/v3/system/server_status").build(), Optional.empty());
     }
 
     @Override
@@ -362,6 +361,13 @@ public class TDClient
             throws TDClientException
     {
         return doGet("/v3/database/list", new TypeReference<List<TDDatabase>>() {});
+    }
+
+    @Override
+    public TDDatabase showDatabase(String databaseName)
+            throws TDClientException
+    {
+        return doGet(buildUrl("/v3/database/show", databaseName), TDDatabase.class);
     }
 
     private static Pattern acceptableNamePattern = Pattern.compile("^([a-z0-9_]+)$");
@@ -579,13 +585,12 @@ public class TDClient
     @Override
     public void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema, boolean ignoreDuplicate)
     {
-        checkNotNull(databaseName, "databaseName is null");
-        checkNotNull(tableName, "tableName is null");
-        checkNotNull(newSchema, "newSchema is null");
+        requireNonNull(databaseName, "databaseName is null");
+        requireNonNull(tableName, "tableName is null");
+        requireNonNull(newSchema, "newSchema is null");
 
         ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
         for (TDColumn newColumn : newSchema) {
-            // TODO: Schema should be array of [name, type, key], not [key, type, name]. Kept for backward compatibility for now...
             builder.add(ImmutableList.of(newColumn.getKeyString(), newColumn.getType().toString(), newColumn.getName()));
         }
         String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build(), "ignore_duplicate_schema", ignoreDuplicate));
@@ -595,15 +600,15 @@ public class TDClient
     @Override
     public void appendTableSchema(String databaseName, String tableName, List<TDColumn> appendedSchema)
     {
-        checkNotNull(databaseName, "databaseName is null");
-        checkNotNull(tableName, "tableName is null");
-        checkNotNull(appendedSchema, "appendedSchema is null");
+        requireNonNull(databaseName, "databaseName is null");
+        requireNonNull(tableName, "tableName is null");
+        requireNonNull(appendedSchema, "appendedSchema is null");
 
         ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
         for (TDColumn appendedColumn : appendedSchema) {
             // Unlike update-schema API, append-schema API can generate alias for column name.
-            // So we should not pass `appendedColumn.getKeyString()` here.
-            builder.add(ImmutableList.of(appendedColumn.getName(), appendedColumn.getType().toString()));
+            // So we should not pass `appendedColumn.getName()` here.
+            builder.add(ImmutableList.of(appendedColumn.getKeyString(), appendedColumn.getType().toString()));
         }
         String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build()));
         doPost(buildUrl("/v3/table/append-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
@@ -654,14 +659,10 @@ public class TDClient
                 doPost(
                         buildUrl("/v3/job/issue", jobRequest.getType().getType(), jobRequest.getDatabase()),
                         queryParam,
-                        jobRequest.getConfig().transform(new Function<ObjectNode, String>()
-                        {
-                            public String apply(ObjectNode config)
-                            {
+                        jobRequest.getConfig().map((config) -> {
                                 ObjectNode body = config.objectNode();
                                 body.set("config", config);
                                 return body.toString();
-                            }
                         }),
                         TDJobSubmitResult.class);
         return result.getJobId();
@@ -781,13 +782,13 @@ public class TDClient
     @Override
     public void performBulkImportSession(String sessionName, TDJob.Priority priority)
     {
-        performBulkImportSession(sessionName, Optional.absent(), priority);
+        performBulkImportSession(sessionName, Optional.empty(), priority);
     }
 
     @Override
     public void performBulkImportSession(String sessionName, Optional<String> poolName, TDJob.Priority priority)
     {
-        Optional<String> jsonBody = Optional.absent();
+        Optional<String> jsonBody = Optional.empty();
         if (poolName.isPresent()) {
             jsonBody = Optional.of(JSONObject.toJSONString(ImmutableMap.of("pool_name", poolName.get())));
         }
@@ -1018,7 +1019,7 @@ public class TDClient
             payload = ObjectMappers.compactMapper().writeValueAsString(request);
         }
         catch (JsonProcessingException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         return doPost(buildUrl("/v3/bulk_loads", name, "jobs"),
                 queryParams, Optional.of(payload),
@@ -1062,7 +1063,7 @@ public class TDClient
             return Optional.of(distribution);
         }
         catch (TDClientHttpNotFoundException e) {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

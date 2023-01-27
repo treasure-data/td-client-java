@@ -25,12 +25,10 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
@@ -57,10 +55,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
 import static com.google.common.net.HttpHeaders.DATE;
@@ -84,7 +83,7 @@ public class TDHttpClient
     // Used for reading JSON response
     static ObjectMapper defaultObjectMapper = new ObjectMapper()
             .registerModule(new JsonOrgModule()) // for mapping query json strings into JSONObject
-            .registerModule(new GuavaModule())   // for mapping to Guava Optional class
+            .registerModule(new Jdk8Module())
             .configure(DeserializationFeature.UNWRAP_ROOT_VALUE, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -203,14 +202,7 @@ public class TDHttpClient
     public Request prepareRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
     {
         String queryStr = "";
-        String portStr = config.port.transform(new Function<Integer, String>()
-        {
-            @Override
-            public String apply(Integer input)
-            {
-                return ":" + input.toString();
-            }
-        }).or("");
+        String portStr = config.port.map((input) -> ":" + input).orElse("");
         String requestUri = apiRequest.getPath().startsWith("http")
                 ? apiRequest.getPath()
                 : String.format("%s://%s%s%s", config.useSSL ? "https" : "http", config.endpoint, portStr, apiRequest.getPath());
@@ -220,7 +212,7 @@ public class TDHttpClient
             for (Map.Entry<String, String> queryParam : apiRequest.getQueryParams().entrySet()) {
                 queryParamList.add(String.format("%s=%s", urlEncode(queryParam.getKey()), urlEncode(queryParam.getValue())));
             }
-            queryStr = Joiner.on("&").join(queryParamList);
+            queryStr = String.join("&", queryParamList);
             if (apiRequest.getMethod() == TDHttpMethod.GET ||
                     (apiRequest.getMethod() == TDHttpMethod.POST && apiRequest.getPostJson().isPresent())) {
                 requestUri += "?" + queryStr;
@@ -254,7 +246,9 @@ public class TDHttpClient
         }
 
         // Set API Key after setting the other headers
-        Optional<String> apiKey = apiKeyCache.or(config.apiKey);
+        Optional<String> apiKey = Stream.of(apiKeyCache, config.apiKey)
+                .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
+                .findFirst();
         if (apiKey.isPresent()) {
             String auth;
             if (isNakedTD1Key(apiKey.get())) {
@@ -342,17 +336,17 @@ public class TDHttpClient
 
     protected static class RequestContext
     {
-        private final ExponentialBackOff backoff;
+        private final BackOff backoff;
         public final TDApiRequest apiRequest;
         public final Optional<String> apiKeyCache;
         public final Optional<TDClientException> rootCause;
 
         public RequestContext(TDClientConfig config, TDApiRequest apiRequest, Optional<String> apiKeyCache)
         {
-            this(new ExponentialBackOff(config.retryInitialIntervalMillis, config.retryMaxIntervalMillis, config.retryMultiplier), apiRequest, apiKeyCache, Optional.absent());
+            this(BackOffStrategy.newBackOff(config), apiRequest, apiKeyCache, Optional.empty());
         }
 
-        public RequestContext(ExponentialBackOff backoff, TDApiRequest apiRequest, Optional<String> apiKeyCache, Optional<TDClientException> rootCause)
+        public RequestContext(BackOff backoff, TDApiRequest apiRequest, Optional<String> apiKeyCache, Optional<TDClientException> rootCause)
         {
             this.backoff = backoff;
             this.apiRequest = apiRequest;
@@ -378,9 +372,13 @@ public class TDHttpClient
         if (executionCount > config.retryLimit) {
             logger.warn("API request retry limit exceeded: ({}/{})", config.retryLimit, config.retryLimit);
 
-            checkState(context.rootCause.isPresent(), "rootCause must be present here");
-            // Throw the last seen error
-            throw context.rootCause.get();
+            if (context.rootCause.isPresent()) {
+                // Throw the last seen error
+                throw context.rootCause.get();
+            }
+            else {
+                throw new IllegalStateException("rootCause must be present here");
+            }
         }
         else {
             if (executionCount == 0) {

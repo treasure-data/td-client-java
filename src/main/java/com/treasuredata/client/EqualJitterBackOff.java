@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,30 +18,28 @@
  */
 package com.treasuredata.client;
 
-import java.util.Optional;
+import java.util.Random;
 
-/**
- * On 409 conflict error (e.g., database already exists)
- */
-public class TDClientHttpConflictException
-        extends TDClientHttpException
+public class EqualJitterBackOff
+        extends AbstractBackOff
 {
-    private final String conflictsWith;
+    private final Random rnd = new Random();
 
-    public TDClientHttpConflictException(String errorMessage)
+    public EqualJitterBackOff()
     {
-        this(errorMessage, null);
+        this(2000, 60000, 2);
     }
 
-    public TDClientHttpConflictException(String errorMessage, String conflictsWith)
+    public EqualJitterBackOff(int baseIntervalMillis, int maxIntervalMillis, double multiplier)
     {
-        super(ErrorType.TARGET_ALREADY_EXISTS, errorMessage, HttpStatus.CONFLICT_409, null);
-
-        this.conflictsWith = conflictsWith;
+        super(baseIntervalMillis, maxIntervalMillis, multiplier);
     }
 
-    public Optional<String> getConflictsWith()
+    @Override
+    public int nextWaitTimeMillis()
     {
-        return Optional.ofNullable(conflictsWith);
+        executionCount++;
+        int v = (int) calculateExponential() / 2;
+        return v + rnd.nextInt(v);
     }
 }

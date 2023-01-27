@@ -13,6 +13,7 @@ import static com.treasuredata.client.TDRequestErrorHandler.defaultHttpResponseE
 /**
  *
  */
+@FunctionalInterface
 public interface TDHttpRequestHandler<Result>
 {
     static class ResponseContext

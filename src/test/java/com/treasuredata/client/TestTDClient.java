@@ -22,11 +22,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
@@ -35,7 +32,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.treasuredata.client.model.ObjectMappers;
-import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
 import com.treasuredata.client.model.TDBulkLoadSessionStartResult;
@@ -104,11 +100,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -209,13 +207,25 @@ public class TestTDClient
     }
 
     @Test
+    public void showDatabase()
+            throws Exception
+    {
+        String databaseName = "sample_datasets";
+        TDDatabase dbDetail = client.showDatabase(databaseName);
+        assertEquals("should match in sample_datasets", databaseName, dbDetail.getName());
+        assertTrue("should be positive", Integer.parseInt(dbDetail.getId()) > 0);
+
+        logger.debug(dbDetail.toString());
+    }
+
+    @Test
     public void listDatabases()
             throws Exception
     {
         List<String> dbList = client.listDatabaseNames();
         assertTrue("should contain sample_datasets", dbList.contains("sample_datasets"));
 
-        String dbListStr = Joiner.on(", ").join(dbList);
+        String dbListStr = String.join(", ", dbList);
         logger.debug(dbListStr);
 
         List<TDDatabase> detailedDBList = client.listDatabases();
@@ -229,7 +239,7 @@ public class TestTDClient
             }
         });
 
-        String detailedDbListStr = Joiner.on(", ").join(dbStr);
+        String detailedDbListStr = String.join(", ", dbStr);
         logger.trace(detailedDbListStr);
     }
 
@@ -254,7 +264,7 @@ public class TestTDClient
     {
         List<TDTable> tableList = client.listTables("sample_datasets");
         assertTrue(tableList.size() >= 2);
-        logger.debug(Joiner.on(", ").join(tableList));
+        logger.debug(tableList.stream().map(TDTable::toString).collect(Collectors.joining(", ")));
 
         Set<TDTable> tableSet = new HashSet<>();
         for (final TDTable t : tableList) {
@@ -334,7 +344,7 @@ public class TestTDClient
             throws InterruptedException
     {
         int retryCount = 0;
-        ExponentialBackOff backoff = new ExponentialBackOff();
+        BackOff backoff = new ExponentialBackOff();
         long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
         TDJobSummary tdJob = null;
         do {
@@ -380,7 +390,7 @@ public class TestTDClient
                     return new JSONArray(result);
                 }
                 catch (Exception e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -409,7 +419,7 @@ public class TestTDClient
                     return null;
                 }
                 catch (IOException e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -590,7 +600,7 @@ public class TestTDClient
                     return new JSONArray(result);
                 }
                 catch (Exception e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -801,7 +811,7 @@ public class TestTDClient
                 "secret access key",
                 "bucket",
                 "prefix/",
-                Optional.<String>absent());
+                Optional.empty());
         client.createDatabaseIfNotExists(SAMPLE_DB);
         client.createTableIfNotExists(SAMPLE_DB, "sample_output");
         String jobId = client.submitExportJob(jobRequest);
@@ -893,7 +903,7 @@ public class TestTDClient
                 return Optional.of(table);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Test
@@ -1018,7 +1028,7 @@ public class TestTDClient
                     return result;
                 }
                 catch (IOException e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -1232,7 +1242,7 @@ public class TestTDClient
             client.performBulkImportSession(session);
 
             // Wait the perform completion
-            ExponentialBackOff backoff = new ExponentialBackOff();
+            BackOff backoff = new ExponentialBackOff();
             long deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10);
             bs = client.getBulkImportSession(session);
             while (bs.getStatus() == TDBulkImportSession.ImportStatus.PERFORMING) {
@@ -1267,7 +1277,7 @@ public class TestTDClient
                         return errorRecordCount;
                     }
                     catch (IOException e) {
-                        throw Throwables.propagate(e);
+                        throw new RuntimeException(e);
                     }
                 }
             });
@@ -1312,7 +1322,7 @@ public class TestTDClient
 
             assertEquals(numRowsInPart * 2, imported.getRowCount());
             List<TDColumn> columns = imported.getColumns();
-            logger.info(Joiner.on(", ").join(columns));
+            logger.info(columns.stream().map(TDColumn::toString).collect(Collectors.joining(", ")));
             assertEquals(2, columns.size()); // event, description, (time)
         }
         finally {
@@ -1391,34 +1401,6 @@ public class TestTDClient
     }
 
     @Test
-    public void validateApiKeyMocked()
-            throws Exception
-    {
-        client = mockClient();
-
-        String expectedKeyJson = "{\"user_id\":1,\"account_id\":2,\"key_type\":\"normal\",\"administrator\":true}";
-
-        TDApiKey expectedKey = ObjectMappers.compactMapper().readValue(expectedKeyJson, TDApiKey.class);
-
-        server.enqueue(new MockResponse().setBody(expectedKeyJson));
-
-        TDApiKey key = client.validateApiKey();
-
-        assertThat(key, is(expectedKey));
-
-        RecordedRequest recordedRequest = server.takeRequest();
-        assertThat(recordedRequest.getPath(), is("/v3/user/apikey/validate"));
-    }
-
-    @Test
-    public void validateApiKey()
-            throws Exception
-    {
-        TDApiKey key = client.validateApiKey();
-        logger.trace("api_key: {}", key);
-    }
-
-    @Test
     public void listUsers()
             throws Exception
     {
@@ -1434,7 +1416,7 @@ public class TestTDClient
     {
         List<TDSavedQuery> savedQueries = client.listSavedQueries();
         assertTrue(savedQueries.size() > 0);
-        logger.info(Joiner.on(", ").join(savedQueries));
+        logger.info(savedQueries.stream().map(TDSavedQuery::toString).collect(Collectors.joining(", ")));
     }
 
     @Test
@@ -1461,7 +1443,7 @@ public class TestTDClient
                 return Optional.of(q);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private void validateSavedQuery(TDSaveQueryRequest expected, TDSavedQuery target)
@@ -1632,7 +1614,7 @@ public class TestTDClient
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
-                .setEngineVersion(EngineVersion.fromString("experimental"))
+                .setEngineVersion(EngineVersion.fromString("stable"))
                 .build();
 
         try {
@@ -1675,7 +1657,7 @@ public class TestTDClient
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
-                .setEngineVersion(EngineVersion.fromString("experimental"))
+                .setEngineVersion(EngineVersion.fromString("stable"))
                 .build();
 
         try {

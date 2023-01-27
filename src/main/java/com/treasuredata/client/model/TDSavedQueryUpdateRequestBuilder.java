@@ -18,24 +18,24 @@
  */
 package com.treasuredata.client.model;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 /**
  *
  */
 public class TDSavedQueryUpdateRequestBuilder
 {
-    private Optional<String> name = Optional.absent();
-    private Optional<String> cron = Optional.absent();
-    private Optional<TDJob.Type> type = Optional.absent();
-    private Optional<String> query = Optional.absent();
-    private Optional<String> timezone = Optional.absent();
-    private Optional<Long> delay = Optional.absent();
-    private Optional<String> database = Optional.absent();
-    private Optional<Integer> priority = Optional.absent();
-    private Optional<Integer> retryLimit = Optional.absent();
-    private Optional<String> result = Optional.absent();
-    private Optional<TDJob.EngineVersion> engineVersion = Optional.absent();
+    private Optional<String> name = Optional.empty();
+    private Optional<String> cron = Optional.empty();
+    private Optional<TDJob.Type> type = Optional.empty();
+    private Optional<String> query = Optional.empty();
+    private Optional<String> timezone = Optional.empty();
+    private Optional<Long> delay = Optional.empty();
+    private Optional<String> database = Optional.empty();
+    private Optional<Integer> priority = Optional.empty();
+    private Optional<Integer> retryLimit = Optional.empty();
+    private Optional<String> result = Optional.empty();
+    private Optional<TDJob.EngineVersion> engineVersion = Optional.empty();
 
     TDSavedQueryUpdateRequestBuilder()
     {

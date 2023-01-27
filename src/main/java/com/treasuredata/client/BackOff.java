@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,30 +18,11 @@
  */
 package com.treasuredata.client;
 
-import java.util.Optional;
-
-/**
- * On 409 conflict error (e.g., database already exists)
- */
-public class TDClientHttpConflictException
-        extends TDClientHttpException
+public interface BackOff
 {
-    private final String conflictsWith;
+    int getExecutionCount();
 
-    public TDClientHttpConflictException(String errorMessage)
-    {
-        this(errorMessage, null);
-    }
+    void incrementExecutionCount();
 
-    public TDClientHttpConflictException(String errorMessage, String conflictsWith)
-    {
-        super(ErrorType.TARGET_ALREADY_EXISTS, errorMessage, HttpStatus.CONFLICT_409, null);
-
-        this.conflictsWith = conflictsWith;
-    }
-
-    public Optional<String> getConflictsWith()
-    {
-        return Optional.ofNullable(conflictsWith);
-    }
+    int nextWaitTimeMillis();
 }

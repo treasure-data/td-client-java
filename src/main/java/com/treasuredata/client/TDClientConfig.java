@@ -19,7 +19,6 @@
 package com.treasuredata.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
@@ -33,6 +32,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -95,6 +95,7 @@ public class TDClientConfig
     public final Optional<String> password;
     public final Optional<ProxyConfig> proxy;
     public final boolean useSSL;
+    public final BackOffStrategy retryStrategy;
     public final int retryLimit;
     public final int retryInitialIntervalMillis;
     public final int retryMaxIntervalMillis;
@@ -113,6 +114,7 @@ public class TDClientConfig
             Optional<String> user,
             Optional<String> password,
             Optional<ProxyConfig> proxy,
+            BackOffStrategy retryStrategy,
             int retryLimit,
             int retryInitialIntervalMillis,
             int retryMaxIntervalMillis,
@@ -122,13 +124,14 @@ public class TDClientConfig
             int connectionPoolSize,
             Multimap<String, String> headers)
     {
-        this.endpoint = endpoint.or("api.treasuredata.com");
+        this.endpoint = endpoint.orElse("api.treasuredata.com");
         this.port = port;
         this.useSSL = useSSL;
         this.apiKey = apiKey;
         this.user = user;
         this.password = password;
         this.proxy = proxy;
+        this.retryStrategy = retryStrategy;
         this.retryLimit = retryLimit;
         this.retryInitialIntervalMillis = retryInitialIntervalMillis;
         this.retryMaxIntervalMillis = retryMaxIntervalMillis;
@@ -154,6 +157,7 @@ public class TDClientConfig
                 user,
                 password,
                 proxy,
+                retryStrategy,
                 retryLimit,
                 retryInitialIntervalMillis,
                 retryMaxIntervalMillis,

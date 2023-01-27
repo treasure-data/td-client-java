@@ -1,8 +1,9 @@
 package com.treasuredata.client.model;
 
-import com.google.common.base.Optional;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
+
+import java.util.Optional;
 
 @Value.Style(typeBuilder = "TDExportResultJobRequestBuilder")
 public class TDExportResultJobRequest
@@ -47,9 +48,9 @@ public class TDExportResultJobRequest
             Optional<String> resultConnectionSettings)
     {
         return new TDExportResultJobRequest(jobId,
-                resultOutput.or(""),
-                resultConnectionId.or(""),
-                resultConnectionSettings.or(""));
+                resultOutput.orElse(""),
+                resultConnectionId.orElse(""),
+                resultConnectionSettings.orElse(""));
     }
 
     public static TDExportResultJobRequestBuilder builder()

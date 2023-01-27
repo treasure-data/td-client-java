@@ -18,8 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -32,8 +30,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * An abstraction of TD API request, which will be translated to Jetty's http client request.
@@ -67,16 +66,16 @@ public class TDApiRequest
             Optional<Boolean> followRedirects
     )
     {
-        this.method = checkNotNull(method, "method is null");
-        this.path = checkNotNull(path, "uri is null");
-        this.queryParams = checkNotNull(queryParams, "queryParms is null");
-        this.headerParams = checkNotNull(headerParams, "headerParams is null");
-        this.postJson = checkNotNull(postJson, "postJson is null");
-        this.putFile = checkNotNull(putFile, "putFile is null");
-        this.content = checkNotNull(content, "content is null");
+        this.method = requireNonNull(method, "method is null");
+        this.path = requireNonNull(path, "uri is null");
+        this.queryParams = requireNonNull(queryParams, "queryParms is null");
+        this.headerParams = requireNonNull(headerParams, "headerParams is null");
+        this.postJson = requireNonNull(postJson, "postJson is null");
+        this.putFile = requireNonNull(putFile, "putFile is null");
+        this.content = requireNonNull(content, "content is null");
         this.contentOffset = contentOffset;
         this.contentLength = contentLength;
-        this.followRedirects = checkNotNull(followRedirects, "followRedirects is null");
+        this.followRedirects = requireNonNull(followRedirects, "followRedirects is null");
     }
 
     public TDApiRequest withUri(String uri)
@@ -142,12 +141,12 @@ public class TDApiRequest
         private String path;
         private Map<String, String> queryParams;
         private ImmutableMultimap.Builder<String, String> headerParams;
-        private Optional<String> postJson = Optional.absent();
-        private Optional<File> file = Optional.absent();
-        private Optional<byte[]> content = Optional.absent();
+        private Optional<String> postJson = Optional.empty();
+        private Optional<File> file = Optional.empty();
+        private Optional<byte[]> content = Optional.empty();
         private int contentOffset;
         private int contentLength;
-        private Optional<Boolean> followRedirects = Optional.absent();
+        private Optional<Boolean> followRedirects = Optional.empty();
 
         Builder(TDHttpMethod method, String path)
         {
@@ -251,7 +250,7 @@ public class TDApiRequest
             return URLEncoder.encode(value, "UTF-8");
         }
         catch (UnsupportedEncodingException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 }

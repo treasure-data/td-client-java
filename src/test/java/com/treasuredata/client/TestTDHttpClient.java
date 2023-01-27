@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMultimap;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -41,12 +40,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler;
-
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.Matchers.is;
@@ -80,7 +79,7 @@ public class TestTDHttpClient
     public void addHttpRequestHeader()
     {
         TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").addHeader("TEST_HEADER", "hello td-client-java").build();
-        String resp = client.submitRequest(req, Optional.<String>absent(), stringContentHandler);
+        String resp = client.submitRequest(req, Optional.empty(), stringContentHandler);
     }
 
     @Test
@@ -89,12 +88,12 @@ public class TestTDHttpClient
         TDApiRequest apiRequest = TDApiRequest.Builder.GET("/v3/system/server_status").build();
 
         // Without specifying User-Agent header
-        Request request1 = client.prepareRequest(apiRequest, Optional.<String>absent());
+        Request request1 = client.prepareRequest(apiRequest, Optional.empty());
         assertEquals("td-client-java unknown", request1.header(USER_AGENT));
 
         // With specifying User-Agent header
         TDHttpClient newClient = client.withHeaders(ImmutableMultimap.of(USER_AGENT, "td-sample-client 1.0"));
-        Request request2 = newClient.prepareRequest(apiRequest, Optional.<String>absent());
+        Request request2 = newClient.prepareRequest(apiRequest, Optional.empty());
         assertEquals("td-client-java unknown,td-sample-client 1.0", request2.header(USER_AGENT));
     }
 
@@ -103,7 +102,7 @@ public class TestTDHttpClient
     {
         try {
             TDApiRequest req = TDApiRequest.Builder.DELETE("/v3/dummy_endpoint").build();
-            String resp = client.submitRequest(req, Optional.<String>absent(), stringContentHandler);
+            String resp = client.submitRequest(req, Optional.empty(), stringContentHandler);
             fail();
         }
         catch (TDClientHttpException e) {
@@ -129,7 +128,7 @@ public class TestTDHttpClient
         final byte[] body = "foobar".getBytes("UTF-8");
         final long retryAfterSeconds = 5;
 
-        byte[] result = client.submitRequest(req, Optional.<String>absent(), new TDHttpRequestHandler<byte[]>()
+        byte[] result = client.submitRequest(req, Optional.empty(), new TDHttpRequestHandler<byte[]>()
         {
             @Override
             public Response send(OkHttpClient httpClient, Request request)
@@ -187,7 +186,7 @@ public class TestTDHttpClient
                 .build()
                 .httpClient;
 
-        int requests = failWith429(Optional.<String>absent(), Optional.<Matcher<Date>>absent());
+        int requests = failWith429(Optional.empty(), Optional.empty());
 
         assertThat(requests, is(4));
     }
@@ -202,7 +201,7 @@ public class TestTDHttpClient
                 .build()
                 .httpClient;
 
-        int requests = failWith429(Optional.of("foobar"), Optional.<Matcher<Date>>absent());
+        int requests = failWith429(Optional.of("foobar"), Optional.empty());
 
         assertThat(requests, is(4));
     }
@@ -256,11 +255,12 @@ public class TestTDHttpClient
     }
 
     @Test
-    public void failOn429_RetryLimitExceeded()
+    public void failOn429_RetryLimitExceededUsingExponentialBackOff()
             throws Exception
     {
         client = TDClient.newBuilder()
                 .setRetryMaxIntervalMillis(Integer.MAX_VALUE)
+                .setRetryStrategy(BackOffStrategy.Exponential)
                 .setRetryLimit(3)
                 .build()
                 .httpClient;
@@ -285,7 +285,7 @@ public class TestTDHttpClient
         final byte[] body = new byte[3 * 1024 * 1024];
         Arrays.fill(body, (byte) 100);
 
-        byte[] res = client.submitRequest(req, Optional.<String>absent(), new TestDefaultHandler(body));
+        byte[] res = client.submitRequest(req, Optional.empty(), new TestDefaultHandler(body));
         assertThat(res, is(body));
     }
 
@@ -329,7 +329,7 @@ public class TestTDHttpClient
         final TDApiRequest req = TDApiRequest.Builder.GET("/v3/system/server_status").build();
 
         try {
-            client.submitRequest(req, Optional.<String>absent(), new TDHttpRequestHandler<byte[]>()
+            client.submitRequest(req, Optional.empty(), new TDHttpRequestHandler<byte[]>()
             {
                 @Override
                 public Response send(OkHttpClient httpClient, Request request)
@@ -365,7 +365,7 @@ public class TestTDHttpClient
             }
             TDClientHttpTooManyRequestsException tooManyRequestsException = (TDClientHttpTooManyRequestsException) e;
             if (retryAfterMatcher.isPresent()) {
-                assertThat(tooManyRequestsException.getRetryAfter().orNull(), retryAfterMatcher.get());
+                assertThat(tooManyRequestsException.getRetryAfter().orElse(null), retryAfterMatcher.get());
             }
         }
 

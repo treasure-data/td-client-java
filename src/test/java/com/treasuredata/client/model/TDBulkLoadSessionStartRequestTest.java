@@ -1,7 +1,8 @@
 package com.treasuredata.client.model;
 
-import com.google.common.base.Optional;
 import org.junit.Test;
+
+import java.util.Optional;
 
 import static com.treasuredata.client.model.ObjectMappers.compactMapper;
 import static org.hamcrest.Matchers.is;
@@ -14,7 +15,7 @@ public class TDBulkLoadSessionStartRequestTest
     public void defaultValues()
             throws Exception
     {
-        assertThat(TDBulkLoadSessionStartRequest.builder().build().getScheduledTime(), is(Optional.<String>absent()));
+        assertThat(TDBulkLoadSessionStartRequest.builder().build().getScheduledTime(), is(Optional.empty()));
     }
 
     @Test

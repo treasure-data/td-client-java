@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client.impl;
 
-import com.google.common.base.Optional;
 import com.treasuredata.client.ProxyConfig;
 import com.treasuredata.client.TDClientException;
 import com.treasuredata.client.TDClientHttpException;
@@ -31,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static com.google.common.net.HttpHeaders.PROXY_AUTHORIZATION;
 
@@ -42,7 +42,7 @@ public class ProxyAuthenticator
 {
     private final Logger logger = LoggerFactory.getLogger(ProxyAuthenticator.class);
     private final ProxyConfig proxyConfig;
-    private Optional<String> proxyAuthCache = Optional.absent();
+    private Optional<String> proxyAuthCache = Optional.empty();
 
     public ProxyAuthenticator(ProxyConfig proxyConfig)
     {
@@ -62,7 +62,7 @@ public class ProxyAuthenticator
         if (!proxyAuthCache.isPresent()) {
             logger.debug("Proxy authorization requested for " + route.address());
             proxyAuthCache = Optional.of(
-                    Credentials.basic(proxyConfig.getUser().or(""), proxyConfig.getPassword().or(""))
+                    Credentials.basic(proxyConfig.getUser().orElse(""), proxyConfig.getPassword().orElse(""))
             );
         }
         return response.request().newBuilder()

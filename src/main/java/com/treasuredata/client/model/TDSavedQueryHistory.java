@@ -19,9 +19,9 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Optional;
 
 import java.util.List;
+import java.util.Optional;
 
 public class TDSavedQueryHistory
 {

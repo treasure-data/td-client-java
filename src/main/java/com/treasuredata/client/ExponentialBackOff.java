@@ -18,17 +18,12 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Preconditions;
-
 /**
  *
  */
 public class ExponentialBackOff
+        extends AbstractBackOff
 {
-    private final int initialIntervalMills;
-    private final int maxIntervalMillis;
-    private final double multiplier;
-    private int executionCount;
     private int nextIntervalMillis;
 
     public ExponentialBackOff()
@@ -38,27 +33,11 @@ public class ExponentialBackOff
 
     public ExponentialBackOff(int initialIntervalMillis, int maxIntervalMillis, double multiplier)
     {
-        this.initialIntervalMills = initialIntervalMillis;
-        this.maxIntervalMillis = maxIntervalMillis;
-        this.multiplier = multiplier;
-        this.executionCount = 0;
+        super(initialIntervalMillis, maxIntervalMillis, multiplier);
         this.nextIntervalMillis = initialIntervalMillis;
-
-        Preconditions.checkArgument(initialIntervalMillis >= 0, "initialIntervalMillis must be >= 0");
-        Preconditions.checkArgument(maxIntervalMillis >= 0, "maxIntervalMillis must be >= 0");
-        Preconditions.checkArgument(multiplier >= 0.0, "multiplier must be >= 0");
     }
 
-    public int getExecutionCount()
-    {
-        return executionCount;
-    }
-
-    public int incrementExecutionCount()
-    {
-        return executionCount++;
-    }
-
+    @Override
     public int nextWaitTimeMillis()
     {
         int currentWaitTimeMillis = nextIntervalMillis;

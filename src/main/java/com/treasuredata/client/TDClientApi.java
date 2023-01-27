@@ -18,8 +18,9 @@
  */
 package com.treasuredata.client;
 
+import java.util.Optional;
+
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
@@ -92,6 +93,7 @@ public interface TDClientApi<ClientImpl>
     TDUser getUser();
 
     /**
+     * @deprecated reason this API is deprecated since February 2021.
      * Validates and return information about the current API key.
      * @return A {@link TDApiKey} instance.
      */
@@ -114,6 +116,14 @@ public interface TDClientApi<ClientImpl>
      * @throws TDClientException if failed to retrieve the database list
      */
     List<String> listDatabaseNames();
+
+    /**
+     * Get the detailed information of a database
+     *
+     * @return TDDatabase
+     * @throws TDClientException if failed to retrieve the detailed information of a database.
+     */
+    TDDatabase showDatabase(String databaseName);
 
     /**
      * Get the detailed information of databases

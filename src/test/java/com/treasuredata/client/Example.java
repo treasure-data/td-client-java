@@ -19,7 +19,6 @@
 package com.treasuredata.client;
 
 import com.google.common.base.Function;
-import com.google.common.base.Throwables;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDColumnType;
@@ -137,7 +136,7 @@ public class Example
             String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(1) cnt from www_access"));
 
             // Wait until the query finishes
-            ExponentialBackOff backOff = new ExponentialBackOff();
+            BackOff backOff = new ExponentialBackOff();
             TDJobSummary job = client.jobStatus(jobId);
             while (!job.getStatus().isFinished()) {
                 Thread.sleep(backOff.nextWaitTimeMillis());
@@ -166,7 +165,7 @@ public class Example
                         unpacker.close();
                     }
                     catch (Exception e) {
-                        throw Throwables.propagate(e);
+                        throw new RuntimeException(e);
                     }
                     return count;
                 }

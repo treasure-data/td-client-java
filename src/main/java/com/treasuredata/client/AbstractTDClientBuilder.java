@@ -18,11 +18,12 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 
 import java.util.Properties;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.treasuredata.client.TDClientConfig.ENV_TD_CLIENT_APIKEY;
 import static com.treasuredata.client.TDClientConfig.Type.APIKEY;
@@ -50,13 +51,14 @@ import static com.treasuredata.client.TDClientConfig.getTDConfProperties;
  */
 public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends AbstractTDClientBuilder<ClientImpl, BuilderImpl>>
 {
-    protected Optional<String> endpoint = Optional.absent();
-    protected Optional<Integer> port = Optional.absent();
+    protected Optional<String> endpoint = Optional.empty();
+    protected Optional<Integer> port = Optional.empty();
     protected boolean useSSL = true;
-    protected Optional<String> apiKey = Optional.absent();
-    protected Optional<String> user = Optional.absent();
-    protected Optional<String> password = Optional.absent();
-    protected Optional<ProxyConfig> proxy = Optional.absent();
+    protected Optional<String> apiKey = Optional.empty();
+    protected Optional<String> user = Optional.empty();
+    protected Optional<String> password = Optional.empty();
+    protected Optional<ProxyConfig> proxy = Optional.empty();
+    protected BackOffStrategy retryStrategy = BackOffStrategy.FullJitter;
     protected int retryLimit = 7;
     protected int retryInitialIntervalMillis = 500;
     protected int retryMaxIntervalMillis = 60000;
@@ -73,7 +75,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
 
     private static Optional<String> getConfigProperty(Properties p, String key)
     {
-        return Optional.fromNullable(p.getProperty(key));
+        return Optional.ofNullable(p.getProperty(key));
     }
 
     private static Optional<Integer> getConfigPropertyInt(Properties p, TDClientConfig.Type key)
@@ -93,7 +95,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
             }
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -114,7 +116,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
             }
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -130,7 +132,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
             }
         }
         else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -167,24 +169,25 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
      */
     public BuilderImpl setProperties(Properties p)
     {
-        this.endpoint = getConfigProperty(p, API_ENDPOINT)
-                .or(getConfigProperty(p, "endpoint"))
-                .or(endpoint);
-        this.port = getConfigPropertyInt(p, API_PORT)
-                .or(getConfigPropertyInt(p, "port"))
-                .or(port);
-        this.useSSL = getConfigPropertyBoolean(p, USESSL)
-                .or(getConfigPropertyBoolean(p, "usessl"))
-                .or(useSSL);
-        this.apiKey = getConfigProperty(p, APIKEY)
-                .or(getConfigProperty(p, "apikey"))
-                .or(apiKey);
-        this.user = getConfigProperty(p, USER)
-                .or(getConfigProperty(p, "user"))
-                .or(user);
-        this.password = getConfigProperty(p, PASSOWRD)
-                .or(getConfigProperty(p, "password"))
-                .or(password);
+        this.endpoint = Stream.of(getConfigProperty(p, API_ENDPOINT), getConfigProperty(p, "endpoint"), endpoint)
+                .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
+                .findFirst();
+        this.port = Stream.of(getConfigPropertyInt(p, API_PORT), getConfigPropertyInt(p, "port"), port)
+                .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
+                .findFirst();
+        this.useSSL = Stream.of(getConfigPropertyBoolean(p, USESSL), getConfigPropertyBoolean(p, "usessl"))
+                .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
+                .findFirst()
+                .orElse(useSSL);
+        this.apiKey = Stream.of(getConfigProperty(p, APIKEY), getConfigProperty(p, "apikey"), apiKey)
+                .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
+                .findFirst();
+        this.user = Stream.of(getConfigProperty(p, USER), getConfigProperty(p, "user"), user)
+                .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
+                .findFirst();
+        this.password = Stream.of(getConfigProperty(p, PASSOWRD), getConfigProperty(p, "password"), password)
+                .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
+                .findFirst();
 
         // proxy
         boolean hasProxy = false;
@@ -221,16 +224,16 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
             hasProxy = true;
             proxyConfig.setPassword(proxyPassword.get());
         }
-        this.proxy = Optional.fromNullable(hasProxy ? proxyConfig.createProxyConfig() : null);
+        this.proxy = Optional.ofNullable(hasProxy ? proxyConfig.createProxyConfig() : null);
 
         // http client parameter
-        this.retryLimit = getConfigPropertyInt(p, RETRY_LIMIT).or(retryLimit);
-        this.retryInitialIntervalMillis = getConfigPropertyInt(p, RETRY_INITIAL_INTERVAL_MILLIS).or(retryInitialIntervalMillis);
-        this.retryMaxIntervalMillis = getConfigPropertyInt(p, RETRY_MAX_INTERVAL_MILLIS).or(retryMaxIntervalMillis);
-        this.retryMultiplier = getConfigPropertyDouble(p, RETRY_MULTIPLIER).or(retryMultiplier);
-        this.connectTimeoutMillis = getConfigPropertyInt(p, CONNECT_TIMEOUT_MILLIS).or(connectTimeoutMillis);
-        this.readTimeoutMillis = getConfigPropertyInt(p, READ_TIMEOUT_MILLIS).or(readTimeoutMillis);
-        this.connectionPoolSize = getConfigPropertyInt(p, CONNECTION_POOL_SIZE).or(connectionPoolSize);
+        this.retryLimit = getConfigPropertyInt(p, RETRY_LIMIT).orElse(retryLimit);
+        this.retryInitialIntervalMillis = getConfigPropertyInt(p, RETRY_INITIAL_INTERVAL_MILLIS).orElse(retryInitialIntervalMillis);
+        this.retryMaxIntervalMillis = getConfigPropertyInt(p, RETRY_MAX_INTERVAL_MILLIS).orElse(retryMaxIntervalMillis);
+        this.retryMultiplier = getConfigPropertyDouble(p, RETRY_MULTIPLIER).orElse(retryMultiplier);
+        this.connectTimeoutMillis = getConfigPropertyInt(p, CONNECT_TIMEOUT_MILLIS).orElse(connectTimeoutMillis);
+        this.readTimeoutMillis = getConfigPropertyInt(p, READ_TIMEOUT_MILLIS).orElse(readTimeoutMillis);
+        this.connectionPoolSize = getConfigPropertyInt(p, CONNECTION_POOL_SIZE).orElse(connectionPoolSize);
 
         return self();
     }
@@ -274,6 +277,12 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     public BuilderImpl setProxy(ProxyConfig proxyConfig)
     {
         this.proxy = Optional.of(proxyConfig);
+        return self();
+    }
+
+    public BuilderImpl setRetryStrategy(BackOffStrategy strategy)
+    {
+        this.retryStrategy = strategy;
         return self();
     }
 
@@ -340,6 +349,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
                 user,
                 password,
                 proxy,
+                retryStrategy,
                 retryLimit,
                 retryInitialIntervalMillis,
                 retryMaxIntervalMillis,

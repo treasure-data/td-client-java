@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 public class TDUserList
 {
@@ -14,7 +13,7 @@ public class TDUserList
     @JsonCreator
     TDUserList(@JsonProperty("users") List<TDUser> users)
     {
-        this.users = checkNotNull(users, "users");
+        this.users = Objects.requireNonNull(users, "users");
     }
 
     @JsonProperty("users")

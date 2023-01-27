@@ -1,7 +1,6 @@
 package com.treasuredata.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.Response;
 import okhttp3.internal.http2.StreamResetException;
@@ -26,6 +25,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -253,10 +253,15 @@ public class TDRequestErrorHandler
     @VisibleForTesting
     public static Optional<TDApiErrorMessage> extractErrorResponse(Response response)
     {
-        Optional<String> content = Optional.absent();
+        Optional<String> content = Optional.empty();
         try {
             try {
                 content = Optional.of(response.body().string());
+            }
+            catch (SocketTimeoutException e) {
+                // http status was error or not found but failed to get body content
+                // handler by status will process further
+                return Optional.of(new TDApiErrorMessage(e.getClass().getSimpleName(), e.getMessage(), "error"));
             }
             catch (IOException e) {
                 throw new TDClientException(INVALID_JSON_RESPONSE, e);
@@ -268,12 +273,12 @@ public class TDRequestErrorHandler
             }
             else {
                 // Error message from Proxy server etc.
-                return Optional.of(new TDApiErrorMessage("error", content.or("[empty]"), "error"));
+                return Optional.of(new TDApiErrorMessage("error", content.orElse("[empty]"), "error"));
             }
         }
         catch (IOException e) {
-            logger.warn("Failed to parse the error response {}: {}\n{}", response.request().url(), content.or("[empty]"), e.getMessage());
+            logger.warn("Failed to parse the error response {}: {}\n{}", response.request().url(), content.orElse("[empty]"), e.getMessage());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 }

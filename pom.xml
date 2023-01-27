@@ -5,7 +5,7 @@
   <artifactId>td-client</artifactId>
   <name>Treasure Data Client for Java</name>
   <description>Treasure Data Client for Java.</description>
-  <version>0.9.5-SNAPSHOT</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-client-java</url>
 
@@ -66,9 +66,10 @@
     <project.check.fail-dependency>false</project.check.fail-dependency>
     <project.check.fail-dependency-version-check>${project.check.fail-all}</project.check.fail-dependency-version-check>
 
-    <jetty.version>9.2.22.v20170606</jetty.version>
-    <jackson-core.version>2.9.10</jackson-core.version>
-    <jackson-bind.version>2.9.10.5</jackson-bind.version>
+    <jackson-core.version>2.14.1</jackson-core.version>
+    <jackson-bind.version>2.14.1</jackson-bind.version>
+
+    <okhttp.version>3.14.9</okhttp.version>
   </properties>
 
   <repositories>
@@ -95,39 +96,26 @@
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
-      <version>3.14.7</version>
+      <version>${okhttp.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp-urlconnection</artifactId>
-      <version>3.14.7</version>
+      <version>${okhttp.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>mockwebserver</artifactId>
-      <version>3.14.7</version>
+      <version>${okhttp.version}</version>
       <scope>test</scope>
-    </dependency>
-
-
-    <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-      <version>4.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-multibindings</artifactId>
-      <version>3.0</version>
     </dependency>
 
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>24.1.1-jre</version>
+      <version>31.1-jre</version>
     </dependency>
 
     <dependency>
@@ -150,7 +138,7 @@
 
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-guava</artifactId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
       <version>${jackson-core.version}</version>
     </dependency>
 
@@ -163,7 +151,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.12</version>
+      <version>2.0.6</version>
     </dependency>
 
     <dependency>
@@ -183,7 +171,7 @@
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
-      <version>1.2</version>
+      <version>1.3.2</version>
     </dependency>
 
     <!-- ==================== -->
@@ -192,21 +180,21 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.1.3</version>
+      <version>1.2.11</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>1.9.5</version>
+      <version>4.10.0</version>
       <scope>test</scope>
     </dependency>
 
@@ -215,6 +203,12 @@
       <artifactId>fixd</artifactId>
       <version>1.0.0</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -226,6 +220,10 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -240,14 +238,14 @@
     <dependency>
       <groupId>org.exparity</groupId>
       <artifactId>hamcrest-date</artifactId>
-      <version>1.1.0</version>
+      <version>2.0.8</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
-      <version>2.9.4</version>
+      <version>2.12.1</version>
       <scope>test</scope>
     </dependency>
 
@@ -258,7 +256,7 @@
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <version>3.10.1</version>
         <configuration>
           <source>${project.build.targetJdk}</source>
           <target>${project.build.targetJdk}</target>
@@ -272,7 +270,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.4.1</version>
         <configuration>
           <relocations>
             <relocation>
@@ -306,7 +304,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.2</version>
+        <version>3.3.0</version>
         <configuration>
           <archive>
             <manifest>
@@ -322,7 +320,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.4</version>
+        <version>3.2.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -336,7 +334,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.1</version>
+        <version>2.22.2</version>
         <configuration>
 	  <!-- This config was necessary to run tests on Circle CI -->
           <forkCount>0</forkCount>
@@ -351,7 +349,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-scm-plugin</artifactId>
-        <version>1.9.4</version>
+        <version>1.13.0</version>
         <configuration>
           <pushChanges>false</pushChanges>
         </configuration>
@@ -360,7 +358,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
+        <version>3.3.0</version>
         <configuration>
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>
@@ -377,13 +375,13 @@
 
       <plugin>
         <artifactId>maven-eclipse-plugin</artifactId>
-        <version>2.9</version>
+        <version>2.10</version>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.8</version>
+        <version>3.5.0</version>
         <configuration>
           <skip>${project.check.skip-dependency}</skip>
           <failOnWarning>${project.check.fail-dependency}</failOnWarning>
@@ -424,13 +422,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.4.1</version>
         <configuration>
           <source>${project.build.targetJdk}</source>
           <encoding>${project.build.sourceEncoding}</encoding>
           <maxmemory>${project.build.jvmsize}</maxmemory>
           <additionalparam>${javadoc.opts}</additionalparam>
-          <sourcepath>${project.basedir}/src/main;${project.basedir}/target/generated-sources/annotations</sourcepath>
         </configuration>
         <executions>
           <execution>
@@ -446,7 +443,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.2.0</version>
         <executions>
           <execution>
             <phase>validate</phase>
@@ -494,15 +491,7 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav-jackrabbit</artifactId>
-        <version>2.9</version>
-      </extension>
-    </extensions>
   </build>
 
   <reporting>
@@ -511,7 +500,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9</version>
+        <version>3.4.1</version>
         <configuration>
           <doctitle>${project.name} ${project.version} API</doctitle>
           <aggregate>true</aggregate>
@@ -530,12 +519,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
-        <version>2.5</version>
+        <version>3.3.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.18.1</version>
+        <version>2.22.2</version>
       </plugin>
     </plugins>
   </reporting>
