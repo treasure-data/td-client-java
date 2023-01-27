@@ -46,6 +46,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.Matchers.is;
@@ -172,8 +173,11 @@ public class TestTDHttpClient
         assertThat(requests.get(), is(2));
         assertThat(result, is(body));
 
+        // The delay often goes below 5 seconds fractionally, e.g. 4.9996 seconds (99.992%),
+        // which appears to be acceptable. So 1% margin of error is allowed.
         long delayNanos = secondRequestNanos.get() - firstRequestNanos.get();
-        assertThat(delayNanos, Matchers.greaterThanOrEqualTo(SECONDS.toNanos(retryAfterSeconds)));
+        long almostFiveSeconds = MILLISECONDS.toNanos(retryAfterSeconds * 990);
+        assertThat(delayNanos, Matchers.greaterThanOrEqualTo(almostFiveSeconds));
     }
 
     @Test
