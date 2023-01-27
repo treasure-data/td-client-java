@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.google.common.annotations.VisibleForTesting;
 
 import java.util.Optional;
 
@@ -101,7 +100,6 @@ public class TDSavedQueryUpdateRequest
      * @param base
      * @return
      */
-    @VisibleForTesting
     public TDSaveQueryRequest merge(TDSavedQuery base)
     {
         return new TDSaveQueryRequest(

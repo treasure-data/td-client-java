@@ -251,7 +251,6 @@ public class TDRequestErrorHandler
         return String.valueOf(conflictsWith);
     }
 
-    @VisibleForTesting
     public static Optional<TDApiErrorMessage> extractErrorResponse(Response response)
     {
         Optional<String> content = Optional.empty();
