@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
@@ -96,6 +95,7 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -1794,7 +1794,7 @@ public class TestTDClient
     public void legacyApikeyMocked()
             throws Exception
     {
-        String apikey = Strings.repeat("a", 40);
+        String apikey = String.join("", Collections.nCopies(40, "a"));
         client = mockClient().withApiKey(apikey);
 
         server.enqueue(new MockResponse());
