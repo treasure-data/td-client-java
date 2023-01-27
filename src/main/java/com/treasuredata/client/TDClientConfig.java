@@ -21,7 +21,6 @@ package com.treasuredata.client;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +30,7 @@ import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -257,7 +257,7 @@ public class TDClientConfig
         Properties p = new Properties();
         logger.info(String.format("Reading configuration file: %s", file));
         try {
-            List<String> lines = Files.readLines(file, StandardCharsets.UTF_8);
+            List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
             StringBuilder extracted = new StringBuilder();
             for (String line : lines) {
                 String trimmed = line.trim();
