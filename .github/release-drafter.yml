@@ -15,12 +15,12 @@ categories:
     label:
       - 'library-update'
       - 'test-library-update'
-      - 'sbt-plugin-update'
       - 'dependencies'
   - title: '🛠  Internal Updates'
     label:
       - 'internal'
       - 'kaizen'
+      - 'chore'
   - title: '📚 Docs'
     labels:
       - 'doc'
