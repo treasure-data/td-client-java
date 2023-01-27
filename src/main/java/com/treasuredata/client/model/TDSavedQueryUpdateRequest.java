@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.google.common.annotations.VisibleForTesting;
 
 import java.util.Optional;
 
@@ -45,7 +44,9 @@ public class TDSavedQueryUpdateRequest
     private final Optional<String> result;
     private final Optional<TDJob.EngineVersion> engineVersion;
 
-    @VisibleForTesting
+    /**
+     * Visible for testing.
+     */
     @JsonCreator
     TDSavedQueryUpdateRequest(
             @JsonProperty("name") Optional<String> name,
@@ -73,7 +74,6 @@ public class TDSavedQueryUpdateRequest
         this.engineVersion = engineVersion;
     }
 
-    @VisibleForTesting
     static ObjectMapper getObjectMapper()
     {
         ObjectMapper mapper = new ObjectMapper();
@@ -100,7 +100,6 @@ public class TDSavedQueryUpdateRequest
      * @param base
      * @return
      */
-    @VisibleForTesting
     public TDSaveQueryRequest merge(TDSavedQuery base)
     {
         return new TDSaveQueryRequest(

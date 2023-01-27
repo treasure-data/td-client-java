@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.google.common.annotations.VisibleForTesting;
 
-@VisibleForTesting
+/**
+ * @deprecated Do not use this from application. This file made public for testing and is a subject to be deleted.
+ */
+@Deprecated
 public class ObjectMappers
 {
     private ObjectMappers()
@@ -25,7 +27,6 @@ public class ObjectMappers
     /**
      * Get an {@link ObjectMapper} that omits null and absent fields.
      */
-    @VisibleForTesting
     public static ObjectMapper compactMapper()
     {
         return Lazy.COMPACT_MAPPER;

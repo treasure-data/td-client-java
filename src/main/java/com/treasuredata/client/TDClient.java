@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -151,10 +150,16 @@ public class TDClient
         return new TDClient(config, httpClient.withHeaders(headers), apiKeyCache);
     }
 
-    @VisibleForTesting
+    /**
+     * Visible for testing.
+     */
     protected final TDClientConfig config;
-    @VisibleForTesting
+
+    /**
+     * Visible for testing.
+     */
     protected final TDHttpClient httpClient;
+
     protected final Optional<String> apiKeyCache;
 
     public TDClient(TDClientConfig config)

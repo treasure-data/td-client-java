@@ -1,6 +1,5 @@
 package com.treasuredata.client;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.treasuredata.client.model.TDApiErrorMessage;
 import okhttp3.Response;
 import okhttp3.internal.http2.StreamResetException;
@@ -51,7 +50,9 @@ public class TDRequestErrorHandler
     // Use TDHttpClient's logger for better log messages
     private static Logger logger = LoggerFactory.getLogger(TDHttpClient.class);
 
-    @VisibleForTesting
+    /**
+     * Visible for testing.
+     */
     static final ThreadLocal<SimpleDateFormat> HTTP_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>()
     {
         @Override
@@ -212,8 +213,8 @@ public class TDRequestErrorHandler
 
     /**
      * https://tools.ietf.org/html/rfc7231#section-7.1.3
+     * Visible for testing.
      */
-    @VisibleForTesting
     static Date parseRetryAfter(long now, Response response)
     {
         String retryAfter = response.header(RETRY_AFTER);
@@ -250,7 +251,6 @@ public class TDRequestErrorHandler
         return String.valueOf(conflictsWith);
     }
 
-    @VisibleForTesting
     public static Optional<TDApiErrorMessage> extractErrorResponse(Response response)
     {
         Optional<String> content = Optional.empty();
