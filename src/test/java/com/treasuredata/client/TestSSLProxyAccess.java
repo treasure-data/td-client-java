@@ -105,7 +105,7 @@ public class TestSSLProxyAccess
         proxy.setPort(proxyPort);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS);
-        TDClient client = TDClient.newBuilder().setProxy(proxy.createProxyConfig()).build();
+        TDClient client = TDClient.newBuilder().setRetryLimit(2).setProxy(proxy.createProxyConfig()).build();
         client.serverStatus();
 
         List<TDTable> tableList = client.listTables("sample_datasets");
