@@ -159,19 +159,16 @@ public class TestProxyAccess
     public void proxyApiAccess()
     {
         TDClient client = TDClient.newBuilder().setProxy(proxyBaseConfig()).build();
-        try {
-            client.serverStatus();
+        client.serverStatus();
 
-            List<TDTable> tableList = client.listTables("sample_datasets");
-            assertTrue(tableList.size() >= 2);
+        List<TDTable> tableList = client.listTables("sample_datasets");
+        assertTrue(tableList.size() >= 2);
 
-            TDJobList jobList = client.listJobs();
-            assertTrue(jobList.getJobs().size() > 0);
-        }
-        finally {
-            logger.debug("proxy access count: {}", proxyAccessCount);
-            assertEquals(1, proxyAccessCount.get());
-        }
+        TDJobList jobList = client.listJobs();
+        assertTrue(jobList.getJobs().size() > 0);
+
+        logger.debug("proxy access count: {}", proxyAccessCount);
+        assertEquals(1, proxyAccessCount.get());
     }
 
     @Test
