@@ -3,6 +3,8 @@ package com.treasuredata.client.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
+
 public class TDBulkLoadSessionStartResult
 {
     private final String jobId;
@@ -32,7 +34,7 @@ public class TDBulkLoadSessionStartResult
 
         TDBulkLoadSessionStartResult that = (TDBulkLoadSessionStartResult) o;
 
-        return jobId != null ? jobId.equals(that.jobId) : that.jobId == null;
+        return Objects.equals(jobId, that.jobId);
     }
 
     @Override

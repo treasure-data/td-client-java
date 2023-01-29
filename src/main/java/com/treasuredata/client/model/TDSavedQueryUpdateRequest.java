@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -211,38 +212,10 @@ public class TDSavedQueryUpdateRequest
         }
 
         TDSavedQueryUpdateRequest that = (TDSavedQueryUpdateRequest) o;
-
-        if (name != null ? !name.equals(that.name) : that.name != null) {
-            return false;
-        }
-        if (cron != null ? !cron.equals(that.cron) : that.cron != null) {
-            return false;
-        }
-        if (type != null ? !type.equals(that.type) : that.type != null) {
-            return false;
-        }
-        if (query != null ? !query.equals(that.query) : that.query != null) {
-            return false;
-        }
-        if (timezone != null ? !timezone.equals(that.timezone) : that.timezone != null) {
-            return false;
-        }
-        if (delay != null ? !delay.equals(that.delay) : that.delay != null) {
-            return false;
-        }
-        if (database != null ? !database.equals(that.database) : that.database != null) {
-            return false;
-        }
-        if (priority != null ? !priority.equals(that.priority) : that.priority != null) {
-            return false;
-        }
-        if (retryLimit != null ? !retryLimit.equals(that.retryLimit) : that.retryLimit != null) {
-            return false;
-        }
-        if (engineVersion != null ? !engineVersion.equals(that.engineVersion) : that.engineVersion != null) {
-            return false;
-        }
-        return result != null ? result.equals(that.result) : that.result == null;
+        return Objects.equals(name, that.name) && Objects.equals(cron, that.cron) && Objects.equals(type, that.type) &&
+                Objects.equals(query, that.query) && Objects.equals(timezone, that.timezone) && Objects.equals(delay, that.delay) &&
+                Objects.equals(database, that.database) && Objects.equals(priority, that.priority) && Objects.equals(retryLimit, that.retryLimit) &&
+                Objects.equals(engineVersion, that.engineVersion) && Objects.equals(result, that.result);
     }
 
     @Override
