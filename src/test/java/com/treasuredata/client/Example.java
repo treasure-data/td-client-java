@@ -98,40 +98,29 @@ public class Example
 
     public static void createDatabaseExample(String databaseName)
     {
-        TDClient client = TDClient.newClient();
-
-        try {
+        try (TDClient client = TDClient.newClient()) {
             client.createDatabase(databaseName);
             System.out.print("Database " + databaseName + " is created!");
         }
         catch (TDClientException e) {
             e.printStackTrace();
         }
-        finally {
-            client.close();
-        }
     }
 
     public static void deleteDatabaseExample(String databaseName)
     {
-        TDClient client = TDClient.newClient();
-
-        try {
+        try (TDClient client = TDClient.newClient()) {
             client.deleteDatabase(databaseName);
             System.out.print("Database " + databaseName + " is deleted!");
         }
         catch (TDClientException e) {
             e.printStackTrace();
         }
-        finally {
-            client.close();
-        }
     }
 
     public static void submitJobExample()
     {
-        TDClient client = TDClient.newClient();
-        try {
+        try (TDClient client = TDClient.newClient()) {
             // Submit a new Presto query
             String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "select count(1) cnt from www_access"));
 
@@ -154,15 +143,13 @@ public class Example
                 public Integer apply(InputStream input)
                 {
                     int count = 0;
-                    try {
-                        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
+                    try (MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input))) {
                         while (unpacker.hasNext()) {
                             // Each row of the query result is array type value (e.g., [1, "name", ...])
                             ArrayValue array = unpacker.unpackValue().asArrayValue();
                             System.out.println(array);
                             count++;
                         }
-                        unpacker.close();
                     }
                     catch (Exception e) {
                         throw new RuntimeException(e);
@@ -174,15 +161,11 @@ public class Example
         catch (Exception e) {
             e.printStackTrace();
         }
-        finally {
-            client.close();
-        }
     }
 
     public static void listDatabasesExample()
     {
-        TDClient client = TDClient.newClient();
-        try {
+        try (TDClient client = TDClient.newClient()) {
             // Retrieve database and table names
             List<TDDatabase> databases = client.listDatabases();
             TDDatabase db = databases.get(0);
@@ -194,60 +177,44 @@ public class Example
         catch (TDClientException e) {
             e.printStackTrace();
         }
-        finally {
-            client.close();
-        }
     }
 
     public static void createTableExample(String databaseName, String tableName)
     {
-        TDClient client = TDClient.newClient();
-        try {
+        try (TDClient client = TDClient.newClient()) {
             client.createTable(databaseName, tableName);
             System.out.println("Table " + tableName + " is created in database " + databaseName);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        finally {
-            client.close();
-        }
     }
 
     public static void deleteTableExample(String databaseName, String tableName)
     {
-        TDClient client = TDClient.newClient();
-        try {
+        try (TDClient client = TDClient.newClient()) {
             client.deleteTable(databaseName, tableName);
             System.out.println("Table " + tableName + " is deleted from database " + databaseName);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        finally {
-            client.close();
-        }
     }
 
     public static void updateSchemaExample(String databaseName, String tableName, List<TDColumn> columns)
     {
-        TDClient client = TDClient.newClient();
-        try {
+        try (TDClient client = TDClient.newClient()) {
             client.updateTableSchema(databaseName, tableName, columns);
             System.out.println("Updated schema for table " + tableName);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        finally {
-            client.close();
-        }
     }
 
     public static void importDataExample(String databaseName, String tableName)
     {
-        TDClient client = TDClient.newClient();
-        try {
+        try (TDClient client = TDClient.newClient()) {
             File file = File.createTempFile("data", ".msgpack.gz");
             System.out.println("File path: " + file.getAbsolutePath());
             file.deleteOnExit();
@@ -266,18 +233,15 @@ public class Example
 
             ImmutableMapValue mapValue = ValueFactory.newMap(sampleData);
 
-            MessagePacker packer = MessagePack.newDefaultPacker(new GZIPOutputStream(new FileOutputStream(file)));
-            packer.packValue(mapValue);
-            packer.close();
+            try (MessagePacker packer = MessagePack.newDefaultPacker(new GZIPOutputStream(new FileOutputStream(file)))) {
+                packer.packValue(mapValue);
+            }
 
             client.importFile(databaseName, tableName, file);
             System.out.println("Done importing data into table " + tableName);
         }
         catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
-            client.close();
         }
     }
 
@@ -287,33 +251,30 @@ public class Example
         file.deleteOnExit();
 
         Map<Value, Value> mapData = new HashMap<>();
+        try (MessagePacker packer = MessagePack.newDefaultPacker(new GZIPOutputStream(new FileOutputStream(file)))) {
+            int numberOfRecords = 100;
+            for (int i = 1; i <= numberOfRecords; i++) {
+                StringValue timeCol = ValueFactory.newString("time");
+                StringValue timeColValue = ValueFactory.newString(i + "");
+                StringValue col1 = ValueFactory.newString("col1");
+                StringValue col1Value = ValueFactory.newString("value" + i);
+                StringValue col2 = ValueFactory.newString("col2");
+                StringValue col2Value = ValueFactory.newString("value2_" + i);
 
-        MessagePacker packer = MessagePack.newDefaultPacker(new GZIPOutputStream(new FileOutputStream(file)));
-        int numberOfRecords = 100;
-        for (int i = 1; i <= numberOfRecords; i++) {
-            StringValue timeCol = ValueFactory.newString("time");
-            StringValue timeColValue = ValueFactory.newString(i + "");
-            StringValue col1 = ValueFactory.newString("col1");
-            StringValue col1Value = ValueFactory.newString("value" + i);
-            StringValue col2 = ValueFactory.newString("col2");
-            StringValue col2Value = ValueFactory.newString("value2_" + i);
+                mapData.put(timeCol, timeColValue);
+                mapData.put(col1, col1Value);
+                mapData.put(col2, col2Value);
 
-            mapData.put(timeCol, timeColValue);
-            mapData.put(col1, col1Value);
-            mapData.put(col2, col2Value);
-
-            ImmutableMapValue mapValue = ValueFactory.newMap(mapData);
-            packer.packValue(mapValue);
+                ImmutableMapValue mapValue = ValueFactory.newMap(mapData);
+                packer.packValue(mapValue);
+            }
         }
-        packer.close();
-
         return file;
     }
 
     public static void bulkImportExample(String bulkName, String databaseName, String tableName)
     {
-        TDClient client = TDClient.newClient();
-        try {
+        try (TDClient client = TDClient.newClient()) {
             File msgpackFile = Example.createBulkImportData();
 
             client.createBulkImportSession(bulkName, databaseName, tableName);
@@ -336,57 +297,54 @@ public class Example
         catch (Exception e) {
             e.printStackTrace();
         }
-        finally {
-            client.close();
-        }
     }
 
     public static void saveQueryExample()
     {
-        TDClient client = TDClient.newClient();
+        try (TDClient client = TDClient.newClient()) {
+            // Register a new scheduled query
+            TDSaveQueryRequest query =
+                    TDSavedQuery.newBuilder(
+                                    "my_saved_query",
+                                    TDJob.Type.PRESTO,
+                                    "testdb",
+                                    "select 1",
+                                    "Asia/Tokyo")
+                            .setCron("40 * * * *")
+                            .setResult("mysql://testuser:pass@somemysql.address/somedb/sometable")
+                            .build();
 
-        // Register a new scheduled query
-        TDSaveQueryRequest query =
-                TDSavedQuery.newBuilder(
-                        "my_saved_query",
-                        TDJob.Type.PRESTO,
-                        "testdb",
-                        "select 1",
-                        "Asia/Tokyo")
-                        .setCron("40 * * * *")
-                        .setResult("mysql://testuser:pass@somemysql.address/somedb/sometable")
-                        .build();
+            client.saveQuery(query);
 
-        client.saveQuery(query);
+            // List saved queries
+            List<TDSavedQuery> savedQueries = client.listSavedQueries();
 
-        // List saved queries
-        List<TDSavedQuery> savedQueries = client.listSavedQueries();
+            // Run a saved query
+            Date scheduledTime = new Date(System.currentTimeMillis());
+            client.startSavedQuery(query.getName(), scheduledTime);
 
-        // Run a saved query
-        Date scheduledTime = new Date(System.currentTimeMillis());
-        client.startSavedQuery(query.getName(), scheduledTime);
+            // Get saved query job history (first page)
+            TDSavedQueryHistory firstPage = client.getSavedQueryHistory(query.getName());
 
-        // Get saved query job history (first page)
-        TDSavedQueryHistory firstPage = client.getSavedQueryHistory(query.getName());
+            // Get second page
+            long from = firstPage.getTo().get();
+            long to = from + 20;
+            TDSavedQueryHistory secondPage = client.getSavedQueryHistory(query.getName(), from, to);
 
-        // Get second page
-        long from = firstPage.getTo().get();
-        long to = from + 20;
-        TDSavedQueryHistory secondPage = client.getSavedQueryHistory(query.getName(), from, to);
+            // Get result of last job
+            TDJob lastJob = firstPage.getHistory().get(0);
+            System.out.println("Last job:" + lastJob);
 
-        // Get result of last job
-        TDJob lastJob = firstPage.getHistory().get(0);
-        System.out.println("Last job:" + lastJob);
+            // Update a saved query
+            TDSavedQueryUpdateRequest updateRequest =
+                    TDSavedQuery.newUpdateRequestBuilder()
+                            .setQuery("select 2")
+                            .setDelay(3600)
+                            .build();
+            client.updateSavedQuery("my_saved_query", updateRequest);
 
-        // Update a saved query
-        TDSavedQueryUpdateRequest updateRequest =
-                TDSavedQuery.newUpdateRequestBuilder()
-                        .setQuery("select 2")
-                        .setDelay(3600)
-                        .build();
-        client.updateSavedQuery("my_saved_query", updateRequest);
-
-        // Delete a saved query
-        client.deleteSavedQuery(query.getName());
+            // Delete a saved query
+            client.deleteSavedQuery(query.getName());
+        }
     }
 }

@@ -59,13 +59,9 @@ public class TestProxyAccess
     static int findAvailablePort()
             throws IOException
     {
-        ServerSocket socket = new ServerSocket(0);
-        try {
+        try (ServerSocket socket = new ServerSocket(0)) {
             int port = socket.getLocalPort();
             return port;
-        }
-        finally {
-            socket.close();
         }
     }
 
