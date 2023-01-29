@@ -210,7 +210,7 @@ public class TDHttpClient
                 : String.format("%s://%s%s%s", config.useSSL ? "https" : "http", config.endpoint, portStr, apiRequest.getPath());
 
         if (!apiRequest.getQueryParams().isEmpty()) {
-            List<String> queryParamList = new ArrayList<String>(apiRequest.getQueryParams().size());
+            List<String> queryParamList = new ArrayList<>(apiRequest.getQueryParams().size());
             for (Map.Entry<String, String> queryParam : apiRequest.getQueryParams().entrySet()) {
                 queryParamList.add(String.format("%s=%s", urlEncode(queryParam.getKey()), urlEncode(queryParam.getValue())));
             }

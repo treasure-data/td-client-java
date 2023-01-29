@@ -83,7 +83,7 @@ public class TestTDClientConfig
         p.put(PASSOWRD, "yyyy");
         m = p.build();
 
-        assertTrue(new HashSet(TDClientConfig.knownProperties()).containsAll(m.keySet()));
+        assertTrue(new HashSet<>(TDClientConfig.knownProperties()).containsAll(m.keySet()));
     }
 
     private void validate(TDClientConfig config)
