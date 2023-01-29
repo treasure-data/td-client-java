@@ -64,9 +64,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
@@ -117,6 +115,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -125,9 +124,6 @@ import static org.junit.Assert.fail;
  */
 public class TestTDClient
 {
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
     private static final Logger logger = LoggerFactory.getLogger(TestTDClient.class);
 
     private static final String SAMPLE_DB = "_tdclient_test";
@@ -563,14 +559,13 @@ public class TestTDClient
     public void submitPrestoJobWithInvalidPoolName()
             throws Exception
     {
-        exception.expect(TDClientHttpException.class);
-        exception.expectMessage("Presto resource pool with name 'no_such_pool' does not exist");
-
-        client.deleteTableIfExists(SAMPLE_DB, "sample_output");
-        String poolName = "no_such_pool";
-        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
-        TDJobSummary tdJob = waitJobCompletion(jobId);
-        client.existsTable(SAMPLE_DB, "sample_output");
+        assertThrows("Presto resource pool with name 'no_such_pool' does not exist", TDClientHttpException.class, () -> {
+            client.deleteTableIfExists(SAMPLE_DB, "sample_output");
+            String poolName = "no_such_pool";
+            String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
+            TDJobSummary tdJob = waitJobCompletion(jobId);
+            client.existsTable(SAMPLE_DB, "sample_output");
+        });
     }
 
     @Test
