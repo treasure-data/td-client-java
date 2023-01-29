@@ -691,7 +691,7 @@ public class TestTDClient
         ObjectNode config = JsonNodeFactory.instance.objectNode();
         ObjectNode in = JsonNodeFactory.instance.objectNode();
         in.put("type", "s3");
-        config.put("in", in);
+        config.set("in", in);
         client.createDatabaseIfNotExists(SAMPLE_DB);
         client.createTableIfNotExists(SAMPLE_DB, "sample_output");
         String jobId = client.submit(TDJobRequest.newBulkLoad(SAMPLE_DB, "sample_output", config));
