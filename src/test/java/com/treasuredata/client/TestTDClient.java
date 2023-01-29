@@ -794,17 +794,17 @@ public class TestTDClient
     public void submitExportJob()
             throws Exception
     {
-        TDExportJobRequest jobRequest = new TDExportJobRequest(
-                SAMPLE_DB,
-                "sample_output",
-                new Date(0L),
-                new Date(1456522300L * 1000),
-                TDExportFileFormatType.JSONL_GZ,
-                "access key id",
-                "secret access key",
-                "bucket",
-                "prefix/",
-                Optional.empty());
+        TDExportJobRequest jobRequest = TDExportJobRequest.builder()
+            .database(SAMPLE_DB)
+            .table("sample_output")
+            .from(new Date(0L))
+            .to(new Date(1456522300L * 1000))
+            .fileFormat(TDExportFileFormatType.JSONL_GZ)
+            .accessKeyId("access key id")
+            .secretAccessKey("secret access key")
+            .bucketName("bucket")
+            .filePrefix("prefix/")
+            .poolName(Optional.empty()).build();
         client.createDatabaseIfNotExists(SAMPLE_DB);
         client.createTableIfNotExists(SAMPLE_DB, "sample_output");
         String jobId = client.submitExportJob(jobRequest);
