@@ -50,11 +50,11 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -225,10 +225,12 @@ public class TDHttpClient
             logger.debug("Sending API request to {}", requestUri);
         }
         String dateHeader = RFC2822_FORMAT.get().format(new Date());
-        String userAgent = getClientName();
-        for (Iterator<String> i = headers.get(USER_AGENT).iterator(); i.hasNext(); ) {
-            userAgent = userAgent + "," + i.next();
+        StringJoiner joiner = new StringJoiner(",");
+        joiner.add(getClientName());
+        for (String s : headers.get(USER_AGENT)) {
+            joiner.add(s);
         }
+        String userAgent = joiner.toString();
         Request.Builder request =
                 new Request.Builder()
                         .url(requestUri)
