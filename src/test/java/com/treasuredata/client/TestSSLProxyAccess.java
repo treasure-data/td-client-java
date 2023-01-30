@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  *
@@ -99,19 +99,15 @@ public class TestSSLProxyAccess
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS);
         TDClient client = TDClient.newBuilder().setProxy(proxy.createProxyConfig()).build();
-        try {
-            client.serverStatus();
+        client.serverStatus();
 
-            List<TDTable> tableList = client.listTables("sample_datasets");
-            assertTrue(tableList.size() >= 2);
+        List<TDTable> tableList = client.listTables("sample_datasets");
+        assertTrue(tableList.size() >= 2);
 
-            TDJobList jobList = client.listJobs();
-            assertTrue(jobList.getJobs().size() > 0);
-        }
-        finally {
-            logger.debug("proxy access count: {}", proxyAccessCount);
-            assertEquals(1, proxyAccessCount.get());
-        }
+        TDJobList jobList = client.listJobs();
+        assertTrue(jobList.getJobs().size() > 0);
+        logger.debug("proxy access count: {}", proxyAccessCount);
+        assertEquals(1, proxyAccessCount.get());
     }
 
     @Test
@@ -124,13 +120,10 @@ public class TestSSLProxyAccess
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS + "---"); // Use an wrong password
         TDClient client = TDClient.newBuilder().setProxy(proxy.createProxyConfig()).build();
-        try {
+        TDClientException e = assertThrows(TDClientException.class, () -> {
             client.listTables("sample_datasets");
-            fail("should not reach here");
-        }
-        catch (TDClientException e) {
-            logger.debug(e.getMessage());
-            assertEquals(TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE, e.getErrorType());
-        }
+        });
+        logger.debug(e.getMessage());
+        assertEquals(TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE, e.getErrorType());
     }
 }
