@@ -108,7 +108,7 @@ public class TDColumn implements Serializable
         try {
             String unescaped = jsonStr.replaceAll("\\\"", "\"");
             JSONArray arr = castToArray(new JSONParser().parse(unescaped));
-            List<TDColumn> columnList = new ArrayList<TDColumn>(arr.size());
+            List<TDColumn> columnList = new ArrayList<>(arr.size());
             for (Object e : arr) {
                 JSONArray columnNameAndType = castToArray(e);
                 String[] s = new String[columnNameAndType.size()];
@@ -121,7 +121,7 @@ public class TDColumn implements Serializable
         }
         catch (ParseException e) {
             LoggerFactory.getLogger(TDColumn.class).error("Failed to parse json string", e);
-            return new ArrayList<TDColumn>(0);
+            return new ArrayList<>(0);
         }
     }
 

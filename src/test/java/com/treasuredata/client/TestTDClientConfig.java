@@ -68,7 +68,7 @@ public class TestTDClientConfig
     static ImmutableMap<TDClientConfig.Type, Object> m;
 
     static {
-        ImmutableMap.Builder p = ImmutableMap.<TDClientConfig.Type, Object>builder();
+        ImmutableMap.Builder<TDClientConfig.Type, Object> p = ImmutableMap.builder();
         p.put(API_ENDPOINT, "api2.treasuredata.com");
         p.put(API_PORT, 8981);
         p.put(USESSL, true);
@@ -83,7 +83,7 @@ public class TestTDClientConfig
         p.put(PASSOWRD, "yyyy");
         m = p.build();
 
-        assertTrue(new HashSet(TDClientConfig.knownProperties()).containsAll(m.keySet()));
+        assertTrue(new HashSet<>(TDClientConfig.knownProperties()).containsAll(m.keySet()));
     }
 
     private void validate(TDClientConfig config)
@@ -136,7 +136,7 @@ public class TestTDClientConfig
     @Test
     public void testProxyParam()
     {
-        Map<TDClientConfig.Type, Object> m = new HashMap<TDClientConfig.Type, Object>();
+        Map<TDClientConfig.Type, Object> m = new HashMap<>();
         m.put(PROXY_HOST, "localhost1");
         m.put(PROXY_PORT, 8982);
         m.put(PROXY_USER, "pp");
