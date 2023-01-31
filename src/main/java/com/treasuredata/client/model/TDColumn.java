@@ -98,10 +98,9 @@ public class TDColumn implements Serializable
         // unescape json quotation
         try {
             String unescaped = jsonStr.replaceAll("\\\"", "\"");
-            String[] arr = objectMapper.readValue(unescaped, String[].class);
+            String[][] arr = objectMapper.readValue(unescaped, String[][].class);
             List<TDColumn> columnList = new ArrayList<>(arr.length);
-            for (String e : arr) {
-                String[] columnNameAndType = objectMapper.readValue(e, String[].class);
+            for (String[] columnNameAndType : arr) {
                 columnList.add(parseTuple(columnNameAndType));
             }
             return columnList;
