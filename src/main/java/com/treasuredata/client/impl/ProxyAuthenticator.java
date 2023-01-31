@@ -32,14 +32,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Optional;
 
-import static com.google.common.net.HttpHeaders.PROXY_AUTHORIZATION;
-
 /**
  *
  */
 public class ProxyAuthenticator
         implements Authenticator
 {
+    private static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
     private final Logger logger = LoggerFactory.getLogger(ProxyAuthenticator.class);
     private final ProxyConfig proxyConfig;
     private Optional<String> proxyAuthCache = Optional.empty();

@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.net.HttpHeaders;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -52,6 +51,8 @@ import static org.junit.Assert.fail;
  */
 public class TestServerFailures
 {
+    private static final String CONTENT_TYPE = "Content-Type";
+
     private static Logger logger = LoggerFactory.getLogger(TestServerFailures.class);
 
     private MockWebServer server;
@@ -275,8 +276,8 @@ public class TestServerFailures
     public void corruptedJsonResponse()
             throws Exception
     {
-        server.enqueue(new MockResponse().setBody("{broken json}").setHeader(HttpHeaders.CONTENT_TYPE, "plain/text"));
-        server.enqueue(new MockResponse().setBody("{\"database\":1}").setHeader(HttpHeaders.CONTENT_TYPE, "plain/text"));
+        server.enqueue(new MockResponse().setBody("{broken json}").setHeader(CONTENT_TYPE, "plain/text"));
+        server.enqueue(new MockResponse().setBody("{\"database\":1}").setHeader(CONTENT_TYPE, "plain/text"));
         server.start(port);
 
         TDClient client = TDClient
