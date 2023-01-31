@@ -7,7 +7,7 @@ import java.util.Optional;
 import static com.treasuredata.client.model.ObjectMappers.compactMapper;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TDBulkLoadSessionStartRequestTest
 {

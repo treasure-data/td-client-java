@@ -64,9 +64,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
@@ -114,9 +112,10 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -125,9 +124,6 @@ import static org.junit.Assert.fail;
  */
 public class TestTDClient
 {
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
     private static final Logger logger = LoggerFactory.getLogger(TestTDClient.class);
 
     private static final String SAMPLE_DB = "_tdclient_test";
@@ -563,14 +559,13 @@ public class TestTDClient
     public void submitPrestoJobWithInvalidPoolName()
             throws Exception
     {
-        exception.expect(TDClientHttpException.class);
-        exception.expectMessage("Presto resource pool with name 'no_such_pool' does not exist");
-
-        client.deleteTableIfExists(SAMPLE_DB, "sample_output");
-        String poolName = "no_such_pool";
-        String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
-        TDJobSummary tdJob = waitJobCompletion(jobId);
-        client.existsTable(SAMPLE_DB, "sample_output");
+        assertThrows("Presto resource pool with name 'no_such_pool' does not exist", TDClientHttpException.class, () -> {
+            client.deleteTableIfExists(SAMPLE_DB, "sample_output");
+            String poolName = "no_such_pool";
+            String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
+            TDJobSummary tdJob = waitJobCompletion(jobId);
+            client.existsTable(SAMPLE_DB, "sample_output");
+        });
     }
 
     @Test
@@ -696,7 +691,7 @@ public class TestTDClient
         ObjectNode config = JsonNodeFactory.instance.objectNode();
         ObjectNode in = JsonNodeFactory.instance.objectNode();
         in.put("type", "s3");
-        config.put("in", in);
+        config.set("in", in);
         client.createDatabaseIfNotExists(SAMPLE_DB);
         client.createTableIfNotExists(SAMPLE_DB, "sample_output");
         String jobId = client.submit(TDJobRequest.newBulkLoad(SAMPLE_DB, "sample_output", config));
@@ -799,17 +794,17 @@ public class TestTDClient
     public void submitExportJob()
             throws Exception
     {
-        TDExportJobRequest jobRequest = new TDExportJobRequest(
-                SAMPLE_DB,
-                "sample_output",
-                new Date(0L),
-                new Date(1456522300L * 1000),
-                TDExportFileFormatType.JSONL_GZ,
-                "access key id",
-                "secret access key",
-                "bucket",
-                "prefix/",
-                Optional.empty());
+        TDExportJobRequest jobRequest = TDExportJobRequest.builder()
+            .database(SAMPLE_DB)
+            .table("sample_output")
+            .from(new Date(0L))
+            .to(new Date(1456522300L * 1000))
+            .fileFormat(TDExportFileFormatType.JSONL_GZ)
+            .accessKeyId("access key id")
+            .secretAccessKey("secret access key")
+            .bucketName("bucket")
+            .filePrefix("prefix/")
+            .poolName(Optional.empty()).build();
         client.createDatabaseIfNotExists(SAMPLE_DB);
         client.createTableIfNotExists(SAMPLE_DB, "sample_output");
         String jobId = client.submitExportJob(jobRequest);
