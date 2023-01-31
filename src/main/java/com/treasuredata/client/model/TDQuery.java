@@ -46,10 +46,8 @@ public class TDQuery
     public static TDQuery fromObject(JsonNode value)
     {
         // embulk job have nested json object
-        try {
-            StringWriter s = new StringWriter();
+        try (StringWriter s = new StringWriter()) {
             new ObjectMapper().writeValue(s, value);
-            s.close();
             return new TDQuery(s.toString());
         }
         catch (java.io.IOException e) {

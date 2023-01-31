@@ -104,8 +104,7 @@ import org.msgpack.value.ArrayValue;
 ...
 
 // Create a new TD client by using configurations in $HOME/.td/td.conf
-TDClient client = TDClient.newClient();
-try {
+try (TDClient client = TDClient.newClient()){
 
 // Retrieve database and table names
 List<TDDatabase> databaseNames = client.listDatabases();
@@ -148,10 +147,6 @@ client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream
 
 ...
 
-}
-finally {
-  // Never forget to close the TDClient.
-  client.close();
 }
 ```
 

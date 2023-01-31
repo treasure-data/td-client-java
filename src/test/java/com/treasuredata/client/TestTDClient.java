@@ -146,17 +146,17 @@ public class TestTDClient
     public void tearDown()
             throws Exception
     {
-        for (String name : savedQueries) {
-            try {
-                client.deleteSavedQuery(name);
-            }
-            catch (Exception e) {
-                logger.error("Failed to delete query: {}", name, e);
+        try (TDClient client1 = client;
+             MockWebServer unused = server) {
+            for (String name : savedQueries) {
+                try {
+                    client1.deleteSavedQuery(name);
+                }
+                catch (Exception e) {
+                    logger.error("Failed to delete query: {}", name, e);
+                }
             }
         }
-
-        client.close();
-        server.shutdown();
     }
 
     @Test
@@ -1191,21 +1191,19 @@ public class TestTDClient
                 String partName = "bip" + i;
                 // Prepare msgpack.gz
                 ByteArrayOutputStream buf = new ByteArrayOutputStream();
-                OutputStream out = new GZIPOutputStream(buf);
-                MessagePacker packer = MessagePack.newDefaultPacker(out);
-                for (int n = 0; n < numRowsInPart; ++n) {
-                    ValueFactory.MapBuilder b = ValueFactory.newMapBuilder();
-                    b.put(ValueFactory.newString("time"), ValueFactory.newInteger(time + count));
-                    b.put(ValueFactory.newString("event"), ValueFactory.newString("log" + count));
-                    b.put(ValueFactory.newString("description"), ValueFactory.newString("sample data"));
-                    packer.packValue(b.build());
-                    count += 1;
+                try (OutputStream out = new GZIPOutputStream(buf);
+                    MessagePacker packer = MessagePack.newDefaultPacker(out)) {
+                    for (int n = 0; n < numRowsInPart; ++n) {
+                        ValueFactory.MapBuilder b = ValueFactory.newMapBuilder();
+                        b.put(ValueFactory.newString("time"), ValueFactory.newInteger(time + count));
+                        b.put(ValueFactory.newString("event"), ValueFactory.newString("log" + count));
+                        b.put(ValueFactory.newString("description"), ValueFactory.newString("sample data"));
+                        packer.packValue(b.build());
+                        count += 1;
+                    }
+                    // Embed an error record
+                    packer.packValue(ValueFactory.newMap(new Value[]{ValueFactory.newNil(), ValueFactory.newString("invalid data")}));
                 }
-                // Embed an error record
-                packer.packValue(ValueFactory.newMap(new Value[] {ValueFactory.newNil(), ValueFactory.newString("invalid data")}));
-
-                packer.close();
-                out.close();
 
                 File tmpFile = File.createTempFile(partName, ".msgpack.gz", new File("target"));
                 Files.write(tmpFile.toPath(), buf.toByteArray());

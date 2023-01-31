@@ -223,10 +223,9 @@ public class TestTDColumn
     private static void checkSerialization(Object o)
             throws IOException
     {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        ObjectOutputStream os = new ObjectOutputStream(b);
-        os.writeObject(o);
-        os.close();
+        try (ObjectOutputStream os = new ObjectOutputStream(new ByteArrayOutputStream())) {
+            os.writeObject(o);
+        }
     }
 
     @Test
