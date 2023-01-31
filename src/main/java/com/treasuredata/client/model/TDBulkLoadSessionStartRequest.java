@@ -3,6 +3,7 @@ package com.treasuredata.client.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class TDBulkLoadSessionStartRequest
@@ -49,8 +50,7 @@ public class TDBulkLoadSessionStartRequest
         }
 
         TDBulkLoadSessionStartRequest that = (TDBulkLoadSessionStartRequest) o;
-
-        return scheduledTime != null ? scheduledTime.equals(that.scheduledTime) : that.scheduledTime == null;
+        return Objects.equals(scheduledTime, that.scheduledTime);
     }
 
     @Override

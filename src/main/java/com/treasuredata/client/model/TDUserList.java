@@ -38,8 +38,7 @@ public class TDUserList
         }
 
         TDUserList that = (TDUserList) o;
-
-        return users != null ? users.equals(that.users) : that.users == null;
+        return Objects.equals(users, that.users);
     }
 
     @Override

@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -211,38 +212,37 @@ public class TDSavedQueryUpdateRequest
         }
 
         TDSavedQueryUpdateRequest that = (TDSavedQueryUpdateRequest) o;
-
-        if (name != null ? !name.equals(that.name) : that.name != null) {
+        if (!Objects.equals(name, that.name)) {
             return false;
         }
-        if (cron != null ? !cron.equals(that.cron) : that.cron != null) {
+        if (!Objects.equals(cron, that.cron)) {
             return false;
         }
-        if (type != null ? !type.equals(that.type) : that.type != null) {
+        if (!Objects.equals(type, that.type)) {
             return false;
         }
-        if (query != null ? !query.equals(that.query) : that.query != null) {
+        if (!Objects.equals(query, that.query)) {
             return false;
         }
-        if (timezone != null ? !timezone.equals(that.timezone) : that.timezone != null) {
+        if (!Objects.equals(timezone, that.timezone)) {
             return false;
         }
-        if (delay != null ? !delay.equals(that.delay) : that.delay != null) {
+        if (!Objects.equals(delay, that.delay)) {
             return false;
         }
-        if (database != null ? !database.equals(that.database) : that.database != null) {
+        if (!Objects.equals(database, that.database)) {
             return false;
         }
-        if (priority != null ? !priority.equals(that.priority) : that.priority != null) {
+        if (!Objects.equals(priority, that.priority)) {
             return false;
         }
-        if (retryLimit != null ? !retryLimit.equals(that.retryLimit) : that.retryLimit != null) {
+        if (!Objects.equals(retryLimit, that.retryLimit)) {
             return false;
         }
-        if (engineVersion != null ? !engineVersion.equals(that.engineVersion) : that.engineVersion != null) {
+        if (!Objects.equals(engineVersion, that.engineVersion)) {
             return false;
         }
-        return result != null ? result.equals(that.result) : that.result == null;
+        return Objects.equals(result, that.result);
     }
 
     @Override
