@@ -212,10 +212,37 @@ public class TDSavedQueryUpdateRequest
         }
 
         TDSavedQueryUpdateRequest that = (TDSavedQueryUpdateRequest) o;
-        return Objects.equals(name, that.name) && Objects.equals(cron, that.cron) && Objects.equals(type, that.type) &&
-                Objects.equals(query, that.query) && Objects.equals(timezone, that.timezone) && Objects.equals(delay, that.delay) &&
-                Objects.equals(database, that.database) && Objects.equals(priority, that.priority) && Objects.equals(retryLimit, that.retryLimit) &&
-                Objects.equals(engineVersion, that.engineVersion) && Objects.equals(result, that.result);
+        if (!Objects.equals(name, that.name)) {
+            return false;
+        }
+        if (!Objects.equals(cron, that.cron)) {
+            return false;
+        }
+        if (!Objects.equals(type, that.type)) {
+            return false;
+        }
+        if (!Objects.equals(query, that.query)) {
+            return false;
+        }
+        if (!Objects.equals(timezone, that.timezone)) {
+            return false;
+        }
+        if (!Objects.equals(delay, that.delay)) {
+            return false;
+        }
+        if (!Objects.equals(database, that.database)) {
+            return false;
+        }
+        if (!Objects.equals(priority, that.priority)) {
+            return false;
+        }
+        if (!Objects.equals(retryLimit, that.retryLimit)) {
+            return false;
+        }
+        if (!Objects.equals(engineVersion, that.engineVersion)) {
+            return false;
+        }
+        return Objects.equals(result, that.result);
     }
 
     @Override
