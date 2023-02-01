@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.charset.Charset;
@@ -371,7 +372,7 @@ public class TDHttpClient
     }
 
     protected <Result> Result submitRequest(RequestContext context, TDHttpRequestHandler<Result> handler)
-            throws TDClientException, InterruptedException
+            throws TDClientException, InterruptedException, InterruptedIOException
     {
         int executionCount = context.backoff.getExecutionCount();
         if (executionCount > config.retryLimit) {
@@ -477,8 +478,13 @@ public class TDHttpClient
         try {
             return submitRequest(requestContext, handler);
         }
-        catch (InterruptedException e) {
+        catch (InterruptedException | InterruptedIOException e) {
             logger.warn("API request interrupted", e);
+
+            // Clears the interrupted status that is set when catching an InterruptedIOException to have the same
+            // behavior between both exceptions.
+            Thread.interrupted();
+
             throw new TDClientInterruptedException(e);
         }
         catch (TDClientException e) {
