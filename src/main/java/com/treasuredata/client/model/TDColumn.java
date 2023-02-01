@@ -21,10 +21,9 @@ package com.treasuredata.client.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
@@ -92,34 +91,21 @@ public class TDColumn implements Serializable
         return new String(key, StandardCharsets.UTF_8);
     }
 
-    private static JSONArray castToArray(Object obj)
-    {
-        if (obj instanceof JSONArray) {
-            return (JSONArray) obj;
-        }
-        else {
-            throw new RuntimeJsonMappingException("Not an json array: " + obj);
-        }
-    }
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static List<TDColumn> parseTuple(String jsonStr)
     {
         // unescape json quotation
         try {
             String unescaped = jsonStr.replaceAll("\\\"", "\"");
-            JSONArray arr = castToArray(new JSONParser().parse(unescaped));
-            List<TDColumn> columnList = new ArrayList<>(arr.size());
-            for (Object e : arr) {
-                JSONArray columnNameAndType = castToArray(e);
-                String[] s = new String[columnNameAndType.size()];
-                for (int i = 0; i < columnNameAndType.size(); ++i) {
-                    s[i] = columnNameAndType.get(i).toString();
-                }
-                columnList.add(parseTuple(s));
+            String[][] arr = objectMapper.readValue(unescaped, String[][].class);
+            List<TDColumn> columnList = new ArrayList<>(arr.length);
+            for (String[] columnNameAndType : arr) {
+                columnList.add(parseTuple(columnNameAndType));
             }
             return columnList;
         }
-        catch (ParseException e) {
+        catch (JsonProcessingException e) {
             LoggerFactory.getLogger(TDColumn.class).error("Failed to parse json string", e);
             return new ArrayList<>(0);
         }

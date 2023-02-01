@@ -21,6 +21,7 @@ package com.treasuredata.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -61,7 +62,6 @@ import com.treasuredata.client.model.TDUpdateTableResult;
 import com.treasuredata.client.model.TDUser;
 import com.treasuredata.client.model.TDUserList;
 import com.treasuredata.client.model.impl.TDScheduleRunResult;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -597,8 +597,20 @@ public class TDClient
         for (TDColumn newColumn : newSchema) {
             builder.add(ImmutableList.of(newColumn.getKeyString(), newColumn.getType().toString(), newColumn.getName()));
         }
-        String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build(), "ignore_duplicate_schema", ignoreDuplicate));
+        String schemaJson = toJSONString(ImmutableMap.of("schema", builder.build(), "ignore_duplicate_schema", ignoreDuplicate));
         doPost(buildUrl("/v3/table/update-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
+    }
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static String toJSONString(Map<String, Object> map)
+    {
+        try {
+            return objectMapper.writeValueAsString(map);
+        }
+        catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -614,7 +626,7 @@ public class TDClient
             // So we should not pass `appendedColumn.getName()` here.
             builder.add(ImmutableList.of(appendedColumn.getKeyString(), appendedColumn.getType().toString()));
         }
-        String schemaJson = JSONObject.toJSONString(ImmutableMap.of("schema", builder.build()));
+        String schemaJson = toJSONString(ImmutableMap.of("schema", builder.build()));
         doPost(buildUrl("/v3/table/append-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
     }
 
@@ -794,7 +806,7 @@ public class TDClient
     {
         Optional<String> jsonBody = Optional.empty();
         if (poolName.isPresent()) {
-            jsonBody = Optional.of(JSONObject.toJSONString(ImmutableMap.of("pool_name", poolName.get())));
+            jsonBody = Optional.of(toJSONString(ImmutableMap.of("pool_name", poolName.get())));
         }
         doPost(buildUrl("/v3/bulk_import/perform", sessionName), ImmutableMap.of("priority", Integer.toString(priority.toInt())), jsonBody, String.class);
     }

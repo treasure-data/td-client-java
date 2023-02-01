@@ -18,7 +18,9 @@
  */
 package com.treasuredata.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
@@ -59,9 +61,6 @@ import com.treasuredata.client.model.TDUserList;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,6 +95,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -124,6 +124,8 @@ import static org.junit.Assert.fail;
  */
 public class TestTDClient
 {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private static final Logger logger = LoggerFactory.getLogger(TestTDClient.class);
 
     private static final String SAMPLE_DB = "_tdclient_test";
@@ -192,12 +194,12 @@ public class TestTDClient
 
     @Test
     public void serverStatus()
-            throws JSONException
+            throws JsonProcessingException
     {
         String status = client.serverStatus();
         logger.info(status);
-        JSONObject s = new JSONObject(status);
-        assertEquals("ok", s.getString("status"));
+        Map<String, String> s = objectMapper.readValue(status, Map.class);
+        assertEquals("ok", s.get("status"));
     }
 
     @Test
@@ -373,24 +375,19 @@ public class TestTDClient
         assertTrue(schema.isPresent());
         assertEquals("[[\"cnt\", \"bigint\"]]", schema.get());
 
-        JSONArray array = client.jobResult(jobId, TDResultFormat.JSON, new Function<InputStream, JSONArray>()
-        {
-            @Override
-            public JSONArray apply(InputStream input)
-            {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-                    String result = reader.lines().collect(Collectors.joining());
-                    logger.info("result:\n" + result);
-                    return new JSONArray(result);
-                }
-                catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+        String[] array = client.jobResult(jobId, TDResultFormat.JSON, input -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+                String result = reader.lines().collect(Collectors.joining());
+                logger.info("result:\n" + result);
+                return objectMapper.readValue(result, String[].class);
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
-        assertEquals(1, array.length());
+        assertEquals(1, array.length);
         assertEquals(1, jobInfo.getNumRecords());
-        assertTrue(array.getLong(0) > 0);
+        assertTrue(Long.parseLong(array[0]) > 0);
 
         // test msgpack.gz format
         client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>()
@@ -497,25 +494,20 @@ public class TestTDClient
         assertTrue(schema.isPresent());
         assertEquals("[[\"cnt\", \"bigint\"]]", schema.get());
 
-        JSONArray array = client.jobResult(jobId, TDResultFormat.JSON, new Function<InputStream, JSONArray>()
-        {
-            @Override
-            public JSONArray apply(InputStream input)
-            {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-                    String result = reader.lines().collect(Collectors.joining());
-                    logger.info("result:\n" + result);
-                    return new JSONArray(result);
-                }
-                catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+        String[] array = client.jobResult(jobId, TDResultFormat.JSON, input -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+                String result = reader.lines().collect(Collectors.joining());
+                logger.info("result:\n" + result);
+                return objectMapper.readValue(result, String[].class);
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
 
-        assertEquals(1, array.length());
+        assertEquals(1, array.length);
         assertEquals(1, jobInfo.getNumRecords());
-        assertTrue(array.getLong(0) > 0);
+        assertTrue(Long.parseLong(array[0]) > 0);
     }
 
     @Test
@@ -582,24 +574,19 @@ public class TestTDClient
         String jobId = client.submit(request);
         waitJobCompletion(jobId);
 
-        JSONArray array = client.jobResult(jobId, TDResultFormat.JSON, new Function<InputStream, JSONArray>()
-        {
-            @Override
-            public JSONArray apply(InputStream input)
-            {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-                    String result = reader.lines().collect(Collectors.joining());
-                    logger.info("result:\n" + result);
-                    return new JSONArray(result);
-                }
-                catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+        String[] array = client.jobResult(jobId, TDResultFormat.JSON, input -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+                String result = reader.lines().collect(Collectors.joining());
+                logger.info("result:\n" + result);
+                return objectMapper.readValue(result, String[].class);
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
 
-        assertEquals(1, array.length());
-        assertEquals(scheduledTime, array.getLong(0));
+        assertEquals(1, array.length);
+        assertEquals(scheduledTime, Long.parseLong(array[0]));
     }
 
     @Test
