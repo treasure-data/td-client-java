@@ -88,6 +88,12 @@ public class TestProxyAccess
                         logger.debug("Proxy Authentication: " + (isValid ? "success" : "failure"));
                         return isValid;
                     }
+
+                    @Override
+                    public String getRealm()
+                    {
+                        return null;
+                    }
                 })
                 .withFiltersSource(new HttpFiltersSourceAdapter()
                 {
@@ -154,7 +160,7 @@ public class TestProxyAccess
     @Test
     public void proxyApiAccess()
     {
-        TDClient client = TDClient.newBuilder().setProxy(proxyBaseConfig()).build();
+        TDClient client = TDClient.newBuilder().setRetryLimit(2).setProxy(proxyBaseConfig()).build();
         client.serverStatus();
 
         List<TDTable> tableList = client.listTables("sample_datasets");

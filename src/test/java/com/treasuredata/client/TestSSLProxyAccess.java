@@ -62,11 +62,18 @@ public class TestSSLProxyAccess
                 .withPort(proxyPort)
                 .withProxyAuthenticator(new org.littleshoot.proxy.ProxyAuthenticator()
                 {
+                    @Override
                     public boolean authenticate(String user, String pass)
                     {
                         boolean isValid = user.equals(PROXY_USER) && pass.equals(PROXY_PASS);
                         logger.debug("Proxy Authentication: " + (isValid ? "success" : "failure"));
                         return isValid;
+                    }
+
+                    @Override
+                    public String getRealm()
+                    {
+                        return null;
                     }
                 })
                 .withFiltersSource(new HttpFiltersSourceAdapter()
@@ -98,7 +105,7 @@ public class TestSSLProxyAccess
         proxy.setPort(proxyPort);
         proxy.setUser(PROXY_USER);
         proxy.setPassword(PROXY_PASS);
-        TDClient client = TDClient.newBuilder().setProxy(proxy.createProxyConfig()).build();
+        TDClient client = TDClient.newBuilder().setRetryLimit(2).setProxy(proxy.createProxyConfig()).build();
         client.serverStatus();
 
         List<TDTable> tableList = client.listTables("sample_datasets");
