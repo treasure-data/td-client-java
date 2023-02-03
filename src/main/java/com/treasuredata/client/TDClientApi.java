@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
@@ -53,6 +52,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Treasure Data Client API
@@ -256,6 +256,24 @@ public interface TDClientApi<ClientImpl>
      *
      * You will receive an empty stream if the query has not finished yet.
      *
+     * @deprecated Use {@link #jobResult(String, TDResultFormat, Function)} instead.
+     * @param jobId
+     * @param format
+     * @param resultStreamHandler
+     * @return
+     */
+    @Deprecated
+    default <Result> Result jobResult(String jobId, TDResultFormat format, com.google.common.base.Function<InputStream, Result> resultStreamHandler)
+    {
+        return this.jobResult(jobId, format, resultStreamHandler::apply);
+    }
+
+    /**
+     * Open an input stream to retrieve the job result.
+     * The input stream will be closed after this method
+     *
+     * You will receive an empty stream if the query has not finished yet.
+     *
      * @param jobId
      * @param format
      * @param resultStreamHandler
@@ -289,6 +307,15 @@ public interface TDClientApi<ClientImpl>
     void commitBulkImportSession(String sessionName);
 
     void deleteBulkImportSession(String sessionName);
+
+    /**
+     * @deprecated Use {@link #getBulkImportErrorRecords(String, Function)} instead.
+     */
+    @Deprecated
+    default <Result> Result getBulkImportErrorRecords(String sessionName, com.google.common.base.Function<InputStream, Result> resultStreamHandler)
+    {
+       return this.getBulkImportErrorRecords(sessionName, resultStreamHandler::apply);
+    }
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
 

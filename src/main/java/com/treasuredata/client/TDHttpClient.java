@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-import com.google.common.base.Function;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
@@ -58,6 +57,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -523,6 +523,20 @@ public class TDHttpClient
             logger.trace("response:\n{}", content);
         }
         return content;
+    }
+
+    /**
+     * @deprecated Use {@link #call(TDApiRequest, Optional, Function)} instead.
+     * @param apiRequest
+     * @param apiKeyCache
+     * @param contentStreamHandler
+     * @param <Result>
+     * @return
+     */
+    @Deprecated
+    public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final com.google.common.base.Function<InputStream, Result> contentStreamHandler)
+    {
+        return submitRequest(apiRequest, apiKeyCache, newByteStreamHandler(contentStreamHandler));
     }
 
     /**

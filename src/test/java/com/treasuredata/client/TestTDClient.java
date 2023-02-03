@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Function;
 import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
@@ -72,7 +71,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -98,6 +96,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -370,28 +369,23 @@ public class TestTDClient
         assertTrue(Long.parseLong(array[0]) > 0);
 
         // test msgpack.gz format
-        client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>()
-        {
-            @Override
-            public Object apply(InputStream input)
-            {
-                try {
-                    logger.debug("Reading job result in msgpack.gz");
-                    MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
-                    int rowCount = 0;
-                    while (unpacker.hasNext()) {
-                        ArrayValue array = unpacker.unpackValue().asArrayValue();
-                        assertEquals(1, array.size());
-                        int numRows = array.get(0).asIntegerValue().toInt();
-                        assertTrue(numRows > 0);
-                        rowCount++;
-                    }
-                    assertEquals(rowCount, 1);
-                    return null;
+        client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, input -> {
+            try {
+                logger.debug("Reading job result in msgpack.gz");
+                MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
+                int rowCount = 0;
+                while (unpacker.hasNext()) {
+                    ArrayValue array1 = unpacker.unpackValue().asArrayValue();
+                    assertEquals(1, array1.size());
+                    int numRows = array1.get(0).asIntegerValue().toInt();
+                    assertTrue(numRows > 0);
+                    rowCount++;
                 }
-                catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                assertEquals(rowCount, 1);
+                return null;
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -974,19 +968,14 @@ public class TestTDClient
     {
         String jobId = client.submit(TDJobRequest.newPrestoQuery(database, sql));
         waitJobCompletion(jobId);
-        return client.jobResult(jobId, TDResultFormat.CSV, new Function<InputStream, String>()
-        {
-            @Override
-            public String apply(InputStream input)
-            {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-                    String result = reader.lines().collect(Collectors.joining());
-                    logger.info(result);
-                    return result;
-                }
-                catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        return client.jobResult(jobId, TDResultFormat.CSV, input -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+                String result = reader.lines().collect(Collectors.joining());
+                logger.info(result);
+                return result;
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -1203,26 +1192,21 @@ public class TestTDClient
             assertTrue(bs.hasErrorOnPerform());
             logger.debug(bs.getErrorMessage());
 
-            // Error record check
-            int errorCount = client.getBulkImportErrorRecords(session, new Function<InputStream, Integer>()
-            {
-                int errorRecordCount = 0;
+            final AtomicInteger errorRecordCount = new AtomicInteger(0);
 
-                @Override
-                public Integer apply(InputStream input)
-                {
-                    try {
-                        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
-                        while (unpacker.hasNext()) {
-                            Value v = unpacker.unpackValue();
-                            logger.info("error record: " + v);
-                            errorRecordCount += 1;
-                        }
-                        return errorRecordCount;
+            // Error record check
+            int errorCount = client.getBulkImportErrorRecords(session, input -> {
+                try {
+                    MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
+                    while (unpacker.hasNext()) {
+                        Value v = unpacker.unpackValue();
+                        logger.info("error record: " + v);
+                        errorRecordCount.incrementAndGet();
                     }
-                    catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    return errorRecordCount.get();
+                }
+                catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             });
 
