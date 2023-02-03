@@ -265,7 +265,7 @@ public interface TDClientApi<ClientImpl>
     @Deprecated
     default <Result> Result jobResult(String jobId, TDResultFormat format, com.google.common.base.Function<InputStream, Result> resultStreamHandler)
     {
-        return this.jobResult(jobId, format, resultStreamHandler::apply);
+        return this.jobResult(jobId, format, (Function<InputStream, Result>) resultStreamHandler::apply);
     }
 
     /**
@@ -314,7 +314,7 @@ public interface TDClientApi<ClientImpl>
     @Deprecated
     default <Result> Result getBulkImportErrorRecords(String sessionName, com.google.common.base.Function<InputStream, Result> resultStreamHandler)
     {
-       return this.getBulkImportErrorRecords(sessionName, resultStreamHandler::apply);
+       return this.getBulkImportErrorRecords(sessionName, (Function<InputStream, Result>) resultStreamHandler::apply);
     }
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
