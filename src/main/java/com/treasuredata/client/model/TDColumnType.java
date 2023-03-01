@@ -20,10 +20,10 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.google.common.collect.ImmutableList;
 import com.treasuredata.client.model.impl.TDColumnTypeDeserializer;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -37,16 +37,16 @@ public class TDColumnType implements Serializable
     public static final TDColumnType DOUBLE = new TDColumnType(TDTypeName.DOUBLE, Collections.emptyList());
     public static final TDColumnType STRING = new TDColumnType(TDTypeName.STRING, Collections.emptyList());
 
-    public static final List<TDColumnType> primitiveTypes = ImmutableList.of(INT, LONG, FLOAT, DOUBLE, STRING);
+    public static final List<TDColumnType> primitiveTypes = Arrays.asList(INT, LONG, FLOAT, DOUBLE, STRING);
 
     public static TDColumnType newArrayType(TDColumnType elementType)
     {
-        return new TDColumnType(TDTypeName.ARRAY, ImmutableList.of(elementType));
+        return new TDColumnType(TDTypeName.ARRAY, Collections.singletonList(elementType));
     }
 
     public static TDColumnType newMapType(TDColumnType keyType, TDColumnType valueType)
     {
-        return new TDColumnType(TDTypeName.MAP, ImmutableList.of(keyType, valueType));
+        return new TDColumnType(TDTypeName.MAP, Arrays.asList(keyType, valueType));
     }
 
     private final TDTypeName typeName;

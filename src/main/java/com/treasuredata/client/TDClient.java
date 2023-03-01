@@ -23,9 +23,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDApiKey;
@@ -69,12 +66,16 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
@@ -143,8 +144,20 @@ public class TDClient
         return new TDClient(config, httpClient, Optional.of(newApiKey));
     }
 
+    /**
+     * @deprecated Use {@link #withHeaders(Map)} instead.
+     * @param headers
+     * @return
+     */
+    @Deprecated
     @Override
     public TDClient withHeaders(Multimap<String, String> headers)
+    {
+        return new TDClient(config, httpClient.withHeaders(headers), apiKeyCache);
+    }
+
+    @Override
+    public TDClient withHeaders(Map<String, ? extends Collection<String>> headers)
     {
         return new TDClient(config, httpClient.withHeaders(headers), apiKeyCache);
     }
@@ -240,7 +253,7 @@ public class TDClient
     protected <ResultType> ResultType doPost(String path, Class<ResultType> resultTypeClass)
             throws TDClientException
     {
-        return this.<ResultType>doPost(path, ImmutableMap.<String, String>of(), Optional.empty(), resultTypeClass);
+        return this.<ResultType>doPost(path, Collections.emptyMap(), Optional.empty(), resultTypeClass);
     }
 
     protected <ResultType> ResultType doPost(String path, Map<String, String> queryParam, Class<ResultType> resultTypeClass)
@@ -320,7 +333,10 @@ public class TDClient
     @Override
     public TDClient authenticate(String email, String password)
     {
-        TDAuthenticationResult authResult = doPost("/v3/user/authenticate", ImmutableMap.of("user", email, "password", password), TDAuthenticationResult.class);
+        Map<String, String> m = new HashMap<>();
+        m.put("user", email);
+        m.put("password", password);
+        TDAuthenticationResult authResult = doPost("/v3/user/authenticate", Collections.unmodifiableMap(m), TDAuthenticationResult.class);
         return withApiKey(authResult.getApikey());
     }
 
@@ -496,7 +512,7 @@ public class TDClient
     {
         // Idempotent key support is EXPERIMENTAL.
         doPost(buildUrl("/v3/table/create", databaseName, validateTableName(tableName), TDTableType.LOG.getTypeName()),
-                ImmutableMap.of("idempotent_key", idempotentKey));
+                Collections.singletonMap("idempotent_key", idempotentKey));
     }
 
     @Override
@@ -523,7 +539,7 @@ public class TDClient
             throws TDClientException
     {
         doPost(buildUrl("/v3/table/rename", databaseName, tableName, validateTableName(newTableName)),
-                ImmutableMap.of("overwrite", Boolean.toString(overwrite)),
+                Collections.singletonMap("overwrite", Boolean.toString(overwrite)),
                 TDUpdateTableResult.class
         );
     }
@@ -562,15 +578,15 @@ public class TDClient
             throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, String.format("from/to value must be a multiple of 3600: [%s, %s)", from, to));
         }
 
-        ImmutableMap.Builder<String, String> queryParams = ImmutableMap.<String, String>builder()
-                .put("from", Long.toString(from))
-                .put("to", Long.toString(to));
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("from", Long.toString(from));
+        queryParams.put("to", Long.toString(to));
 
         if (domainKey != null) {
             queryParams.put("domain_key", domainKey);
         }
 
-        TDPartialDeleteJob job = doPost(buildUrl("/v3/table/partialdelete", databaseName, tableName), queryParams.build(), TDPartialDeleteJob.class);
+        TDPartialDeleteJob job = doPost(buildUrl("/v3/table/partialdelete", databaseName, tableName), Collections.unmodifiableMap(queryParams), TDPartialDeleteJob.class);
         return job;
     }
 
@@ -593,12 +609,15 @@ public class TDClient
         requireNonNull(tableName, "tableName is null");
         requireNonNull(newSchema, "newSchema is null");
 
-        ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
+        List<List<String>> builder = new ArrayList<>(newSchema.size());
         for (TDColumn newColumn : newSchema) {
-            builder.add(ImmutableList.of(newColumn.getKeyString(), newColumn.getType().toString(), newColumn.getName()));
+            builder.add(Arrays.asList(newColumn.getKeyString(), newColumn.getType().toString(), newColumn.getName()));
         }
-        String schemaJson = toJSONString(ImmutableMap.of("schema", builder.build(), "ignore_duplicate_schema", ignoreDuplicate));
-        doPost(buildUrl("/v3/table/update-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
+        Map<String, Object> m = new HashMap<>();
+        m.put("schema", Collections.unmodifiableList(builder));
+        m.put("ignore_duplicate_schema", ignoreDuplicate);
+        String schemaJson = toJSONString(m);
+        doPost(buildUrl("/v3/table/update-schema", databaseName, tableName), Collections.emptyMap(), Optional.of(schemaJson), String.class);
     }
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -620,14 +639,14 @@ public class TDClient
         requireNonNull(tableName, "tableName is null");
         requireNonNull(appendedSchema, "appendedSchema is null");
 
-        ImmutableList.Builder<List<String>> builder = ImmutableList.builder();
+        List<List<String>> builder = new ArrayList<>(appendedSchema.size());
         for (TDColumn appendedColumn : appendedSchema) {
             // Unlike update-schema API, append-schema API can generate alias for column name.
             // So we should not pass `appendedColumn.getName()` here.
-            builder.add(ImmutableList.of(appendedColumn.getKeyString(), appendedColumn.getType().toString()));
+            builder.add(Arrays.asList(appendedColumn.getKeyString(), appendedColumn.getType().toString()));
         }
-        String schemaJson = toJSONString(ImmutableMap.of("schema", builder.build()));
-        doPost(buildUrl("/v3/table/append-schema", databaseName, tableName), ImmutableMap.<String, String>of(), Optional.of(schemaJson), String.class);
+        String schemaJson = toJSONString(Collections.singletonMap("schema", Collections.unmodifiableList(builder)));
+        doPost(buildUrl("/v3/table/append-schema", databaseName, tableName), Collections.emptyMap(), Optional.of(schemaJson), String.class);
     }
 
     @Override
@@ -806,9 +825,9 @@ public class TDClient
     {
         Optional<String> jsonBody = Optional.empty();
         if (poolName.isPresent()) {
-            jsonBody = Optional.of(toJSONString(ImmutableMap.of("pool_name", poolName.get())));
+            jsonBody = Optional.of(toJSONString(Collections.singletonMap("pool_name", poolName.get())));
         }
-        doPost(buildUrl("/v3/bulk_import/perform", sessionName), ImmutableMap.of("priority", Integer.toString(priority.toInt())), jsonBody, String.class);
+        doPost(buildUrl("/v3/bulk_import/perform", sessionName), Collections.singletonMap("priority", Integer.toString(priority.toInt())), jsonBody, String.class);
     }
 
     @Override
@@ -870,7 +889,7 @@ public class TDClient
 
         TDSavedQueryStartResultV4 result =
                 doPost(buildUrl("/v4/queries", Long.toString(request.id().get()), "jobs"),
-                        ImmutableMap.<String, String>of(),
+                        Collections.emptyMap(),
                         Optional.of(toJson(TDSavedQueryStartRequestV4.from(request))),
                         TDSavedQueryStartResultV4.class);
 
@@ -945,7 +964,7 @@ public class TDClient
         TDSavedQuery result =
                 doPost(
                         buildUrl("/v3/schedule/create", request.getName()),
-                        ImmutableMap.<String, String>of(),
+                        Collections.emptyMap(),
                         Optional.of(json),
                         TDSavedQuery.class);
         return result;
@@ -959,7 +978,7 @@ public class TDClient
         TDSavedQuery result =
                 doPost(
                         buildUrl("/v3/schedule/update", name),
-                        ImmutableMap.<String, String>of(),
+                        Collections.emptyMap(),
                         Optional.of(json),
                         TDSavedQuery.class);
         return result;
@@ -1029,7 +1048,7 @@ public class TDClient
     @Override
     public TDBulkLoadSessionStartResult startBulkLoadSession(String name, TDBulkLoadSessionStartRequest request)
     {
-        Map<String, String> queryParams = ImmutableMap.of();
+        Map<String, String> queryParams = Collections.emptyMap();
         String payload = null;
         try {
             payload = ObjectMappers.compactMapper().writeValueAsString(request);
@@ -1086,36 +1105,36 @@ public class TDClient
     @Override
     public TDImportResult importFile(String databaseName, String tableName, File file)
     {
-        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), ImmutableMap.of(), file, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), Collections.emptyMap(), file, TDImportResult.class);
     }
 
     @Override
     public TDImportResult importFile(String databaseName, String tableName, File file, String id)
     {
-        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), ImmutableMap.of(), file, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), Collections.emptyMap(), file, TDImportResult.class);
     }
 
     @Override
     public TDImportResult importBytes(String databaseName, String tableName, byte[] content)
     {
-        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), ImmutableMap.of(), content, 0, content.length, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), Collections.emptyMap(), content, 0, content.length, TDImportResult.class);
     }
 
     @Override
     public TDImportResult importBytes(String databaseName, String tableName, byte[] content, int offset, int length)
     {
-        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), ImmutableMap.of(), content, offset, length, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import/%s/%s/%s", databaseName, tableName, "msgpack.gz")), Collections.emptyMap(), content, offset, length, TDImportResult.class);
     }
 
     @Override
     public TDImportResult importBytes(String databaseName, String tableName, byte[] content, String id)
     {
-        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), ImmutableMap.of(), content, 0, content.length, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), Collections.emptyMap(), content, 0, content.length, TDImportResult.class);
     }
 
     @Override
     public TDImportResult importBytes(String databaseName, String tableName, byte[] content, int offset, int length, String id)
     {
-        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), ImmutableMap.of(), content, offset, length, TDImportResult.class);
+        return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), Collections.emptyMap(), content, offset, length, TDImportResult.class);
     }
 }

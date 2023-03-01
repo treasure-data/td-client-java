@@ -18,9 +18,12 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -66,7 +69,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
     protected int connectTimeoutMillis = 15000;
     protected int readTimeoutMillis = 60000;
     protected int connectionPoolSize = 64;
-    protected Multimap<String, String> headers = ImmutableMultimap.of();
+    protected Map<String, Collection<String>> headers = Collections.emptyMap();
 
     private static Optional<String> getConfigProperty(Properties p, TDClientConfig.Type key)
     {
@@ -328,9 +331,20 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         return self();
     }
 
+    /**
+     * @deprecated Use {@link #setHeaders(Map)} instead.
+     * @param headers
+     * @return
+     */
+    @Deprecated
     public BuilderImpl setHeaders(Multimap<String, String> headers)
     {
-        this.headers = ImmutableMultimap.copyOf(headers);
+        return this.setHeaders(headers.asMap());
+    }
+
+    public BuilderImpl setHeaders(Map<String, ? extends Collection<String>> headers)
+    {
+        this.headers = Collections.unmodifiableMap(new HashMap<>(headers));
         return self();
     }
 
