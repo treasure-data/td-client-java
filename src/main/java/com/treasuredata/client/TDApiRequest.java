@@ -100,7 +100,7 @@ public class TDApiRequest
     }
 
     /**
-     * @deprecated Use {@link #getHeaderParamsV2()} instead.
+     * @deprecated Use {@link #getAllHeaders()} instead.
      * @return
      */
     @Deprecated
@@ -113,7 +113,7 @@ public class TDApiRequest
         return builder.build();
     }
 
-    public Map<String, Collection<String>> getHeaderParamsV2()
+    public Map<String, Collection<String>> getAllHeaders()
     {
         return headerParams;
     }

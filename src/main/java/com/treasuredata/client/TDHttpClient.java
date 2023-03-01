@@ -61,7 +61,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.google.common.net.HttpHeaders.USER_AGENT;
 import static com.treasuredata.client.TDApiRequest.urlEncode;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
 import static com.treasuredata.client.TDHttpRequestHandler.ResponseContext;
@@ -263,7 +262,7 @@ public class TDHttpClient
                 }
             }
         }
-        for (Map.Entry<String, Collection<String>> entry : apiRequest.getHeaderParamsV2().entrySet()) {
+        for (Map.Entry<String, Collection<String>> entry : apiRequest.getAllHeaders().entrySet()) {
             String k = entry.getKey();
             for (String v : entry.getValue()) {
                 request = request.addHeader(k, v);
