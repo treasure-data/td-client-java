@@ -254,5 +254,6 @@ $ git commit -am "Next snapshot version"
 $ git push
 $ git push --tags
 ```
+And then, create a release note page at https://github.com/treasure-data/td-client-java/releases
 
 See also https://github.com/xerial/sbt-sonatype#publishing-maven-projects to use `sbt sonatypeReleaseAll` command.
