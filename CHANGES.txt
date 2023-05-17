@@ -1,3 +1,7 @@
+
+This page is an archive of old release.
+See the [releases page](https://github.com/treasure-data/td-client-java/releases) for the latest release notes.
+
 Release 1.0.0 - 2023-01-24
  - Upgrade to Guava 31.1
  - Breaking: Use Java Optional instead of Guava Optional
