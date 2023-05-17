@@ -18,9 +18,10 @@
  */
 package com.treasuredata.client;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
@@ -51,6 +52,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Treasure Data Client API
@@ -72,9 +74,19 @@ public interface TDClientApi<ClientImpl>
      * This instance will share the same internal http client, so closing the returned client will invalidate the current instance.
      *
      * @param headers
+     * @deprecated Use {@link #withHeaders(Map)} instead
      * @return
      */
-    ClientImpl withHeaders(Multimap<String, String> headers);
+    @Deprecated ClientImpl withHeaders(Multimap<String, String> headers);
+
+    /**
+     * Return a TDClientApi implementation that uses the provided headers when making api requests.
+     * This instance will share the same internal http client, so closing the returned client will invalidate the current instance.
+     *
+     * @param headers
+     * @return
+     */
+    ClientImpl withHeaders(Map<String, ? extends Collection<String>> headers);
 
     /**
      * Perform user email and password based authentication and return a new client that will use apikey based authentication.
@@ -244,6 +256,24 @@ public interface TDClientApi<ClientImpl>
      *
      * You will receive an empty stream if the query has not finished yet.
      *
+     * @deprecated Use {@link #jobResult(String, TDResultFormat, Function)} instead.
+     * @param jobId
+     * @param format
+     * @param resultStreamHandler
+     * @return
+     */
+    @Deprecated
+    default <Result> Result jobResult(String jobId, TDResultFormat format, com.google.common.base.Function<InputStream, Result> resultStreamHandler)
+    {
+        return this.jobResult(jobId, format, (Function<InputStream, Result>) resultStreamHandler::apply);
+    }
+
+    /**
+     * Open an input stream to retrieve the job result.
+     * The input stream will be closed after this method
+     *
+     * You will receive an empty stream if the query has not finished yet.
+     *
      * @param jobId
      * @param format
      * @param resultStreamHandler
@@ -277,6 +307,15 @@ public interface TDClientApi<ClientImpl>
     void commitBulkImportSession(String sessionName);
 
     void deleteBulkImportSession(String sessionName);
+
+    /**
+     * @deprecated Use {@link #getBulkImportErrorRecords(String, Function)} instead.
+     */
+    @Deprecated
+    default <Result> Result getBulkImportErrorRecords(String sessionName, com.google.common.base.Function<InputStream, Result> resultStreamHandler)
+    {
+       return this.getBulkImportErrorRecords(sessionName, (Function<InputStream, Result>) resultStreamHandler::apply);
+    }
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
 

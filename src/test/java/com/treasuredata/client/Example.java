@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.base.Function;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDColumnType;
@@ -50,6 +49,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -138,24 +138,20 @@ public class Example
             System.out.println("error log:\n" + jobInfo.getStdErr());
 
             // Read the job results in msgpack.gz format
-            client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Integer>() {
-                @Override
-                public Integer apply(InputStream input)
-                {
-                    int count = 0;
-                    try (MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input))) {
-                        while (unpacker.hasNext()) {
-                            // Each row of the query result is array type value (e.g., [1, "name", ...])
-                            ArrayValue array = unpacker.unpackValue().asArrayValue();
-                            System.out.println(array);
-                            count++;
-                        }
+            Integer result = client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, (Function<InputStream, Integer>) input -> {
+                int count = 0;
+                try (MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input))) {
+                    while (unpacker.hasNext()) {
+                        // Each row of the query result is array type value (e.g., [1, "name", ...])
+                        ArrayValue array = unpacker.unpackValue().asArrayValue();
+                        System.out.println(array);
+                        count++;
                     }
-                    catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    return count;
                 }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                return count;
             });
         }
         catch (Exception e) {

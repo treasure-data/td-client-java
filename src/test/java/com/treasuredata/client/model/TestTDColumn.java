@@ -19,7 +19,6 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -85,7 +84,7 @@ public class TestTDColumn
     public void parsePrimitiveColumnTypes()
     {
         // primitive type set
-        Set<TDColumnType> primitives = ImmutableSet.copyOf(TDColumnType.primitiveTypes);
+        Set<TDColumnType> primitives = new HashSet<>(TDColumnType.primitiveTypes);
 
         // primitive types
         for (String name : new String[] {"int", "long", "float", "double", "string"}) {

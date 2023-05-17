@@ -20,8 +20,8 @@ package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ImmutableMap;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -39,7 +39,7 @@ public class TDApiErrorMessage
             String text,
             String severity)
     {
-        this(error, text, severity, ImmutableMap.<String, Object>of());
+        this(error, text, severity, Collections.emptyMap());
     }
 
     @JsonCreator

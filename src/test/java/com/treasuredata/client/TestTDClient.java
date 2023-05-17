@@ -23,13 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.ObjectMappers;
 import com.treasuredata.client.model.TDBulkImportSession;
 import com.treasuredata.client.model.TDBulkLoadSessionStartRequest;
@@ -78,7 +71,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -89,10 +81,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +96,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -225,15 +220,10 @@ public class TestTDClient
         logger.debug(dbListStr);
 
         List<TDDatabase> detailedDBList = client.listDatabases();
-        Iterable<String> dbStr = Iterables.transform(detailedDBList, new Function<TDDatabase, String>()
-        {
-            @Override
-            public String apply(TDDatabase input)
-            {
-                String summary = String.format("name:%s, count:%s, createdAt:%s, updatedAt:%s, organization:%s, permission:%s", input.getName(), input.getCount(), input.getCreatedAt(), input.getUpdatedAt(), input.getOrganization(), input.getPermission());
-                return summary;
-            }
-        });
+        Iterable<String> dbStr = detailedDBList.stream().map(input -> {
+            String summary = String.format("name:%s, count:%s, createdAt:%s, updatedAt:%s, organization:%s, permission:%s", input.getName(), input.getCount(), input.getCreatedAt(), input.getUpdatedAt(), input.getOrganization(), input.getPermission());
+            return summary;
+        }).collect(Collectors.toList());
 
         String detailedDbListStr = String.join(", ", dbStr);
         logger.trace(detailedDbListStr);
@@ -314,20 +304,9 @@ public class TestTDClient
         assertEquals(101, jobsInAnIDRange.getJobs().size());
 
         // Check getters
-        Iterable<Method> getters = FluentIterable.from(TDJob.class.getDeclaredMethods()).filter(new Predicate<Method>()
-        {
-            @Override
-            public boolean apply(Method input)
-            {
-                return test(input);
-            }
-
-            @Override
-            public boolean test(Method input)
-            {
-                return input.getName().startsWith("get");
-            }
-        });
+        Iterable<Method> getters = Arrays.stream(TDJob.class.getDeclaredMethods()).filter(input -> {
+            return input.getName().startsWith("get");
+        }).collect(Collectors.toList());
         // Call getters
         for (TDJob job : jobs.getJobs()) {
             for (Method m : getters) {
@@ -390,28 +369,23 @@ public class TestTDClient
         assertTrue(Long.parseLong(array[0]) > 0);
 
         // test msgpack.gz format
-        client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, new Function<InputStream, Object>()
-        {
-            @Override
-            public Object apply(InputStream input)
-            {
-                try {
-                    logger.debug("Reading job result in msgpack.gz");
-                    MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
-                    int rowCount = 0;
-                    while (unpacker.hasNext()) {
-                        ArrayValue array = unpacker.unpackValue().asArrayValue();
-                        assertEquals(1, array.size());
-                        int numRows = array.get(0).asIntegerValue().toInt();
-                        assertTrue(numRows > 0);
-                        rowCount++;
-                    }
-                    assertEquals(rowCount, 1);
-                    return null;
+        client.jobResult(jobId, TDResultFormat.MESSAGE_PACK_GZ, input -> {
+            try {
+                logger.debug("Reading job result in msgpack.gz");
+                MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
+                int rowCount = 0;
+                while (unpacker.hasNext()) {
+                    ArrayValue array1 = unpacker.unpackValue().asArrayValue();
+                    assertEquals(1, array1.size());
+                    int numRows = array1.get(0).asIntegerValue().toInt();
+                    assertTrue(numRows > 0);
+                    rowCount++;
                 }
-                catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                assertEquals(rowCount, 1);
+                return null;
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -926,21 +900,18 @@ public class TestTDClient
             byte[] keyName = "int_col_key_name".getBytes(StandardCharsets.UTF_8);
             // schema test
             TDTable targetTable = findTable(SAMPLE_DB, t).get();
-            List<TDColumn> newSchema = ImmutableList.<TDColumn>builder()
-                    .addAll(targetTable.getSchema())
-                    .add(new TDColumn("int_col", TDColumnType.INT, keyName))
-                    .build();
+
+            List<TDColumn> newSchema = new ArrayList<>(targetTable.getSchema());
+            newSchema.add(new TDColumn("int_col", TDColumnType.INT, keyName));
             client.updateTableSchema(SAMPLE_DB, t, newSchema);
             TDTable updatedTable = findTable(SAMPLE_DB, t).get();
             logger.debug(updatedTable.toString());
             assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("int_col", TDColumnType.INT, keyName)));
 
             // schema test with duplicated key
-            newSchema = ImmutableList.<TDColumn>builder()
-                    .addAll(targetTable.getSchema())
-                    .add(new TDColumn("str_col", TDColumnType.STRING, keyName))
-                    .add(new TDColumn("str_col", TDColumnType.STRING, keyName))
-                    .build();
+            newSchema = new ArrayList<>(targetTable.getSchema());
+            newSchema.add(new TDColumn("str_col", TDColumnType.STRING, keyName));
+            newSchema.add(new TDColumn("str_col", TDColumnType.STRING, keyName));
             client.updateTableSchema(SAMPLE_DB, t, newSchema, true);
             updatedTable = findTable(SAMPLE_DB, t).get();
             logger.debug(updatedTable.toString());
@@ -997,19 +968,14 @@ public class TestTDClient
     {
         String jobId = client.submit(TDJobRequest.newPrestoQuery(database, sql));
         waitJobCompletion(jobId);
-        return client.jobResult(jobId, TDResultFormat.CSV, new Function<InputStream, String>()
-        {
-            @Override
-            public String apply(InputStream input)
-            {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-                    String result = reader.lines().collect(Collectors.joining());
-                    logger.info(result);
-                    return result;
-                }
-                catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        return client.jobResult(jobId, TDResultFormat.CSV, input -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+                String result = reader.lines().collect(Collectors.joining());
+                logger.info(result);
+                return result;
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -1146,20 +1112,9 @@ public class TestTDClient
             client.createBulkImportSession(session, SAMPLE_DB, bulkImportTable);
 
             List<TDBulkImportSession> sessionList = client.listBulkImportSessions();
-            TDBulkImportSession foundInList = Iterables.find(sessionList, new Predicate<TDBulkImportSession>()
-            {
-                @Override
-                public boolean apply(TDBulkImportSession input)
-                {
-                    return test(input);
-                }
-
-                @Override
-                public boolean test(TDBulkImportSession input)
-                {
-                    return input.getName().equals(session);
-                }
-            });
+            TDBulkImportSession foundInList = sessionList.stream().filter(input -> {
+                return input.getName().equals(session);
+            }).findAny().get();
 
             TDBulkImportSession bs = client.getBulkImportSession(session);
             logger.info("bulk import session: {}, error message: {}", bs.getJobId(), bs.getErrorMessage());
@@ -1237,26 +1192,21 @@ public class TestTDClient
             assertTrue(bs.hasErrorOnPerform());
             logger.debug(bs.getErrorMessage());
 
-            // Error record check
-            int errorCount = client.getBulkImportErrorRecords(session, new Function<InputStream, Integer>()
-            {
-                int errorRecordCount = 0;
+            final AtomicInteger errorRecordCount = new AtomicInteger(0);
 
-                @Override
-                public Integer apply(InputStream input)
-                {
-                    try {
-                        MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
-                        while (unpacker.hasNext()) {
-                            Value v = unpacker.unpackValue();
-                            logger.info("error record: " + v);
-                            errorRecordCount += 1;
-                        }
-                        return errorRecordCount;
+            // Error record check
+            int errorCount = client.getBulkImportErrorRecords(session, input -> {
+                try {
+                    MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(new GZIPInputStream(input));
+                    while (unpacker.hasNext()) {
+                        Value v = unpacker.unpackValue();
+                        logger.info("error record: " + v);
+                        errorRecordCount.incrementAndGet();
                     }
-                    catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    return errorRecordCount.get();
+                }
+                catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             });
 
@@ -1283,20 +1233,9 @@ public class TestTDClient
             }
 
             // Check the data
-            TDTable imported = Iterables.find(client.listTables(SAMPLE_DB), new Predicate<TDTable>()
-            {
-                @Override
-                public boolean apply(TDTable input)
-                {
-                    return test(input);
-                }
-
-                @Override
-                public boolean test(TDTable input)
-                {
-                    return input.getName().equals(bulkImportTable);
-                }
-            });
+            TDTable imported = client.listTables(SAMPLE_DB).stream().filter(input -> {
+                return input.getName().equals(bulkImportTable);
+            }).findFirst().get();
 
             assertEquals(numRowsInPart * 2, imported.getRowCount());
             List<TDColumn> columns = imported.getColumns();
@@ -1401,9 +1340,9 @@ public class TestTDClient
     public void getSavedQueryHistory()
     {
         List<TDSavedQuery> allQueries = client.listSavedQueries();
-        List<TDSavedQuery> queries = FluentIterable.from(allQueries)
+        List<TDSavedQuery> queries = allQueries.stream()
                 .limit(10)
-                .toList();
+                .collect(Collectors.toList());
 
         for (TDSavedQuery query : queries) {
             TDSavedQueryHistory firstPage = client.getSavedQueryHistory(query.getName());
@@ -1819,15 +1758,14 @@ public class TestTDClient
     public void customHeaders()
             throws InterruptedException
     {
-        Multimap<String, String> headers0 = ImmutableMultimap.of(
-                "k0", "v0");
-        Multimap<String, String> headers1 = ImmutableMultimap.of(
-                "k1", "v1a",
-                "k1", "v1b",
-                "k2", "v2");
-        Multimap<String, String> headers2 = ImmutableMultimap.of(
-                "k3", "v3",
-                "k4", "v4");
+        Map<String, Set<String>> headers0 = Collections.singletonMap(
+                "k0", Collections.singleton("v0"));
+        Map<String, List<String>> headers1 = new HashMap<>();
+        headers1.put("k1", Arrays.asList("v1a", "v1b"));
+        headers1.put("k2", Collections.singletonList("v2"));
+        Map<String, List<String>> headers2 = new HashMap<>();
+        headers1.put("k3", Collections.singletonList("v3"));
+        headers1.put("k4", Collections.singletonList("v4"));
 
         client = TDClient.newBuilder(false)
                 .setUseSSL(false)

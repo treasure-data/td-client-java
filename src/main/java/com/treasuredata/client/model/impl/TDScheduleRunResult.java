@@ -20,9 +20,10 @@ package com.treasuredata.client.model.impl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ImmutableList;
 import com.treasuredata.client.model.TDJob;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -78,7 +79,7 @@ public class TDScheduleRunResult
     @JsonCreator
     public TDScheduleRunResult(@JsonProperty("jobs") List<Job> jobs)
     {
-        this.jobs = ImmutableList.copyOf(jobs);
+        this.jobs = Collections.unmodifiableList(new ArrayList<>(jobs));
     }
 
     @JsonProperty("jobs")

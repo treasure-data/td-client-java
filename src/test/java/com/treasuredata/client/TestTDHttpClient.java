@@ -18,7 +18,6 @@
  */
 package com.treasuredata.client;
 
-import com.google.common.collect.ImmutableMultimap;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -40,6 +39,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -95,7 +95,7 @@ public class TestTDHttpClient
         assertEquals("td-client-java unknown", request1.header(USER_AGENT));
 
         // With specifying User-Agent header
-        TDHttpClient newClient = client.withHeaders(ImmutableMultimap.of(USER_AGENT, "td-sample-client 1.0"));
+        TDHttpClient newClient = client.withHeaders(Collections.singletonMap(USER_AGENT, Collections.singletonList("td-sample-client 1.0")));
         Request request2 = newClient.prepareRequest(apiRequest, Optional.empty());
         assertEquals("td-client-java unknown,td-sample-client 1.0", request2.header(USER_AGENT));
     }

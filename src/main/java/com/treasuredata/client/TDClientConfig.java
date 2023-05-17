@@ -19,7 +19,7 @@
 package com.treasuredata.client;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -78,11 +81,7 @@ public class TDClientConfig
 
     public static List<Type> knownProperties()
     {
-        ImmutableList.Builder<Type> builder = ImmutableList.builder();
-        for (Type t : Type.values()) {
-            builder.add(t);
-        }
-        return builder.build();
+        return Arrays.asList(Type.values());
     }
 
     /**
@@ -103,7 +102,11 @@ public class TDClientConfig
     public final int connectTimeoutMillis;
     public final int readTimeoutMillis;
     public final int connectionPoolSize;
+
+    @Deprecated
     public final Multimap<String, String> headers;
+
+    public final Map<String, Collection<String>> headersV2;
 
     @JsonCreator
     TDClientConfig(
@@ -122,7 +125,7 @@ public class TDClientConfig
             int connectTimeoutMillis,
             int readTimeoutMillis,
             int connectionPoolSize,
-            Multimap<String, String> headers)
+            Map<String, Collection<String>> headers)
     {
         this.endpoint = endpoint.orElse("api.treasuredata.com");
         this.port = port;
@@ -139,7 +142,12 @@ public class TDClientConfig
         this.connectTimeoutMillis = connectTimeoutMillis;
         this.readTimeoutMillis = readTimeoutMillis;
         this.connectionPoolSize = connectionPoolSize;
-        this.headers = headers;
+        this.headersV2 = headers;
+        ImmutableMultimap.Builder<String, String> headersBuilder = ImmutableMultimap.builder();
+        for (Map.Entry<String, Collection<String>> e : headers.entrySet()) {
+            headersBuilder.putAll(e.getKey(), e.getValue());
+        }
+        this.headers = headersBuilder.build();
     }
 
     public TDClientConfig withApiKey(String apikey)
@@ -165,7 +173,7 @@ public class TDClientConfig
                 connectTimeoutMillis,
                 readTimeoutMillis,
                 connectionPoolSize,
-                headers
+                headersV2
         );
     }
 
