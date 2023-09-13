@@ -36,7 +36,7 @@ workflows:
     jobs:
       # NOTE: Run in series to avoid failing CI
       - build:
-          name: build with JDK 8
+          # name: build with JDK 8
           matrix:
             parameters:
               jdk: [jdk8]
@@ -46,7 +46,7 @@ workflows:
             parameters:
               jdk: [jdk11]
           requires:
-            - build with JDK 8
+            - build
       - build:
           name: build with JDK 17
           matrix:
