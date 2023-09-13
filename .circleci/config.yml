@@ -41,16 +41,9 @@ workflows:
             parameters:
               jdk: [jdk8]
       - build:
-          name: build with JDK 11
+          name: build with JDK 11 & 17
           matrix:
             parameters:
-              jdk: [jdk11]
+              jdk: [jdk11, jdk17]
           requires:
             - build
-      - build:
-          name: build with JDK 17
-          matrix:
-            parameters:
-              jdk: [jdk17]
-          requires:
-            - build with JDK 11
