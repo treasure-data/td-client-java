@@ -1,11 +1,25 @@
 version: 2.1
 orbs:
   maven: circleci/maven@1.4.0
+
+executors:
+  jdk8:
+    docker:
+      - image: cimg/openjdk:8.0
+  jdk11:
+    docker:
+      - image: cimg/openjdk:11.0
+  jdk17:
+    docker:
+      - image: cimg/openjdk:17.0
+
 jobs:
   build:
     working_directory: /tmp/td-client-java
-    docker:
-      - image: cimg/openjdk:8.0
+    parameters:
+      jdk:
+        type: executor
+    executor: << parameters.jdk >>
     steps:
       - checkout
       - maven/with_cache:
@@ -16,3 +30,20 @@ jobs:
       - maven/process_test_results
       - store_artifacts:
             path: /tmp/td-client-java/target/site
+
+workflows:
+  build:
+    jobs:
+      # NOTE: Run in series to avoid failing CI
+      - build:
+          matrix:
+            parameters:
+              jdk: [jdk8]
+      - build:
+          matrix:
+            parameters:
+              jdk: [jdk11]
+      - build:
+          matrix:
+            parameters:
+              jdk: [jdk17]
