@@ -123,7 +123,10 @@ public class TestTDClient
 
     private static final Logger logger = LoggerFactory.getLogger(TestTDClient.class);
 
-    private static final String SAMPLE_DB = "_tdclient_test";
+    private static final String SAMPLE_DB;
+    static {
+        SAMPLE_DB = "_tdclient_test" + System.getProperty("java.version").replaceAll("\\.", "_");
+    }
 
     private TDClient client;
 
