@@ -108,11 +108,17 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertFalse;
+//import static org.junit.Assert.assertThrows;
+//import static org.junit.Assert.assertTrue;
+//import static org.junit.Assert.fail;
 
 /**
  *
@@ -207,7 +213,7 @@ public class TestTDClient
         String databaseName = "sample_datasets";
         TDDatabase dbDetail = client.showDatabase(databaseName);
         assertEquals("should match in sample_datasets", databaseName, dbDetail.getName());
-        assertTrue("should be positive", Integer.parseInt(dbDetail.getId()) > 0);
+        assertTrue(Integer.parseInt(dbDetail.getId()) > 0, "should be positive");
 
         logger.debug(dbDetail.toString());
     }
@@ -217,7 +223,7 @@ public class TestTDClient
             throws Exception
     {
         List<String> dbList = client.listDatabaseNames();
-        assertTrue("should contain sample_datasets", dbList.contains("sample_datasets"));
+        assertTrue(dbList.contains("sample_datasets"), "should contain sample_datasets");
 
         String dbListStr = String.join(", ", dbList);
         logger.debug(dbListStr);
@@ -528,13 +534,13 @@ public class TestTDClient
     public void submitPrestoJobWithInvalidPoolName()
             throws Exception
     {
-        assertThrows("Presto resource pool with name 'no_such_pool' does not exist", TDClientHttpException.class, () -> {
+        assertThrows(TDClientHttpException.class, () -> {
             client.deleteTableIfExists(SAMPLE_DB, "sample_output");
             String poolName = "no_such_pool";
             String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
             TDJobSummary tdJob = waitJobCompletion(jobId);
             client.existsTable(SAMPLE_DB, "sample_output");
-        });
+        }, "Presto resource pool with name 'no_such_pool' does not exist");
     }
 
     @Test
@@ -909,7 +915,7 @@ public class TestTDClient
             client.updateTableSchema(SAMPLE_DB, t, newSchema);
             TDTable updatedTable = findTable(SAMPLE_DB, t).get();
             logger.debug(updatedTable.toString());
-            assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("int_col", TDColumnType.INT, keyName)));
+            assertTrue(updatedTable.getSchema().contains(new TDColumn("int_col", TDColumnType.INT, keyName)), "should have updated column");
 
             // schema test with duplicated key
             newSchema = new ArrayList<>(targetTable.getSchema());
@@ -918,7 +924,7 @@ public class TestTDClient
             client.updateTableSchema(SAMPLE_DB, t, newSchema, true);
             updatedTable = findTable(SAMPLE_DB, t).get();
             logger.debug(updatedTable.toString());
-            assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("str_col", TDColumnType.STRING, keyName)));
+            assertTrue(updatedTable.getSchema().contains(new TDColumn("str_col", TDColumnType.STRING, keyName)), "should have updated column");
 
             // rename
             client.deleteTableIfExists(SAMPLE_DB, newTableName);
@@ -1402,7 +1408,7 @@ public class TestTDClient
             TDSavedQuery result = client.saveQuery(query);
             assertThat(result.getId(), not(isEmptyOrNullString()));
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
-            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            assertTrue(q.isPresent(), String.format("saved query %s is not found", queryName));
 
             validateSavedQuery(query, result);
             assertTrue(result.getResult().startsWith("mysql://testuser:")); // password will be hidden
@@ -1437,7 +1443,7 @@ public class TestTDClient
         }
 
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertTrue(!q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
@@ -1463,7 +1469,7 @@ public class TestTDClient
             TDSavedQuery result = client.saveQuery(query);
             assertThat(result.getId(), not(isEmptyOrNullString()));
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
-            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            assertTrue(q.isPresent(), String.format("saved query %s is not found", queryName));
         }
         catch (TDClientException e) {
             logger.error("failed", e);
@@ -1473,7 +1479,7 @@ public class TestTDClient
             client.deleteSavedQuery(queryName);
         }
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertTrue(!q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
@@ -1515,7 +1521,7 @@ public class TestTDClient
             }
         }
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertTrue(!q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
@@ -1541,7 +1547,7 @@ public class TestTDClient
             TDSavedQuery result = client.saveQuery(query);
             assertThat(result.getId(), not(isEmptyOrNullString()));
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
-            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            assertTrue(q.isPresent(), String.format("saved query %s is not found", queryName));
             // Update
             TDSavedQueryUpdateRequest query2 =
                     TDSavedQuery.newUpdateRequestBuilder()
@@ -1558,7 +1564,7 @@ public class TestTDClient
             client.deleteSavedQuery(queryName);
         }
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertTrue(!q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
@@ -1584,7 +1590,7 @@ public class TestTDClient
             TDSavedQuery result = client.saveQuery(query);
             assertThat(result.getId(), not(isEmptyOrNullString()));
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
-            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            assertTrue(q.isPresent(), String.format("saved query %s is not found", queryName));
             // Update
             TDSavedQueryUpdateRequest query2 =
                     TDSavedQuery.newUpdateRequestBuilder()
@@ -1608,7 +1614,7 @@ public class TestTDClient
             client.deleteSavedQuery(queryName);
         }
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertTrue(!q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
