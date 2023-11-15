@@ -71,7 +71,7 @@
 
     <okhttp.version>3.14.9</okhttp.version>
 
-    <surefire.version>3.2.1</surefire.version>
+    <surefire.version>3.2.2</surefire.version>
   </properties>
 
   <repositories>
