@@ -18,9 +18,9 @@
  */
 package com.treasuredata.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Ensure compatibility with com.google.common.net.UrlEscapers.urlPathSegmentEscaper;

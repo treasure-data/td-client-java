@@ -22,9 +22,9 @@ import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDTable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
 import org.littleshoot.proxy.HttpProxyServer;
@@ -46,9 +46,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestProxyAccess
 {
@@ -69,7 +70,7 @@ public class TestProxyAccess
     private static final String PROXY_PASS = "helloproxy";
     private AtomicInteger proxyAccessCount = new AtomicInteger(0);
 
-    @Before
+    @BeforeEach
     public void setUp()
             throws Exception
     {
@@ -106,7 +107,7 @@ public class TestProxyAccess
                 }).start();
     }
 
-    @After
+    @AfterEach
     public void tearDown()
             throws Exception
     {
@@ -167,7 +168,7 @@ public class TestProxyAccess
         assertTrue(tableList.size() >= 2);
 
         TDJobList jobList = client.listJobs();
-        assertTrue(jobList.getJobs().size() > 0);
+        assertFalse(jobList.getJobs().isEmpty());
 
         logger.debug("proxy access count: {}", proxyAccessCount);
         assertEquals(1, proxyAccessCount.get());

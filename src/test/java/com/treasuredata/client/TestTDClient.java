@@ -54,9 +54,10 @@ import com.treasuredata.client.model.TDUserList;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessagePacker;
 import org.msgpack.core.MessageUnpacker;
@@ -108,11 +109,11 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
@@ -124,6 +125,7 @@ public class TestTDClient
     private static final Logger logger = LoggerFactory.getLogger(TestTDClient.class);
 
     private static final String SAMPLE_DB;
+
     static {
         SAMPLE_DB = "_tdclient_test" + System.getProperty("java.version").replaceAll("\\.", "_");
     }
@@ -134,7 +136,7 @@ public class TestTDClient
 
     private List<String> savedQueries = new ArrayList<>();
 
-    @Before
+    @BeforeEach
     public void setUp()
             throws Exception
     {
@@ -142,12 +144,12 @@ public class TestTDClient
         server = new MockWebServer();
     }
 
-    @After
+    @AfterEach
     public void tearDown()
             throws Exception
     {
         try (TDClient client1 = client;
-             MockWebServer unused = server) {
+                MockWebServer unused = server) {
             for (String name : savedQueries) {
                 try {
                     client1.deleteSavedQuery(name);
@@ -206,8 +208,8 @@ public class TestTDClient
     {
         String databaseName = "sample_datasets";
         TDDatabase dbDetail = client.showDatabase(databaseName);
-        assertEquals("should match in sample_datasets", databaseName, dbDetail.getName());
-        assertTrue("should be positive", Integer.parseInt(dbDetail.getId()) > 0);
+        assertEquals(databaseName, dbDetail.getName(), "should match in sample_datasets");
+        assertTrue(Integer.parseInt(dbDetail.getId()) > 0, "should be positive");
 
         logger.debug(dbDetail.toString());
     }
@@ -217,7 +219,7 @@ public class TestTDClient
             throws Exception
     {
         List<String> dbList = client.listDatabaseNames();
-        assertTrue("should contain sample_datasets", dbList.contains("sample_datasets"));
+        assertTrue(dbList.contains("sample_datasets"), "should contain sample_datasets");
 
         String dbListStr = String.join(", ", dbList);
         logger.debug(dbListStr);
@@ -240,11 +242,11 @@ public class TestTDClient
 
         // nasdaq
         table = client.showTable("sample_datasets", "nasdaq");
-        assertTrue(table.getColumns().size() == 6);
+        assertEquals(6, table.getColumns().size());
 
         // www_access
         table = client.showTable("sample_datasets", "www_access");
-        assertTrue(table.getColumns().size() == 8);
+        assertEquals(8, table.getColumns().size());
     }
 
     @Test
@@ -265,10 +267,10 @@ public class TestTDClient
             logger.info("created at: " + t.getCreatedAt());
             logger.info("updated at: " + t.getUpdatedAt());
             if (t.getName().equals("nasdaq")) {
-                assertTrue(t.getColumns().size() == 6);
+                assertEquals(6, t.getColumns().size());
             }
             else if (t.getName().equals("www_access")) {
-                assertTrue(t.getColumns().size() == 8);
+                assertEquals(8, t.getColumns().size());
             }
             // To use equals and hashCode
             tableSet.add(t);
@@ -394,7 +396,8 @@ public class TestTDClient
     }
 
     @Test
-    public void submitJobWithInvalidEngineVersionPresto() throws Exception
+    public void submitJobWithInvalidEngineVersionPresto()
+            throws Exception
     {
         //Invalid engine_version must throw TDClientHttpException
         try {
@@ -410,7 +413,8 @@ public class TestTDClient
     }
 
     @Test
-    public void submitJobWithValidEngineVersionPresto() throws Exception
+    public void submitJobWithValidEngineVersionPresto()
+            throws Exception
     {
         // Valid engine_version must be accepted
         try {
@@ -422,7 +426,8 @@ public class TestTDClient
     }
 
     @Test
-    public void submitJobWithInvalidEngineVersionHive() throws Exception
+    public void submitJobWithInvalidEngineVersionHive()
+            throws Exception
     {
         //Invalid engine_version must throw TDClientHttpException
         try {
@@ -438,7 +443,8 @@ public class TestTDClient
     }
 
     @Test
-    public void submitJobWithValidEngineVersionHive() throws Exception
+    public void submitJobWithValidEngineVersionHive()
+            throws Exception
     {
         // Valid engine_version must be accepted
         try {
@@ -528,13 +534,13 @@ public class TestTDClient
     public void submitPrestoJobWithInvalidPoolName()
             throws Exception
     {
-        assertThrows("Presto resource pool with name 'no_such_pool' does not exist", TDClientHttpException.class, () -> {
+        assertThrows(TDClientHttpException.class, () -> {
             client.deleteTableIfExists(SAMPLE_DB, "sample_output");
             String poolName = "no_such_pool";
             String jobId = client.submit(TDJobRequest.newPrestoQuery("sample_datasets", "-- td-client-java test\nselect count(*) from nasdaq", null, poolName));
             TDJobSummary tdJob = waitJobCompletion(jobId);
             client.existsTable(SAMPLE_DB, "sample_output");
-        });
+        }, "Presto resource pool with name 'no_such_pool' does not exist");
     }
 
     @Test
@@ -710,11 +716,11 @@ public class TestTDClient
         String queryName = newTemporaryName("td_client_test");
 
         TDSaveQueryRequest query = TDSavedQuery.newBuilder(
-                queryName,
-                TDJob.Type.PRESTO,
-                SAMPLE_DB,
-                "select 1",
-                "Asia/Tokyo")
+                        queryName,
+                        TDJob.Type.PRESTO,
+                        SAMPLE_DB,
+                        "select 1",
+                        "Asia/Tokyo")
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
@@ -759,16 +765,16 @@ public class TestTDClient
             throws Exception
     {
         TDExportJobRequest jobRequest = TDExportJobRequest.builder()
-            .database(SAMPLE_DB)
-            .table("sample_output")
-            .from(new Date(0L))
-            .to(new Date(1456522300L * 1000))
-            .fileFormat(TDExportFileFormatType.JSONL_GZ)
-            .accessKeyId("access key id")
-            .secretAccessKey("secret access key")
-            .bucketName("bucket")
-            .filePrefix("prefix/")
-            .poolName(Optional.empty()).build();
+                .database(SAMPLE_DB)
+                .table("sample_output")
+                .from(new Date(0L))
+                .to(new Date(1456522300L * 1000))
+                .fileFormat(TDExportFileFormatType.JSONL_GZ)
+                .accessKeyId("access key id")
+                .secretAccessKey("secret access key")
+                .bucketName("bucket")
+                .filePrefix("prefix/")
+                .poolName(Optional.empty()).build();
         client.createDatabaseIfNotExists(SAMPLE_DB);
         client.createTableIfNotExists(SAMPLE_DB, "sample_output");
         String jobId = client.submitExportJob(jobRequest);
@@ -909,7 +915,7 @@ public class TestTDClient
             client.updateTableSchema(SAMPLE_DB, t, newSchema);
             TDTable updatedTable = findTable(SAMPLE_DB, t).get();
             logger.debug(updatedTable.toString());
-            assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("int_col", TDColumnType.INT, keyName)));
+            assertTrue(updatedTable.getSchema().contains(new TDColumn("int_col", TDColumnType.INT, keyName)), "should have updated column");
 
             // schema test with duplicated key
             newSchema = new ArrayList<>(targetTable.getSchema());
@@ -918,7 +924,7 @@ public class TestTDClient
             client.updateTableSchema(SAMPLE_DB, t, newSchema, true);
             updatedTable = findTable(SAMPLE_DB, t).get();
             logger.debug(updatedTable.toString());
-            assertTrue("should have updated column", updatedTable.getSchema().contains(new TDColumn("str_col", TDColumnType.STRING, keyName)));
+            assertTrue(updatedTable.getSchema().contains(new TDColumn("str_col", TDColumnType.STRING, keyName)), "should have updated column");
 
             // rename
             client.deleteTableIfExists(SAMPLE_DB, newTableName);
@@ -932,19 +938,23 @@ public class TestTDClient
         }
     }
 
-    @Test(expected = TDClientException.class)
+    @Test
     public void createTableWithoutIdempotentKey()
             throws Exception
     {
         String t = newTemporaryName("non_idempotent_test");
-        try {
-            // It should throw TDClientException without idempotent key.
-            client.createTable(SAMPLE_DB, t);
-            client.createTable(SAMPLE_DB, t);
-        }
-        finally {
-            client.deleteTable(SAMPLE_DB, t);
-        }
+        Assertions.assertThrows(TDClientException.class, () -> {
+            try {
+                // It should throw TDClientException without idempotent key.
+                client.createTable(SAMPLE_DB, t);
+                client.createTable(SAMPLE_DB, t);
+                Assertions.fail();
+            }
+            finally {
+                logger.info("Deleting table: " + t);
+                client.deleteTable(SAMPLE_DB, t);
+            }
+        });
     }
 
     @Test
@@ -1137,7 +1147,7 @@ public class TestTDClient
                 // Prepare msgpack.gz
                 ByteArrayOutputStream buf = new ByteArrayOutputStream();
                 try (OutputStream out = new GZIPOutputStream(buf);
-                    MessagePacker packer = MessagePack.newDefaultPacker(out)) {
+                        MessagePacker packer = MessagePack.newDefaultPacker(out)) {
                     for (int n = 0; n < numRowsInPart; ++n) {
                         ValueFactory.MapBuilder b = ValueFactory.newMapBuilder();
                         b.put(ValueFactory.newString("time"), ValueFactory.newInteger(time + count));
@@ -1147,7 +1157,7 @@ public class TestTDClient
                         count += 1;
                     }
                     // Embed an error record
-                    packer.packValue(ValueFactory.newMap(new Value[]{ValueFactory.newNil(), ValueFactory.newString("invalid data")}));
+                    packer.packValue(ValueFactory.newMap(new Value[] {ValueFactory.newNil(), ValueFactory.newString("invalid data")}));
                 }
 
                 File tmpFile = File.createTempFile(partName, ".msgpack.gz", new File("target"));
@@ -1387,11 +1397,11 @@ public class TestTDClient
         String queryName = newTemporaryName("td_client_test");
 
         TDSaveQueryRequest query = TDSavedQuery.newBuilder(
-                queryName,
-                TDJob.Type.PRESTO,
-                SAMPLE_DB,
-                "select 1",
-                "Asia/Tokyo")
+                        queryName,
+                        TDJob.Type.PRESTO,
+                        SAMPLE_DB,
+                        "select 1",
+                        "Asia/Tokyo")
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
@@ -1402,7 +1412,7 @@ public class TestTDClient
             TDSavedQuery result = client.saveQuery(query);
             assertThat(result.getId(), not(isEmptyOrNullString()));
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
-            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            assertTrue(q.isPresent(), String.format("saved query %s is not found", queryName));
 
             validateSavedQuery(query, result);
             assertTrue(result.getResult().startsWith("mysql://testuser:")); // password will be hidden
@@ -1437,7 +1447,7 @@ public class TestTDClient
         }
 
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertFalse(q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
@@ -1448,11 +1458,11 @@ public class TestTDClient
         String queryName = newTemporaryName("td_client_test");
 
         TDSaveQueryRequest query = TDSavedQuery.newBuilder(
-                queryName,
-                TDJob.Type.PRESTO,
-                SAMPLE_DB,
-                "select 1",
-                "Asia/Tokyo")
+                        queryName,
+                        TDJob.Type.PRESTO,
+                        SAMPLE_DB,
+                        "select 1",
+                        "Asia/Tokyo")
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
@@ -1463,7 +1473,7 @@ public class TestTDClient
             TDSavedQuery result = client.saveQuery(query);
             assertThat(result.getId(), not(isEmptyOrNullString()));
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
-            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            assertTrue(q.isPresent(), String.format("saved query %s is not found", queryName));
         }
         catch (TDClientException e) {
             logger.error("failed", e);
@@ -1473,7 +1483,7 @@ public class TestTDClient
             client.deleteSavedQuery(queryName);
         }
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertFalse(q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
@@ -1484,11 +1494,11 @@ public class TestTDClient
         String queryName = newTemporaryName("td_client_test");
 
         TDSaveQueryRequest query = TDSavedQuery.newBuilder(
-                queryName,
-                TDJob.Type.PRESTO,
-                SAMPLE_DB,
-                "select 1",
-                "Asia/Tokyo")
+                        queryName,
+                        TDJob.Type.PRESTO,
+                        SAMPLE_DB,
+                        "select 1",
+                        "Asia/Tokyo")
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
@@ -1515,7 +1525,7 @@ public class TestTDClient
             }
         }
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertFalse(q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
@@ -1526,11 +1536,11 @@ public class TestTDClient
         String queryName = newTemporaryName("td_client_test");
 
         TDSaveQueryRequest query = TDSavedQuery.newBuilder(
-                queryName,
-                TDJob.Type.HIVE,
-                SAMPLE_DB,
-                "select 1",
-                "Asia/Tokyo")
+                        queryName,
+                        TDJob.Type.HIVE,
+                        SAMPLE_DB,
+                        "select 1",
+                        "Asia/Tokyo")
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
@@ -1541,7 +1551,7 @@ public class TestTDClient
             TDSavedQuery result = client.saveQuery(query);
             assertThat(result.getId(), not(isEmptyOrNullString()));
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
-            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            assertTrue(q.isPresent(), String.format("saved query %s is not found", queryName));
             // Update
             TDSavedQueryUpdateRequest query2 =
                     TDSavedQuery.newUpdateRequestBuilder()
@@ -1558,7 +1568,7 @@ public class TestTDClient
             client.deleteSavedQuery(queryName);
         }
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertFalse(q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
@@ -1569,11 +1579,11 @@ public class TestTDClient
         String queryName = newTemporaryName("td_client_test");
 
         TDSaveQueryRequest query = TDSavedQuery.newBuilder(
-                queryName,
-                TDJob.Type.HIVE,
-                SAMPLE_DB,
-                "select 1",
-                "Asia/Tokyo")
+                        queryName,
+                        TDJob.Type.HIVE,
+                        SAMPLE_DB,
+                        "select 1",
+                        "Asia/Tokyo")
                 .setCron("0 * * * *")
                 .setPriority(-1)
                 .setRetryLimit(2)
@@ -1584,7 +1594,7 @@ public class TestTDClient
             TDSavedQuery result = client.saveQuery(query);
             assertThat(result.getId(), not(isEmptyOrNullString()));
             Optional<TDSavedQuery> q = findSavedQuery(queryName);
-            assertTrue(String.format("saved query %s is not found", queryName), q.isPresent());
+            assertTrue(q.isPresent(), String.format("saved query %s is not found", queryName));
             // Update
             TDSavedQueryUpdateRequest query2 =
                     TDSavedQuery.newUpdateRequestBuilder()
@@ -1608,7 +1618,7 @@ public class TestTDClient
             client.deleteSavedQuery(queryName);
         }
         Optional<TDSavedQuery> q = findSavedQuery(queryName);
-        assertTrue(String.format("saved query %s should be deleted", queryName), !q.isPresent());
+        assertFalse(q.isPresent(), String.format("saved query %s should be deleted", queryName));
     }
 
     @Test
@@ -1839,7 +1849,7 @@ public class TestTDClient
         assertEquals("17", jobId);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void submitResultExportJobWithOnlyJobId()
     {
         client = mockClient();
@@ -1849,7 +1859,9 @@ public class TestTDClient
                 .jobId("17")
                 .build();
 
-        client.submitResultExportJob(jobRequest);
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            client.submitResultExportJob(jobRequest);
+        });
     }
 
     @Test
@@ -1954,7 +1966,7 @@ public class TestTDClient
 
         File tmpFile = File.createTempFile(prefix, ".msgpack.gz");
         try (OutputStream out = new GZIPOutputStream(new FileOutputStream(tmpFile));
-             MessagePacker packer = MessagePack.newDefaultPacker(out)) {
+                MessagePacker packer = MessagePack.newDefaultPacker(out)) {
             for (int n = 0; n < numRows; ++n) {
                 ValueFactory.MapBuilder b = ValueFactory.newMapBuilder();
                 b.put(ValueFactory.newString("time"), ValueFactory.newInteger(time + count));
