@@ -21,7 +21,8 @@ package com.treasuredata.client;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,25 +39,25 @@ import static com.treasuredata.client.TDClientConfig.Type.API_ENDPOINT;
 import static com.treasuredata.client.TDClientConfig.Type.API_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECTION_POOL_SIZE;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECT_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.Type.READ_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.PASSOWRD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_HOST;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PASSWORD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_USER;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_USESSL;
+import static com.treasuredata.client.TDClientConfig.Type.READ_TIMEOUT_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_INITIAL_INTERVAL_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_LIMIT;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_MAX_INTERVAL_MILLIS;
 import static com.treasuredata.client.TDClientConfig.Type.RETRY_MULTIPLIER;
 import static com.treasuredata.client.TDClientConfig.Type.USER;
 import static com.treasuredata.client.TDClientConfig.Type.USESSL;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
@@ -178,20 +179,24 @@ public class TestTDClientConfig
         }
     }
 
-    @Test(expected = TDClientException.class)
+    @Test
     public void readInvalidValue()
     {
-        Properties p = new Properties();
-        p.setProperty(API_PORT.key, "xxxx");
-        TDClient.newBuilder().setProperties(p);
+        Assertions.assertThrows(TDClientException.class, () -> {
+            Properties p = new Properties();
+            p.setProperty(API_PORT.key, "xxxx");
+            TDClient.newBuilder().setProperties(p);
+        });
     }
 
-    @Test(expected = TDClientException.class)
+    @Test
     public void readInvalidDoubleValue()
     {
-        Properties p = new Properties();
-        p.setProperty(RETRY_MULTIPLIER.key, "xxx");
-        TDClient.newBuilder().setProperties(p);
+        Assertions.assertThrows(TDClientException.class, () -> {
+            Properties p = new Properties();
+            p.setProperty(RETRY_MULTIPLIER.key, "xxx");
+            TDClient.newBuilder().setProperties(p);
+        });
     }
 
     @Test
@@ -223,13 +228,13 @@ public class TestTDClientConfig
         Map<String, List<String>> combinedHeaders = new HashMap<>(headers);
         for (Map.Entry<String, List<String>> e : extraHeaders.entrySet()) {
             combinedHeaders.compute(e.getKey(), (unused, col) -> {
-               if (col != null) {
-                   col.addAll(e.getValue());
-                   return col;
-               }
-               else {
-                   return new ArrayList<>(e.getValue());
-               }
+                if (col != null) {
+                    col.addAll(e.getValue());
+                    return col;
+                }
+                else {
+                    return new ArrayList<>(e.getValue());
+                }
             });
         }
 

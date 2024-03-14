@@ -22,9 +22,9 @@ import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDTable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.littleshoot.proxy.HttpFilters;
 import org.littleshoot.proxy.HttpFiltersSourceAdapter;
 import org.littleshoot.proxy.HttpProxyServer;
@@ -35,9 +35,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -51,7 +51,7 @@ public class TestSSLProxyAccess
     private static final String PROXY_PASS = "helloproxy";
     private AtomicInteger proxyAccessCount = new AtomicInteger(0);
 
-    @Before
+    @BeforeEach
     public void setUp()
             throws Exception
     {
@@ -87,7 +87,7 @@ public class TestSSLProxyAccess
                 }).start();
     }
 
-    @After
+    @AfterEach
     public void tearDown()
             throws Exception
     {
