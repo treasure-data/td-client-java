@@ -19,7 +19,8 @@
 package com.treasuredata.client.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,12 +38,11 @@ import static com.treasuredata.client.model.TDColumnType.newArrayType;
 import static com.treasuredata.client.model.TDColumnType.newMapType;
 import static com.treasuredata.client.model.TDColumnType.parseColumnType;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 /**
  *
  */
@@ -171,52 +171,68 @@ public class TestTDColumn
         assertEquals(m2, parseColumnType(m2.toString()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseInvalidType1()
     {
-        TDColumnType.parseColumnType("int2");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            TDColumnType.parseColumnType("int2");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseInvalidType2()
     {
-        TDColumnType.parseColumnType("array[int]");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            TDColumnType.parseColumnType("array[int]");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseInvalidType3()
     {
-        TDColumnType.parseColumnType("array<int]");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            TDColumnType.parseColumnType("array<int]");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseInvalidType4()
     {
-        TDColumnType.parseColumnType("map<int>");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            TDColumnType.parseColumnType("map<int>");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseInvalidType5()
     {
-        TDColumnType.parseColumnType("map<int2>");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            TDColumnType.parseColumnType("map<int2>");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseInvalidType6()
     {
-        TDColumnType.parseColumnType("map<int, int]");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            TDColumnType.parseColumnType("map<int, int]");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseInvalidType7()
     {
-        TDColumnType.parseColumnType("map[int, int]");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            TDColumnType.parseColumnType("map[int, int]");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseUnknownType()
     {
-        TDColumnType.parseColumnType("xint");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            TDColumnType.parseColumnType("xint");
+        });
     }
 
     private static void checkSerialization(Object o)

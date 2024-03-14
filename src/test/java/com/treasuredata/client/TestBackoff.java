@@ -18,29 +18,36 @@
  */
 package com.treasuredata.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestBackoff
 {
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void invalidBaseIntervalArgument()
     {
-        new ExponentialBackOff(-1, 10000, -1);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new ExponentialBackOff(-1, 10000, -1);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void invalidMaxIntervalArgument()
     {
-        new ExponentialBackOff(1000, -1, 1);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new ExponentialBackOff(1000, -1, 1);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void invalidMultiplierArgument()
     {
-        new FullJitterBackOff(1000, 10000, -1);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new FullJitterBackOff(1000, 10000, -1);
+        });
     }
 
     @Test
