@@ -438,7 +438,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>3.4.0</version>
         <executions>
           <execution>
             <phase>validate</phase>
@@ -458,7 +458,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>8.31</version>
+            <version>8.45.1</version>
           </dependency>
         </dependencies>
       </plugin>
