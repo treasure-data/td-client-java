@@ -37,4 +37,4 @@ workflows:
       - build:
           matrix:
             parameters:
-              jdk: [jdk8, jdk11, jdk17]
+              jdk: [jdk8, jdk17]
