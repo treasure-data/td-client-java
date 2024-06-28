@@ -427,7 +427,7 @@
           <source>${project.build.targetJdk}</source>
           <encoding>${project.build.sourceEncoding}</encoding>
           <maxmemory>${project.build.jvmsize}</maxmemory>
-          <additionalparam>${javadoc.opts}</additionalparam>
+          <additionalOptions>${javadoc.opts}</additionalOptions>
         </configuration>
         <executions>
           <execution>
@@ -512,7 +512,7 @@
             <artifactId>umlgraph</artifactId>
             <version>5.6</version>
           </docletArtifact>
-          <additionalparam>-views -all</additionalparam>
+          <additionalOptions>-views -all</additionalOptions>
           <useStandardDocletOptions>true</useStandardDocletOptions>
         </configuration>
       </plugin>
