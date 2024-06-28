@@ -161,14 +161,14 @@
     <dependency>
       <groupId>org.immutables</groupId>
       <artifactId>value</artifactId>
-      <version>2.2.10</version>
+      <version>2.10.1</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.immutables</groupId>
       <artifactId>builder</artifactId>
-      <version>2.2.10</version>
+      <version>2.10.1</version>
       <scope>provided</scope>
     </dependency>
 
@@ -196,14 +196,14 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.10.0</version>
+      <version>5.12.0</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.bigtesting</groupId>
       <artifactId>fixd</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.5</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -216,7 +216,7 @@
     <dependency>
       <groupId>xyz.rogfam</groupId>
       <artifactId>littleproxy</artifactId>
-      <version>2.0.15</version>
+      <version>2.2.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
