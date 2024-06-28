@@ -27,9 +27,9 @@ import okhttp3.ResponseBody;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,10 +49,10 @@ import static com.treasuredata.client.TDHttpRequestHandlers.stringContentHandler
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.exparity.hamcrest.date.DateMatchers.within;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
@@ -64,14 +64,14 @@ public class TestTDHttpClient
     private static Logger logger = LoggerFactory.getLogger(TestTDHttpClient.class);
     private TDHttpClient client;
 
-    @Before
+    @BeforeEach
     public void setUp()
             throws Exception
     {
         client = TDClient.newClient().httpClient;
     }
 
-    @After
+    @AfterEach
     public void tearDown()
             throws Exception
     {

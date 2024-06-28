@@ -18,7 +18,7 @@
  */
 package com.treasuredata.client.builder;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.treasuredata.client.TDClient;
 
