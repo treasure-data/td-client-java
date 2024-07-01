@@ -450,20 +450,20 @@
             <goals>
               <goal>check</goal>
             </goals>
-            <configuration>
-              <failOnViolation>true</failOnViolation>
-              <consoleOutput>true</consoleOutput>
-              <includeTestSourceDirectory>true</includeTestSourceDirectory>
-              <configLocation>check-style.xml</configLocation>
-              <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
-            </configuration>
           </execution>
         </executions>
+        <configuration>
+          <failOnViolation>true</failOnViolation>
+          <consoleOutput>true</consoleOutput>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <configLocation>check-style.xml</configLocation>
+          <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+        </configuration>
         <dependencies>
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>8.45.1</version>
+            <version>9.3</version>
           </dependency>
         </dependencies>
       </plugin>
