@@ -36,6 +36,7 @@ import com.treasuredata.client.model.TDConnectionLookupResult;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDExportResultJobRequest;
+import com.treasuredata.client.model.TDFederatedQueryConfig;
 import com.treasuredata.client.model.TDImportResult;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
@@ -1136,5 +1137,12 @@ public class TDClient
     public TDImportResult importBytes(String databaseName, String tableName, byte[] content, int offset, int length, String id)
     {
         return doPut(buildUrl(String.format("/v3/table/import_with_id/%s/%s/%s/%s", databaseName, tableName, id, "msgpack.gz")), Collections.emptyMap(), content, offset, length, TDImportResult.class);
+    }
+
+    @Override
+    public List<TDFederatedQueryConfig> getFederatedQueryConfigs()
+        throws TDClientException
+    {
+        return doGet("/v4/federated_query_configs", new TypeReference<List<TDFederatedQueryConfig>>() {});
     }
 }

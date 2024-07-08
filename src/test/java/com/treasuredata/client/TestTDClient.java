@@ -33,6 +33,7 @@ import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportFileFormatType;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDExportResultJobRequest;
+import com.treasuredata.client.model.TDFederatedQueryConfig;
 import com.treasuredata.client.model.TDImportResult;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJob.EngineVersion;
@@ -1956,6 +1957,50 @@ public class TestTDClient
         assertEquals(result.getElapsedTime(), 10);
         assertEquals(result.getMd5Hex(), "a34e7c79aa6b6cc48e6e1075c2215a8b");
         assertEquals(result.getUniqueId(), "4288048cf8f811e88b560a87157ac806");
+    }
+
+    @Test
+    public void testGetFederatedQueryConfigsWhenEmpty()
+        throws Exception
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("[]"));
+
+        List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetFederatedQueryConfigsWhenOnlyOne()
+        throws Exception
+    {
+        client = mockClient();
+        final String federatedQueryConfigs = "[{\"id\":12345,\"type\":\"custom_type\",\"user_id\":67890,\"account_id\":54321,\"name\":\"test_name\",\"connection_id\":112233,\"created_at\":\"2023-06-01T00:00:00Z\",\"updated_at\":\"2023-06-15T00:00:00Z\",\"settings\":{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}}]";
+        server.enqueue(new MockResponse().setBody(federatedQueryConfigs));
+
+        List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
+
+        List<TDFederatedQueryConfig> expected = Arrays.asList(new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", "{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}"));
+        assertEquals(result, expected);
+    }
+
+    @Test
+    public void testGetFederatedQueryConfigsWhenMultiple()
+        throws Exception
+    {
+        client = mockClient();
+        final String federatedQueryConfigs = "[{\"id\":12345,\"type\":\"custom_type\",\"user_id\":67890,\"account_id\":54321,\"name\":\"test_name\",\"connection_id\":112233,\"created_at\":\"2023-06-01T00:00:00Z\",\"updated_at\":\"2023-06-15T00:00:00Z\",\"settings\":{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}},"
+            + "{\"id\":67890,\"type\":\"another_type\",\"user_id\":12345,\"account_id\":98765,\"name\":\"another_test_name\",\"connection_id\":445566,\"created_at\":\"2023-07-01T00:00:00Z\",\"updated_at\":\"2023-07-15T00:00:00Z\",\"settings\":{\"account_name\":\"another_snowflake_account\",\"auth_method\":\"oauth\",\"private_key\":\"another_encrypted_key\",\"passphrase\":\"another_secret_phrase\",\"options\":{\"keyA\":\"valA\",\"keyB\":\"valB\"},\"user\":\"another_snowflake_user\",\"password\":\"another_snowflake_password\",\"database\":\"another_sample_database\"}}]";
+        server.enqueue(new MockResponse().setBody(federatedQueryConfigs));
+
+        List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
+
+        List<TDFederatedQueryConfig> expected = Arrays.asList(
+            new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", "{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}"),
+            new TDFederatedQueryConfig(67890, "another_type", 12345, 98765, "another_test_name", 445566, "2023-07-01T00:00:00Z", "2023-07-15T00:00:00Z", "{\"account_name\":\"another_snowflake_account\",\"auth_method\":\"oauth\",\"private_key\":\"another_encrypted_key\",\"passphrase\":\"another_secret_phrase\",\"options\":{\"keyA\":\"valA\",\"keyB\":\"valB\"},\"user\":\"another_snowflake_user\",\"password\":\"another_snowflake_password\",\"database\":\"another_sample_database\"}")
+        );
+        assertEquals(result, expected);
     }
 
     private File createTempMsgpackGz(String prefix, int numRows)

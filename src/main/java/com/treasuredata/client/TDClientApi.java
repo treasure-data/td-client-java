@@ -31,6 +31,7 @@ import com.treasuredata.client.model.TDColumn;
 import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDExportResultJobRequest;
+import com.treasuredata.client.model.TDFederatedQueryConfig;
 import com.treasuredata.client.model.TDImportResult;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
@@ -501,4 +502,10 @@ public interface TDClientApi<ClientImpl>
      * @return TDImportResult which contains a unique import id and md5
      */
     TDImportResult importBytes(String database, String table, byte[] content, int offset, int length, String id);
+
+    /**
+     * Fetch a list of federated query configurations
+     * @return List<TDFederatedQueryConfig> which contains a list of federated query configs
+     */
+    List<TDFederatedQueryConfig> getFederatedQueryConfigs();
 }
