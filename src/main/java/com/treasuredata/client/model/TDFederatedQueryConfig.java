@@ -17,10 +17,7 @@ public class TDFederatedQueryConfig
     private final String createdAt;
     private final String updatedAt;
 
-    @JsonDeserialize(
-            using =
-                    com.treasuredata.client.deserialize.FederatedQueryConfigSettingsDeserializer
-                            .class)
+    @JsonDeserialize(using = com.treasuredata.client.deserialize.FederatedQueryConfigSettingsDeserializer.class)
     private final String settings;
 
     @JsonCreator
