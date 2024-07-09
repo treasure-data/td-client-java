@@ -1973,8 +1973,7 @@ public class TestTDClient
     }
 
     @Test
-    public void testGetFederatedQueryConfigsWhenOnlyOne()
-        throws Exception
+    public void testGetFederatedQueryConfigsWhenOnlyOne() throws Exception
     {
         client = mockClient();
         final String federatedQueryConfigs = "[\n" +
@@ -2006,13 +2005,27 @@ public class TestTDClient
 
         List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
 
-        List<TDFederatedQueryConfig> expected = Arrays.asList(new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", "{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}"));
+        Map<String, Object> settings = new HashMap<>();
+        settings.put("account_name", "snowflake_account");
+        settings.put("auth_method", "password");
+        settings.put("private_key", "encrypted_key");
+        settings.put("passphrase", "secret_phrase");
+        Map<String, Object> options = new HashMap<>();
+        options.put("key1", "val1");
+        options.put("key2", "val2");
+        settings.put("options", options);
+        settings.put("user", "snowflake_user");
+        settings.put("password", "snowflake_password");
+        settings.put("database", "sample_database");
+
+        List<TDFederatedQueryConfig> expected = Arrays.asList(
+            new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", settings)
+        );
         assertIterableEquals(result, expected);
     }
 
     @Test
-    public void testGetFederatedQueryConfigsWhenMultiple()
-        throws Exception
+    public void testGetFederatedQueryConfigsWhenMultiple() throws Exception
     {
         client = mockClient();
         final String federatedQueryConfigs = "[\n" +
@@ -2067,9 +2080,35 @@ public class TestTDClient
 
         List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
 
+        Map<String, Object> settings1 = new HashMap<>();
+        settings1.put("account_name", "snowflake_account");
+        settings1.put("auth_method", "password");
+        settings1.put("private_key", "encrypted_key");
+        settings1.put("passphrase", "secret_phrase");
+        Map<String, Object> options1 = new HashMap<>();
+        options1.put("key1", "val1");
+        options1.put("key2", "val2");
+        settings1.put("options", options1);
+        settings1.put("user", "snowflake_user");
+        settings1.put("password", "snowflake_password");
+        settings1.put("database", "sample_database");
+
+        Map<String, Object> settings2 = new HashMap<>();
+        settings2.put("account_name", "another_snowflake_account");
+        settings2.put("auth_method", "oauth");
+        settings2.put("private_key", "another_encrypted_key");
+        settings2.put("passphrase", "another_secret_phrase");
+        Map<String, Object> options2 = new HashMap<>();
+        options2.put("keyA", "valA");
+        options2.put("keyB", "valB");
+        settings2.put("options", options2);
+        settings2.put("user", "another_snowflake_user");
+        settings2.put("password", "another_snowflake_password");
+        settings2.put("database", "another_sample_database");
+
         List<TDFederatedQueryConfig> expected = Arrays.asList(
-            new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", "{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}"),
-            new TDFederatedQueryConfig(67890, "another_type", 12345, 98765, "another_test_name", 445566, "2023-07-01T00:00:00Z", "2023-07-15T00:00:00Z", "{\"account_name\":\"another_snowflake_account\",\"auth_method\":\"oauth\",\"private_key\":\"another_encrypted_key\",\"passphrase\":\"another_secret_phrase\",\"options\":{\"keyA\":\"valA\",\"keyB\":\"valB\"},\"user\":\"another_snowflake_user\",\"password\":\"another_snowflake_password\",\"database\":\"another_sample_database\"}")
+            new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", settings1),
+            new TDFederatedQueryConfig(67890, "another_type", 12345, 98765, "another_test_name", 445566, "2023-07-01T00:00:00Z", "2023-07-15T00:00:00Z", settings2)
         );
         assertIterableEquals(result, expected);
     }
