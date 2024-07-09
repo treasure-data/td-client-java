@@ -1973,7 +1973,8 @@ public class TestTDClient
     }
 
     @Test
-    public void testGetFederatedQueryConfigsWhenOnlyOne() throws Exception
+    public void testGetFederatedQueryConfigsWhenOnlyOne()
+        throws Exception
     {
         client = mockClient();
         final String federatedQueryConfigs = "[\n" +
@@ -2025,7 +2026,8 @@ public class TestTDClient
     }
 
     @Test
-    public void testGetFederatedQueryConfigsWhenMultiple() throws Exception
+    public void testGetFederatedQueryConfigsWhenMultiple()
+        throws Exception
     {
         client = mockClient();
         final String federatedQueryConfigs = "[\n" +
