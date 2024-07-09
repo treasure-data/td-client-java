@@ -112,6 +112,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1976,13 +1977,37 @@ public class TestTDClient
         throws Exception
     {
         client = mockClient();
-        final String federatedQueryConfigs = "[{\"id\":12345,\"type\":\"custom_type\",\"user_id\":67890,\"account_id\":54321,\"name\":\"test_name\",\"connection_id\":112233,\"created_at\":\"2023-06-01T00:00:00Z\",\"updated_at\":\"2023-06-15T00:00:00Z\",\"settings\":{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}}]";
+        final String federatedQueryConfigs = "[\n" +
+            "    {\n" +
+            "        \"id\": 12345,\n" +
+            "        \"type\": \"custom_type\",\n" +
+            "        \"user_id\": 67890,\n" +
+            "        \"account_id\": 54321,\n" +
+            "        \"name\": \"test_name\",\n" +
+            "        \"connection_id\": 112233,\n" +
+            "        \"created_at\": \"2023-06-01T00:00:00Z\",\n" +
+            "        \"updated_at\": \"2023-06-15T00:00:00Z\",\n" +
+            "        \"settings\": {\n" +
+            "            \"account_name\": \"snowflake_account\",\n" +
+            "            \"auth_method\": \"password\",\n" +
+            "            \"private_key\": \"encrypted_key\",\n" +
+            "            \"passphrase\": \"secret_phrase\",\n" +
+            "            \"options\": {\n" +
+            "                \"key1\": \"val1\",\n" +
+            "                \"key2\": \"val2\"\n" +
+            "            },\n" +
+            "            \"user\": \"snowflake_user\",\n" +
+            "            \"password\": \"snowflake_password\",\n" +
+            "            \"database\": \"sample_database\"\n" +
+            "        }\n" +
+            "    }\n" +
+            "]";
         server.enqueue(new MockResponse().setBody(federatedQueryConfigs));
 
         List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
 
         List<TDFederatedQueryConfig> expected = Arrays.asList(new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", "{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}"));
-        assertEquals(result, expected);
+        assertIterableEquals(result, expected);
     }
 
     @Test
@@ -1990,8 +2015,54 @@ public class TestTDClient
         throws Exception
     {
         client = mockClient();
-        final String federatedQueryConfigs = "[{\"id\":12345,\"type\":\"custom_type\",\"user_id\":67890,\"account_id\":54321,\"name\":\"test_name\",\"connection_id\":112233,\"created_at\":\"2023-06-01T00:00:00Z\",\"updated_at\":\"2023-06-15T00:00:00Z\",\"settings\":{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}},"
-            + "{\"id\":67890,\"type\":\"another_type\",\"user_id\":12345,\"account_id\":98765,\"name\":\"another_test_name\",\"connection_id\":445566,\"created_at\":\"2023-07-01T00:00:00Z\",\"updated_at\":\"2023-07-15T00:00:00Z\",\"settings\":{\"account_name\":\"another_snowflake_account\",\"auth_method\":\"oauth\",\"private_key\":\"another_encrypted_key\",\"passphrase\":\"another_secret_phrase\",\"options\":{\"keyA\":\"valA\",\"keyB\":\"valB\"},\"user\":\"another_snowflake_user\",\"password\":\"another_snowflake_password\",\"database\":\"another_sample_database\"}}]";
+        final String federatedQueryConfigs = "[\n" +
+            "    {\n" +
+            "        \"id\": 12345,\n" +
+            "        \"type\": \"custom_type\",\n" +
+            "        \"user_id\": 67890,\n" +
+            "        \"account_id\": 54321,\n" +
+            "        \"name\": \"test_name\",\n" +
+            "        \"connection_id\": 112233,\n" +
+            "        \"created_at\": \"2023-06-01T00:00:00Z\",\n" +
+            "        \"updated_at\": \"2023-06-15T00:00:00Z\",\n" +
+            "        \"settings\": {\n" +
+            "            \"account_name\": \"snowflake_account\",\n" +
+            "            \"auth_method\": \"password\",\n" +
+            "            \"private_key\": \"encrypted_key\",\n" +
+            "            \"passphrase\": \"secret_phrase\",\n" +
+            "            \"options\": {\n" +
+            "                \"key1\": \"val1\",\n" +
+            "                \"key2\": \"val2\"\n" +
+            "            },\n" +
+            "            \"user\": \"snowflake_user\",\n" +
+            "            \"password\": \"snowflake_password\",\n" +
+            "            \"database\": \"sample_database\"\n" +
+            "        }\n" +
+            "    },\n" +
+            "    {\n" +
+            "        \"id\": 67890,\n" +
+            "        \"type\": \"another_type\",\n" +
+            "        \"user_id\": 12345,\n" +
+            "        \"account_id\": 98765,\n" +
+            "        \"name\": \"another_test_name\",\n" +
+            "        \"connection_id\": 445566,\n" +
+            "        \"created_at\": \"2023-07-01T00:00:00Z\",\n" +
+            "        \"updated_at\": \"2023-07-15T00:00:00Z\",\n" +
+            "        \"settings\": {\n" +
+            "            \"account_name\": \"another_snowflake_account\",\n" +
+            "            \"auth_method\": \"oauth\",\n" +
+            "            \"private_key\": \"another_encrypted_key\",\n" +
+            "            \"passphrase\": \"another_secret_phrase\",\n" +
+            "            \"options\": {\n" +
+            "                \"keyA\": \"valA\",\n" +
+            "                \"keyB\": \"valB\"\n" +
+            "            },\n" +
+            "            \"user\": \"another_snowflake_user\",\n" +
+            "            \"password\": \"another_snowflake_password\",\n" +
+            "            \"database\": \"another_sample_database\"\n" +
+            "        }\n" +
+            "    }\n" +
+            "]";
         server.enqueue(new MockResponse().setBody(federatedQueryConfigs));
 
         List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
@@ -2000,7 +2071,24 @@ public class TestTDClient
             new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", "{\"account_name\":\"snowflake_account\",\"auth_method\":\"password\",\"private_key\":\"encrypted_key\",\"passphrase\":\"secret_phrase\",\"options\":{\"key1\":\"val1\",\"key2\":\"val2\"},\"user\":\"snowflake_user\",\"password\":\"snowflake_password\",\"database\":\"sample_database\"}"),
             new TDFederatedQueryConfig(67890, "another_type", 12345, 98765, "another_test_name", 445566, "2023-07-01T00:00:00Z", "2023-07-15T00:00:00Z", "{\"account_name\":\"another_snowflake_account\",\"auth_method\":\"oauth\",\"private_key\":\"another_encrypted_key\",\"passphrase\":\"another_secret_phrase\",\"options\":{\"keyA\":\"valA\",\"keyB\":\"valB\"},\"user\":\"another_snowflake_user\",\"password\":\"another_snowflake_password\",\"database\":\"another_sample_database\"}")
         );
-        assertEquals(result, expected);
+        assertIterableEquals(result, expected);
+    }
+
+    @Test
+    public void testGetFederatedQueryConfigsWhenAuthenticationFail()
+        throws Exception
+    {
+        TDClient client = TDClient.newBuilder().setApiKey("1/xxfasdfafd").build(); // Set a wrong API key
+        server.enqueue(new MockResponse().setBody("[]"));
+
+        try {
+            List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
+            fail("should not reach here");
+        }
+        catch (TDClientHttpUnauthorizedException e) {
+            // OK
+            assertEquals(HttpStatus.UNAUTHORIZED_401, e.getStatusCode());
+        }
     }
 
     private File createTempMsgpackGz(String prefix, int numRows)

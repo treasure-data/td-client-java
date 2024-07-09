@@ -10,11 +10,11 @@ import java.io.IOException;
 
 public class FederatedQueryConfigSettingsDeserializer extends JsonDeserializer<String>
 {
-  @Override
-  public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
-  {
-    ObjectMapper mapper = (ObjectMapper) p.getCodec();
-    ObjectNode root = mapper.readTree(p);
-    return root.toString();
-  }
+    @Override
+    public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
+    {
+        ObjectMapper mapper = (ObjectMapper) p.getCodec();
+        ObjectNode root = mapper.readTree(p);
+        return root.toString();
+    }
 }
