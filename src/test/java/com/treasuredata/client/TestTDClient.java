@@ -33,6 +33,7 @@ import com.treasuredata.client.model.TDDatabase;
 import com.treasuredata.client.model.TDExportFileFormatType;
 import com.treasuredata.client.model.TDExportJobRequest;
 import com.treasuredata.client.model.TDExportResultJobRequest;
+import com.treasuredata.client.model.TDFederatedQueryConfig;
 import com.treasuredata.client.model.TDImportResult;
 import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJob.EngineVersion;
@@ -111,6 +112,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1956,6 +1958,178 @@ public class TestTDClient
         assertEquals(result.getElapsedTime(), 10);
         assertEquals(result.getMd5Hex(), "a34e7c79aa6b6cc48e6e1075c2215a8b");
         assertEquals(result.getUniqueId(), "4288048cf8f811e88b560a87157ac806");
+    }
+
+    @Test
+    public void testGetFederatedQueryConfigsWhenEmpty()
+        throws Exception
+    {
+        client = mockClient();
+        server.enqueue(new MockResponse().setBody("[]"));
+
+        List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetFederatedQueryConfigsWhenOnlyOne()
+        throws Exception
+    {
+        client = mockClient();
+        final String federatedQueryConfigs = "[\n" +
+            "    {\n" +
+            "        \"id\": 12345,\n" +
+            "        \"type\": \"custom_type\",\n" +
+            "        \"user_id\": 67890,\n" +
+            "        \"account_id\": 54321,\n" +
+            "        \"name\": \"test_name\",\n" +
+            "        \"connection_id\": 112233,\n" +
+            "        \"created_at\": \"2023-06-01T00:00:00Z\",\n" +
+            "        \"updated_at\": \"2023-06-15T00:00:00Z\",\n" +
+            "        \"settings\": {\n" +
+            "            \"account_name\": \"snowflake_account\",\n" +
+            "            \"auth_method\": \"password\",\n" +
+            "            \"private_key\": \"encrypted_key\",\n" +
+            "            \"passphrase\": \"secret_phrase\",\n" +
+            "            \"options\": {\n" +
+            "                \"key1\": \"val1\",\n" +
+            "                \"key2\": \"val2\"\n" +
+            "            },\n" +
+            "            \"user\": \"snowflake_user\",\n" +
+            "            \"password\": \"snowflake_password\",\n" +
+            "            \"database\": \"sample_database\"\n" +
+            "        }\n" +
+            "    }\n" +
+            "]";
+        server.enqueue(new MockResponse().setBody(federatedQueryConfigs));
+
+        List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
+
+        Map<String, Object> settings = new HashMap<>();
+        settings.put("account_name", "snowflake_account");
+        settings.put("auth_method", "password");
+        settings.put("private_key", "encrypted_key");
+        settings.put("passphrase", "secret_phrase");
+        Map<String, Object> options = new HashMap<>();
+        options.put("key1", "val1");
+        options.put("key2", "val2");
+        settings.put("options", options);
+        settings.put("user", "snowflake_user");
+        settings.put("password", "snowflake_password");
+        settings.put("database", "sample_database");
+
+        List<TDFederatedQueryConfig> expected = Arrays.asList(
+            new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", settings)
+        );
+        assertIterableEquals(result, expected);
+    }
+
+    @Test
+    public void testGetFederatedQueryConfigsWhenMultiple()
+        throws Exception
+    {
+        client = mockClient();
+        final String federatedQueryConfigs = "[\n" +
+            "    {\n" +
+            "        \"id\": 12345,\n" +
+            "        \"type\": \"custom_type\",\n" +
+            "        \"user_id\": 67890,\n" +
+            "        \"account_id\": 54321,\n" +
+            "        \"name\": \"test_name\",\n" +
+            "        \"connection_id\": 112233,\n" +
+            "        \"created_at\": \"2023-06-01T00:00:00Z\",\n" +
+            "        \"updated_at\": \"2023-06-15T00:00:00Z\",\n" +
+            "        \"settings\": {\n" +
+            "            \"account_name\": \"snowflake_account\",\n" +
+            "            \"auth_method\": \"password\",\n" +
+            "            \"private_key\": \"encrypted_key\",\n" +
+            "            \"passphrase\": \"secret_phrase\",\n" +
+            "            \"options\": {\n" +
+            "                \"key1\": \"val1\",\n" +
+            "                \"key2\": \"val2\"\n" +
+            "            },\n" +
+            "            \"user\": \"snowflake_user\",\n" +
+            "            \"password\": \"snowflake_password\",\n" +
+            "            \"database\": \"sample_database\"\n" +
+            "        }\n" +
+            "    },\n" +
+            "    {\n" +
+            "        \"id\": 67890,\n" +
+            "        \"type\": \"another_type\",\n" +
+            "        \"user_id\": 12345,\n" +
+            "        \"account_id\": 98765,\n" +
+            "        \"name\": \"another_test_name\",\n" +
+            "        \"connection_id\": 445566,\n" +
+            "        \"created_at\": \"2023-07-01T00:00:00Z\",\n" +
+            "        \"updated_at\": \"2023-07-15T00:00:00Z\",\n" +
+            "        \"settings\": {\n" +
+            "            \"account_name\": \"another_snowflake_account\",\n" +
+            "            \"auth_method\": \"oauth\",\n" +
+            "            \"private_key\": \"another_encrypted_key\",\n" +
+            "            \"passphrase\": \"another_secret_phrase\",\n" +
+            "            \"options\": {\n" +
+            "                \"keyA\": \"valA\",\n" +
+            "                \"keyB\": \"valB\"\n" +
+            "            },\n" +
+            "            \"user\": \"another_snowflake_user\",\n" +
+            "            \"password\": \"another_snowflake_password\",\n" +
+            "            \"database\": \"another_sample_database\"\n" +
+            "        }\n" +
+            "    }\n" +
+            "]";
+        server.enqueue(new MockResponse().setBody(federatedQueryConfigs));
+
+        List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
+
+        Map<String, Object> settings1 = new HashMap<>();
+        settings1.put("account_name", "snowflake_account");
+        settings1.put("auth_method", "password");
+        settings1.put("private_key", "encrypted_key");
+        settings1.put("passphrase", "secret_phrase");
+        Map<String, Object> options1 = new HashMap<>();
+        options1.put("key1", "val1");
+        options1.put("key2", "val2");
+        settings1.put("options", options1);
+        settings1.put("user", "snowflake_user");
+        settings1.put("password", "snowflake_password");
+        settings1.put("database", "sample_database");
+
+        Map<String, Object> settings2 = new HashMap<>();
+        settings2.put("account_name", "another_snowflake_account");
+        settings2.put("auth_method", "oauth");
+        settings2.put("private_key", "another_encrypted_key");
+        settings2.put("passphrase", "another_secret_phrase");
+        Map<String, Object> options2 = new HashMap<>();
+        options2.put("keyA", "valA");
+        options2.put("keyB", "valB");
+        settings2.put("options", options2);
+        settings2.put("user", "another_snowflake_user");
+        settings2.put("password", "another_snowflake_password");
+        settings2.put("database", "another_sample_database");
+
+        List<TDFederatedQueryConfig> expected = Arrays.asList(
+            new TDFederatedQueryConfig(12345, "custom_type", 67890, 54321, "test_name", 112233, "2023-06-01T00:00:00Z", "2023-06-15T00:00:00Z", settings1),
+            new TDFederatedQueryConfig(67890, "another_type", 12345, 98765, "another_test_name", 445566, "2023-07-01T00:00:00Z", "2023-07-15T00:00:00Z", settings2)
+        );
+        assertIterableEquals(result, expected);
+    }
+
+    @Test
+    public void testGetFederatedQueryConfigsWhenAuthenticationFail()
+        throws Exception
+    {
+        TDClient client = TDClient.newBuilder().setApiKey("1/xxfasdfafd").build(); // Set a wrong API key
+        server.enqueue(new MockResponse().setBody("[]"));
+
+        try {
+            List<TDFederatedQueryConfig> result = client.getFederatedQueryConfigs();
+            fail("should not reach here");
+        }
+        catch (TDClientHttpUnauthorizedException e) {
+            // OK
+            assertEquals(HttpStatus.UNAUTHORIZED_401, e.getStatusCode());
+        }
     }
 
     private File createTempMsgpackGz(String prefix, int numRows)
