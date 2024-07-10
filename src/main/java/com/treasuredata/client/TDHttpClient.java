@@ -150,9 +150,9 @@ public class TDHttpClient
      * Get a {@link TDHttpClient} that uses the specified headers for each request. Reuses the same
      * underlying http client so closing the returned instance will return this instance as well.
      *
-     * @deprecated Use {@link #withHeaders(Map)} instead.
      * @param headers
      * @return
+     * @deprecated Use {@link #withHeaders(Map)} instead.
      */
     @Deprecated
     public TDHttpClient withHeaders(Multimap<String, String> headers)
@@ -324,7 +324,7 @@ public class TDHttpClient
                     }
                 }
                 else if (queryStr.length() > 0) {
-                        request = request.put(createRequestBodyWithoutCharset(mediaTypeXwwwFormUrlencoded, queryStr));
+                    request = request.put(createRequestBodyWithoutCharset(mediaTypeXwwwFormUrlencoded, queryStr));
                 }
                 else {
                     // We should set content-length explicitly for an empty put
@@ -525,12 +525,12 @@ public class TDHttpClient
     }
 
     /**
-     * @deprecated Use {@link #call(TDApiRequest, Optional, Function)} instead.
      * @param apiRequest
      * @param apiKeyCache
      * @param contentStreamHandler
      * @param <Result>
      * @return
+     * @deprecated Use {@link #call(TDApiRequest, Optional, Function)} instead.
      */
     @Deprecated
     public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final com.google.common.base.Function<InputStream, Result> contentStreamHandler)

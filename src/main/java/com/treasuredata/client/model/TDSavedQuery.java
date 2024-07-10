@@ -88,7 +88,7 @@ public class TDSavedQuery
             @JsonProperty("result") String result,
             @JsonProperty("next_time") String nextTime,
             @JsonProperty("engine_version") TDJob.EngineVersion engineVersion
-            )
+    )
     {
         this.id = id;
         this.name = name;

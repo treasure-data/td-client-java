@@ -18,10 +18,6 @@
  */
 package com.treasuredata.client;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.model.TDApiKey;
 import com.treasuredata.client.model.TDBulkImportSession;
@@ -51,8 +47,11 @@ import com.treasuredata.client.model.TDUserList;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -315,7 +314,7 @@ public interface TDClientApi<ClientImpl>
     @Deprecated
     default <Result> Result getBulkImportErrorRecords(String sessionName, com.google.common.base.Function<InputStream, Result> resultStreamHandler)
     {
-       return this.getBulkImportErrorRecords(sessionName, (Function<InputStream, Result>) resultStreamHandler::apply);
+        return this.getBulkImportErrorRecords(sessionName, (Function<InputStream, Result>) resultStreamHandler::apply);
     }
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);

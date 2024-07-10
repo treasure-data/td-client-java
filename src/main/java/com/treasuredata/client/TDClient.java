@@ -696,9 +696,9 @@ public class TDClient
                         buildUrl("/v3/job/issue", jobRequest.getType().getType(), jobRequest.getDatabase()),
                         queryParam,
                         jobRequest.getConfig().map((config) -> {
-                                ObjectNode body = config.objectNode();
-                                body.set("config", config);
-                                return body.toString();
+                            ObjectNode body = config.objectNode();
+                            body.set("config", config);
+                            return body.toString();
                         }),
                         TDJobSubmitResult.class);
         return result.getJobId();

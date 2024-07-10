@@ -15,7 +15,7 @@ public class TDBulkLoadSessionStartRequest
     TDBulkLoadSessionStartRequest(
             @JsonProperty("scheduled_time") String scheduledTime,
             @JsonProperty("domain_key") String domainKey
-            )
+    )
     {
         this.scheduledTime = scheduledTime;
         this.domainKey = domainKey;
