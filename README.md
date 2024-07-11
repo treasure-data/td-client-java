@@ -2,7 +2,7 @@
 
 # td-client for java
 
-A java client for accessing [Treasure Data API](http://docs.treasuredata.com/articles/rest-api).
+A java client for accessing [Treasure Data API](https://api-docs.treasuredata.com/en/api/td-api/quickstart/).
 With this client, you can:
  - submit Hive/Presto queries to Treasure Data
  - check the status of jobs (queries)
