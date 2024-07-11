@@ -23,7 +23,6 @@ jobs:
     steps:
       - checkout
       - run:
-          # when jdk other than jdk8 is specified, sleep for a random time between 0 and 30 seconds
           name: Sleep to avoid resource name conflict
           command: |
             if [[ $CIRCLE_JOB != "build-jdk8" ]]; then
