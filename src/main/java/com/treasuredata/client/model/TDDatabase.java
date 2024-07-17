@@ -30,6 +30,8 @@ public class TDDatabase
     private final String id;
     private final String name;
     private final long count;
+    private final long userId;
+    private final String description;
     private final String createdAt;
     private final String updatedAt;
     private final Optional<String> organization;
@@ -39,6 +41,8 @@ public class TDDatabase
     public TDDatabase(
             @JsonProperty("id") String id,
             @JsonProperty("name") String name,
+            @JsonProperty("user_id") long userId,
+            @JsonProperty("description") String description,
             @JsonProperty("count") long count,
             @JsonProperty("created_at") String createdAt,
             @JsonProperty("updated_at") String updatedAt,
@@ -48,6 +52,8 @@ public class TDDatabase
     {
         this.id = id;
         this.name = name;
+        this.userId = userId;
+        this.description = description;
         this.count = count;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -67,6 +73,15 @@ public class TDDatabase
         return name;
     }
 
+    public long getUserId()
+    {
+        return userId;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
     /**
      * Record count
      *
