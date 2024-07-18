@@ -37,7 +37,7 @@ public class TDTable
     private final String expireDays;
     private final String createdAt;
     private final String updatedAt;
-    private final long userId;
+    private final Integer userId;
     private final String description;
 
     @JsonCreator
@@ -52,7 +52,7 @@ public class TDTable
             @JsonProperty("expire_days") String expireDays,
             @JsonProperty("created_at") String createdAt,
             @JsonProperty("updated_at") String updatedAt,
-            @JsonProperty("user_id")  long userId,
+            @JsonProperty("user_id") Integer userId,
             @JsonProperty("description") String description
     )
     {
@@ -132,7 +132,7 @@ public class TDTable
         return updatedAt;
     }
 
-    public long getUserId()
+    public Integer getUserId()
     {
         return userId;
     }
