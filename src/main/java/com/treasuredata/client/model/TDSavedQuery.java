@@ -72,7 +72,7 @@ public class TDSavedQuery
     private final String result;
     private final String nextTime;
     private final TDJob.EngineVersion engineVersion;
-    private final long executingUserId;
+    private final Integer executingUserId;
     private final String description;
 
     public TDSavedQuery(
@@ -90,7 +90,7 @@ public class TDSavedQuery
             @JsonProperty("result") String result,
             @JsonProperty("next_time") String nextTime,
             @JsonProperty("engine_version") TDJob.EngineVersion engineVersion,
-            @JsonProperty("executing_user_id") long executingUserId,
+            @JsonProperty("executing_user_id") Integer executingUserId,
             @JsonProperty("description") String description
     )
     {
@@ -187,7 +187,7 @@ public class TDSavedQuery
         return engineVersion;
     }
 
-    public long getExecutingUserId()
+    public Integer getExecutingUserId()
     {
         return executingUserId;
     }
@@ -214,6 +214,8 @@ public class TDSavedQuery
                 ", result='" + result + '\'' +
                 ", nextTime='" + nextTime + '\'' +
                 ", engineVersion='" + engineVersion + '\'' +
+                ", executingUserid='" + executingUserId + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 }
