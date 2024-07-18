@@ -214,7 +214,7 @@ public class TDSavedQuery
                 ", result='" + result + '\'' +
                 ", nextTime='" + nextTime + '\'' +
                 ", engineVersion='" + engineVersion + '\'' +
-                ", executingUserid='" + executingUserId + '\'' +
+                ", executingUserid=" + executingUserId +
                 ", description='" + description + '\'' +
                 '}';
     }
