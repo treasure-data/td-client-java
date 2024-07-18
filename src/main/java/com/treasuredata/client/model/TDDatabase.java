@@ -30,7 +30,7 @@ public class TDDatabase
     private final String id;
     private final String name;
     private final long count;
-    private final long userId;
+    private final Integer userId;
     private final String description;
     private final String createdAt;
     private final String updatedAt;
@@ -41,7 +41,7 @@ public class TDDatabase
     public TDDatabase(
             @JsonProperty("id") String id,
             @JsonProperty("name") String name,
-            @JsonProperty("user_id") long userId,
+            @JsonProperty("user_id") Integer userId,
             @JsonProperty("description") String description,
             @JsonProperty("count") long count,
             @JsonProperty("created_at") String createdAt,
@@ -73,7 +73,7 @@ public class TDDatabase
         return name;
     }
 
-    public long getUserId()
+    public Integer getUserId()
     {
         return userId;
     }
