@@ -262,6 +262,8 @@ public class TestTDClient
         Set<TDTable> tableSet = new HashSet<>();
         for (final TDTable t : tableList) {
             logger.info("id: " + t.getId());
+            logger.info("user id:" + t.getUserId());
+            logger.info("description: " + t.getDescription());
             logger.info("type: " + t.getType());
             logger.info("estimated size:" + t.getEstimatedStorageSize());
             logger.info("last log timestamp: " + t.getLastLogTimeStamp());
