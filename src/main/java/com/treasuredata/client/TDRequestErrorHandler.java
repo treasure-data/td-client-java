@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -179,6 +180,10 @@ public class TDRequestErrorHandler
                     socketException instanceof NoRouteToHostException ||
                     socketException instanceof PortUnreachableException) {
                 // All known SocketException are retryable.
+                return new TDClientSocketException(socketException);
+            }
+            else if (Objects.equals(socketException.getMessage(), "Socket closed")) {
+                // okhttp can raise java.net.SocketException("Socket closed")
                 return new TDClientSocketException(socketException);
             }
             else {
