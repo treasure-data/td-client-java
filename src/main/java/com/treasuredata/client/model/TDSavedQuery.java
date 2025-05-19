@@ -72,8 +72,6 @@ public class TDSavedQuery
     private final String result;
     private final String nextTime;
     private final TDJob.EngineVersion engineVersion;
-    private final Integer executingUserId;
-    private final String description;
 
     public TDSavedQuery(
             @JsonProperty("id") String id,
@@ -89,9 +87,7 @@ public class TDSavedQuery
             @JsonProperty("retry_limit") int retryLimit,
             @JsonProperty("result") String result,
             @JsonProperty("next_time") String nextTime,
-            @JsonProperty("engine_version") TDJob.EngineVersion engineVersion,
-            @JsonProperty("executing_user_id") Integer executingUserId,
-            @JsonProperty("description") String description
+            @JsonProperty("engine_version") TDJob.EngineVersion engineVersion
     )
     {
         this.id = id;
@@ -108,8 +104,6 @@ public class TDSavedQuery
         this.result = result;
         this.nextTime = nextTime;
         this.engineVersion = engineVersion;
-        this.executingUserId = executingUserId;
-        this.description = description;
     }
 
     public String getId()
@@ -187,16 +181,6 @@ public class TDSavedQuery
         return engineVersion;
     }
 
-    public Integer getExecutingUserId()
-    {
-        return executingUserId;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
     @Override
     public String toString()
     {
@@ -214,8 +198,6 @@ public class TDSavedQuery
                 ", result='" + result + '\'' +
                 ", nextTime='" + nextTime + '\'' +
                 ", engineVersion='" + engineVersion + '\'' +
-                ", executingUserid=" + executingUserId +
-                ", description='" + description + '\'' +
                 '}';
     }
 }
