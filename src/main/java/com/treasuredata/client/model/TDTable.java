@@ -37,8 +37,6 @@ public class TDTable
     private final String expireDays;
     private final String createdAt;
     private final String updatedAt;
-    private final Integer userId;
-    private final String description;
 
     @JsonCreator
     public TDTable(
@@ -51,9 +49,7 @@ public class TDTable
             @JsonProperty("last_log_timestamp") String lastLogTimeStamp,
             @JsonProperty("expire_days") String expireDays,
             @JsonProperty("created_at") String createdAt,
-            @JsonProperty("updated_at") String updatedAt,
-            @JsonProperty("user_id") Integer userId,
-            @JsonProperty("description") String description
+            @JsonProperty("updated_at") String updatedAt
     )
     {
         this.id = id;
@@ -66,8 +62,6 @@ public class TDTable
         this.expireDays = expireDays;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.userId = userId;
-        this.description = description;
     }
 
     public String getId()
@@ -132,15 +126,6 @@ public class TDTable
         return updatedAt;
     }
 
-    public Integer getUserId()
-    {
-        return userId;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
     @Override
     public boolean equals(Object obj)
     {
