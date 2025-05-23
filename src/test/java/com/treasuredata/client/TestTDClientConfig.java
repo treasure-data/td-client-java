@@ -39,7 +39,7 @@ import static com.treasuredata.client.TDClientConfig.Type.API_ENDPOINT;
 import static com.treasuredata.client.TDClientConfig.Type.API_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECTION_POOL_SIZE;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECT_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.Type.PASSOWRD;
+import static com.treasuredata.client.TDClientConfig.Type.PASSWORD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_HOST;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PASSWORD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PORT;
@@ -80,7 +80,7 @@ public class TestTDClientConfig
         p.put(RETRY_MAX_INTERVAL_MILLIS, 10000);
         p.put(RETRY_MULTIPLIER, 1.5);
         p.put(USER, "xxxx");
-        p.put(PASSOWRD, "yyyy");
+        p.put(PASSWORD, "yyyy");
         m = Collections.unmodifiableMap(p);
 
         assertTrue(new HashSet<>(TDClientConfig.knownProperties()).containsAll(m.keySet()));
@@ -99,7 +99,7 @@ public class TestTDClientConfig
         assertEquals((double) m.get(RETRY_MULTIPLIER), config.retryMultiplier, 0.001);
         assertEquals(m.get(RETRY_LIMIT), config.retryLimit);
         assertEquals(m.get(USER), config.user.get());
-        assertEquals(m.get(PASSOWRD), config.password.get());
+        assertEquals(m.get(PASSWORD), config.password.get());
         assertFalse(config.proxy.isPresent());
     }
 
@@ -128,7 +128,7 @@ public class TestTDClientConfig
         b.setRetryMultiplier(Double.parseDouble(m.get(RETRY_MULTIPLIER).toString()));
         b.setRetryLimit(Integer.parseInt(m.get(RETRY_LIMIT).toString()));
         b.setUser(m.get(USER).toString());
-        b.setPassword(m.get(PASSOWRD).toString());
+        b.setPassword(m.get(PASSWORD).toString());
         TDClientConfig config2 = b.build().config;
         validate(config2);
     }

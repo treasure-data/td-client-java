@@ -52,7 +52,7 @@ public class TDClientConfig
     {
         APIKEY("td.client.apikey", "API key to access Treasure Data."),
         USER("td.client.user", "Account e-mail address (unnecessary if apikey is set)"),
-        PASSOWRD("td.client.password", "Account password (unnecessary if apikey is set"),
+        PASSWORD("td.client.password", "Account password (unnecessary if apikey is set)"),
         USESSL("td.client.usessl", "Use SSL encryption"),
         API_ENDPOINT("td.client.endpoint", "TD API end point (e.g., api.treasuredata.com"),
         API_PORT("td.client.port", "TD API port number"),
@@ -66,7 +66,7 @@ public class TDClientConfig
         PROXY_HOST("td.client.proxy.host", "Proxy host (e.g., myproxy.com)"),
         PROXY_PORT("td.client.proxy.port", "Proxy port number"),
         PROXY_USER("td.client.proxy.user", "Proxy user name"),
-        PROXY_PASSWORD("td.client.proxy.password", "Proxy paassword"),
+        PROXY_PASSWORD("td.client.proxy.password", "Proxy password"),
         PROXY_USESSL("td.client.proxy.usessl", "Use SSL for proxy");
 
         public final String key;
@@ -208,7 +208,7 @@ public class TDClientConfig
         saveProperty(p, Type.USESSL, useSSL);
         saveProperty(p, Type.APIKEY, apiKey);
         saveProperty(p, Type.USER, user);
-        saveProperty(p, Type.PASSOWRD, password);
+        saveProperty(p, Type.PASSWORD, password);
         if (proxy.isPresent()) {
             ProxyConfig pc = proxy.get();
             saveProperty(p, Type.PROXY_HOST, pc.getHost());

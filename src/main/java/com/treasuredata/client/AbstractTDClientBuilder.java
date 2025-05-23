@@ -34,7 +34,7 @@ import static com.treasuredata.client.TDClientConfig.Type.API_ENDPOINT;
 import static com.treasuredata.client.TDClientConfig.Type.API_PORT;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECTION_POOL_SIZE;
 import static com.treasuredata.client.TDClientConfig.Type.CONNECT_TIMEOUT_MILLIS;
-import static com.treasuredata.client.TDClientConfig.Type.PASSOWRD;
+import static com.treasuredata.client.TDClientConfig.Type.PASSWORD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_HOST;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PASSWORD;
 import static com.treasuredata.client.TDClientConfig.Type.PROXY_PORT;
@@ -188,7 +188,7 @@ public abstract class AbstractTDClientBuilder<ClientImpl, BuilderImpl extends Ab
         this.user = Stream.of(getConfigProperty(p, USER), getConfigProperty(p, "user"), user)
                 .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
                 .findFirst();
-        this.password = Stream.of(getConfigProperty(p, PASSOWRD), getConfigProperty(p, "password"), password)
+        this.password = Stream.of(getConfigProperty(p, PASSWORD), getConfigProperty(p, "password"), password)
                 .flatMap((opt) -> opt.map(Stream::of).orElseGet(Stream::empty))
                 .findFirst();
 
