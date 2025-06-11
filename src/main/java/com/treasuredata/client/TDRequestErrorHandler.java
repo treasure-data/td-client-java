@@ -182,8 +182,10 @@ public class TDRequestErrorHandler
                 // All known SocketException are retryable.
                 return new TDClientSocketException(socketException);
             }
-            else if (Objects.equals(socketException.getMessage(), "Socket closed")) {
-                // okhttp can raise java.net.SocketException("Socket closed")
+            else if (Objects.equals(socketException.getMessage(), "Broken pipe") ||
+                    Objects.equals(socketException.getMessage(), "Connection reset") ||
+                    Objects.equals(socketException.getMessage(), "Socket closed")) {
+                // The underlying socket implementation used by OkHttp may throw these exceptions.
                 return new TDClientSocketException(socketException);
             }
             else {
