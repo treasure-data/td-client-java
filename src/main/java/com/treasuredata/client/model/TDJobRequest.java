@@ -110,6 +110,36 @@ public class TDJobRequest
                 .createTDJobRequest();
     }
 
+    public static TDJobRequest newTrinoQuery(String database, String query)
+    {
+        return new TDJobRequestBuilder()
+                .setType(TDJob.Type.TRINO)
+                .setDatabase(database)
+                .setQuery(query)
+                .createTDJobRequest();
+    }
+
+    public static TDJobRequest newTrinoQuery(String database, String query, String resultOutput)
+    {
+        return new TDJobRequestBuilder()
+                .setType(TDJob.Type.TRINO)
+                .setDatabase(database)
+                .setQuery(query)
+                .setResultOutput(resultOutput)
+                .createTDJobRequest();
+    }
+
+    public static TDJobRequest newTrinoQuery(String database, String query, String resultOutput, String poolName)
+    {
+        return new TDJobRequestBuilder()
+                .setType(TDJob.Type.TRINO)
+                .setDatabase(database)
+                .setQuery(query)
+                .setResultOutput(resultOutput)
+                .setPoolName(poolName)
+                .createTDJobRequest();
+    }
+
     public static TDJobRequest newHiveQuery(String database, String query)
     {
         return new TDJobRequestBuilder()
