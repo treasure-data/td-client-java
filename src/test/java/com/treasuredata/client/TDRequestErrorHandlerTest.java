@@ -13,13 +13,16 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.SocketException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  *
@@ -95,5 +98,36 @@ public class TDRequestErrorHandlerTest
         Instant retryAfter = d.toInstant();
         Instant expected = Instant.ofEpochMilli(now).plusSeconds(120);
         assertThat(retryAfter, is(expected));
+    }
+
+    @Test
+    public void defaultExceptionResolverBrokenPipe()
+    {
+        SocketException socketException = new SocketException("Broken pipe");
+        TDClientException result = TDRequestErrorHandler.defaultExceptionResolver(socketException);
+        assertThat(result, instanceOf(TDClientSocketException.class));
+    }
+
+    @Test
+    public void defaultExceptionResolverConnectionReset()
+    {
+        SocketException socketException = new SocketException("Connection reset");
+        TDClientException result = TDRequestErrorHandler.defaultExceptionResolver(socketException);
+        assertThat(result, instanceOf(TDClientSocketException.class));
+    }
+
+    @Test
+    public void defaultExceptionResolverSocketClosed()
+    {
+        SocketException socketException = new SocketException("Socket closed");
+        TDClientException result = TDRequestErrorHandler.defaultExceptionResolver(socketException);
+        assertThat(result, instanceOf(TDClientSocketException.class));
+    }
+
+    @Test
+    public void defaultExceptionResolverUnknownSocketException()
+    {
+        SocketException socketException = new SocketException("Unknown socket error");
+        assertThrows(TDClientSocketException.class, () -> TDRequestErrorHandler.defaultExceptionResolver(socketException));
     }
 }
