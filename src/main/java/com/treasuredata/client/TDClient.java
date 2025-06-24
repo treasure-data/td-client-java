@@ -623,6 +623,18 @@ public class TDClient
     }
 
     @Override
+    public void updateExpire(String databaseName, String tableName, int expireDays)
+    {
+        requireNonNull(databaseName, "databaseName is null");
+        requireNonNull(tableName, "tableName is null");
+
+        doPost(buildUrl("/v3/table/update", databaseName, tableName),
+                Collections.singletonMap("expire_days", Integer.toString(expireDays)),
+                TDUpdateTableResult.class
+        );
+    }
+
+    @Override
     public String submit(TDJobRequest jobRequest)
             throws TDClientException
     {
