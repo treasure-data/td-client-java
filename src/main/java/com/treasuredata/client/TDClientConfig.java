@@ -66,7 +66,7 @@ public class TDClientConfig
         PROXY_HOST("td.client.proxy.host", "Proxy host (e.g., myproxy.com)"),
         PROXY_PORT("td.client.proxy.port", "Proxy port number"),
         PROXY_USER("td.client.proxy.user", "Proxy user name"),
-        PROXY_PASSWORD("td.client.proxy.password", "Proxy paassword"),
+        PROXY_PASSWORD("td.client.proxy.password", "Proxy password"),
         PROXY_USESSL("td.client.proxy.usessl", "Use SSL for proxy");
 
         public final String key;
