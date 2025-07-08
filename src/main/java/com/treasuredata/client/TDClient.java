@@ -749,9 +749,17 @@ public class TDClient
     public <Result> Result jobResult(String jobId, TDResultFormat format, Function<InputStream, Result> resultStreamHandler)
             throws TDClientException
     {
+        return jobResult(jobId, format, false, resultStreamHandler);
+    }
+
+    @Override
+    public <Result> Result jobResult(String jobId, TDResultFormat format, boolean includeHeader, Function<InputStream, Result> resultStreamHandler)
+            throws TDClientException
+    {
         TDApiRequest request = TDApiRequest.Builder
                 .GET(buildUrl("/v3/job/result", jobId))
                 .addQueryParam("format", format.getName())
+                .addQueryParam("header", Boolean.toString(includeHeader))
                 .build();
         return httpClient.<Result>call(request, apiKeyCache, resultStreamHandler);
     }

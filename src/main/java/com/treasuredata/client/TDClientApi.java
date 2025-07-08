@@ -281,6 +281,20 @@ public interface TDClientApi<ClientImpl>
      */
     <Result> Result jobResult(String jobId, TDResultFormat format, Function<InputStream, Result> resultStreamHandler);
 
+    /**
+     * Open an input stream to retrieve the job result.
+     * The input stream will be closed after this method
+     *
+     * You will receive an empty stream if the query has not finished yet.
+     *
+     * @param jobId
+     * @param format
+     * @param resultStreamHandler
+     * @param includeHeader
+     * @return
+     */
+    <Result> Result jobResult(String jobId, TDResultFormat format,  boolean includeHeader, Function<InputStream, Result> resultStreamHandler);
+
     // bulk import API
     List<TDBulkImportSession> listBulkImportSessions();
 
