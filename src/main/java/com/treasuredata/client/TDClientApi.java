@@ -229,6 +229,8 @@ public interface TDClientApi<ClientImpl>
 
     void appendTableSchema(String databaseName, String tableName, List<TDColumn> newSchema);
 
+    void updateExpire(String databaseName, String tableName, int expireDays);
+
     /**
      * Submit a new job request
      *
