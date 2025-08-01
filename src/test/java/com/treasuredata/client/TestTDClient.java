@@ -41,7 +41,6 @@ import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobRequestBuilder;
 import com.treasuredata.client.model.TDJobSummary;
-import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
@@ -999,85 +998,6 @@ public class TestTDClient
     {
         String dateStr = new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date());
         return prefix + "_" + dateStr;
-    }
-
-    @Test
-    public void partialDeleteTest()
-            throws Exception
-    {
-        String t = newTemporaryName("td_client_test");
-        try {
-            client.deleteTableIfExists(SAMPLE_DB, t);
-
-            String jobId = client.submit(TDJobRequest.newPrestoQuery(SAMPLE_DB,
-                    String.format("CREATE TABLE %s AS SELECT * FROM (VALUES TD_TIME_PARSE('2015-01-01', 'UTC'), TD_TIME_PARSE('2015-02-01', 'UTC')) as sample(time)", t, t)));
-
-            waitJobCompletion(jobId);
-
-            String before = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
-
-            assertTrue(before.contains("1420070400"));
-            assertTrue(before.contains("1422748800"));
-
-            // delete 2015-01-01 entry
-            try {
-                client.partialDelete(SAMPLE_DB, t, 1420070400, 1420070400 + 1);
-                fail("should not reach here");
-            }
-            catch (TDClientException e) {
-                assertEquals(TDClientException.ErrorType.INVALID_INPUT, e.getErrorType());
-            }
-            long from = 1420070400 - (1420070400 % 3600);
-            long to = from + 3600;
-            TDPartialDeleteJob partialDeleteJob = client.partialDelete(SAMPLE_DB, t, from, to);
-            logger.debug("partial delete job: " + partialDeleteJob);
-            assertEquals(from, partialDeleteJob.getFrom());
-            assertEquals(to, partialDeleteJob.getTo());
-            assertEquals(SAMPLE_DB, partialDeleteJob.getDatabase());
-            assertEquals(t, partialDeleteJob.getTable());
-
-            waitJobCompletion(partialDeleteJob.getJobId());
-
-            String after = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
-            assertFalse(after.contains("1420070400"));
-            assertTrue(after.contains("1422748800"));
-        }
-        finally {
-            client.deleteTableIfExists(SAMPLE_DB, t);
-        }
-    }
-
-    @Test
-    public void partialDeleteWithDomainKeyTest()
-            throws Exception
-    {
-        String domainKey = randomDomainKey();
-
-        String t = newTemporaryName("td_client_test");
-        try {
-            client.deleteTableIfExists(SAMPLE_DB, t);
-
-            String jobId = client.submit(TDJobRequest.newPrestoQuery(SAMPLE_DB,
-                    String.format("CREATE TABLE %s AS SELECT * FROM (VALUES TD_TIME_PARSE('2015-01-01', 'UTC'), TD_TIME_PARSE('2015-02-01', 'UTC')) as sample(time)", t, t)));
-
-            waitJobCompletion(jobId);
-
-            int from = 1420070400;
-            int to = from + 3600;
-
-            TDPartialDeleteJob deleteJob = client.partialDelete(SAMPLE_DB, t, from, to, domainKey);
-
-            try {
-                client.partialDelete(SAMPLE_DB, t, from, to, domainKey);
-                fail("Expected " + TDClientHttpConflictException.class.getName());
-            }
-            catch (TDClientHttpConflictException e) {
-                assertThat(e.getConflictsWith(), is(Optional.of(deleteJob.getJobId())));
-            }
-        }
-        finally {
-            client.deleteTableIfExists(SAMPLE_DB, t);
-        }
     }
 
     @Test
