@@ -43,7 +43,6 @@ import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSubmitResult;
 import com.treasuredata.client.model.TDJobSummary;
-import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
@@ -562,33 +561,6 @@ public class TDClient
         catch (TDClientHttpNotFoundException e) {
             // This will be thrown the table does not exists or Nginx calls this API request twice
         }
-    }
-
-    @Override
-    public TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to)
-            throws TDClientException
-    {
-        return partialDelete(databaseName, tableName, from, to, null);
-    }
-
-    @Override
-    public TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to, String domainKey)
-            throws TDClientException
-    {
-        if ((from % 3600 != 0) || (to % 3600 != 0)) {
-            throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, String.format("from/to value must be a multiple of 3600: [%s, %s)", from, to));
-        }
-
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("from", Long.toString(from));
-        queryParams.put("to", Long.toString(to));
-
-        if (domainKey != null) {
-            queryParams.put("domain_key", domainKey);
-        }
-
-        TDPartialDeleteJob job = doPost(buildUrl("/v3/table/partialdelete", databaseName, tableName), Collections.unmodifiableMap(queryParams), TDPartialDeleteJob.class);
-        return job;
     }
 
     @Override
