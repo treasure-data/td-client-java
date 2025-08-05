@@ -33,7 +33,6 @@ import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
-import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
@@ -214,10 +213,6 @@ public interface TDClientApi<ClientImpl>
     void deleteTable(String databaseName, String tableName);
 
     void deleteTableIfExists(String databaseName, String tableName);
-
-    TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to);
-
-    TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to, String domainKey);
 
     void swapTables(String databaseName, String tableName1, String tableName2);
 
