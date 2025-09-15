@@ -72,7 +72,7 @@
     <okhttp.version>3.14.9</okhttp.version>
     <hamcrest.version>2.2</hamcrest.version>
 
-    <surefire.version>3.3.0</surefire.version>
+    <surefire.version>3.5.4</surefire.version>
     <javadoc-plugin.version>3.7.0</javadoc-plugin.version>
   </properties>
 
