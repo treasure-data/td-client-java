@@ -1,4 +1,4 @@
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/treasure-data/td-client-java/tree/master.svg?style=svg&circle-token=18039f1bcb525695f8f863d9786592c3dacf4541)](https://dl.circleci.com/status-badge/redirect/gh/treasure-data/td-client-java/tree/master)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/treasure-data/td-client-java/tree/master.svg?style=svg&circle-token=18039f1bcb525695f8f863d9786592c3dacf4541)](https://dl.circleci.com/status-badge/redirect/gh/treasure-data/td-client-java/tree/master) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/treasure-data/td-client-java)
 
 # td-client for java
 
