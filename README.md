@@ -1,4 +1,4 @@
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/treasure-data/td-client-java/tree/master.svg?style=svg&circle-token=18039f1bcb525695f8f863d9786592c3dacf4541)](https://dl.circleci.com/status-badge/redirect/gh/treasure-data/td-client-java/tree/master)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/treasure-data/td-client-java/tree/master.svg?style=svg&circle-token=18039f1bcb525695f8f863d9786592c3dacf4541)](https://dl.circleci.com/status-badge/redirect/gh/treasure-data/td-client-java/tree/master) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/treasure-data/td-client-java)
 
 # td-client for java
 
@@ -23,7 +23,7 @@ For the information of the older versions, see <https://github.com/treasure-data
 
 ### For Maven Users
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.treasuredata.client/td-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.treasuredata.client/td-client/)
+[![Maven Central Version](https://img.shields.io/maven-central/v/com.treasuredata.client/td-client)](https://central.sonatype.com/artifact/com.treasuredata.client/td-client)
 [![javadoc](https://javadoc.io/badge2/com.treasuredata.client/td-client/javadoc.svg)](https://javadoc.io/doc/com.treasuredata.client/td-client)
 
 Use the following dependency settings:
