@@ -940,6 +940,47 @@ public class TestTDClient
     }
 
     @Test
+    public void updateExpireTest()
+            throws Exception
+    {
+        String t = newTemporaryName("expire_test");
+
+        try {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+            client.createTableIfNotExists(SAMPLE_DB, t);
+
+            // Test updating expire days
+            int expireDays = 30;
+            client.updateExpire(SAMPLE_DB, t, expireDays);
+
+            // Verify the expire days were updated
+            TDTable updatedTable = findTable(SAMPLE_DB, t).get();
+            assertEquals(Integer.toString(expireDays), updatedTable.getExpireDays());
+
+            // Test updating to different expire days
+            int newExpireDays = 60;
+            client.updateExpire(SAMPLE_DB, t, newExpireDays);
+
+            // Verify the expire days were updated again
+            updatedTable = findTable(SAMPLE_DB, t).get();
+            assertEquals(Integer.toString(newExpireDays), updatedTable.getExpireDays());
+
+            // Test error case - table doesn't exist
+            try {
+                client.updateExpire(SAMPLE_DB, "nonexistent_table", 30);
+                fail("should not reach here");
+            }
+            catch (TDClientHttpNotFoundException e) {
+                // OK
+                assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
+            }
+        }
+        finally {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+        }
+    }
+
+    @Test
     public void createTableWithoutIdempotentKey()
             throws Exception
     {
