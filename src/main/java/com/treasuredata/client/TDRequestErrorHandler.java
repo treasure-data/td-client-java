@@ -285,7 +285,7 @@ public class TDRequestErrorHandler
             }
         }
         catch (IOException e) {
-            logger.warn("Failed to parse the error response {}: {}\n{}", response.request().url(), content.orElse("[empty]"), e.getMessage());
+            logger.warn("Failed to parse the error response {}: {}\n{}", response.uri(), content.orElse("[empty]"), e.getMessage());
         }
         return Optional.empty();
     }

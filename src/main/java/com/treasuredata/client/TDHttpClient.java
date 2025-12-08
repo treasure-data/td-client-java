@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.collect.Multimap;
-import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -194,9 +193,8 @@ public class TDHttpClient
 
     public void close()
     {
-        // Cleanup the internal thread manager and connections
-        httpClient.dispatcher().executorService().shutdown();
-        httpClient.connectionPool().evictAll();
+        // JDK HTTP client handles cleanup automatically
+        // No explicit cleanup needed
     }
 
     private static final ThreadLocal<SimpleDateFormat> RFC2822_FORMAT =
@@ -260,26 +258,26 @@ public class TDHttpClient
             joiner.add(s);
         }
         String userAgent = joiner.toString();
-        Request.Builder request =
-                new Request.Builder()
-                        .url(requestUri)
-                        .header(USER_AGENT, userAgent)
-                        .header(DATE, dateHeader);
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create(requestUri))
+                .header(USER_AGENT, userAgent)
+                .header(DATE, dateHeader)
+                .timeout(Duration.ofMillis(config.readTimeoutMillis));
 
-        request = setTDAuthHeaders(request, dateHeader);
+        requestBuilder = setTDAuthHeaders(requestBuilder, dateHeader);
 
         // Set other headers
         for (Map.Entry<String, Collection<String>> e : headers.entrySet()) {
             if (!e.getKey().equals(USER_AGENT)) {
                 for (String v : e.getValue()) {
-                    request = request.addHeader(e.getKey(), v);
+                    requestBuilder = requestBuilder.header(e.getKey(), v);
                 }
             }
         }
         for (Map.Entry<String, Collection<String>> entry : apiRequest.getAllHeaders().entrySet()) {
             String k = entry.getKey();
             for (String v : entry.getValue()) {
-                request = request.addHeader(k, v);
+                requestBuilder = requestBuilder.header(k, v);
             }
         }
 
@@ -295,77 +293,67 @@ public class TDHttpClient
             else {
                 auth = apiKey.get();
             }
-            request = request.header(AUTHORIZATION, auth);
+            requestBuilder = requestBuilder.header(AUTHORIZATION, auth);
         }
 
-        // Submit method specific headers
+        // Submit method specific headers and build request
         switch (apiRequest.getMethod()) {
             case GET:
-                request = request.get();
-                break;
+                return requestBuilder.GET().build();
             case DELETE:
-                request = request.delete();
-                break;
+                return requestBuilder.DELETE().build();
             case POST:
                 if (apiRequest.getPostJson().isPresent()) {
-                    request = request.post(createRequestBodyWithoutCharset(mediaTypeJson, apiRequest.getPostJson().get()));
+                    requestBuilder = requestBuilder.header("Content-Type", CONTENT_TYPE_JSON);
+                    return requestBuilder.POST(HttpRequest.BodyPublishers.ofString(apiRequest.getPostJson().get())).build();
                 }
                 else if (queryStr.length() > 0) {
-                    request = request.post(createRequestBodyWithoutCharset(mediaTypeXwwwFormUrlencoded, queryStr));
+                    requestBuilder = requestBuilder.header("Content-Type", CONTENT_TYPE_FORM_URLENCODED);
+                    return requestBuilder.POST(HttpRequest.BodyPublishers.ofString(queryStr)).build();
                 }
                 else {
-                    // We should set content-length explicitly for an empty post
-                    request = request
-                            .header(CONTENT_LENGTH, "0")
-                            .post(RequestBody.create(null, ""));
+                    // Empty post
+                    requestBuilder = requestBuilder.header(CONTENT_LENGTH, "0");
+                    return requestBuilder.POST(HttpRequest.BodyPublishers.noBody()).build();
                 }
-                break;
             case PUT:
                 if (apiRequest.getPutFile().isPresent()) {
                     try {
-                        request = request.put(RequestBody.create(mediaTypeOctetStream, apiRequest.getPutFile().get()));
+                        requestBuilder = requestBuilder.header("Content-Type", CONTENT_TYPE_OCTET_STREAM);
+                        return requestBuilder.PUT(HttpRequest.BodyPublishers.ofFile(apiRequest.getPutFile().get().toPath())).build();
                     }
-                    catch (NullPointerException e) {
+                    catch (Exception e) {
                         throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, "Failed to read input file: " + apiRequest.getPutFile().get());
                     }
                 }
                 else if (apiRequest.getContent().isPresent()) {
                     try {
-                        request = request.put(RequestBody.create(mediaTypeOctetStream, apiRequest.getContent().get(), apiRequest.getContentOffset(), apiRequest.getContentLength()));
+                        requestBuilder = requestBuilder.header("Content-Type", CONTENT_TYPE_OCTET_STREAM);
+                        byte[] content = apiRequest.getContent().get();
+                        int offset = apiRequest.getContentOffset();
+                        int length = apiRequest.getContentLength();
+                        byte[] slicedContent = new byte[length];
+                        System.arraycopy(content, offset, slicedContent, 0, length);
+                        return requestBuilder.PUT(HttpRequest.BodyPublishers.ofByteArray(slicedContent)).build();
                     }
                     catch (Throwable e) {
                         throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, "Failed to get Content");
                     }
                 }
                 else if (queryStr.length() > 0) {
-                    request = request.put(createRequestBodyWithoutCharset(mediaTypeXwwwFormUrlencoded, queryStr));
+                    requestBuilder = requestBuilder.header("Content-Type", CONTENT_TYPE_FORM_URLENCODED);
+                    return requestBuilder.PUT(HttpRequest.BodyPublishers.ofString(queryStr)).build();
                 }
                 else {
-                    // We should set content-length explicitly for an empty put
-                    request = request
-                            .header(CONTENT_LENGTH, "0")
-                            .put(RequestBody.create(null, ""));
+                    // Empty put
+                    requestBuilder = requestBuilder.header(CONTENT_LENGTH, "0");
+                    return requestBuilder.PUT(HttpRequest.BodyPublishers.noBody()).build();
                 }
-                break;
+            default:
+                throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, "Unsupported HTTP method: " + apiRequest.getMethod());
         }
-
-        // OkHttp will follow redirect (302)
-
-        return request.build();
     }
 
-    private static RequestBody createRequestBodyWithoutCharset(MediaType contentType, String content)
-    {
-        Charset charset = StandardCharsets.UTF_8;
-        if (contentType != null) {
-            charset = contentType.charset();
-            if (charset == null) {
-                charset = StandardCharsets.UTF_8;
-            }
-        }
-        byte[] bytes = content.getBytes(charset);
-        return RequestBody.create(contentType, bytes);
-    }
 
     private static boolean isNakedTD1Key(String s)
     {
