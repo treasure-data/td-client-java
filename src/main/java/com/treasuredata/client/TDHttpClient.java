@@ -32,18 +32,15 @@ import com.treasuredata.client.model.JsonCollectionRootName;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.HttpTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -57,7 +54,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -122,9 +118,11 @@ public class TDHttpClient
                 // Set up proxy authenticator using system properties for JDK HTTP client
                 System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
                 System.setProperty("jdk.http.auth.proxying.disabledSchemes", "");
-                java.net.Authenticator authenticator = new java.net.Authenticator() {
+                java.net.Authenticator authenticator = new java.net.Authenticator()
+                {
                     @Override
-                    protected java.net.PasswordAuthentication getPasswordAuthentication() {
+                    protected java.net.PasswordAuthentication getPasswordAuthentication()
+                    {
                         if (getRequestorType() == RequestorType.PROXY) {
                             return new java.net.PasswordAuthentication(
                                     proxyConfig.getUser().orElse(""),
@@ -354,7 +352,6 @@ public class TDHttpClient
         }
     }
 
-
     private static boolean isNakedTD1Key(String s)
     {
         return NAKED_TD1_KEY_PATTERN.matcher(s).matches();
@@ -421,33 +418,30 @@ public class TDHttpClient
 
             try {
                 // Prepare http request
-                Request request = prepareRequest(context.apiRequest, context.apiKeyCache);
-                // Apply request customization
-                request = handler.prepareRequest(request);
+                HttpRequest request = prepareRequest(context.apiRequest, context.apiKeyCache);
 
                 // Get response
-                try (Response response = handler.send(httpClient, request)) {
-                    int code = response.code();
-                    // Retry upon proxy authentication request
-                    // This is a workaround for this issue: https://github.com/square/okhttp/issues/3111
-                    if (code == HttpStatus.TEMPORARY_REDIRECT_307 || code == 308) {
-                        String location = response.header(LOCATION);
-                        if (location != null) {
-                            context = context.withTDApiRequest(context.apiRequest.withUri(location));
-                            return submitRequest(context, handler);
-                        }
+                HttpResponse<String> response = handler.send(httpClient, request);
+                int code = response.statusCode();
+                // Retry upon proxy authentication request
+                // This is a workaround for this issue: https://github.com/square/okhttp/issues/3111
+                if (code == HttpStatus.TEMPORARY_REDIRECT_307 || code == 308) {
+                    String location = response.headers().firstValue(LOCATION).orElse(null);
+                    if (location != null) {
+                        context = context.withTDApiRequest(context.apiRequest.withUri(location));
+                        return submitRequest(context, handler);
                     }
+                }
 
-                    ResponseContext responseContext = new ResponseContext(context.apiRequest, response);
-                    if (handler.isSuccess(responseContext)) {
-                        // 2xx success
-                        logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), context.apiRequest.getPath()));
-                        return handler.onSuccess(response);
-                    }
-                    else {
-                        // This may directly throw an TDClientException if we know this is unrecoverable error.
-                        context = context.withRootCause(handler.resolveHttpResponseError(responseContext));
-                    }
+                ResponseContext responseContext = new ResponseContext(context.apiRequest, response);
+                if (handler.isSuccess(responseContext)) {
+                    // 2xx success
+                    logger.debug(String.format("[%d:%s] API request to %s has succeeded", code, HttpStatus.getMessage(code), context.apiRequest.getPath()));
+                    return handler.onSuccess(response);
+                }
+                else {
+                    // This may directly throw an TDClientException if we know this is unrecoverable error.
+                    context = context.withRootCause(handler.resolveHttpResponseError(responseContext));
                 }
             }
             catch (Exception e) {
@@ -524,20 +518,6 @@ public class TDHttpClient
             logger.trace("response:\n{}", content);
         }
         return content;
-    }
-
-    /**
-     * @param apiRequest
-     * @param apiKeyCache
-     * @param contentStreamHandler
-     * @param <Result>
-     * @return
-     * @deprecated Use {@link #call(TDApiRequest, Optional, Function)} instead.
-     */
-    @Deprecated
-    public <Result> Result call(TDApiRequest apiRequest, Optional<String> apiKeyCache, final com.google.common.base.Function<InputStream, Result> contentStreamHandler)
-    {
-        return submitRequest(apiRequest, apiKeyCache, newByteStreamHandler(contentStreamHandler));
     }
 
     /**

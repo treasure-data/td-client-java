@@ -259,11 +259,6 @@ public interface TDClientApi<ClientImpl>
      * @param resultStreamHandler
      * @return
      */
-    @Deprecated
-    default <Result> Result jobResult(String jobId, TDResultFormat format, com.google.common.base.Function<InputStream, Result> resultStreamHandler)
-    {
-        return this.jobResult(jobId, format, (Function<InputStream, Result>) resultStreamHandler::apply);
-    }
 
     /**
      * Open an input stream to retrieve the job result.
@@ -318,15 +313,6 @@ public interface TDClientApi<ClientImpl>
     void commitBulkImportSession(String sessionName);
 
     void deleteBulkImportSession(String sessionName);
-
-    /**
-     * @deprecated Use {@link #getBulkImportErrorRecords(String, Function)} instead.
-     */
-    @Deprecated
-    default <Result> Result getBulkImportErrorRecords(String sessionName, com.google.common.base.Function<InputStream, Result> resultStreamHandler)
-    {
-        return this.getBulkImportErrorRecords(sessionName, (Function<InputStream, Result>) resultStreamHandler::apply);
-    }
 
     <Result> Result getBulkImportErrorRecords(String sessionName, Function<InputStream, Result> resultStreamHandler);
 

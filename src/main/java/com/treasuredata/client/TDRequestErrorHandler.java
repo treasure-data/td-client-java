@@ -263,17 +263,7 @@ public class TDRequestErrorHandler
     {
         Optional<String> content = Optional.empty();
         try {
-            try {
-                content = Optional.of(response.body());
-            }
-            catch (SocketTimeoutException e) {
-                // http status was error or not found but failed to get body content
-                // handler by status will process further
-                return Optional.of(new TDApiErrorMessage(e.getClass().getSimpleName(), e.getMessage(), "error"));
-            }
-            catch (IOException e) {
-                throw new TDClientException(INVALID_JSON_RESPONSE, e);
-            }
+            content = Optional.of(response.body());
 
             if (content.isPresent() && content.get().length() > 0 && content.get().charAt(0) == '{') {
                 // Error message from TD API
