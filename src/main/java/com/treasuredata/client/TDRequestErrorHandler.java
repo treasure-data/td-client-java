@@ -209,6 +209,20 @@ public class TDRequestErrorHandler
             Date retryAfter = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(1));
             return new TDClientHttpTooManyRequestsException(e.getMessage(), retryAfter);
         }
+        else if (e instanceof IOException) {
+            IOException ioException = (IOException) e;
+            String message = ioException.getMessage();
+
+            // Handle JDK HTTP client proxy authentication failures
+            if (message != null && (message.contains("WWW-Authenticate header missing") ||
+                                   message.contains("too many authentication attempts"))) {
+                throw new TDClientHttpException(PROXY_AUTHENTICATION_FAILURE, message, 407, null);
+            }
+
+            // For other IOExceptions, treat as unknown and throw as processing exception
+            logger.warn("unknown type IOException: " + e.getClass(), e);
+            throw new TDClientProcessingException(e);
+        }
         else if (e.getCause() != null && Exception.class.isAssignableFrom(e.getCause().getClass())) {
             return defaultExceptionResolver((Exception) e.getCause());
         }
