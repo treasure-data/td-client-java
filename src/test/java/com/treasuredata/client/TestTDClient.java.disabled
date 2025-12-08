@@ -51,9 +51,8 @@ import com.treasuredata.client.model.TDTable;
 import com.treasuredata.client.model.TDTableDistribution;
 import com.treasuredata.client.model.TDUser;
 import com.treasuredata.client.model.TDUserList;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
+import com.treasuredata.client.MockHttpServer.MockResponse;
+import com.treasuredata.client.MockHttpServer.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -133,7 +132,7 @@ public class TestTDClient
 
     private TDClient client;
 
-    private MockWebServer server;
+    private MockHttpServer server;
 
     private List<String> savedQueries = new ArrayList<>();
 
@@ -142,7 +141,7 @@ public class TestTDClient
             throws Exception
     {
         client = TDClient.newClient();
-        server = new MockWebServer();
+        server = new MockHttpServer();
     }
 
     @AfterEach
@@ -150,7 +149,7 @@ public class TestTDClient
             throws Exception
     {
         try (TDClient client1 = client;
-                MockWebServer unused = server) {
+                MockHttpServer unused = server) {
             for (String name : savedQueries) {
                 try {
                     client1.deleteSavedQuery(name);

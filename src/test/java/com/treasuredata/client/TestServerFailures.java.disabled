@@ -18,10 +18,8 @@
  */
 package com.treasuredata.client;
 
-import okhttp3.mockwebserver.Dispatcher;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
+import com.treasuredata.client.MockHttpServer.MockResponse;
+import com.treasuredata.client.MockHttpServer.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +53,7 @@ public class TestServerFailures
 
     private static Logger logger = LoggerFactory.getLogger(TestServerFailures.class);
 
-    private MockWebServer server;
+    private MockHttpServer server;
     private int port;
 
     @BeforeEach
@@ -63,7 +61,7 @@ public class TestServerFailures
             throws Exception
     {
         port = TestProxyAccess.findAvailablePort();
-        server = new MockWebServer();
+        server = new MockHttpServer();
     }
 
     @AfterEach
