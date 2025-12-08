@@ -1,8 +1,8 @@
 package com.treasuredata.client;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 import java.io.IOException;
 
@@ -19,9 +19,9 @@ public interface TDHttpRequestHandler<Result>
     static class ResponseContext
     {
         public final TDApiRequest apiRequest;
-        public final Response response;
+        public final HttpResponse<String> response;
 
-        public ResponseContext(TDApiRequest apiRequest, Response response)
+        public ResponseContext(TDApiRequest apiRequest, HttpResponse<String> response)
         {
             this.apiRequest = apiRequest;
             this.response = response;
@@ -31,10 +31,10 @@ public interface TDHttpRequestHandler<Result>
     /**
      * Set additional request parameters here.
      */
-    default Request prepareRequest(Request request)
+    default HttpRequest.Builder prepareRequest(HttpRequest.Builder requestBuilder)
     {
         // Do nothing by default
-        return request;
+        return requestBuilder;
     }
 
     /**
@@ -43,24 +43,25 @@ public interface TDHttpRequestHandler<Result>
     default boolean isSuccess(ResponseContext responseContext)
     {
         // Just check 200 <= code < 300 range
-        return responseContext.response.isSuccessful();
+        int statusCode = responseContext.response.statusCode();
+        return statusCode >= 200 && statusCode < 300;
     }
 
     /**
      * Send the request through the given client.
      * @throws IOException
      */
-    default Response send(OkHttpClient httpClient, Request request)
-            throws IOException
+    default HttpResponse<String> send(HttpClient httpClient, HttpRequest request)
+            throws IOException, InterruptedException
     {
-        return httpClient.newCall(request).execute();
+        return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     /**
      * Handle the response
      * @throws Exception
      */
-    Result onSuccess(Response response)
+    Result onSuccess(HttpResponse<String> response)
             throws Exception;
 
     /**
@@ -95,13 +96,13 @@ public interface TDHttpRequestHandler<Result>
      * @param response
      * @return returned content
      */
-    default byte[] onError(Response response)
+    default byte[] onError(HttpResponse<String> response)
             throws IOException
     {
         try {
-            return response.body().bytes();
+            return response.body().getBytes();
         }
-        catch (IOException e) {
+        catch (Exception e) {
             throw new TDClientException(INVALID_JSON_RESPONSE, e);
         }
     }

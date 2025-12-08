@@ -1,8 +1,8 @@
 package com.treasuredata.client;
 
 import com.treasuredata.client.model.TDApiErrorMessage;
-import okhttp3.Response;
-import okhttp3.internal.http2.StreamResetException;
+import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,8 +102,8 @@ public class TDRequestErrorHandler
     public static TDClientException defaultHttpResponseErrorResolver(ResponseContext responseContext)
             throws TDClientException
     {
-        Response response = responseContext.response;
-        int code = response.code();
+        HttpResponse<String> response = responseContext.response;
+        int code = response.statusCode();
         long now = System.currentTimeMillis();
 
         Date retryAfter = parseRetryAfter(now, response);
@@ -204,8 +204,8 @@ public class TDRequestErrorHandler
                 return new TDClientSSLException(sslException);
             }
         }
-        else if (e instanceof StreamResetException) {
-            // okhttp 4.10.0 will throw 429 Too Many Requests and defaultHttpResponseErrorResolver will handle
+        else if (e instanceof HttpTimeoutException) {
+            // JDK HTTP client will throw HttpTimeoutException for timeouts
             // just retry after 1 secs but we could consider increasing it
             Date retryAfter = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(1));
             return new TDClientHttpTooManyRequestsException(e.getMessage(), retryAfter);
@@ -223,9 +223,9 @@ public class TDRequestErrorHandler
      * https://tools.ietf.org/html/rfc7231#section-7.1.3
      * Visible for testing.
      */
-    static Date parseRetryAfter(long now, Response response)
+    static Date parseRetryAfter(long now, HttpResponse<String> response)
     {
-        String retryAfter = response.header(RETRY_AFTER);
+        String retryAfter = response.headers().firstValue(RETRY_AFTER).orElse(null);
         if (retryAfter == null) {
             return null;
         }
@@ -259,12 +259,12 @@ public class TDRequestErrorHandler
         return String.valueOf(conflictsWith);
     }
 
-    public static Optional<TDApiErrorMessage> extractErrorResponse(Response response)
+    public static Optional<TDApiErrorMessage> extractErrorResponse(HttpResponse<String> response)
     {
         Optional<String> content = Optional.empty();
         try {
             try {
-                content = Optional.of(response.body().string());
+                content = Optional.of(response.body());
             }
             catch (SocketTimeoutException e) {
                 // http status was error or not found but failed to get body content

@@ -30,12 +30,10 @@ import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.google.common.collect.Multimap;
 import com.treasuredata.client.impl.ProxyAuthenticator;
 import com.treasuredata.client.model.JsonCollectionRootName;
-import okhttp3.ConnectionPool;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,9 +41,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,7 +95,7 @@ public class TDHttpClient
     private static final Pattern NAKED_TD1_KEY_PATTERN = Pattern.compile("^(?:[1-9][0-9]*/)?[a-f0-9]{40}$");
 
     protected final TDClientConfig config;
-    private final OkHttpClient httpClient;
+    private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
     /**
@@ -105,27 +107,38 @@ public class TDHttpClient
     {
         this.config = config;
 
-        // Prepare OkHttpClient
-        OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.connectTimeout(config.connectTimeoutMillis, TimeUnit.MILLISECONDS);
-        builder.readTimeout(config.readTimeoutMillis, TimeUnit.MILLISECONDS);
+        // Prepare JDK HttpClient
+        HttpClient.Builder builder = HttpClient.newBuilder();
+        builder.connectTimeout(Duration.ofMillis(config.connectTimeoutMillis));
 
         // Proxy configuration
         if (config.proxy.isPresent()) {
             final ProxyConfig proxyConfig = config.proxy.get();
             logger.trace("proxy configuration: " + proxyConfig);
-            // TODO Support https proxy
-            builder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyConfig.getHost(), proxyConfig.getPort())));
+
+            ProxySelector proxySelector = ProxySelector.of(new InetSocketAddress(proxyConfig.getHost(), proxyConfig.getPort()));
+            builder.proxy(proxySelector);
 
             if (proxyConfig.requireAuthentication()) {
-                builder.proxyAuthenticator(new ProxyAuthenticator(proxyConfig));
+                // Set up proxy authenticator using system properties for JDK HTTP client
+                System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
+                System.setProperty("jdk.http.auth.proxying.disabledSchemes", "");
+                java.net.Authenticator authenticator = new java.net.Authenticator() {
+                    @Override
+                    protected java.net.PasswordAuthentication getPasswordAuthentication() {
+                        if (getRequestorType() == RequestorType.PROXY) {
+                            return new java.net.PasswordAuthentication(
+                                    proxyConfig.getUser().orElse(""),
+                                    proxyConfig.getPassword().orElse("").toCharArray());
+                        }
+                        return null;
+                    }
+                };
+                builder.authenticator(authenticator);
             }
         }
-        // connection pool
-        ConnectionPool connectionPool = new ConnectionPool(config.connectionPoolSize, 5, TimeUnit.MINUTES);
-        builder.connectionPool(connectionPool);
 
-        // Build OkHttpClient
+        // Build HttpClient
         this.httpClient = builder.build();
         this.headers = config.headersV2;
 
@@ -138,7 +151,7 @@ public class TDHttpClient
         this(reference.config, reference.httpClient, reference.objectMapper, reference.headers);
     }
 
-    private TDHttpClient(TDClientConfig config, OkHttpClient httpClient, ObjectMapper objectMapper, Map<String, Collection<String>> headers)
+    private TDHttpClient(TDClientConfig config, HttpClient httpClient, ObjectMapper objectMapper, Map<String, Collection<String>> headers)
     {
         this.config = config;
         this.httpClient = httpClient;
@@ -196,10 +209,10 @@ public class TDHttpClient
                 }
             };
 
-    protected Request.Builder setTDAuthHeaders(Request.Builder request, String dateHeader)
+    protected HttpRequest.Builder setTDAuthHeaders(HttpRequest.Builder requestBuilder, String dateHeader)
     {
         // Do nothing
-        return request;
+        return requestBuilder;
     }
 
     /**
@@ -212,11 +225,12 @@ public class TDHttpClient
         return "td-client-java " + TDClient.getVersion();
     }
 
-    private static MediaType mediaTypeJson = MediaType.parse("application/json");
-    private static MediaType mediaTypeXwwwFormUrlencoded = MediaType.parse("application/x-www-form-urlencoded");
-    private static MediaType mediaTypeOctetStream = MediaType.parse("application/octet-stream");
+    private static final String CONTENT_TYPE_JSON = "application/json";
+    private static final String CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String CONTENT_TYPE_OCTET_STREAM = "application/octet-stream";
 
-    public Request prepareRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
+    public HttpRequest prepareRequest(TDApiRequest apiRequest, Optional<String> apiKeyCache)
+            throws URISyntaxException
     {
         String queryStr = "";
         String portStr = config.port.map((input) -> ":" + input).orElse("");

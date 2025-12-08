@@ -1,8 +1,8 @@
 package com.treasuredata.client;
 
-import okhttp3.ResponseBody;
-
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.http.HttpResponse;
 import java.util.function.Function;
 
 /**
@@ -14,9 +14,9 @@ public class TDHttpRequestHandlers
     {
     }
 
-    public static final TDHttpRequestHandler<String> stringContentHandler = response -> response.body().string();
+    public static final TDHttpRequestHandler<String> stringContentHandler = response -> response.body();
 
-    public static final TDHttpRequestHandler<byte[]> byteArrayContentHandler = response -> response.body().bytes();
+    public static final TDHttpRequestHandler<byte[]> byteArrayContentHandler = response -> response.body().getBytes();
 
     /**
      * @deprecated Use {@link #newByteStreamHandler(Function)} instead.
@@ -28,8 +28,8 @@ public class TDHttpRequestHandlers
     public static final <Result> TDHttpRequestHandler<Result> newByteStreamHandler(final com.google.common.base.Function<InputStream, Result> handler)
     {
         return response -> {
-            try (ResponseBody body = response.body()) {
-                return handler.apply(body.byteStream());
+            try (InputStream inputStream = new ByteArrayInputStream(response.body().getBytes())) {
+                return handler.apply(inputStream);
             }
         };
     }
@@ -37,8 +37,8 @@ public class TDHttpRequestHandlers
     public static final <Result> TDHttpRequestHandler<Result> newByteStreamHandler(final Function<InputStream, Result> handler)
     {
         return response -> {
-            try (ResponseBody body = response.body()) {
-                return handler.apply(body.byteStream());
+            try (InputStream inputStream = new ByteArrayInputStream(response.body().getBytes())) {
+                return handler.apply(inputStream);
             }
         };
     }
