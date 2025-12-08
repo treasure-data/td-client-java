@@ -9,7 +9,7 @@ With this client, you can:
  - retrieve query results
  - check the information of databases and tables
 
-Since td-client-java 0.8.0, it requires Java 1.8 or higher. For Java7, use td-client-java-0.7.x.
+Since td-client-java 2.0.0, it requires Java 17 or higher. For Java 8, use td-client-java-1.x series.
 
 td-client-java is licensed under Apache License Version 2.0.
 

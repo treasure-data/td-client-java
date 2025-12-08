@@ -2,6 +2,15 @@
 This page is an archive of old release.
 See the [releases page](https://github.com/treasure-data/td-client-java/releases) for the latest release notes.
 
+Release 2.0.0 - 2024-12-08
+ - BREAKING: Minimum Java version is now 17 (was Java 8)
+ - BREAKING: Replaced OkHttp with JDK HTTP client (built-in HTTP/2 support)
+ - BREAKING: Removed deprecated Guava Function methods, use java.util.function.Function
+ - Reduced dependencies: Removed OkHttp and Okio dependencies (~2MB reduction)
+ - Improved: Native proxy authentication using JDK authenticator
+ - Improved: Modern HTTP client with HTTP/2 support and reactive streams
+ - Migration: For Java 8 compatibility, use td-client-java 1.x series
+
 Release 1.0.0 - 2023-01-24
  - Upgrade to Guava 31.1
  - Breaking: Use Java Optional instead of Guava Optional
