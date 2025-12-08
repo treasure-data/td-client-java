@@ -3,12 +3,6 @@ orbs:
   maven: circleci/maven@1.4.0
 
 executors:
-  jdk8:
-    docker:
-      - image: cimg/openjdk:8.0
-  jdk11:
-    docker:
-      - image: cimg/openjdk:11.0
   jdk17:
     docker:
       - image: cimg/openjdk:17.0
@@ -24,10 +18,7 @@ jobs:
       - checkout
       - run:
           name: Sleep to avoid resource name conflict
-          command: |
-            if [[ $CIRCLE_JOB != "build-jdk8" ]]; then
-              sleep $((15 + RANDOM % 15))
-            fi
+          command: sleep $((15 + RANDOM % 15))
       - maven/with_cache:
           steps:
             - run:
@@ -43,4 +34,4 @@ workflows:
       - build:
           matrix:
             parameters:
-              jdk: [jdk8, jdk17]
+              jdk: [jdk17]

@@ -5,7 +5,7 @@
   <artifactId>td-client</artifactId>
   <name>Treasure Data Client for Java</name>
   <description>Treasure Data Client for Java.</description>
-  <version>1.2.0</version>
+  <version>2.0.0</version>
   <packaging>jar</packaging>
   <url>https://github.com/treasure-data/td-client-java</url>
 
@@ -55,7 +55,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.build.targetJdk>1.8</project.build.targetJdk>
+    <project.build.targetJdk>17</project.build.targetJdk>
     <project.build.jvmsize>512m</project.build.jvmsize>
 
     <project.check.skip-all>false</project.check.skip-all>
@@ -577,14 +577,14 @@
         </plugins>
       </build>
     </profile>
-    <!-- Disable linting for Java8 -->
+    <!-- Javadoc configuration for JDK 17 -->
     <profile>
-      <id>doclint-java8-disable</id>
+      <id>javadoc-jdk17</id>
       <activation>
-        <jdk>[1.8,)</jdk>
+        <jdk>[17,)</jdk>
       </activation>
       <properties>
-        <javadoc.opts>-Xdoclint:none</javadoc.opts>
+        <javadoc.opts>-Xdoclint:all</javadoc.opts>
       </properties>
     </profile>
   </profiles>
