@@ -31,7 +31,6 @@ import java.util.concurrent.TimeoutException;
 
 import static com.treasuredata.client.TDClientException.ErrorType.CLIENT_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.INVALID_INPUT;
-import static com.treasuredata.client.TDClientException.ErrorType.INVALID_JSON_RESPONSE;
 import static com.treasuredata.client.TDClientException.ErrorType.PROXY_AUTHENTICATION_FAILURE;
 import static com.treasuredata.client.TDClientException.ErrorType.SERVER_ERROR;
 import static com.treasuredata.client.TDClientException.ErrorType.UNEXPECTED_RESPONSE_CODE;
