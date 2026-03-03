@@ -22,6 +22,12 @@ jobs:
     executor: << parameters.jdk >>
     steps:
       - checkout
+      - run:
+          name: Sleep to avoid resource name conflict
+          command: |
+            if [[ $CIRCLE_JOB != "build-jdk8" ]]; then
+              sleep $((15 + RANDOM % 15))
+            fi
       - maven/with_cache:
           steps:
             - run:

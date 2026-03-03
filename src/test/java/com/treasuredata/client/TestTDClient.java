@@ -41,7 +41,6 @@ import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobRequestBuilder;
 import com.treasuredata.client.model.TDJobSummary;
-import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
@@ -941,6 +940,47 @@ public class TestTDClient
     }
 
     @Test
+    public void updateExpireTest()
+            throws Exception
+    {
+        String t = newTemporaryName("expire_test");
+
+        try {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+            client.createTableIfNotExists(SAMPLE_DB, t);
+
+            // Test updating expire days
+            int expireDays = 30;
+            client.updateExpire(SAMPLE_DB, t, expireDays);
+
+            // Verify the expire days were updated
+            TDTable updatedTable = findTable(SAMPLE_DB, t).get();
+            assertEquals(Integer.toString(expireDays), updatedTable.getExpireDays());
+
+            // Test updating to different expire days
+            int newExpireDays = 60;
+            client.updateExpire(SAMPLE_DB, t, newExpireDays);
+
+            // Verify the expire days were updated again
+            updatedTable = findTable(SAMPLE_DB, t).get();
+            assertEquals(Integer.toString(newExpireDays), updatedTable.getExpireDays());
+
+            // Test error case - table doesn't exist
+            try {
+                client.updateExpire(SAMPLE_DB, "nonexistent_table", 30);
+                fail("should not reach here");
+            }
+            catch (TDClientHttpNotFoundException e) {
+                // OK
+                assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
+            }
+        }
+        finally {
+            client.deleteTableIfExists(SAMPLE_DB, t);
+        }
+    }
+
+    @Test
     public void createTableWithoutIdempotentKey()
             throws Exception
     {
@@ -999,85 +1039,6 @@ public class TestTDClient
     {
         String dateStr = new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date());
         return prefix + "_" + dateStr;
-    }
-
-    @Test
-    public void partialDeleteTest()
-            throws Exception
-    {
-        String t = newTemporaryName("td_client_test");
-        try {
-            client.deleteTableIfExists(SAMPLE_DB, t);
-
-            String jobId = client.submit(TDJobRequest.newPrestoQuery(SAMPLE_DB,
-                    String.format("CREATE TABLE %s AS SELECT * FROM (VALUES TD_TIME_PARSE('2015-01-01', 'UTC'), TD_TIME_PARSE('2015-02-01', 'UTC')) as sample(time)", t, t)));
-
-            waitJobCompletion(jobId);
-
-            String before = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
-
-            assertTrue(before.contains("1420070400"));
-            assertTrue(before.contains("1422748800"));
-
-            // delete 2015-01-01 entry
-            try {
-                client.partialDelete(SAMPLE_DB, t, 1420070400, 1420070400 + 1);
-                fail("should not reach here");
-            }
-            catch (TDClientException e) {
-                assertEquals(TDClientException.ErrorType.INVALID_INPUT, e.getErrorType());
-            }
-            long from = 1420070400 - (1420070400 % 3600);
-            long to = from + 3600;
-            TDPartialDeleteJob partialDeleteJob = client.partialDelete(SAMPLE_DB, t, from, to);
-            logger.debug("partial delete job: " + partialDeleteJob);
-            assertEquals(from, partialDeleteJob.getFrom());
-            assertEquals(to, partialDeleteJob.getTo());
-            assertEquals(SAMPLE_DB, partialDeleteJob.getDatabase());
-            assertEquals(t, partialDeleteJob.getTable());
-
-            waitJobCompletion(partialDeleteJob.getJobId());
-
-            String after = queryResult(SAMPLE_DB, String.format("SELECT * FROM %s", t));
-            assertFalse(after.contains("1420070400"));
-            assertTrue(after.contains("1422748800"));
-        }
-        finally {
-            client.deleteTableIfExists(SAMPLE_DB, t);
-        }
-    }
-
-    @Test
-    public void partialDeleteWithDomainKeyTest()
-            throws Exception
-    {
-        String domainKey = randomDomainKey();
-
-        String t = newTemporaryName("td_client_test");
-        try {
-            client.deleteTableIfExists(SAMPLE_DB, t);
-
-            String jobId = client.submit(TDJobRequest.newPrestoQuery(SAMPLE_DB,
-                    String.format("CREATE TABLE %s AS SELECT * FROM (VALUES TD_TIME_PARSE('2015-01-01', 'UTC'), TD_TIME_PARSE('2015-02-01', 'UTC')) as sample(time)", t, t)));
-
-            waitJobCompletion(jobId);
-
-            int from = 1420070400;
-            int to = from + 3600;
-
-            TDPartialDeleteJob deleteJob = client.partialDelete(SAMPLE_DB, t, from, to, domainKey);
-
-            try {
-                client.partialDelete(SAMPLE_DB, t, from, to, domainKey);
-                fail("Expected " + TDClientHttpConflictException.class.getName());
-            }
-            catch (TDClientHttpConflictException e) {
-                assertThat(e.getConflictsWith(), is(Optional.of(deleteJob.getJobId())));
-            }
-        }
-        finally {
-            client.deleteTableIfExists(SAMPLE_DB, t);
-        }
     }
 
     @Test
@@ -1248,9 +1209,23 @@ public class TestTDClient
             }
 
             // Check the data
+            // It seems it needs some time to reflect the data in TD,
+            // so we will wait for few mins before checking the data
+            deadline = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
+
             TDTable imported = client.listTables(SAMPLE_DB).stream().filter(input -> {
                 return input.getName().equals(bulkImportTable);
             }).findFirst().get();
+            while (imported.getRowCount() == 0) {
+                if (System.currentTimeMillis() > deadline) {
+                    throw new IllegalStateException("timeout error: data is not imported yet");
+                }
+                logger.info("Waiting data import step completion");
+                Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+                imported = client.listTables(SAMPLE_DB).stream().filter(input -> {
+                    return input.getName().equals(bulkImportTable);
+                }).findFirst().get();
+            }
 
             assertEquals(numRowsInPart * 2, imported.getRowCount());
             List<TDColumn> columns = imported.getColumns();

@@ -33,7 +33,6 @@ import com.treasuredata.client.model.TDJob;
 import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSummary;
-import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
@@ -215,10 +214,6 @@ public interface TDClientApi<ClientImpl>
 
     void deleteTableIfExists(String databaseName, String tableName);
 
-    TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to);
-
-    TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to, String domainKey);
-
     void swapTables(String databaseName, String tableName1, String tableName2);
 
     // schema API
@@ -228,6 +223,8 @@ public interface TDClientApi<ClientImpl>
     void updateTableSchema(String databaseName, String tableName, List<TDColumn> newSchema, boolean ignoreDuplicate);
 
     void appendTableSchema(String databaseName, String tableName, List<TDColumn> newSchema);
+
+    void updateExpire(String databaseName, String tableName, int expireDays);
 
     /**
      * Submit a new job request
@@ -280,6 +277,20 @@ public interface TDClientApi<ClientImpl>
      * @return
      */
     <Result> Result jobResult(String jobId, TDResultFormat format, Function<InputStream, Result> resultStreamHandler);
+
+    /**
+     * Open an input stream to retrieve the job result.
+     * The input stream will be closed after this method
+     *
+     * You will receive an empty stream if the query has not finished yet.
+     *
+     * @param jobId
+     * @param format
+     * @param resultStreamHandler
+     * @param includeHeader
+     * @return
+     */
+    <Result> Result jobResult(String jobId, TDResultFormat format,  boolean includeHeader, Function<InputStream, Result> resultStreamHandler);
 
     // bulk import API
     List<TDBulkImportSession> listBulkImportSessions();

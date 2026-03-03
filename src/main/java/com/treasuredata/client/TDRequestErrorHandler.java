@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -179,6 +180,12 @@ public class TDRequestErrorHandler
                     socketException instanceof NoRouteToHostException ||
                     socketException instanceof PortUnreachableException) {
                 // All known SocketException are retryable.
+                return new TDClientSocketException(socketException);
+            }
+            else if (Objects.equals(socketException.getMessage(), "Broken pipe") ||
+                    Objects.equals(socketException.getMessage(), "Connection reset") ||
+                    Objects.equals(socketException.getMessage(), "Socket closed")) {
+                // The underlying socket implementation used by OkHttp may throw these exceptions.
                 return new TDClientSocketException(socketException);
             }
             else {

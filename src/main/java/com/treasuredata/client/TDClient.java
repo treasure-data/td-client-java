@@ -43,7 +43,6 @@ import com.treasuredata.client.model.TDJobList;
 import com.treasuredata.client.model.TDJobRequest;
 import com.treasuredata.client.model.TDJobSubmitResult;
 import com.treasuredata.client.model.TDJobSummary;
-import com.treasuredata.client.model.TDPartialDeleteJob;
 import com.treasuredata.client.model.TDResultFormat;
 import com.treasuredata.client.model.TDSaveQueryRequest;
 import com.treasuredata.client.model.TDSavedQuery;
@@ -565,33 +564,6 @@ public class TDClient
     }
 
     @Override
-    public TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to)
-            throws TDClientException
-    {
-        return partialDelete(databaseName, tableName, from, to, null);
-    }
-
-    @Override
-    public TDPartialDeleteJob partialDelete(String databaseName, String tableName, long from, long to, String domainKey)
-            throws TDClientException
-    {
-        if ((from % 3600 != 0) || (to % 3600 != 0)) {
-            throw new TDClientException(TDClientException.ErrorType.INVALID_INPUT, String.format("from/to value must be a multiple of 3600: [%s, %s)", from, to));
-        }
-
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("from", Long.toString(from));
-        queryParams.put("to", Long.toString(to));
-
-        if (domainKey != null) {
-            queryParams.put("domain_key", domainKey);
-        }
-
-        TDPartialDeleteJob job = doPost(buildUrl("/v3/table/partialdelete", databaseName, tableName), Collections.unmodifiableMap(queryParams), TDPartialDeleteJob.class);
-        return job;
-    }
-
-    @Override
     public void swapTables(String databaseName, String tableName1, String tableName2)
     {
         doPost(buildUrl("/v3/table/swap", databaseName, tableName1, tableName2));
@@ -648,6 +620,18 @@ public class TDClient
         }
         String schemaJson = toJSONString(Collections.singletonMap("schema", Collections.unmodifiableList(builder)));
         doPost(buildUrl("/v3/table/append-schema", databaseName, tableName), Collections.emptyMap(), Optional.of(schemaJson), String.class);
+    }
+
+    @Override
+    public void updateExpire(String databaseName, String tableName, int expireDays)
+    {
+        requireNonNull(databaseName, "databaseName is null");
+        requireNonNull(tableName, "tableName is null");
+
+        doPost(buildUrl("/v3/table/update", databaseName, tableName),
+                Collections.singletonMap("expire_days", Integer.toString(expireDays)),
+                TDUpdateTableResult.class
+        );
     }
 
     @Override
@@ -749,9 +733,17 @@ public class TDClient
     public <Result> Result jobResult(String jobId, TDResultFormat format, Function<InputStream, Result> resultStreamHandler)
             throws TDClientException
     {
+        return jobResult(jobId, format, false, resultStreamHandler);
+    }
+
+    @Override
+    public <Result> Result jobResult(String jobId, TDResultFormat format, boolean includeHeader, Function<InputStream, Result> resultStreamHandler)
+            throws TDClientException
+    {
         TDApiRequest request = TDApiRequest.Builder
                 .GET(buildUrl("/v3/job/result", jobId))
                 .addQueryParam("format", format.getName())
+                .addQueryParam("header", Boolean.toString(includeHeader))
                 .build();
         return httpClient.<Result>call(request, apiKeyCache, resultStreamHandler);
     }
